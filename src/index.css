@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-ivory text-charcoal font-sans antialiased;
+  }
+}
+
+/* Custom scrollbar to keep layout premium */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-charcoal/20 rounded-full hover:bg-charcoal/35 transition-colors;
+}
+
+/* Terracotta Star Lantern Overlay */
+.lantern-overlay {
+  position: relative;
+  overflow: hidden;
+}
+.lantern-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 200 200'%3E%3Cg stroke='%23D95D39' stroke-width='0.45' fill='none' opacity='0.025'%3E%3Ccircle cx='100' cy='100' r='85'/%3E%3Ccircle cx='100' cy='100' r='60'/%3E%3Ccircle cx='100' cy='100' r='35'/%3E%3Cline x1='100' y1='5' x2='100' y2='195'/%3E%3Cline x1='5' y1='100' x2='195' y2='100'/%3E%3Cline x1='32.8' y1='32.8' x2='167.2' y2='167.2'/%3E%3Cline x1='32.8' y1='167.2' x2='167.2' y2='32.8'/%3E%3Cpolygon points='100,10 118,72 190,100 118,128 100,190 82,128 10,100 82,72'/%3E%3Cpolygon points='100,40 110,80 160,100 110,120 100,160 90,120 40,100 90,80' transform='rotate(22.5 100 100)'/%3E%3C/g%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  z-index: 0;
+}
+
+/* Saffron Gold Star Lantern Overlay */
+.lantern-overlay-gold {
+  position: relative;
+  overflow: hidden;
+}
+.lantern-overlay-gold::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 200 200'%3E%3Cg stroke='%23F2B824' stroke-width='0.45' fill='none' opacity='0.035'%3E%3Ccircle cx='100' cy='100' r='85'/%3E%3Ccircle cx='100' cy='100' r='60'/%3E%3Ccircle cx='100' cy='100' r='35'/%3E%3Cline x1='100' y1='5' x2='100' y2='195'/%3E%3Cline x1='5' y1='100' x2='195' y2='100'/%3E%3Cline x1='32.8' y1='32.8' x2='167.2' y2='167.2'/%3E%3Cline x1='32.8' y1='167.2' x2='167.2' y2='32.8'/%3E%3Cpolygon points='100,10 118,72 190,100 118,128 100,190 82,128 10,100 82,72'/%3E%3Cpolygon points='100,40 110,80 160,100 110,120 100,160 90,120 40,100 90,80' transform='rotate(22.5 100 100)'/%3E%3C/g%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  z-index: 0;
+}
+
+/* Base card configurations */
+.bento-card {
+  @apply bg-white rounded-2xl border border-[#E9E5DE] shadow-sm relative overflow-hidden transition-all duration-300;
+}
+.bento-card:hover {
+  @apply shadow-md border-terracotta/20 transform -translate-y-0.5;
+}
+
+/* Custom glowing effects for key elements */
+.glow-saffron {
+  box-shadow: 0 0 15px rgba(242, 184, 36, 0.15);
+}
+.glow-terracotta {
+  box-shadow: 0 0 15px rgba(217, 93, 57, 0.15);
+}
