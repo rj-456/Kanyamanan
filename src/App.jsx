@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Upload,
   Check,
+  CheckCircle,
   Navigation,
   Activity,
   LogOut,
@@ -92,12 +93,14 @@ function App() {
     {
       id: 'trail-1',
       name: 'San Fernando Heritage Trail',
-      stops: ["Everybody's Cafe", "Santo Tomas Palayok Kitchen"]
+      stops: ["Everybody's Cafe", "Santo Tomas Palayok Kitchen"],
+      isFinished: false
     },
     {
       id: 'trail-2',
       name: 'Angeles City Sisig Hop',
-      stops: ["Aling Lucing's Sisig", "Atching Lillian's Ancestral Kitchen"]
+      stops: ["Aling Lucing's Sisig", "Atching Lillian's Ancestral Kitchen"],
+      isFinished: false
     }
   ]);
   const [newItineraryName, setNewItineraryName] = useState('');
@@ -733,7 +736,8 @@ function App() {
     const newItin = {
       id: 'trail-' + Date.now(),
       name: newItineraryName.trim(),
-      stops: computedRoutePath.map(r => r.name)
+      stops: computedRoutePath.map(r => r.name),
+      isFinished: false
     };
 
     setSavedItineraries([newItin, ...savedItineraries]);
@@ -749,6 +753,23 @@ function App() {
     setActiveTrip(matchedRestaurants);
     setDashboardTab('planner');
     alert(`Loaded "${itin.name}" into active itinerary. You can now track your GPS or simulate navigation!`);
+  };
+
+  const handleDeleteItinerary = (itinId, e) => {
+    e.stopPropagation();
+    if (confirm("Are you sure you want to delete this saved route?")) {
+      setSavedItineraries(savedItineraries.filter(item => item.id !== itinId));
+    }
+  };
+
+  const handleToggleFinishItinerary = (itinId, e) => {
+    e.stopPropagation();
+    setSavedItineraries(savedItineraries.map(item => {
+      if (item.id === itinId) {
+        return { ...item, isFinished: !item.isFinished };
+      }
+      return item;
+    }));
   };
 
   const handleRegister = (e) => {
@@ -2436,20 +2457,7 @@ function App() {
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-charcoal-light">Total Itinerary Budget Meter</span>
-                          <span className="font-bold">₱{activeTripMetrics.cost} / ₱{userProfile.budgetLimit}</span>
-                        </div>
-                        <div className="w-full bg-[#FAF8F5] rounded-full h-2 overflow-hidden border border-[#E9E5DE]">
-                          <div
-                            className="h-full bg-terracotta transition-all duration-300"
-                            style={{ width: `${Math.min(100, (activeTripMetrics.cost / userProfile.budgetLimit) * 100)}%` }}
-                          ></div>
-                        </div>
-                      </div>
 
-                      <div className="h-px bg-[#FAF8F5]"></div>
 
                       {/* Division Calculations */}
                       <div className="bg-[#FAF8F5] p-3 rounded-lg border border-[#E9E5DE] text-xs space-y-2">
@@ -2695,18 +2703,57 @@ function App() {
                     <div
                       key={itin.id}
                       onClick={() => handleLoadSavedItinerary(itin)}
-                      className="p-4 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-left space-y-2 hover:border-terracotta/20 transition-all cursor-pointer hover:bg-white group/itin"
+                      className={`p-4 border rounded-xl text-left space-y-2 transition-all cursor-pointer group/itin relative ${
+                        itin.isFinished 
+                          ? 'bg-[#FAF8F5]/60 border-[#E9E5DE] opacity-75' 
+                          : 'bg-[#FAF8F5] border-[#E9E5DE] hover:border-terracotta/20 hover:bg-white'
+                      }`}
                       title="Click to load and execute this plan"
                     >
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-black text-charcoal group-hover/itin:text-terracotta transition-colors">{itin.name}</span>
-                        <span className="text-[9px] bg-bananaleaf/10 text-bananaleaf px-2 py-0.5 rounded-full border border-bananaleaf/20 font-bold group-hover/itin:bg-bananaleaf group-hover/itin:text-white transition-colors">
-                          Click to Do Plan →
-                        </span>
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex-1 min-w-0">
+                          <span className={`text-xs font-black block truncate ${itin.isFinished ? 'text-charcoal-light line-through' : 'text-charcoal group-hover/itin:text-terracotta transition-colors'}`}>
+                            {itin.name}
+                          </span>
+                          {itin.isFinished ? (
+                            <span className="inline-flex items-center gap-1 mt-0.5 text-[9px] font-extrabold text-bananaleaf animate-fade-in">
+                              ✓ Finished Trip
+                            </span>
+                          ) : (
+                            <span className="text-[9px] text-charcoal-light font-bold">
+                              Active Plan
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            onClick={(e) => handleToggleFinishItinerary(itin.id, e)}
+                            className={`p-1 rounded transition-colors ${
+                              itin.isFinished 
+                                ? 'text-bananaleaf hover:bg-bananaleaf/10' 
+                                : 'text-charcoal-light hover:text-bananaleaf hover:bg-bananaleaf/5'
+                            }`}
+                            title={itin.isFinished ? "Mark as Active" : "Mark as Finished"}
+                          >
+                            <CheckCircle className={`h-4 w-4 ${itin.isFinished ? 'fill-bananaleaf/10' : ''}`} />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => handleDeleteItinerary(itin.id, e)}
+                            className="p-1 rounded text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 transition-colors"
+                            title="Delete Route"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
+
+                      <div className="flex flex-wrap gap-1.5 pt-1">
                         {itin.stops.map((stop, idx) => (
-                          <span key={idx} className="text-[9px] px-2 py-0.5 rounded bg-white text-charcoal-light border border-[#E9E5DE]">
+                          <span key={idx} className={`text-[9px] px-2 py-0.5 rounded border border-[#E9E5DE] ${itin.isFinished ? 'bg-white/50 text-gray-400' : 'bg-white/90'}`}>
                             {stop}
                           </span>
                         ))}
