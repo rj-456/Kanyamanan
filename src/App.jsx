@@ -4480,61 +4480,61 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
       {/* Footer status bar with Group JECCAN! & Members */}
       <footer className="bg-white border-t border-[#E9E5DE] py-8 mt-12 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
             
             {/* Brand column */}
-            <div className="text-center md:text-left space-y-1.5">
+            <div className="md:col-span-4 text-center md:text-left space-y-2">
               <div className="flex items-center justify-center md:justify-start gap-2">
-                <span className="text-sm font-black text-charcoal uppercase tracking-widest">Kanyamanan</span>
-                <span className="px-2 py-0.5 bg-terracotta/10 text-terracotta text-[10px] font-extrabold rounded-full">v1.0</span>
+                <span className="text-base font-black text-charcoal uppercase tracking-widest">Kanyamanan</span>
+                <span className="px-2.5 py-0.5 bg-terracotta/10 text-terracotta text-[10px] font-extrabold rounded-full">v1.0</span>
               </div>
               <p className="text-xs text-charcoal-light leading-relaxed max-w-sm m-0">
                 Pampanga Provincial Culinary Tourism & Health Informatics Infrastructure Platform.
               </p>
-              <span className="text-[10px] text-charcoal-light block pt-1">
+              <span className="text-[10px] text-charcoal-light block pt-1 font-medium">
                 © 2026 Pampanga, Philippines. All rights reserved.
               </span>
             </div>
 
             {/* Team JECCAN! Members column */}
-            <div className="text-center md:text-left space-y-2.5 border-y md:border-y-0 md:border-x border-[#E9E5DE] py-4 md:py-0 md:px-6">
+            <div className="md:col-span-8 text-center md:text-left space-y-3 border-t md:border-t-0 md:border-l border-[#E9E5DE] pt-6 md:pt-0 md:pl-8">
               <div className="flex items-center justify-center md:justify-start gap-2">
                 <span className="text-xs font-black text-terracotta uppercase tracking-wider">Group JECCAN!</span>
-                <span className="px-2 py-0.5 bg-bananaleaf/10 text-bananaleaf text-[9px] font-bold rounded">Project Creators</span>
+                <span className="px-2.5 py-0.5 bg-bananaleaf/10 text-bananaleaf text-[10px] font-extrabold rounded-md">Project Creators & Developers</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-[11px] font-medium text-charcoal">
-                <div className="p-2 bg-[#FAF8F5] rounded-lg border border-[#E9E5DE]">
-                  <span className="font-bold block text-charcoal">Member 1 (Leader)</span>
-                  <span className="text-[9px] text-charcoal-light block">Team Lead / Systems</span>
-                </div>
-                <div className="p-2 bg-[#FAF8F5] rounded-lg border border-[#E9E5DE]">
-                  <span className="font-bold block text-charcoal">Member 2</span>
-                  <span className="text-[9px] text-charcoal-light block">Full Stack Developer</span>
-                </div>
-                <div className="p-2 bg-[#FAF8F5] rounded-lg border border-[#E9E5DE]">
-                  <span className="font-bold block text-charcoal">Member 3</span>
-                  <span className="text-[9px] text-charcoal-light block">UI/UX & Frontend</span>
-                </div>
-                <div className="p-2 bg-[#FAF8F5] rounded-lg border border-[#E9E5DE]">
-                  <span className="font-bold block text-charcoal">Member 4</span>
-                  <span className="text-[9px] text-charcoal-light block">Health Informatics</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Quick Portal Navigation & Standalone Admin */}
-            <div className="text-center md:text-right space-y-2">
-              <span className="text-xs font-black text-charcoal uppercase tracking-wider block">Administrative Access</span>
-              <p className="text-xs text-charcoal-light leading-relaxed m-0">
-                Merchant and Superadmin Management Portal
-              </p>
-              <a
-                href="#/admin"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-charcoal hover:bg-black text-white text-xs font-bold rounded-lg transition-all shadow-sm cursor-pointer mt-1"
-              >
-                <ShieldCheck className="h-3.5 w-3.5 text-saffron" /> Access Admin Portal (/#/admin)
-              </a>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] shadow-xs flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-terracotta/10 text-terracotta flex items-center justify-center font-bold text-xs shrink-0">
+                    👑
+                  </div>
+                  <div className="min-w-0 text-left">
+                    <span className="font-extrabold text-xs text-charcoal block truncate">Rancis J. Santos</span>
+                    <span className="text-[10px] font-bold text-terracotta block">Team Leader</span>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] shadow-xs flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-bananaleaf/10 text-bananaleaf flex items-center justify-center font-bold text-xs shrink-0">
+                    👨‍💻
+                  </div>
+                  <div className="min-w-0 text-left">
+                    <span className="font-extrabold text-xs text-charcoal block truncate">Lance Jerald D. Laxamana</span>
+                    <span className="text-[10px] text-charcoal-light block">Core Member</span>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] shadow-xs flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-saffron/10 text-saffron-dark flex items-center justify-center font-bold text-xs shrink-0">
+                    👨‍💻
+                  </div>
+                  <div className="min-w-0 text-left">
+                    <span className="font-extrabold text-xs text-charcoal block truncate">Kirsen Yaj B. Villanueva</span>
+                    <span className="text-[10px] text-charcoal-light block">Core Member</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
           </div>
