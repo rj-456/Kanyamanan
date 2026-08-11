@@ -1241,35 +1241,35 @@ function App() {
       const normalize = (str) => String(str || '').toLowerCase().replace(/santo|santa/g, 'san').replace(/[^a-z0-9]/g, '');
 
       // 1. Exact or normalized name match in restaurants
-      let match = restaurants.find(r => 
+      let match = (restaurants || []).find(r => r && (
         r.name === stopNameStr || 
         r.id === stopNameStr ||
         normalize(r.name) === normalize(stopNameStr)
-      );
+      ));
 
       // 2. Exact or normalized name match in attractions
       if (!match) {
-        match = attractions.find(a => 
+        match = (attractions || []).find(a => a && (
           a.name === stopNameStr || 
           a.id === stopNameStr ||
           normalize(a.name) === normalize(stopNameStr)
-        );
+        ));
       }
 
       // 3. Partial substring match in restaurants
       if (!match) {
-        match = restaurants.find(r => 
+        match = (restaurants || []).find(r => r && r.name && (
           r.name.toLowerCase().includes(stopNameStr.toLowerCase()) || 
           stopNameStr.toLowerCase().includes(r.name.toLowerCase())
-        );
+        ));
       }
 
       // 4. Partial substring match in attractions
       if (!match) {
-        match = attractions.find(a => 
+        match = (attractions || []).find(a => a && a.name && (
           a.name.toLowerCase().includes(stopNameStr.toLowerCase()) || 
           stopNameStr.toLowerCase().includes(a.name.toLowerCase())
-        );
+        ));
       }
 
       // 5. Fallback object if not found by exact string
@@ -4478,14 +4478,65 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         </button>
       </div>
 
-      {/* Footer status bar with PWA & Admin Login */}
-      <footer className="bg-white border-t border-[#E9E5DE] py-6 mt-12 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-center sm:text-left space-y-1">
-            <span className="text-xs font-black text-charcoal uppercase tracking-wider block">Kanyamanan</span>
-            <span className="text-[10px] text-charcoal-light block mt-0.5">
-              © 2026 Pampanga, Philippines.
-            </span>
+      {/* Footer status bar with Group JECCAN! & Members */}
+      <footer className="bg-white border-t border-[#E9E5DE] py-8 mt-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+            
+            {/* Brand column */}
+            <div className="text-center md:text-left space-y-1.5">
+              <div className="flex items-center justify-center md:justify-start gap-2">
+                <span className="text-sm font-black text-charcoal uppercase tracking-widest">Kanyamanan</span>
+                <span className="px-2 py-0.5 bg-terracotta/10 text-terracotta text-[10px] font-extrabold rounded-full">v1.0</span>
+              </div>
+              <p className="text-xs text-charcoal-light leading-relaxed max-w-sm m-0">
+                Pampanga Provincial Culinary Tourism & Health Informatics Infrastructure Platform.
+              </p>
+              <span className="text-[10px] text-charcoal-light block pt-1">
+                © 2026 Pampanga, Philippines. All rights reserved.
+              </span>
+            </div>
+
+            {/* Team JECCAN! Members column */}
+            <div className="text-center md:text-left space-y-2.5 border-y md:border-y-0 md:border-x border-[#E9E5DE] py-4 md:py-0 md:px-6">
+              <div className="flex items-center justify-center md:justify-start gap-2">
+                <span className="text-xs font-black text-terracotta uppercase tracking-wider">Group JECCAN!</span>
+                <span className="px-2 py-0.5 bg-bananaleaf/10 text-bananaleaf text-[9px] font-bold rounded">Project Creators</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-[11px] font-medium text-charcoal">
+                <div className="p-2 bg-[#FAF8F5] rounded-lg border border-[#E9E5DE]">
+                  <span className="font-bold block text-charcoal">Member 1 (Leader)</span>
+                  <span className="text-[9px] text-charcoal-light block">Team Lead / Systems</span>
+                </div>
+                <div className="p-2 bg-[#FAF8F5] rounded-lg border border-[#E9E5DE]">
+                  <span className="font-bold block text-charcoal">Member 2</span>
+                  <span className="text-[9px] text-charcoal-light block">Full Stack Developer</span>
+                </div>
+                <div className="p-2 bg-[#FAF8F5] rounded-lg border border-[#E9E5DE]">
+                  <span className="font-bold block text-charcoal">Member 3</span>
+                  <span className="text-[9px] text-charcoal-light block">UI/UX & Frontend</span>
+                </div>
+                <div className="p-2 bg-[#FAF8F5] rounded-lg border border-[#E9E5DE]">
+                  <span className="font-bold block text-charcoal">Member 4</span>
+                  <span className="text-[9px] text-charcoal-light block">Health Informatics</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Portal Navigation & Standalone Admin */}
+            <div className="text-center md:text-right space-y-2">
+              <span className="text-xs font-black text-charcoal uppercase tracking-wider block">Administrative Access</span>
+              <p className="text-xs text-charcoal-light leading-relaxed m-0">
+                Merchant and Superadmin Management Portal
+              </p>
+              <a
+                href="#/admin"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-charcoal hover:bg-black text-white text-xs font-bold rounded-lg transition-all shadow-sm cursor-pointer mt-1"
+              >
+                <ShieldCheck className="h-3.5 w-3.5 text-saffron" /> Access Admin Portal (/#/admin)
+              </a>
+            </div>
+
           </div>
         </div>
       </footer>
