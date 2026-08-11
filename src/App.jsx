@@ -4505,34 +4505,19 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] shadow-xs flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-terracotta/10 text-terracotta flex items-center justify-center font-bold text-xs shrink-0">
-                    👑
-                  </div>
-                  <div className="min-w-0 text-left">
-                    <span className="font-extrabold text-xs text-charcoal block truncate">Rancis J. Santos</span>
-                    <span className="text-[10px] font-bold text-terracotta block">Team Leader</span>
-                  </div>
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] shadow-xs text-left">
+                  <span className="font-extrabold text-xs text-charcoal block truncate">Rancis J. Santos</span>
+                  <span className="text-[10px] font-bold text-terracotta block mt-0.5">Team Leader</span>
                 </div>
 
-                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] shadow-xs flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-bananaleaf/10 text-bananaleaf flex items-center justify-center font-bold text-xs shrink-0">
-                    👨‍💻
-                  </div>
-                  <div className="min-w-0 text-left">
-                    <span className="font-extrabold text-xs text-charcoal block truncate">Lance Jerald D. Laxamana</span>
-                    <span className="text-[10px] text-charcoal-light block">Core Member</span>
-                  </div>
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] shadow-xs text-left">
+                  <span className="font-extrabold text-xs text-charcoal block truncate">Lance Jerald D. Laxamana</span>
+                  <span className="text-[10px] text-charcoal-light block mt-0.5">Core Member</span>
                 </div>
 
-                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] shadow-xs flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-full bg-saffron/10 text-saffron-dark flex items-center justify-center font-bold text-xs shrink-0">
-                    👨‍💻
-                  </div>
-                  <div className="min-w-0 text-left">
-                    <span className="font-extrabold text-xs text-charcoal block truncate">Kirsen Yaj B. Villanueva</span>
-                    <span className="text-[10px] text-charcoal-light block">Core Member</span>
-                  </div>
+                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] shadow-xs text-left">
+                  <span className="font-extrabold text-xs text-charcoal block truncate">Kirsen Yaj B. Villanueva</span>
+                  <span className="text-[10px] text-charcoal-light block mt-0.5">Core Member</span>
                 </div>
               </div>
             </div>
