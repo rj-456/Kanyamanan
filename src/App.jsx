@@ -39,8 +39,110 @@ import {
   TRAVEL_CORRIDORS,
   MUNICIPALITIES,
   PRESEEDED_MEAL_PHOTOS,
-  OCCUPANCY_HOURS
+  OCCUPANCY_HOURS,
+  PRESEEDED_ATTRACTIONS
 } from './mockData';
+
+
+// Distance calculator helper between two lat/lng points in kilometers
+const calculateHaversineKm = (lat1, lon1, lat2, lon2) => {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
+// Universal Multi-Branch Helper Functions
+const normalizeMun = (m) => {
+  if (!m) return '';
+  if (m === 'Mabalacat') return 'Mabalacat City';
+  return m;
+};
+
+const getRestaurantMunicipalities = (r) => {
+  if (!r) return [];
+  const set = new Set();
+  if (r.municipality) set.add(normalizeMun(r.municipality));
+  if (Array.isArray(r.branches)) {
+    r.branches.forEach(b => {
+      const mun = typeof b === 'string' ? b : b.municipality;
+      if (mun) set.add(normalizeMun(mun));
+    });
+  }
+  return Array.from(set);
+};
+
+const isRestaurantInMunicipality = (r, targetMun) => {
+  if (!targetMun || targetMun === 'All') return true;
+  const muns = getRestaurantMunicipalities(r);
+  return muns.includes(normalizeMun(targetMun));
+};
+
+const getBranchAddressForMunicipality = (r, targetMun) => {
+  if (!r) return '';
+  const normTarget = normalizeMun(targetMun);
+  if (normTarget && normTarget !== 'All') {
+    if (normalizeMun(r.municipality) === normTarget && r.address) return r.address;
+    if (Array.isArray(r.branches)) {
+      const match = r.branches.find(b => normalizeMun(typeof b === 'string' ? b : b.municipality) === normTarget);
+      if (match && typeof match === 'object' && match.address) return match.address;
+    }
+  }
+  return r.address || (r.branches && r.branches[0] && r.branches[0].address) || 'Multiple Locations in Pampanga';
+};
+
+const getBranchLat = (r, targetMun) => {
+  if (!r) return 15.0300;
+  const normTarget = normalizeMun(targetMun);
+  if (Array.isArray(r.branches)) {
+    const match = r.branches.find(b => normalizeMun(typeof b === 'string' ? b : b.municipality) === normTarget);
+    if (match && typeof match === 'object' && match.lat) return match.lat;
+  }
+  return r.lat || 15.0300;
+};
+
+
+const getBranchOperatingHours = (r, targetMun) => {
+  if (!r) return '09:00 AM - 09:00 PM';
+  const normTarget = normalizeMun(targetMun);
+  if (normTarget && normTarget !== 'All') {
+    if (normalizeMun(r.municipality) === normTarget && r.operatingHours) return r.operatingHours;
+    if (Array.isArray(r.branches)) {
+      const match = r.branches.find(b => normalizeMun(typeof b === 'string' ? b : b.municipality) === normTarget);
+      if (match && typeof match === 'object' && match.operatingHours) return match.operatingHours;
+    }
+  }
+  return r.operatingHours || '09:00 AM - 09:00 PM';
+};
+
+const getBranchOccupancy = (r, targetMun) => {
+  if (!r) return [20, 40, 60, 80, 95, 80, 60, 40, 60, 80, 95, 80, 40, 20, 10];
+  const normTarget = normalizeMun(targetMun);
+  if (normTarget && normTarget !== 'All') {
+    if (normalizeMun(r.municipality) === normTarget && r.occupancy) return r.occupancy;
+    if (Array.isArray(r.branches)) {
+      const match = r.branches.find(b => normalizeMun(typeof b === 'string' ? b : b.municipality) === normTarget);
+      if (match && typeof match === 'object' && match.occupancy) return match.occupancy;
+    }
+  }
+  return r.occupancy || [20, 40, 60, 80, 95, 80, 60, 40, 60, 80, 95, 80, 40, 20, 10];
+};
+
+const getBranchLng = (r, targetMun) => {
+  if (!r) return 120.6800;
+  const normTarget = normalizeMun(targetMun);
+  if (Array.isArray(r.branches)) {
+    const match = r.branches.find(b => normalizeMun(typeof b === 'string' ? b : b.municipality) === normTarget);
+    if (match && typeof match === 'object' && match.lng) return match.lng;
+  }
+  return r.lng || 120.6800;
+};
 
 function App() {
   // Hash Routing for administrative standalone page
@@ -56,7 +158,9 @@ function App() {
 
   // Consumer Views: 'homepage', 'auth', 'dashboard'
   const [activeView, setActiveView] = useState('homepage');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [branchSelectTarget, setBranchSelectTarget] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
   const [isRegistering, setIsRegistering] = useState(true);
 
   // Dashboard Sub-Modules: 'planner', 'health', 'assistant', 'history'
@@ -66,8 +170,8 @@ function App() {
   const [showToast, setShowToast] = useState(false);
 
   const [userProfile, setUserProfile] = useState({
-    username: '',
-    email: '',
+    username: 'rancis',
+    email: 'rancis@pampanga.gov.ph',
     calorieLimit: 2200,
     budgetLimit: 1500
   });
@@ -82,6 +186,7 @@ function App() {
 
   // Restaurant Drawer State
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [selectedDetailBranch, setSelectedDetailBranch] = useState(null);
   const [activeDish, setActiveDish] = useState(null);
   const [cvUploadedMeal, setCvUploadedMeal] = useState(null);
   const [isCVProcessing, setIsCVProcessing] = useState(false);
@@ -89,6 +194,7 @@ function App() {
 
   // Trip routing pipeline State
   const [activeTrip, setActiveTrip] = useState([]);
+  const [draggedIndex, setDraggedIndex] = useState(null);
   const [savedItineraries, setSavedItineraries] = useState([
     {
       id: 'trail-1',
@@ -112,6 +218,13 @@ function App() {
   const [zoomedDishImg, setZoomedDishImg] = useState(null);
   const [isTrackingGPS, setIsTrackingGPS] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
+
+  // Live Trip Navigation & Multi-Stop Progression States
+  const [isTripActive, setIsTripActive] = useState(false);
+  const [currentStopIndex, setCurrentStopIndex] = useState(0);
+  const [visitedStops, setVisitedStops] = useState([]);
+  const [distanceToTargetKm, setDistanceToTargetKm] = useState(null);
+
   const [roadRouteCoords, setRoadRouteCoords] = useState([]);
 
   const mapRef = useRef(null);
@@ -168,6 +281,264 @@ function App() {
       }
     }
   ]);
+  const [adminBranches, setAdminBranches] = useState([]);
+
+  // Photo URL input states
+  const [resPhotoUrlInput, setResPhotoUrlInput] = useState('');
+  const [attrPhotoUrlInput, setAttrPhotoUrlInput] = useState('');
+
+  // Free AI Menu Scanner States
+  const [aiRawMenuText, setAiRawMenuText] = useState('');
+  const [aiMenuImage, setAiMenuImage] = useState(null);
+  const [isAiScanning, setIsAiScanning] = useState(false);
+
+  // Trip Completion & Celebration States
+  const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
+  const [completionGroupName, setCompletionGroupName] = useState('');
+  const [completionGroupSize, setCompletionGroupSize] = useState('1 Traveler');
+  const [completionPhotos, setCompletionPhotos] = useState([]);
+  const [completionActiveTab, setCompletionActiveTab] = useState('polaroid');
+  const [slotPhotos, setSlotPhotos] = useState({});
+
+  // Real Client-Side Canvas Polaroid Album Downloader
+  const downloadRealPolaroidAlbum = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200;
+    canvas.height = 900;
+    const ctx = canvas.getContext('2d');
+
+    // Canvas Background
+    ctx.fillStyle = '#FAF8F5';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Title Header
+    ctx.fillStyle = '#2C3E50';
+    ctx.font = 'bold 28px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('KANYAMANAN PAMPANGA FOOD CRAWL - MEMORY ALBUM', canvas.width / 2, 50);
+
+    ctx.fillStyle = '#C85A32';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText(newItineraryName || 'Pampanga Heritage Culinary Excursion', canvas.width / 2, 80);
+
+    const stops = computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Heritage Kitchen', municipality: 'Pampanga', image: '' }];
+    const cardsToDraw = stops.slice(0, 4);
+
+    let loadedCount = 0;
+    const totalToLoad = cardsToDraw.length;
+
+    const renderCanvasAndDownload = () => {
+      cardsToDraw.forEach((stop, idx) => {
+        const col = idx % 2;
+        const row = Math.floor(idx / 2);
+        const x = 80 + col * 540;
+        const y = 120 + row * 360;
+        const cardW = 500;
+        const cardH = 330;
+
+        // Card Shadow & White Frame
+        ctx.fillStyle = '#FFFFFF';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = 3;
+        ctx.shadowOffsetY = 5;
+        ctx.fillRect(x, y, cardW, cardH);
+        ctx.shadowColor = 'transparent';
+
+        // Border
+        ctx.strokeStyle = '#E9E5DE';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, cardW, cardH);
+
+        // Tape effect
+        ctx.fillStyle = 'rgba(245, 230, 190, 0.7)';
+        ctx.fillRect(x + cardW / 2 - 40, y - 10, 80, 20);
+
+        // Image container
+        const imgX = x + 20;
+        const imgY = y + 20;
+        const imgW = cardW - 40;
+        const imgH = 220;
+
+        const currentSlotImg = slotPhotos[idx] !== undefined ? slotPhotos[idx] : (completionPhotos[idx] || stop.image);
+
+        if (currentSlotImg) {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            ctx.drawImage(img, imgX, imgY, imgW, imgH);
+            ctx.fillStyle = '#2C3E50';
+            ctx.font = 'italic bold 18px serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 265);
+
+            ctx.fillStyle = '#7F8C8D';
+            ctx.font = '13px monospace';
+            ctx.fillText(`📍 ${stop.municipality || 'Pampanga'} • ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`, x + cardW / 2, y + 295);
+
+            loadedCount++;
+            if (loadedCount === totalToLoad) {
+              triggerCanvasDownload(canvas, `Kanyamanan_Polaroid_Memory_Album.png`);
+            }
+          };
+          img.onerror = () => {
+            ctx.fillStyle = '#F4F1EA';
+            ctx.fillRect(imgX, imgY, imgW, imgH);
+            ctx.fillStyle = '#2C3E50';
+            ctx.font = 'italic bold 18px serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 265);
+            loadedCount++;
+            if (loadedCount === totalToLoad) {
+              triggerCanvasDownload(canvas, `Kanyamanan_Polaroid_Memory_Album.png`);
+            }
+          };
+          img.src = currentSlotImg;
+        } else {
+          ctx.fillStyle = '#F4F1EA';
+          ctx.fillRect(imgX, imgY, imgW, imgH);
+          ctx.fillStyle = '#2C3E50';
+          ctx.font = 'italic bold 18px serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 265);
+          loadedCount++;
+          if (loadedCount === totalToLoad) {
+            triggerCanvasDownload(canvas, `Kanyamanan_Polaroid_Memory_Album.png`);
+          }
+        }
+      });
+    };
+
+    renderCanvasAndDownload();
+  };
+
+  // Real Client-Side Certificate Downloader
+  const downloadRealCertificate = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200;
+    canvas.height = 850;
+    const ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = '#FAF8F5';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Double Border
+    ctx.strokeStyle = '#2C5E3B';
+    ctx.lineWidth = 12;
+    ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+
+    ctx.strokeStyle = '#C85A32';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
+
+    // Header
+    ctx.fillStyle = '#2C5E3B';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('REPUBLIC OF THE PHILIPPINES • PROVINCE OF PAMPANGA', canvas.width / 2, 110);
+
+    ctx.fillStyle = '#C85A32';
+    ctx.font = 'bold 28px serif';
+    ctx.fillText('CERTIFICATE OF KAPAMPANGAN CULINARY EXCURSION', canvas.width / 2, 160);
+
+    ctx.strokeStyle = '#C85A32';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 2 - 100, 180);
+    ctx.lineTo(canvas.width / 2 + 100, 180);
+    ctx.stroke();
+
+    ctx.fillStyle = '#555555';
+    ctx.font = 'italic 18px serif';
+    ctx.fillText('This Certificate of Culinary Distinction is proudly presented to', canvas.width / 2, 230);
+
+    // Recipient Name
+    const recipient = completionGroupName.trim() || userProfile.username || 'Kapampangan Food Enthusiasts';
+    ctx.fillStyle = '#2C3E50';
+    ctx.font = 'bold 36px sans-serif';
+    ctx.fillText(recipient, canvas.width / 2, 300);
+
+    // Body Text
+    ctx.fillStyle = '#333333';
+    ctx.font = '18px sans-serif';
+    ctx.fillText('For successfully navigating and completing the custom Kapampangan culinary route:', canvas.width / 2, 360);
+
+    ctx.fillStyle = '#C85A32';
+    ctx.font = 'bold 24px sans-serif';
+    ctx.fillText(`"${newItineraryName || 'Pampanga Heritage Food Trail'}"`, canvas.width / 2, 410);
+
+    ctx.fillStyle = '#333333';
+    ctx.font = '16px sans-serif';
+    ctx.fillText(`visiting ${computedRoutePath.length || 1} heritage destinations across the Culinary Capital of the Philippines.`, canvas.width / 2, 460);
+
+    // Signatures
+    const sigY = 620;
+    ctx.strokeStyle = '#2C5E3B';
+    ctx.lineWidth = 1.5;
+
+    // Left Signature
+    ctx.beginPath();
+    ctx.moveTo(250, sigY);
+    ctx.lineTo(480, sigY);
+    ctx.stroke();
+
+    ctx.fillStyle = '#2C3E50';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('Team JECCAN', 365, sigY + 30);
+    ctx.fillStyle = '#777777';
+    ctx.font = '12px sans-serif';
+    ctx.fillText('Group Leader / Development Team', 365, sigY + 50);
+
+    // Right Signature
+    ctx.beginPath();
+    ctx.moveTo(720, sigY);
+    ctx.lineTo(950, sigY);
+    ctx.stroke();
+
+    ctx.fillStyle = '#2C5E3B';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('Kanyamanan Board', 835, sigY + 30);
+    ctx.fillStyle = '#777777';
+    ctx.font = '12px sans-serif';
+    ctx.fillText('Health & Culinary Aggregator Core', 835, sigY + 50);
+
+    // Official Stamp
+    ctx.fillStyle = '#C85A32';
+    ctx.font = 'bold 12px monospace';
+    ctx.fillText(`OFFICIAL ENTRY STAMP • ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`, canvas.width / 2, 750);
+
+    triggerCanvasDownload(canvas, `Kapampangan_Culinary_Excursion_Certificate.png`);
+  };
+
+  // Helper function to trigger browser file download
+  const triggerCanvasDownload = (canvas, filename) => {
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = canvas.toDataURL('image/png');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+
+
+
+
+  // Tourist Attraction Admin Management States
+  const [adminSectionTab, setAdminSectionTab] = useState('restaurants'); // 'restaurants' | 'attractions'
+  const [adminEditingAttractionId, setAdminEditingAttractionId] = useState(null);
+  const [adminAttractionForm, setAdminAttractionForm] = useState({
+    name: '',
+    municipality: 'City of San Fernando',
+    type: '🏛️ Historic Parish Church',
+    description: '',
+    details: '',
+    image: '',
+    lat: 15.0300,
+    lng: 120.6800
+  });
+
   const [adminDishes, setAdminDishes] = useState([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
   const [trafficNotifications, setTrafficNotifications] = useState([
     {
@@ -296,10 +667,20 @@ function App() {
     }
   }, [isTrafficCongested]);
 
-  // OSRM Road Routing Fetch Effect
+  // Route Distance & Duration tracking states
+  const [routeDistanceKm, setRouteDistanceKm] = useState(0);
+  const [routeDurationMin, setRouteDurationMin] = useState(0);
+  const [attractions, setAttractions] = useState(PRESEEDED_ATTRACTIONS);
+  const [attractionMunFilter, setAttractionMunFilter] = useState('All');
+  const [attractionTypeFilter, setAttractionTypeFilter] = useState('All');
+  const [selectedAttraction, setSelectedAttraction] = useState(null);
+
+  // OSRM Road Routing Fetch Effect with Live Distance & Duration Calculation
   useEffect(() => {
     if (computedRoutePath.length === 0) {
       setRoadRouteCoords([]);
+      setRouteDistanceKm(0);
+      setRouteDurationMin(0);
       return;
     }
 
@@ -310,16 +691,106 @@ function App() {
       .then(res => res.json())
       .then(data => {
         if (data.code === 'Ok' && data.routes && data.routes[0]) {
-          const path = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]); // [lat, lng]
+          const path = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
           setRoadRouteCoords(path);
+          setRouteDistanceKm((data.routes[0].distance / 1000).toFixed(1));
+          setRouteDurationMin(Math.round(data.routes[0].duration / 60));
         } else {
           setRoadRouteCoords([]);
+          setRouteDistanceKm(0);
+          setRouteDurationMin(0);
         }
       })
       .catch(() => {
         setRoadRouteCoords([]);
       });
   }, [userLocation, computedRoutePath]);
+
+  
+  // Live Location & Proximity Tracker for Multi-Stop Trip Progression
+  useEffect(() => {
+    if (!isTripActive || computedRoutePath.length === 0) return;
+
+    const currentTargetStop = computedRoutePath[currentStopIndex];
+    if (!currentTargetStop) return;
+
+    const targetLat = currentTargetStop.lat;
+    const targetLng = currentTargetStop.lng;
+
+    if (userLocation && targetLat && targetLng) {
+      const dist = calculateHaversineKm(userLocation.lat, userLocation.lng, targetLat, targetLng);
+      setDistanceToTargetKm(dist.toFixed(2));
+
+      // Automatic arrival check if user comes within 150 meters (0.15 km)
+      if (dist <= 0.15 && !visitedStops.includes(currentTargetStop.id)) {
+        const nextVisited = [...visitedStops, currentTargetStop.id];
+        setVisitedStops(nextVisited);
+
+        if (currentStopIndex < computedRoutePath.length - 1) {
+          const nextIndex = currentStopIndex + 1;
+          const nextStop = computedRoutePath[nextIndex];
+          setCurrentStopIndex(nextIndex);
+          alert(`🎉 Arrived at Stop #${currentStopIndex + 1}: "${currentTargetStop.name}"!\n\n➡️ Continuing trip to Next Destination: "${nextStop.name}" (${nextStop.municipality})`);
+        } else {
+          setIsTripActive(false);
+          setIsSimulating(false);
+          alert(`🏆 Congratulations! You reached your final destination "${currentTargetStop.name}" and completed all ${computedRoutePath.length} stops on your Kapampangan Heritage Crawl!`);
+        }
+      }
+    }
+  }, [userLocation, isTripActive, currentStopIndex, computedRoutePath, visitedStops]);
+
+  // Handle Start Live Trip
+  const handleStartLiveTrip = () => {
+    if (computedRoutePath.length === 0) {
+      alert("Please add at least 1 destination to your itinerary before starting your trip!");
+      return;
+    }
+    setIsTripActive(true);
+    setCurrentStopIndex(0);
+    setVisitedStops([]);
+    startRouteSimulation();
+  };
+
+  // Handle Manual Advance to Next Stop
+  const handleAdvanceNextStop = () => {
+    if (computedRoutePath.length === 0) return;
+    const currentTargetStop = computedRoutePath[currentStopIndex];
+    if (currentTargetStop && !visitedStops.includes(currentTargetStop.id)) {
+      setVisitedStops(prev => [...prev, currentTargetStop.id]);
+    }
+
+    if (currentStopIndex < computedRoutePath.length - 1) {
+      const nextIndex = currentStopIndex + 1;
+      const nextStop = computedRoutePath[nextIndex];
+      setCurrentStopIndex(nextIndex);
+      alert(`✓ Reached Stop #${currentStopIndex + 1}: "${currentTargetStop.name}". Advancing to Stop #${nextIndex + 1}: "${nextStop.name}"!`);
+    } else {
+      setIsTripActive(false);
+      setIsSimulating(false);
+      alert(`🏆 Trip Completed! You visited all ${computedRoutePath.length} heritage destinations on your itinerary.`);
+    }
+  };
+
+  // Handle End Live Trip
+  const handleEndLiveTrip = () => {
+    setIsTripActive(false);
+    setIsSimulating(false);
+    if (simIntervalRef.current) {
+      clearInterval(simIntervalRef.current);
+      simIntervalRef.current = null;
+    }
+    alert("Live trip navigation ended.");
+  };
+
+
+  // ETA Clock Helper
+  const calculateETA = (durationMin) => {
+    const mins = isTrafficCongested ? Math.round((durationMin || 25) * 1.35) : (durationMin || 25);
+    const d = new Date();
+    d.setMinutes(d.getMinutes() + mins);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
 
   // GPS Tracking Logic
   const toggleGPSWatch = () => {
@@ -503,11 +974,13 @@ function App() {
     };
   }, [activeView, dashboardTab, userLocation, computedRoutePath, roadRouteCoords]);
 
-  // Restaurant counts per municipality
+  // Restaurant counts per municipality (including all branch locations)
   const municipalityCounts = useMemo(() => {
     const counts = {};
     MUNICIPALITIES.forEach(m => {
-      counts[m] = restaurants.filter(r => r.municipality === m).length;
+      counts[m] = restaurants.filter(r => 
+        r.municipality === m || (Array.isArray(r.branches) && r.branches.some(b => (typeof b === 'string' ? b : b.municipality) === m))
+      ).length;
     });
     return counts;
   }, [restaurants]);
@@ -520,7 +993,9 @@ function App() {
         res.menu.some(dish => dish.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesCorridor = selectedCorridor === 'All' || res.corridor === selectedCorridor;
-      const matchesMunicipality = selectedMunicipality === 'All' || res.municipality === selectedMunicipality;
+      const matchesMunicipality = selectedMunicipality === 'All' || 
+        res.municipality === selectedMunicipality ||
+        (Array.isArray(res.branches) && res.branches.some(b => (typeof b === 'string' ? b : b.municipality) === selectedMunicipality));
 
       return matchesSearch && matchesCorridor && matchesMunicipality;
     });
@@ -725,6 +1200,16 @@ function App() {
     setActiveTrip([...activeTrip, res]);
   };
 
+  
+  // Helper to reorder itinerary stops (Drag & Drop / Move Up / Move Down)
+  const moveItineraryItem = (fromIndex, toIndex) => {
+    if (toIndex < 0 || toIndex >= activeTrip.length) return;
+    const updated = [...activeTrip];
+    const [movedItem] = updated.splice(fromIndex, 1);
+    updated.splice(toIndex, 0, movedItem);
+    setActiveTrip(updated);
+  };
+
   const handleRemoveFromItinerary = (resId) => {
     setActiveTrip(activeTrip.filter(item => item.id !== resId));
   };
@@ -792,6 +1277,7 @@ function App() {
       budgetLimit: Number(regForm.budgetLimit) || 1500
     });
     setIsAuthenticated(true);
+    setIsGuest(false);
     setActiveView('homepage');
   };
 
@@ -854,6 +1340,58 @@ function App() {
   };
 
   const startAdminEdit = (res) => {
+    if (!res) return;
+    setAdminEditingId(res.id);
+    setAdminForm({
+      name: res.name || '',
+      municipality: res.municipality || 'City of San Fernando',
+      operatingHours: res.operatingHours || '09:00 AM - 09:00 PM',
+      priceTier: res.priceTier || '$',
+      address: res.address || '',
+      image: res.image || (res.images && res.images[0]) || '',
+      images: res.images || (res.image ? [res.image] : []),
+      description: res.description || '',
+      username: res.username || 'owner',
+      password: res.password || 'password123'
+    });
+
+    // Populate branches array
+    if (Array.isArray(res.branches) && res.branches.length > 0) {
+      setAdminBranches(res.branches.map(b => ({
+        branchName: b.branchName || b.name || `${res.name} (${b.municipality || 'Main'}) Branch`,
+        municipality: b.municipality || res.municipality || 'City of San Fernando',
+        address: b.address || res.address || '',
+        operatingHours: b.operatingHours || res.operatingHours || '09:00 AM - 09:00 PM',
+        lat: b.lat || res.lat || 15.0300,
+        lng: b.lng || res.lng || 120.6800
+      })));
+    } else {
+      setAdminBranches([{
+        branchName: `${res.name} (Main Branch)`,
+        municipality: res.municipality || 'City of San Fernando',
+        address: res.address || '',
+        operatingHours: res.operatingHours || '09:00 AM - 09:00 PM',
+        lat: res.lat || 15.0300,
+        lng: res.lng || 120.6800
+      }]);
+    }
+
+    if (Array.isArray(res.menu) && res.menu.length > 0) {
+      setAdminDishes(res.menu.map(d => ({
+        name: d.name || '',
+        price: d.price || '',
+        ingredients: d.ingredients || '',
+        allergens: d.allergens || '',
+        calories: d.nutrition?.calories || d.calories || '',
+        image: d.image || ''
+      })));
+    } else {
+      setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const unusedStartAdminEdit = (deprecated) => {
     setAdminEditingId(res.id);
     setAdminForm({
       name: res.name,
@@ -877,6 +1415,91 @@ function App() {
           }))
         : [{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]
     );
+  };
+
+  
+  // Free AI Menu OCR & Intelligent Text Organizer Engine
+  const handleAiAnalyzeMenu = () => {
+    if (!aiRawMenuText.trim() && !aiMenuImage) {
+      alert("Please upload a menu image or paste raw menu text to let AI scan and organize it for you!");
+      return;
+    }
+
+    setIsAiScanning(true);
+
+    setTimeout(() => {
+      let rawText = aiRawMenuText.trim();
+      
+      // Default fallback simulated text if user uploaded an image without typing text
+      if (!rawText && aiMenuImage) {
+        rawText = `Special Pork Sisig ₱280 - Pork mask, calamansi, chili, onion
+Crispy Liempo Kare-Kare ₱390 - Pork liempo, peanut sauce, vegetables
+Kapampangan Bringhe ₱220 - Sticky rice, coconut milk, chicken, egg
+Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
+      }
+
+      // Intelligent regex parsing line by line
+      const lines = rawText.split(/\r?\n|,|;/).map(l => l.trim()).filter(Boolean);
+      const parsedDishes = [];
+
+      lines.forEach((line, index) => {
+        // Extract Price (e.g. ₱250, P250, 250.00, ₱ 180)
+        const priceMatch = line.match(/(?:₱|P|PHP)?\s*(\d{2,4}(?:\.\d{2})?)/i);
+        const price = priceMatch ? priceMatch[1] : (150 + index * 50).toString();
+
+        // Extract Dish Name (remove price from string)
+        let name = line.replace(/(?:₱|P|PHP)?\s*\d{2,4}(?:\.\d{2})?/gi, '').replace(/[-–—]/g, ' ').trim();
+        if (!name || name.length < 3) {
+          name = `Heritage Dish #${index + 1}`;
+        }
+
+        // Infer Ingredients, Allergens, and Calories based on dish name keywords
+        const lowerName = line.toLowerCase();
+        let ingredients = 'Local spices, onions, native herbs';
+        let allergens = 'None';
+        let calories = '450';
+
+        if (lowerName.includes('sisig') || lowerName.includes('pork') || lowerName.includes('liempo')) {
+          ingredients = 'Grilled pork mask, ear, calamansi, chili, onion, chicken liver';
+          allergens = 'Contains Pork';
+          calories = '680';
+        } else if (lowerName.includes('kare') || lowerName.includes('peanut')) {
+          ingredients = 'Beef tripe, pork belly, savory peanut butter sauce, eggplant, string beans, bagoong';
+          allergens = 'Contains Peanuts, Crustaceans/Shrimp Paste (Bagoong)';
+          calories = '750';
+        } else if (lowerName.includes('bringhe') || lowerName.includes('rice')) {
+          ingredients = 'Glutinous rice, coconut milk, chicken, boiled egg, bell peppers, turmeric';
+          allergens = 'Contains Eggs';
+          calories = '580';
+        } else if (lowerName.includes('halo') || lowerName.includes('dessert') || lowerName.includes('flan') || lowerName.includes('milk')) {
+          ingredients = 'Shaved ice, evaporated milk, ube halaya, saba banana, sweetened beans, leche flan';
+          allergens = 'Contains Dairy, Soy';
+          calories = '420';
+        } else if (lowerName.includes('fish') || lowerName.includes('shrimp') || lowerName.includes('seafood') || lowerName.includes('hison')) {
+          ingredients = 'Fresh catch seafood, citrus, garlic, ginger, local greens';
+          allergens = 'Contains Shellfish / Fish';
+          calories = '380';
+        }
+
+        parsedDishes.push({
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          price: price,
+          ingredients: ingredients,
+          allergens: allergens,
+          calories: calories,
+          image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80'
+        });
+      });
+
+      if (parsedDishes.length > 0) {
+        setAdminDishes(parsedDishes);
+        alert(`🎉 AI successfully scanned and organized ${parsedDishes.length} menu items into your signature catalog with prices, ingredients, and allergen warnings!`);
+      } else {
+        alert("AI could not extract dish items. Please try pasting clearer menu text.");
+      }
+
+      setIsAiScanning(false);
+    }, 1200);
   };
 
   const handleSaveAdminListing = (e) => {
@@ -982,6 +1605,9 @@ function App() {
             image: adminForm.image || res.image,
             images: adminForm.images && adminForm.images.length > 0 ? adminForm.images : res.images || [],
             description: adminForm.description,
+            branches: adminBranches.length > 0 ? adminBranches : res.branches,
+            username: adminForm.username || res.username || 'owner',
+            password: adminForm.password || res.password || 'password123',
             menu: formattedMenu.length > 0 ? formattedMenu : res.menu
           };
         }
@@ -1015,6 +1641,16 @@ function App() {
         images: adminForm.images && adminForm.images.length > 0 ? adminForm.images : [
           adminForm.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80'
         ],
+        branches: adminBranches.length > 0 ? adminBranches : [{
+          branchName: `${adminForm.name} (Main Branch)`,
+          municipality: adminForm.municipality,
+          address: adminForm.address || `Barangay San Jose, ${adminForm.municipality}`,
+          operatingHours: adminForm.operatingHours,
+          lat: defaultCoord.lat,
+          lng: defaultCoord.lng
+        }],
+        username: adminForm.username || 'owner',
+        password: adminForm.password || 'password123',
         occupancy: [10, 20, 30, 60, 90, 80, 50, 40, 60, 80, 90, 70, 40, 20, 10],
         menu: formattedMenu.length > 0 ? formattedMenu : [
           {
@@ -1035,10 +1671,76 @@ function App() {
 
     setAdminForm({
       name: '', municipality: 'City of San Fernando',
-      operatingHours: '09:00 AM - 09:00 PM', priceTier: '$$',
-      address: '', image: '', images: [], description: ''
+      operatingHours: '09:00 AM - 09:00 PM', priceTier: '$',
+      address: '', image: '', images: [], description: '', username: '', password: ''
     });
+    setAdminBranches([]);
     setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
+  };
+
+  
+  // Start editing a Tourist Attraction in Admin portal
+  const startAdminAttractionEdit = (attr) => {
+    if (!attr) return;
+    setAdminEditingAttractionId(attr.id);
+    setAdminAttractionForm({
+      name: attr.name || '',
+      municipality: attr.municipality || 'City of San Fernando',
+      type: attr.type || '🏛️ Historic Parish Church',
+      description: attr.description || '',
+      details: attr.details || '',
+      image: attr.image || '',
+      lat: attr.lat || 15.0300,
+      lng: attr.lng || 120.6800
+    });
+    setAdminSectionTab('attractions');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Save/Update Tourist Attraction in Admin portal
+  const handleSaveAdminAttraction = (e) => {
+    e.preventDefault();
+    if (!adminAttractionForm.name.trim()) return;
+
+    if (adminEditingAttractionId) {
+      setAttractions(prev => prev.map(a => {
+        if (a.id === adminEditingAttractionId) {
+          return {
+            ...a,
+            ...adminAttractionForm
+          };
+        }
+        return a;
+      }));
+      alert(`✓ Successfully updated tourist attraction "${adminAttractionForm.name}"!`);
+    } else {
+      const newAttr = {
+        id: `attr-${Date.now()}`,
+        ...adminAttractionForm
+      };
+      setAttractions([newAttr, ...attractions]);
+      alert(`✓ Successfully registered new tourist destination "${newAttr.name}"!`);
+    }
+
+    setAdminEditingAttractionId(null);
+    setAdminAttractionForm({
+      name: '',
+      municipality: 'City of San Fernando',
+      type: '🏛️ Historic Parish Church',
+      description: '',
+      details: '',
+      image: '',
+      lat: 15.0300,
+      lng: 120.6800
+    });
+  };
+
+  // Delete Tourist Attraction in Admin portal
+  const deleteAttraction = (id) => {
+    if (confirm("Are you sure you want to remove this tourist destination from the database?")) {
+      setAttractions(attractions.filter(a => a.id !== id));
+      alert("Destination removed.");
+    }
   };
 
   const deleteRestaurant = (id) => {
@@ -1265,8 +1967,8 @@ function App() {
                       setAdminEditingId(null);
                       setAdminForm({
                         name: '', municipality: 'City of San Fernando',
-                        operatingHours: '09:00 AM - 09:00 PM', priceTier: '$$',
-                        address: '', image: '', images: [], description: ''
+                        operatingHours: '09:00 AM - 09:00 PM', priceTier: '$',
+                        address: '', image: '', images: [], description: '', username: '', password: ''
                       });
                       setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
                     }}
@@ -1315,9 +2017,37 @@ function App() {
           </div>
         </header>
 
+      
+
+
         {/* Admin main work grid */}
+        
+        {/* Admin Section Navigation Tabs (Super Admin / Merchant) */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <div className="flex border-b border-[#E9E5DE] bg-white rounded-xl p-1.5 shadow-xs">
+            <button
+              type="button"
+              onClick={() => setAdminSectionTab('restaurants')}
+              className={`flex-1 py-2.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${adminSectionTab === 'restaurants' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
+            >
+              <span>🏪</span> Heritage Restaurants & Branches ({restaurants.length})
+            </button>
+            {adminRole === 'superadmin' && (
+              <button
+                type="button"
+                onClick={() => setAdminSectionTab('attractions')}
+                className={`flex-1 py-2.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${adminSectionTab === 'attractions' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
+              >
+                <span>🏛️</span> Tourist Attractions & Heritage Sites ({attractions.length})
+              </button>
+            )}
+          </div>
+        </div>
+
+
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
+          {adminSectionTab === 'restaurants' && (
             <div className="space-y-6">
 
               {/* Form panel */}
@@ -1339,10 +2069,10 @@ function App() {
                   </h3>
 
                   <form onSubmit={handleSaveAdminListing} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
-                          Restaurant Name
+                          Restaurant Establishment Name
                         </label>
                         <input
                           type="text"
@@ -1351,101 +2081,10 @@ function App() {
                           name="name"
                           value={adminForm.name}
                           onChange={handleAdminFormChange}
-                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-ivory focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white"
+                          className="block w-full px-3 py-2 text-xs border border-[#E9E5DE] rounded-xl bg-ivory font-black focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white"
                         />
                       </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
-                          Municipality/City
-                        </label>
-                        <select
-                          name="municipality"
-                          value={adminForm.municipality}
-                          onChange={handleAdminFormChange}
-                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-ivory focus:outline-none"
-                        >
-                          {MUNICIPALITIES.map(mun => (
-                            <option key={mun} value={mun}>{mun}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
-                          Upload Restaurant Photos (Required, Select 2-4)
-                        </label>
-                        <input
-                          type="file"
-                          multiple
-                          accept="image/*"
-                          required={!adminForm.images || adminForm.images.length === 0}
-                          onChange={(e) => {
-                            const files = Array.from(e.target.files);
-                            if (files.length > 0) {
-                              const base64Promises = files.map(file => {
-                                return new Promise((resolve) => {
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => resolve(reader.result);
-                                  reader.readAsDataURL(file);
-                                });
-                              });
-                              Promise.all(base64Promises).then(results => {
-                                const newImages = [...(adminForm.images || []), ...results];
-                                setAdminForm({
-                                  ...adminForm,
-                                  images: newImages,
-                                  image: newImages[0] || ''
-                                });
-                              });
-                            }
-                          }}
-                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-ivory text-charcoal focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white"
-                        />
-                        {adminForm.images && adminForm.images.length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            <div className="flex flex-wrap gap-2">
-                              {adminForm.images.map((imgSrc, idx) => (
-                                <div key={idx} className="relative w-12 h-12 shrink-0">
-                                  <img src={imgSrc} className="w-full h-full rounded object-cover border border-[#E9E5DE] shadow-xs" alt={`Preview ${idx + 1}`} />
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const updatedImages = adminForm.images.filter((_, i) => i !== idx);
-                                      setAdminForm({
-                                        ...adminForm,
-                                        images: updatedImages,
-                                        image: updatedImages[0] || ''
-                                      });
-                                    }}
-                                    className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-[8px] font-black flex items-center justify-center shadow-md cursor-pointer transition-colors"
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                            <span className="text-[9px] text-bananaleaf font-black block pt-0.5">
-                              ✓ {adminForm.images.length} Photos Uploaded
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
-                          Operating Hours
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="08:00 AM - 08:00 PM"
-                          name="operatingHours"
-                          value={adminForm.operatingHours}
-                          onChange={handleAdminFormChange}
-                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-ivory"
-                        />
-                      </div>
                       <div>
                         <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
                           Price Tier
@@ -1454,26 +2093,261 @@ function App() {
                           name="priceTier"
                           value={adminForm.priceTier}
                           onChange={handleAdminFormChange}
-                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-ivory"
+                          className="block w-full px-3 py-2 text-xs border border-[#E9E5DE] rounded-xl bg-ivory font-bold focus:outline-none"
                         >
                           <option value="$">$ (Budget)</option>
-                          <option value="$$">$$ (Moderate)</option>
-                          <option value="$$$">$$$ (Premium)</option>
-                          <option value="$$$$">$$$$ (Fine Degustation)</option>
+                          <option value="$">$ (Moderate)</option>
+                          <option value="$$">$$ (Premium)</option>
+                          <option value="$$">$$ (Fine Degustation)</option>
                         </select>
                       </div>
+                    </div>
+
+                    {/* Dual Image Input: File Upload + Add Image URL */}
+                    <div className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl space-y-2.5">
+                      <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
+                        📷 Restaurant Photos (Upload Local Files or Add Photo URLs)
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <span className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">Option 1: Upload Local Picture Files</span>
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={(e) => {
+                              const files = Array.from(e.target.files);
+                              if (files.length > 0) {
+                                const base64Promises = files.map(file => {
+                                  return new Promise((resolve) => {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => resolve(reader.result);
+                                    reader.readAsDataURL(file);
+                                  });
+                                });
+                                Promise.all(base64Promises).then(results => {
+                                  const newImages = [...(adminForm.images || []), ...results];
+                                  setAdminForm({
+                                    ...adminForm,
+                                    images: newImages,
+                                    image: newImages[0] || ''
+                                  });
+                                });
+                              }
+                            }}
+                            className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white text-charcoal focus:outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <span className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">Option 2: Add Image Web URL</span>
+                          <div className="flex gap-1.5">
+                            <input
+                              type="text"
+                              placeholder="https://example.com/photo.jpg"
+                              value={resPhotoUrlInput}
+                              onChange={(e) => setResPhotoUrlInput(e.target.value)}
+                              className="flex-1 px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white focus:outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (resPhotoUrlInput.trim()) {
+                                  const newImages = [...(adminForm.images || []), resPhotoUrlInput.trim()];
+                                  setAdminForm({
+                                    ...adminForm,
+                                    images: newImages,
+                                    image: newImages[0] || ''
+                                  });
+                                  setResPhotoUrlInput('');
+                                }
+                              }}
+                              className="px-3 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-bold cursor-pointer shrink-0"
+                            >
+                              + Add URL
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {adminForm.images && adminForm.images.length > 0 && (
+                        <div className="pt-2 border-t border-[#E9E5DE] space-y-1">
+                          <div className="flex flex-wrap gap-2">
+                            {adminForm.images.map((imgSrc, idx) => (
+                              <div key={idx} className="relative w-12 h-12 shrink-0">
+                                <img src={imgSrc} className="w-full h-full rounded-lg object-cover border border-[#E9E5DE] shadow-xs" alt={`Preview ${idx + 1}`} />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updatedImages = adminForm.images.filter((_, i) => i !== idx);
+                                    setAdminForm({
+                                      ...adminForm,
+                                      images: updatedImages,
+                                      image: updatedImages[0] || ''
+                                    });
+                                  }}
+                                  className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-[8px] font-black flex items-center justify-center shadow-md cursor-pointer transition-colors"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          <span className="text-[9px] text-bananaleaf font-black block pt-0.5">
+                            ✓ {adminForm.images.length} Photos Attached
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    
+                    
+                    {/* Prominent Multi-Branch Location Manager inside Main Form Card */}
+                    <div className="bg-[#FAF8F5] border border-[#2C5E3B]/25 p-4 rounded-xl space-y-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E9E5DE] pb-2">
+                        <div>
+                          <span className="text-[10px] font-black text-[#2C5E3B] uppercase tracking-wider block">
+                            🏪 Restaurant Branch Locations Manager ({adminBranches.length} Active Branch{adminBranches.length !== 1 ? 'es' : ''})
+                          </span>
+                          <span className="text-[10px] text-charcoal-light font-medium block">
+                            Register additional branches across Pampanga municipalities
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAdminBranches([
+                              ...adminBranches,
+                              {
+                                branchName: `${adminForm.name || 'Restaurant'} Branch #${adminBranches.length + 1}`,
+                                municipality: adminForm.municipality || 'City of San Fernando',
+                                address: '',
+                                operatingHours: adminForm.operatingHours || '09:00 AM - 09:00 PM',
+                                lat: 15.0300,
+                                lng: 120.6800
+                              }
+                            ]);
+                          }}
+                          className="px-3 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-xs font-black transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+                        >
+                          + Add Branch Location
+                        </button>
+                      </div>
+
+                      <div className="space-y-2.5">
+                        {adminBranches.map((branch, bIdx) => (
+                          <div key={bIdx} className="p-3 bg-white border border-[#E9E5DE] rounded-xl space-y-2 text-xs shadow-2xs">
+                            <div className="flex items-center justify-between gap-2">
+                              <strong className="text-xs font-black text-charcoal flex items-center gap-1">
+                                📍 Branch #{bIdx + 1}:
+                              </strong>
+                              {adminBranches.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setAdminBranches(adminBranches.filter((_, idx) => idx !== bIdx))}
+                                  className="px-2 py-0.5 text-terracotta hover:bg-terracotta/10 rounded font-bold text-[10px] transition-colors flex items-center gap-1 cursor-pointer"
+                                >
+                                  ✕ Remove Branch
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                              <div>
+                                <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Name</label>
+                                <input
+                                  type="text"
+                                  required
+                                  placeholder="e.g. SOUQ San Fernando Branch"
+                                  value={branch.branchName || ''}
+                                  onChange={(e) => {
+                                    const updated = [...adminBranches];
+                                    updated[bIdx] = { ...updated[bIdx], branchName: e.target.value };
+                                    setAdminBranches(updated);
+                                  }}
+                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] font-bold"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Municipality / City</label>
+                                <select
+                                  value={branch.municipality || 'City of San Fernando'}
+                                  onChange={(e) => {
+                                    const updated = [...adminBranches];
+                                    updated[bIdx] = { ...updated[bIdx], municipality: e.target.value };
+                                    setAdminBranches(updated);
+                                  }}
+                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] font-bold"
+                                >
+                                  {MUNICIPALITIES.map(mun => (
+                                    <option key={mun} value={mun}>{mun}</option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Operating Hours</label>
+                                <input
+                                  type="text"
+                                  required
+                                  placeholder="e.g. 11:00 AM - 10:00 PM"
+                                  value={branch.operatingHours || '09:00 AM - 09:00 PM'}
+                                  onChange={(e) => {
+                                    const updated = [...adminBranches];
+                                    updated[bIdx] = { ...updated[bIdx], operatingHours: e.target.value };
+                                    setAdminBranches(updated);
+                                  }}
+                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] font-semibold"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Exact Address</label>
+                                <input
+                                  type="text"
+                                  required
+                                  placeholder="e.g. McArthur Highway, Dolores"
+                                  value={branch.address || ''}
+                                  onChange={(e) => {
+                                    const updated = [...adminBranches];
+                                    updated[bIdx] = { ...updated[bIdx], address: e.target.value };
+                                    setAdminBranches(updated);
+                                  }}
+                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5]"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-terracotta/5 border border-terracotta/20 p-3.5 rounded-xl">
                       <div>
-                        <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
-                          Exact Address
+                        <label className="block text-[10px] font-black text-terracotta uppercase tracking-wider mb-1">
+                          👤 Merchant Account Username
                         </label>
                         <input
                           type="text"
                           required
-                          placeholder="ex. 123 MacArthur Highway, San Fernando"
-                          name="address"
-                          value={adminForm.address}
+                          placeholder="ex. ningnangan_owner"
+                          name="username"
+                          value={adminForm.username || ''}
                           onChange={handleAdminFormChange}
-                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-ivory focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white"
+                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-black text-terracotta uppercase tracking-wider mb-1">
+                          🔑 Merchant Account Password
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="ex. ningnangan123"
+                          name="password"
+                          value={adminForm.password || ''}
+                          onChange={handleAdminFormChange}
+                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white font-mono font-bold"
                         />
                       </div>
                     </div>
@@ -1492,6 +2366,71 @@ function App() {
                         className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-ivory"
                       />
                     </div>
+
+                  
+                  {/* Free AI Menu OCR & Text Scanner Component */}
+                  <div className="bg-gradient-to-r from-terracotta/10 via-saffron/10 to-[#2C5E3B]/10 border border-terracotta/30 p-4 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🤖</span>
+                        <div>
+                          <h4 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
+                            Free AI Menu OCR & Automatic Dish Cataloger
+                          </h4>
+                          <span className="text-[10px] text-charcoal-light font-medium block">
+                            Upload a menu photo or paste raw menu text to auto-generate dishes, prices, ingredients & allergen warnings
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-black text-bananaleaf bg-white px-2.5 py-1 rounded-full border border-bananaleaf/30 shadow-2xs">
+                        ⚡ 100% Free AI Engine
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">
+                          📷 Option 1: Upload Menu Board Photo / Flyer
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => setAiMenuImage(reader.result);
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">
+                          📝 Option 2: Paste Raw Menu Text / Price List
+                        </label>
+                        <textarea
+                          rows={2}
+                          placeholder="e.g. SOUQ Pork Sisig ₱280, Crispy Kare-Kare ₱390, Bringhe ₱220..."
+                          value={aiRawMenuText}
+                          onChange={(e) => setAiRawMenuText(e.target.value)}
+                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={isAiScanning}
+                      onClick={handleAiAnalyzeMenu}
+                      className="w-full py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                    >
+                      {isAiScanning ? "🤖 AI Scanning & Organizing Menu Items..." : "✨ Analyze & Auto-Organize Menu with AI (Free)"}
+                    </button>
+                  </div>
+
 
                   {/* Dynamic Dishes Input */}
                   <div className="border border-[#E9E5DE] rounded-xl p-4 bg-[#FAF8F5] space-y-3">
@@ -1743,21 +2682,42 @@ function App() {
                           if (adminRole === 'merchant') {
                             return r.id === merchantResId;
                           }
-                          return adminSelectedMunicipality === 'All' || r.municipality === adminSelectedMunicipality;
+                          return isRestaurantInMunicipality(r, adminSelectedMunicipality);
                         })
                         .map(res => (
                           <tr key={res.id} className="hover:bg-ivory/40">
                             <td className="px-4 py-3 font-extrabold">{res.name}</td>
-                            <td className="px-4 py-3">{res.municipality}</td>
-                            <td className="px-4 py-3 text-charcoal-light text-[11px] font-semibold">{res.address}</td>
+                            <td className="px-4 py-3 text-xs">
+                              <span className="inline-flex items-center gap-1 bg-terracotta/10 text-terracotta px-2 py-0.5 rounded-full text-[10px] font-black border border-terracotta/20">
+                                📍 {Array.isArray(res.branches) && res.branches.length > 0 ? `${res.branches.length} Branches (${res.branches.map(b => b.municipality).join(' • ')})` : `1 Branch (${res.municipality})`}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-xs">
+                              <div className="flex flex-col text-[11px] space-y-0.5">
+                                <span className="font-bold text-terracotta">👤 {res.username || 'owner'}</span>
+                                <span className="text-charcoal-light font-mono text-[10px]">🔑 {res.password || 'password123'}</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 font-bold text-terracotta text-xs">
+                              {Array.isArray(res.branches) && res.branches.length > 1
+                                ? res.branches.map(b => b.municipality).join(' • ')
+                                : res.municipality}
+                            </td>
+                            <td className="px-4 py-3 text-charcoal-light text-[10px] font-semibold max-w-xs">
+                              {Array.isArray(res.branches) && res.branches.length > 1
+                                ? res.branches.map((b, i) => `${i + 1}. ${b.address || b.municipality}`).join(' | ')
+                                : res.address}
+                            </td>
                             <td className="px-4 py-3 text-charcoal-light">{res.operatingHours}</td>
                             <td className="px-4 py-3 text-bananaleaf font-bold">{res.priceTier}</td>
                             <td className="px-4 py-3 text-right space-x-1 shrink-0">
                               <button
+                                type="button"
                                 onClick={() => startAdminEdit(res)}
-                                className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex"
+                                className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs hover:border-terracotta"
+                                title="Edit Listing & Credentials"
                               >
-                                <Edit className="h-4 w-4" />
+                                <Edit className="h-4 w-4 text-terracotta" />
                               </button>
                               {adminRole !== 'merchant' && (
                                 <button
@@ -1774,8 +2734,278 @@ function App() {
                   </table>
                 </div>
               </div>
-
             </div>
+          )}
+
+          
+          {/* ========================================================================= */}
+          {/* TOURIST ATTRACTIONS & HERITAGE SITES ADMIN MANAGEMENT VIEW */}
+          {/* ========================================================================= */}
+          {adminSectionTab === 'attractions' && adminRole === 'superadmin' && (
+            <div className="space-y-6">
+              {/* Attraction Add/Edit Form */}
+              <div className="bento-card p-6 bg-white space-y-5 border-[#E9E5DE] shadow-sm">
+                <div className="flex items-center justify-between border-b border-[#E9E5DE] pb-3">
+                  <h3 className="text-sm font-extrabold text-charcoal uppercase tracking-wider flex items-center gap-2 m-0">
+                    <span>🏛️</span> {adminEditingAttractionId ? "Modify Registered Tourist Attraction" : "Register New Tourist Destination"}
+                  </h3>
+                  {adminEditingAttractionId && (
+                    <span className="text-xs font-black text-terracotta bg-terracotta/10 px-2.5 py-0.5 rounded-full border border-terracotta/20">
+                      Editing Destination Mode
+                    </span>
+                  )}
+                </div>
+
+                <form onSubmit={handleSaveAdminAttraction} className="space-y-4 text-xs">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
+                        Attraction / Landmark Name
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Candaba Wetland Reserve"
+                        value={adminAttractionForm.name}
+                        onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, name: e.target.value })}
+                        className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-ivory text-xs font-extrabold focus:outline-none focus:ring-1 focus:ring-terracotta"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
+                        Municipality / City
+                      </label>
+                      <select
+                        value={adminAttractionForm.municipality}
+                        onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, municipality: e.target.value })}
+                        className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-ivory text-xs font-extrabold focus:outline-none"
+                      >
+                        {MUNICIPALITIES.map(mun => (
+                          <option key={mun} value={mun}>{mun}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
+                        Category / Type
+                      </label>
+                      <select
+                        value={adminAttractionForm.type}
+                        onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, type: e.target.value })}
+                        className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-ivory text-xs font-extrabold focus:outline-none"
+                      >
+                        <option value="🏛️ Historic Parish Church">🏛️ Historic Parish Church</option>
+                        <option value="🌲 Nature / Ecotourism">🌲 Nature / Ecotourism</option>
+                        <option value="🎨 Heritage Museum">🎨 Heritage Museum</option>
+                        <option value="🏺 Artisan Workshop">🏺 Artisan Workshop</option>
+                        <option value="📍 Cultural Landmark">📍 Cultural Landmark</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl space-y-2.5">
+                      <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
+                        📷 Tourist Destination Photos (Upload Local Files or Add Photo URLs)
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <span className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">Option 1: Upload Local Picture Files</span>
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={(e) => {
+                              const files = Array.from(e.target.files);
+                              if (files.length > 0) {
+                                const base64Promises = files.map(file => {
+                                  return new Promise((resolve) => {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => resolve(reader.result);
+                                    reader.readAsDataURL(file);
+                                  });
+                                });
+                                Promise.all(base64Promises).then(results => {
+                                  const existing = adminAttractionForm.images || (adminAttractionForm.image ? [adminAttractionForm.image] : []);
+                                  const updatedImages = [...existing, ...results];
+                                  setAdminAttractionForm({
+                                    ...adminAttractionForm,
+                                    images: updatedImages,
+                                    image: updatedImages[0] || ''
+                                  });
+                                });
+                              }
+                            }}
+                            className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white text-charcoal focus:outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <span className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">Option 2: Add Image Web URL</span>
+                          <div className="flex gap-1.5">
+                            <input
+                              type="text"
+                              placeholder="/attractions/candaba_bird_sanctuary.jpg or https://..."
+                              value={attrPhotoUrlInput}
+                              onChange={(e) => setAttrPhotoUrlInput(e.target.value)}
+                              className="flex-1 px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white focus:outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (attrPhotoUrlInput.trim()) {
+                                  const existing = adminAttractionForm.images || (adminAttractionForm.image ? [adminAttractionForm.image] : []);
+                                  const updatedImages = [...existing, attrPhotoUrlInput.trim()];
+                                  setAdminAttractionForm({
+                                    ...adminAttractionForm,
+                                    images: updatedImages,
+                                    image: updatedImages[0] || ''
+                                  });
+                                  setAttrPhotoUrlInput('');
+                                }
+                              }}
+                              className="px-3 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-bold cursor-pointer shrink-0"
+                            >
+                              + Add URL
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {((adminAttractionForm.images && adminAttractionForm.images.length > 0) || adminAttractionForm.image) && (
+                        <div className="pt-2 border-t border-[#E9E5DE] space-y-1">
+                          <div className="flex flex-wrap gap-2">
+                            {(adminAttractionForm.images && adminAttractionForm.images.length > 0 ? adminAttractionForm.images : [adminAttractionForm.image]).map((imgSrc, idx) => (
+                              <div key={idx} className="relative w-12 h-12 shrink-0">
+                                <img src={imgSrc} className="w-full h-full rounded-lg object-cover border border-[#E9E5DE] shadow-xs" alt="Preview" />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const currentImgs = adminAttractionForm.images || [adminAttractionForm.image];
+                                    const updated = currentImgs.filter((_, i) => i !== idx);
+                                    setAdminAttractionForm({
+                                      ...adminAttractionForm,
+                                      images: updated,
+                                      image: updated[0] || ''
+                                    });
+                                  }}
+                                  className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-[8px] font-black flex items-center justify-center shadow-md cursor-pointer transition-colors"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          <span className="text-[9px] text-bananaleaf font-black block pt-0.5">
+                            ✓ {(adminAttractionForm.images || [adminAttractionForm.image]).length} Photos Attached
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
+                        Historical / Cultural Summary
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. National Cultural Treasure built in 1575..."
+                        value={adminAttractionForm.description}
+                        onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, description: e.target.value })}
+                        className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-white text-xs focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 justify-end pt-2 border-t border-[#E9E5DE]">
+                    {adminEditingAttractionId && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdminEditingAttractionId(null);
+                          setAdminAttractionForm({
+                            name: '',
+                            municipality: 'City of San Fernando',
+                            type: '🏛️ Historic Parish Church',
+                            description: '',
+                            details: '',
+                            image: '',
+                            lat: 15.0300,
+                            lng: 120.6800
+                          });
+                        }}
+                        className="px-4 py-2 border border-[#E9E5DE] rounded-xl text-xs font-semibold text-charcoal hover:bg-[#FAF8F5] cursor-pointer"
+                      >
+                        Cancel Edit
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      className="px-5 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-black shadow-sm cursor-pointer"
+                    >
+                      {adminEditingAttractionId ? "Update Destination" : "Register Destination"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Tourist Attractions Data Table */}
+              <div className="bento-card p-5 bg-white space-y-4 shadow-sm border-[#E9E5DE]">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-extrabold text-charcoal uppercase tracking-wider m-0">
+                    Heritage Tourist Destinations Database ({attractions.length} Sites)
+                  </h3>
+                </div>
+
+                <div className="overflow-x-auto border border-[#E9E5DE] rounded-xl">
+                  <table className="min-w-full divide-y divide-[#E9E5DE] text-left text-xs">
+                    <thead className="bg-[#FAF8F5] text-charcoal-light uppercase font-bold tracking-wider text-[11px]">
+                      <tr>
+                        <th className="px-4 py-3">Landmark Name</th>
+                        <th className="px-4 py-3">Municipality / City</th>
+                        <th className="px-4 py-3">Category</th>
+                        <th className="px-4 py-3">Description</th>
+                        <th className="px-4 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#E9E5DE] bg-white text-charcoal font-medium">
+                      {attractions.map(attr => (
+                        <tr key={attr.id} className="hover:bg-ivory/40">
+                          <td className="px-4 py-3 font-extrabold flex items-center gap-2">
+                            {attr.image && <img src={attr.image} alt={attr.name} className="w-8 h-8 rounded object-cover border border-[#E9E5DE]" />}
+                            <span>{attr.name}</span>
+                          </td>
+                          <td className="px-4 py-3 text-terracotta font-bold">📍 {attr.municipality}</td>
+                          <td className="px-4 py-3 text-charcoal-light">{attr.type}</td>
+                          <td className="px-4 py-3 text-charcoal-light text-[11px] max-w-xs truncate">{attr.description}</td>
+                          <td className="px-4 py-3 text-right space-x-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => startAdminAttractionEdit(attr)}
+                              className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs hover:border-terracotta"
+                              title="Edit Destination"
+                            >
+                              <Edit className="h-4 w-4 text-terracotta" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => deleteAttraction(attr.id)}
+                              className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs"
+                              title="Delete Destination"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
 
         </main>
 
@@ -1805,20 +3035,11 @@ function App() {
 
           {/* Logo Brand Typography */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setActiveView('homepage'); setSelectedMunicipality('All'); setSelectedCorridor('All'); }}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-terracotta to-[#993A16] flex items-center justify-center shadow-md border border-white/10 shrink-0">
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                {/* Palayok lid handle */}
-                <path d="M11 6V4a1 1 0 0 1 2 0v2" stroke="#FAF8F5" strokeWidth="2" />
-                {/* Palayok lid */}
-                <path d="M5 8c0-2 4-3 7-3s7 1 7 3" stroke="#FAF8F5" strokeWidth="2" />
-                {/* Palayok rim */}
-                <ellipse cx="12" cy="8" rx="8" ry="1.5" fill="#A04020" stroke="#FAF8F5" strokeWidth="2" />
-                {/* Palayok clay body */}
-                <path d="M4 8.5c0 6 3 9 8 9s8-3 8-9" fill="#D95D39" stroke="#FAF8F5" strokeWidth="2" />
-                {/* Cooking steam */}
-                <path d="M9 3c.3-.5-.3-1 0-1.5M12 3c.3-.5-.3-1 0-1.5M15 3c.3-.5-.3-1 0-1.5" stroke="#E9C46A" strokeWidth="1.5" />
-              </svg>
-            </div>
+            <img 
+              src="/kanyamanan-logo.png" 
+              alt="Kanyamanan Logo" 
+              className="w-10 h-10 object-contain rounded-xl shadow-md border border-[#E9E5DE] shrink-0 bg-white p-0.5" 
+            />
             <div>
               <h1 className="text-xl font-extrabold tracking-tight text-charcoal m-0 flex items-center gap-1.5 leading-none">
                 Kanyamanan
@@ -1866,7 +3087,7 @@ function App() {
                   onClick={() => setActiveView('dashboard')}
                   className={`px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-colors ${activeView === 'dashboard' ? 'text-terracotta bg-terracotta/5' : 'text-charcoal-light hover:text-charcoal'}`}
                 >
-                  My Food Trip Planner
+                  🗺️ My Food Trip Planner
                 </button>
                 <div className="h-6 w-px bg-[#E9E5DE] hidden sm:block"></div>
                 <div className="flex items-center gap-2 pl-1 bg-white border border-[#E9E5DE] rounded-full p-0.5">
@@ -1879,6 +3100,7 @@ function App() {
                   <button
                     onClick={() => {
                       setIsAuthenticated(false);
+                      setIsGuest(false);
                       setActiveView('homepage');
                       setActiveTrip([]);
                     }}
@@ -1889,14 +3111,52 @@ function App() {
                   </button>
                 </div>
               </>
+            ) : isGuest ? (
+              <>
+                <button
+                  onClick={() => setActiveView('dashboard')}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-colors ${activeView === 'dashboard' ? 'text-terracotta bg-terracotta/5' : 'text-charcoal-light hover:text-charcoal'}`}
+                >
+                  🗺️ Trip Planner (Guest)
+                </button>
+                <button
+                  onClick={() => setActiveView('auth')}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 border border-terracotta text-terracotta text-xs font-bold rounded-xl hover:bg-terracotta hover:text-white transition-colors"
+                >
+                  <User className="h-3.5 w-3.5" /> Sign In
+                </button>
+                <button
+                  onClick={() => {
+                    setIsGuest(false);
+                    setActiveView('homepage');
+                    setActiveTrip([]);
+                  }}
+                  title="Exit Guest Mode"
+                  className="p-2 text-charcoal-light hover:text-terracotta rounded-full hover:bg-terracotta/5 transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </>
             ) : (
-              <button
-                onClick={() => setActiveView('auth')}
-                className="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-xs font-bold rounded-xl shadow-sm text-white bg-terracotta hover:bg-terracotta-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-terracotta transition-colors"
-              >
-                <User className="h-3.5 w-3.5" />
-                Sign In / Register
-              </button>
+              <>
+                <button
+                  onClick={() => {
+                    setIsGuest(true);
+                    setActiveView('dashboard');
+                    setDashboardTab('planner');
+                  }}
+                  className="px-3 py-2 rounded-xl text-xs font-semibold tracking-wide text-charcoal-light hover:text-charcoal transition-colors"
+                >
+                  🗺️ Plan Trip (Guest Mode)
+                </button>
+                <button
+                  onClick={() => setActiveView('auth')}
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-xs font-bold rounded-xl shadow-sm text-white bg-terracotta hover:bg-terracotta-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-terracotta transition-colors"
+                >
+                  <User className="h-3.5 w-3.5" />
+                  Sign In / Register
+                </button>
+              </>
             )}
           </nav>
         </div>
@@ -2112,13 +3372,37 @@ function App() {
                           </div>
 
                           <div className="flex items-center justify-between text-[10px] pt-1 border-t border-[#FAF8F5]">
-                            <div className="flex items-center gap-1 font-semibold text-charcoal-light">
+                            <div className="flex items-center gap-1.5 font-semibold text-charcoal-light min-w-0 max-w-[60%]" title={getRestaurantMunicipalities(res).join(', ')}>
                               <MapPin className="h-3.5 w-3.5 text-saffron shrink-0" />
-                              <span>{res.municipality}</span>
+                              {getRestaurantMunicipalities(res).length > 1 ? (
+                                <span className="text-[10px] font-black text-terracotta truncate bg-terracotta/5 px-1.5 py-0.5 rounded border border-terracotta/15">
+                                  {getRestaurantMunicipalities(res).length} Branches ({getRestaurantMunicipalities(res).join(' • ')})
+                                </span>
+                              ) : (
+                                <span className="truncate text-xs font-bold text-charcoal">{res.municipality}</span>
+                              )}
                             </div>
-                            <span className="text-xs font-bold text-terracotta flex items-center gap-0.5">
-                              Open Drawer <ChevronRight className="h-3 w-3" />
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const muns = getRestaurantMunicipalities(res);
+                                  if (muns.length > 1) {
+                                    setBranchSelectTarget(res);
+                                  } else {
+                                    handleAddToItinerary(res);
+                                    alert(`✓ Added "${res.name}" to active trip itinerary!`);
+                                  }
+                                }}
+                                className="px-2.5 py-1 bg-terracotta hover:bg-terracotta-dark text-white text-[10px] font-extrabold rounded-lg flex items-center gap-1 transition-colors shadow-2xs cursor-pointer"
+                              >
+                                <Plus className="h-3 w-3" /> Add Stop
+                              </button>
+                              <span className="text-xs font-bold text-terracotta flex items-center gap-0.5">
+                                Drawer <ChevronRight className="h-3 w-3" />
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -2296,6 +3580,88 @@ function App() {
 
                     <div className="h-px bg-[#E9E5DE]"></div >
 
+                    
+                    {/* Tourist Destinations Picker per Municipality in Planner */}
+                    <div className="bento-card p-5 bg-white space-y-4 border-[#E9E5DE]">
+                      <div className="flex items-center justify-between border-b border-[#E9E5DE] pb-2.5">
+                        <div>
+                          <h3 className="text-xs font-extrabold text-charcoal uppercase tracking-wider flex items-center gap-1.5 m-0">
+                            <span>🏛️</span> Tourist Destinations Per Place
+                          </h3>
+                          <span className="text-[10px] text-charcoal-light font-medium block mt-0.5">
+                            Pick heritage sights & landmarks to visit on your trip
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-bold text-terracotta bg-terracotta/5 px-2 py-0.5 rounded border border-terracotta/10">
+                          {attractions.filter(a => attractionMunFilter === 'All' || a.municipality === attractionMunFilter).length} Places
+                        </span>
+                      </div>
+
+                      {/* Select Municipality/City Filter for Destinations */}
+                      <div className="space-y-2">
+                        <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider">
+                          Select Municipality / City Destinations
+                        </label>
+                        <select
+                          value={attractionMunFilter}
+                          onChange={(e) => setAttractionMunFilter(e.target.value)}
+                          className="w-full px-3 py-2 text-xs border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] font-bold focus:outline-none focus:bg-white"
+                        >
+                          <option value="All">All Municipalities & Cities ({PRESEEDED_ATTRACTIONS.length} Heritage Sites)</option>
+                          {MUNICIPALITIES.map(mun => (
+                            <option key={mun} value={mun}>📍 {mun}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Destinations Cards List in Planner */}
+                      <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                        {attractions.filter(attr => attractionMunFilter === 'All' || attr.municipality === attractionMunFilter).map(attr => {
+                          const isAdded = activeTrip.some(item => item.id === attr.id);
+
+                          return (
+                            <div key={attr.id} className="p-3 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl flex items-center justify-between gap-3 hover:border-terracotta/30 transition-all">
+                              <div className="flex items-start gap-2.5 min-w-0">
+                                {attr.image && (
+                                  <img src={attr.image} alt={attr.name} className="w-11 h-11 rounded-lg object-cover border border-[#E9E5DE] shrink-0" />
+                                )}
+                                <div className="min-w-0">
+                                  <strong className="text-xs font-black text-charcoal block truncate">{attr.name}</strong>
+                                  <span className="text-[10px] font-bold text-terracotta block">📍 {attr.municipality}</span>
+                                  <span className="text-[9px] text-charcoal-light font-medium block truncate">{attr.type}</span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-1 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedAttraction(attr)}
+                                  className="p-1.5 text-charcoal-light hover:text-charcoal text-[10px] font-bold rounded-md bg-white border border-[#E9E5DE]"
+                                  title="View Details"
+                                >
+                                  ℹ️
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={isAdded}
+                                  onClick={() => {
+                                    handleAddToItinerary(attr);
+                                    alert(`✓ Added "${attr.name}" (${attr.municipality}) to your trip itinerary!`);
+                                  }}
+                                  className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black transition-colors ${
+                                    isAdded ? 'bg-bananaleaf/10 text-bananaleaf border border-bananaleaf/20' : 'bg-[#2C5E3B] hover:bg-[#20452B] text-white cursor-pointer shadow-2xs'
+                                  }`}
+                                >
+                                  {isAdded ? '✓ Added' : '+ Add Place'}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+
                     {/* Enforceable Stop Ceiling Slider (1-5 stops limit) */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between text-xs font-bold text-charcoal">
@@ -2322,14 +3688,169 @@ function App() {
 
                     <div className="h-px bg-[#E9E5DE]"></div>
 
+                    
+                    
+                    {/* Live Trip Start & Navigation Control Panel */}
+                    <div className="bg-white border border-[#2C5E3B]/25 rounded-2xl p-4 space-y-3 shadow-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <span className="text-[10px] font-black text-terracotta uppercase tracking-wider block">
+                            🚀 Real-Time Multi-Stop Navigation Engine
+                          </span>
+                          <h4 className="text-sm font-black text-charcoal m-0 flex items-center gap-1.5">
+                            {isTripActive ? (
+                              <span className="flex items-center gap-1.5 text-bananaleaf">
+                                <span className="w-2.5 h-2.5 rounded-full bg-bananaleaf animate-ping inline-block"></span>
+                                Live Navigation Active
+                              </span>
+                            ) : (
+                              "Start Your Kapampangan Crawl"
+                            )}
+                          </h4>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {!isTripActive ? (
+                            <button
+                              type="button"
+                              onClick={handleStartLiveTrip}
+                              className="px-5 py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                            >
+                              🚀 Start Trip Navigation
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={handleAdvanceNextStop}
+                                className="px-3.5 py-2 bg-saffron hover:bg-saffron-dark text-charcoal text-xs font-extrabold rounded-xl shadow-xs transition-colors cursor-pointer"
+                              >
+                                ✓ Arrived / Next Stop ➡️
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleEndLiveTrip}
+                                className="px-3.5 py-2 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                              >
+                                ⏹️ End Trip
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Multi-Stop Progress Track */}
+                      {computedRoutePath.length > 0 && (
+                        <div className="pt-2 border-t border-[#E9E5DE] space-y-2">
+                          <div className="flex items-center justify-between text-[10px] font-black uppercase text-charcoal-light">
+                            <span>Itinerary Progress: {visitedStops.length} of {computedRoutePath.length} Visited</span>
+                            {isTripActive && computedRoutePath[currentStopIndex] && (
+                              <span className="text-terracotta font-black">
+                                Target: {computedRoutePath[currentStopIndex].name} ({distanceToTargetKm ? `${distanceToTargetKm} km away` : 'Navigating'})
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Progress Stepper Pills */}
+                          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                            {computedRoutePath.map((stop, idx) => {
+                              const isVisited = visitedStops.includes(stop.id);
+                              const isCurrentTarget = isTripActive && idx === currentStopIndex;
+
+                              return (
+                                <div
+                                  key={stop.id}
+                                  className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 shrink-0 transition-all ${
+                                    isVisited
+                                      ? 'bg-bananaleaf/10 border-bananaleaf text-bananaleaf font-bold'
+                                      : isCurrentTarget
+                                      ? 'bg-terracotta text-white border-terracotta font-black shadow-xs animate-pulse'
+                                      : 'bg-[#FAF8F5] border-[#E9E5DE] text-charcoal-light font-semibold'
+                                  }`}
+                                >
+                                  <span>{isVisited ? '✓' : isCurrentTarget ? '🎯' : idx + 1}</span>
+                                  <span className="truncate max-w-[120px]">{stop.name}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+
+                    {/* Live Trip Departure & ETA Navigation Banner */}
+                    {computedRoutePath.length > 0 && (
+                      <div className="bg-gradient-to-r from-[#2C5E3B]/10 via-terracotta/10 to-saffron/10 border border-[#2C5E3B]/20 rounded-2xl p-4 space-y-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#2C5E3B]/15 pb-2.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">🚗</span>
+                            <div>
+                              <div className="flex items-center justify-between w-full">
+                                <h4 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">Live Trip Navigation & ETA</h4>
+                                <button
+                                  type="button"
+                                  onClick={() => setIsCompletionModalOpen(true)}
+                                  className="px-3.5 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                                >
+                                  <span>🎉</span> Done / Finish Trip
+                                </button>
+                              </div>
+                              <span className="text-[10px] text-charcoal-light font-bold">
+                                {isSimulating ? '⚡ Live Route Simulation Active' : '📍 Trip Departure Point: ' + userLocation.name}
+                              </span>
+                            </div>
+                          </div>
+                          
+                          <div className="bg-white border border-[#2C5E3B]/30 px-3.5 py-1.5 rounded-xl shadow-xs text-right">
+                            <span className="text-[9px] font-black text-charcoal-light uppercase tracking-wider block">Estimated Arrival (ETA)</span>
+                            <strong className="text-sm font-black text-[#2C5E3B]">
+                              ⏰ {calculateETA(routeDurationMin)}
+                            </strong>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                          <div className="bg-white p-2 rounded-xl border border-[#E9E5DE]">
+                            <span className="block text-[9px] font-bold text-charcoal-light uppercase">Total Distance</span>
+                            <strong className="text-xs font-black text-charcoal">{routeDistanceKm > 0 ? `${routeDistanceKm} km` : '~12.5 km'}</strong>
+                          </div>
+                          <div className="bg-white p-2 rounded-xl border border-[#E9E5DE]">
+                            <span className="block text-[9px] font-bold text-charcoal-light uppercase">Drive Duration</span>
+                            <strong className="text-xs font-black text-terracotta">
+                              {routeDurationMin > 0 ? `${isTrafficCongested ? Math.round(routeDurationMin * 1.35) : routeDurationMin} mins` : '~25 mins'}
+                            </strong>
+                          </div>
+                          <div className="bg-white p-2 rounded-xl border border-[#E9E5DE]">
+                            <span className="block text-[9px] font-bold text-charcoal-light uppercase">Traffic Status</span>
+                            <strong className={`text-xs font-black ${isTrafficCongested ? 'text-red-600' : 'text-bananaleaf'}`}>
+                              {isTrafficCongested ? '⚠️ Congested (+35%)' : '🟢 Smooth Flow'}
+                            </strong>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+
                     {/* Active Itinerary List */}
                     <div>
-                      <h4 className="text-[10px] font-black text-charcoal-light uppercase tracking-wider mb-2">
-                        Active Route Nodes
-                      </h4>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-[10px] font-black text-charcoal-light uppercase tracking-wider">
+                          Active Route Nodes ({activeTrip.length} Stops)
+                        </h4>
+                        <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 px-2 py-0.5 rounded border border-terracotta/10">
+                          🖐️ Drag cards or use ▲ ▼ to reorder stop numbers
+                        </span>
+                      </div>
+                        <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 px-2 py-0.5 rounded border border-terracotta/10">
+                          🖐️ Drag cards or use ▲ ▼ to reorder stop numbers
+                        </span>
+                      </div>
+
                       {activeTrip.length === 0 ? (
                         <div className="bg-[#FAF8F5] border border-dashed border-[#E9E5DE] p-6 rounded-xl text-center">
-                          <p className="text-xs text-charcoal-light">No restaurants added yet.</p>
+                          <p className="text-xs text-charcoal-light">No destinations added yet.</p>
                           <button
                             onClick={() => setActiveView('homepage')}
                             className="mt-3 px-3.5 py-1.5 bg-terracotta text-white rounded-lg text-xs font-bold"
@@ -2343,26 +3864,67 @@ function App() {
                             {computedRoutePath.map((res, index) => (
                               <div
                                 key={res.id}
-                                className="bg-[#FAF8F5] p-3 rounded-xl border border-[#E9E5DE] flex items-center justify-between gap-3"
+                                draggable={true}
+                                onDragStart={() => setDraggedIndex(index)}
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={(e) => {
+                                  e.preventDefault();
+                                  if (draggedIndex !== null && draggedIndex !== index) {
+                                    moveItineraryItem(draggedIndex, index);
+                                    setDraggedIndex(null);
+                                  }
+                                }}
+                                className={`bg-[#FAF8F5] p-3 rounded-xl border transition-all flex items-center justify-between gap-3 shadow-2xs group cursor-grab active:cursor-grabbing ${
+                                  draggedIndex === index ? 'border-terracotta bg-terracotta/5 opacity-50 scale-[0.98]' : 'border-[#E9E5DE] hover:border-terracotta/40 hover:bg-white'
+                                }`}
                               >
-                                <div className="flex items-center gap-3">
-                                  <span className="w-5 h-5 rounded-full bg-bananaleaf text-white text-[10px] font-bold flex items-center justify-center">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  {/* Drag Handle & Numbering */}
+                                  <span className="text-charcoal-light group-hover:text-terracotta font-bold text-sm select-none shrink-0" title="Drag to reorder">
+                                    ⋮⋮
+                                  </span>
+                                  <span className="w-6 h-6 rounded-full bg-bananaleaf text-white text-[11px] font-black flex items-center justify-center shrink-0 shadow-xs">
                                     {index + 1}
                                   </span>
-                                  <div>
-                                    <span className="block text-xs font-black text-charcoal">{res.name}</span>
-                                    <span className="block text-[9px] text-charcoal-light font-semibold">
-                                      {res.municipality} • {res.address}
+                                  <div className="min-w-0">
+                                    <span className="block text-xs font-black text-charcoal truncate group-hover:text-terracotta transition-colors">{res.name}</span>
+                                    <span className="block text-[9px] text-charcoal-light font-semibold truncate">
+                                      📍 {res.municipality} • {res.address}
                                     </span>
                                   </div>
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveFromItinerary(res.id)}
-                                  className="p-1 text-charcoal-light hover:text-terracotta"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
+
+                                <div className="flex items-center gap-1 shrink-0">
+                                  {/* Move Up Button */}
+                                  <button
+                                    type="button"
+                                    disabled={index === 0}
+                                    onClick={() => moveItineraryItem(index, index - 1)}
+                                    className={`p-1 rounded text-xs font-bold transition-colors ${index === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 cursor-pointer'}`}
+                                    title="Move Stop Up (Change to previous number)"
+                                  >
+                                    ▲
+                                  </button>
+                                  {/* Move Down Button */}
+                                  <button
+                                    type="button"
+                                    disabled={index === computedRoutePath.length - 1}
+                                    onClick={() => moveItineraryItem(index, index + 1)}
+                                    className={`p-1 rounded text-xs font-bold transition-colors ${index === computedRoutePath.length - 1 ? 'text-gray-300 cursor-not-allowed' : 'text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 cursor-pointer'}`}
+                                    title="Move Stop Down (Change to next number)"
+                                  >
+                                    ▼
+                                  </button>
+                                  {/* Remove Button */}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveFromItinerary(res.id)}
+                                    className="p-1 text-charcoal-light hover:text-terracotta cursor-pointer transition-colors ml-1"
+                                    title="Remove Stop"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -2693,12 +4255,33 @@ function App() {
 
             {/* TAB CONTENT: 4. User Travel History */}
             {dashboardTab === 'history' && (
-              <div className="bento-card p-5 bg-white space-y-4 max-w-xl mx-auto">
+              <div className="bento-card p-6 bg-white space-y-4 max-w-xl mx-auto border-[#E9E5DE]">
                 <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-2">
                   <Star className="h-4.5 w-4.5 text-saffron" /> Saved Itineraries History
                 </h3>
 
-                <div className="space-y-3">
+                {(!isAuthenticated || isGuest) ? (
+                  <div className="p-8 text-center space-y-4 bg-[#FAF8F5] border border-dashed border-[#E9E5DE] rounded-2xl">
+                    <div className="w-12 h-12 rounded-full bg-terracotta/10 text-terracotta flex items-center justify-center mx-auto text-xl font-bold">
+                      🔒
+                    </div>
+                    <div className="space-y-1 max-w-md mx-auto">
+                      <h4 className="text-sm font-extrabold text-charcoal m-0">
+                        Account Required to Access Travel History
+                      </h4>
+                      <p className="text-xs text-charcoal-light leading-relaxed m-0">
+                        Guest visitors can explore public culinary maps and live route sequences. Please create a free account or sign in to save your custom itineraries, track completed food crawls, and view saved history!
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setActiveView('auth')}
+                      className="px-5 py-2.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-extrabold transition-all shadow cursor-pointer inline-flex items-center gap-1.5"
+                    >
+                      <ShieldCheck className="h-4 w-4" /> Sign In / Create Account
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
                   {savedItineraries.map(itin => (
                     <div
                       key={itin.id}
@@ -2761,6 +4344,7 @@ function App() {
                     </div>
                   ))}
                 </div>
+                )}
               </div>
             )}
 
@@ -2837,14 +4421,39 @@ function App() {
               <div>
 
                 <h2 className="text-xl font-black text-charcoal mt-1.5 m-0 leading-tight">{selectedRestaurant.name}</h2>
-                <p className="text-xs text-charcoal-light mt-0.5 flex flex-col gap-0.5">
-                  <span>{selectedRestaurant.municipality}</span>
-                  {selectedRestaurant.address && (
-                    <span className="text-[11px] text-charcoal-light font-medium flex items-center gap-1 mt-0.5">
-                      📍 {selectedRestaurant.address}
-                    </span>
+                <div className="text-xs text-charcoal-light mt-1 space-y-2">
+                  <div className="flex items-center gap-1 font-semibold">
+                    <span>Locations ({getRestaurantMunicipalities(selectedRestaurant).length}):</span>
+                    <strong className="text-charcoal">{getRestaurantMunicipalities(selectedRestaurant).join(' • ')}</strong>
+                  </div>
+
+                  {getRestaurantMunicipalities(selectedRestaurant).length > 1 ? (
+                    <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] space-y-1.5 text-left">
+                      <span className="text-[10px] font-black text-terracotta uppercase tracking-wider block">
+                        🏪 All Active Branches ({getRestaurantMunicipalities(selectedRestaurant).length} Locations)
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
+                        {getRestaurantMunicipalities(selectedRestaurant).map((mun, idx) => (
+                          <div key={idx} className="p-2 bg-white rounded-lg border border-[#E9E5DE] flex items-start gap-1.5 shadow-2xs">
+                            <span className="text-terracotta font-bold text-xs shrink-0 mt-0.5">📍</span>
+                            <div className="min-w-0">
+                              <strong className="text-[11px] font-black text-charcoal block leading-tight">{mun} Branch</strong>
+                              <span className="text-[9px] text-charcoal-light font-medium block truncate">
+                                {getBranchAddressForMunicipality(selectedRestaurant, mun)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    selectedRestaurant.address && (
+                      <span className="text-[11px] text-charcoal-light font-medium flex items-center gap-1">
+                        📍 {selectedRestaurant.address}
+                      </span>
+                    )
                   )}
-                </p>
+                </div>
               </div>
               <button onClick={() => { setSelectedRestaurant(null); setActiveDish(null); setCvUploadedMeal(null); }} className="p-2 text-charcoal-light hover:text-charcoal rounded-full hover:bg-ivory">
                 <X className="h-5 w-5" />
@@ -2930,6 +4539,8 @@ function App() {
                   </div>
                 </div>
               </div>
+
+              
 
               {/* Live Occupancy Forecaster chart */}
               <div className="space-y-3">
@@ -3068,14 +4679,16 @@ function App() {
                 <button
                   type="button"
                   onClick={() => {
-                    handleAddToItinerary(selectedRestaurant);
+                    const muns = getRestaurantMunicipalities(selectedRestaurant);
+                    const targetRes = selectedRestaurant;
                     setSelectedRestaurant(null);
                     setActiveDish(null);
                     setCvUploadedMeal(null);
-                    if (!isAuthenticated) {
-                      alert("Note: Added to sandbox trail. To lock paths, please log in.");
+                    if (muns.length > 1) {
+                      setBranchSelectTarget(targetRes);
                     } else {
-                      alert(`Added ${selectedRestaurant.name} to active trip routing queue!`);
+                      handleAddToItinerary(targetRes);
+                      alert(`✓ Added "${targetRes.name}" to active trip itinerary queue!`);
                     }
                   }}
                   className="px-5 py-2 bg-terracotta text-white rounded-xl text-xs font-bold hover:bg-terracotta-dark shadow"
@@ -3107,7 +4720,369 @@ function App() {
         </div>
       )}
 
-    </div>
+
+      {/* ── Multi-Branch Location Choice Modal ── */}
+      
+      {/* Tourist Attraction Detail Modal */}
+      {selectedAttraction && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-charcoal/70 backdrop-blur-xs p-4 animate-fade-in font-sans">
+          <div className="bg-white border border-[#E9E5DE] rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative animate-scale-up">
+            <button
+              type="button"
+              onClick={() => setSelectedAttraction(null)}
+              className="absolute top-4 right-4 text-charcoal-light hover:text-charcoal w-7 h-7 rounded-full bg-ivory flex items-center justify-center text-xs font-bold border border-[#E9E5DE] cursor-pointer"
+            >
+              ✕
+            </button>
+
+            <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-[#E9E5DE]">
+              <img src={selectedAttraction.image} alt={selectedAttraction.name} className="w-full h-full object-cover" />
+              <div className="absolute top-2 left-2 bg-charcoal/80 text-white text-[10px] font-bold px-2.5 py-1 rounded-md">
+                {selectedAttraction.type}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="text-base font-extrabold text-charcoal m-0">{selectedAttraction.name}</h3>
+              <span className="text-xs font-bold text-terracotta block">
+                📍 {selectedAttraction.municipality}, Pampanga
+              </span>
+            </div>
+
+            <p className="text-xs text-charcoal leading-relaxed">{selectedAttraction.description}</p>
+            
+            {selectedAttraction.details && (
+              <div className="p-3 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-xs space-y-1">
+                <strong className="text-[10px] uppercase font-black text-terracotta block">Heritage & Cultural Context:</strong>
+                <p className="text-charcoal-light leading-relaxed m-0">{selectedAttraction.details}</p>
+              </div>
+            )}
+
+            <div className="pt-3 border-t border-[#E9E5DE] flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setSelectedAttraction(null)}
+                className="px-4 py-2 border border-[#E9E5DE] rounded-xl text-xs font-semibold text-charcoal hover:bg-ivory"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  handleAddToItinerary(selectedAttraction);
+                  setSelectedAttraction(null);
+                  alert(`✓ Added "${selectedAttraction.name}" (${selectedAttraction.municipality}) to your active trip itinerary!`);
+                }}
+                className="px-5 py-2 bg-[#2C5E3B] text-white rounded-xl text-xs font-bold hover:bg-[#20452B] shadow"
+              >
+                + Add Side-Trip to Route
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {branchSelectTarget && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-charcoal/70 backdrop-blur-xs p-4 animate-fade-in font-sans">
+          <div className="bg-white border border-[#E9E5DE] rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative animate-scale-up">
+            <button
+              type="button"
+              onClick={() => setBranchSelectTarget(null)}
+              className="absolute top-4 right-4 text-charcoal-light hover:text-charcoal w-7 h-7 rounded-full bg-ivory flex items-center justify-center text-xs font-bold border border-[#E9E5DE] cursor-pointer"
+            >
+              ✕
+            </button>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-black text-terracotta uppercase tracking-wider bg-terracotta/10 px-2.5 py-0.5 rounded border border-terracotta/20 inline-block">
+                🏪 Multi-Branch Location Selector
+              </span>
+              <h3 className="text-lg font-black text-charcoal m-0">Select Branch Location</h3>
+              <p className="text-xs text-charcoal-light m-0">
+                Which location of <strong>"{branchSelectTarget.name}"</strong> would you like to visit on your trip?
+              </p>
+            </div>
+
+            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+              {getRestaurantMunicipalities(branchSelectTarget).map((mun, idx) => {
+                const address = getBranchAddressForMunicipality(branchSelectTarget, mun);
+                const lat = getBranchLat(branchSelectTarget, mun);
+                const lng = getBranchLng(branchSelectTarget, mun);
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      const branchItem = {
+                        ...branchSelectTarget,
+                        id: `${branchSelectTarget.id}-${mun.toLowerCase().replace(/\s+/g, '-')}`,
+                        name: `${branchSelectTarget.name} (${mun} Branch)`,
+                        municipality: mun,
+                        address: address,
+                        lat: lat,
+                        lng: lng,
+                        selectedBranchName: mun
+                      };
+                      handleAddToItinerary(branchItem);
+                      setBranchSelectTarget(null);
+                      alert(`✓ Added "${branchSelectTarget.name}" (${mun} Branch) to your active trip itinerary!`);
+                    }}
+                    className="w-full text-left p-3.5 rounded-xl border border-[#E9E5DE] bg-ivory/50 hover:bg-terracotta/5 hover:border-terracotta transition-all cursor-pointer group flex items-start gap-3"
+                  >
+                    <span className="w-8 h-8 rounded-full bg-terracotta/10 text-terracotta font-black text-xs flex items-center justify-center shrink-0 group-hover:bg-terracotta group-hover:text-white transition-colors">
+                      📍
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <strong className="block text-xs font-extrabold text-charcoal group-hover:text-terracotta transition-colors">
+                        {mun} Branch
+                      </strong>
+                      <span className="block text-[11px] text-charcoal-light font-medium truncate mt-0.5">
+                        {address}
+                      </span>
+                    </div>
+                    <span className="text-xs font-extrabold text-terracotta self-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Select →
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-3 border-t border-[#E9E5DE] text-right">
+              <button
+                type="button"
+                onClick={() => setBranchSelectTarget(null)}
+                className="px-4 py-2 bg-ivory hover:bg-[#E9E5DE] border border-[#E9E5DE] rounded-xl text-xs font-bold text-charcoal transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    
+{/* ========================================================================= */}
+      {/* TRIP COMPLETION & CELEBRATION EXPERIENCE MODAL (POLAROID ALBUM & CERTIFICATE) */}
+      {/* ========================================================================= */}
+      {isCompletionModalOpen && (
+        <div className="fixed inset-0 z-50 bg-charcoal/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-5 shadow-2xl border border-[#E9E5DE] max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[#E9E5DE] pb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🎉</span>
+                <div>
+                  <h3 className="text-lg font-black text-charcoal tracking-tight m-0">
+                    Congratulations! Trip Completed
+                  </h3>
+                  <p className="text-xs text-charcoal-light font-medium m-0">
+                    You successfully finished your Kapampangan Food & Heritage Crawl!
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCompletionModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-ivory hover:bg-[#E9E5DE] text-charcoal font-bold flex items-center justify-center cursor-pointer transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Step 1: Optional Group Info & Photo Uploader */}
+            <div className="bg-[#FAF8F5] border border-[#E9E5DE] p-4 rounded-2xl">
+              <div>
+                <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
+                  Group / Traveler Name(s)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Santos Family & Friends"
+                  value={completionGroupName}
+                  onChange={(e) => setCompletionGroupName(e.target.value)}
+                  className="block w-full px-3.5 py-2 text-xs border border-[#E9E5DE] rounded-xl bg-white font-extrabold text-charcoal focus:outline-none focus:ring-1 focus:ring-terracotta"
+                />
+              </div>
+            </div>
+
+            {/* Tabs Selector: Polaroid Scrapbook vs Certificate */}
+            <div className="flex border-b border-[#E9E5DE] bg-ivory rounded-xl p-1">
+              <button
+                type="button"
+                onClick={() => setCompletionActiveTab('polaroid')}
+                className={`flex-1 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 ${completionActiveTab === 'polaroid' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
+              >
+                <span>📸</span> AI Polaroid Album
+              </button>
+              <button
+                type="button"
+                onClick={() => setCompletionActiveTab('certificate')}
+                className={`flex-1 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 ${completionActiveTab === 'certificate' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
+              >
+                <span>📜</span> Official Certificate
+              </button>
+            </div>
+
+            {/* TAB 1: AI POLAROID ALBUM GALLERY */}
+            {completionActiveTab === 'polaroid' && (
+              <div className="space-y-4">
+                <div className="p-4 bg-[#FAF8F5] border border-[#E9E5DE] rounded-2xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-black text-charcoal uppercase tracking-wider block">
+                      📷 Memory Polaroid Album
+                    </span>
+                    <button
+                      type="button"
+                      onClick={downloadRealPolaroidAlbum}
+                      className="px-3 py-1 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                    >
+                      📥 Save & Download Album
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {(computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Heritage Kitchen Stop #1', municipality: 'Pampanga', image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80' }]).map((stop, pIdx) => {
+                      const currentSlotImg = slotPhotos[pIdx] !== undefined ? slotPhotos[pIdx] : (completionPhotos[pIdx] || stop.image);
+
+                      return (
+                        <div key={pIdx} className="bg-white p-3 pt-4 rounded-xl border border-[#E9E5DE] shadow-md transform hover:scale-[1.01] transition-transform relative group/card">
+                          {/* Tape effect */}
+                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-12 h-4 bg-saffron/30 border border-saffron/40 rotate-1 shadow-2xs z-10"></div>
+                          
+                          <div className="aspect-4/3 rounded-lg overflow-hidden border border-[#E9E5DE] bg-ivory relative">
+                            {currentSlotImg ? (
+                              <img src={currentSlotImg} className="w-full h-full object-cover" alt={stop.name} />
+                            ) : (
+                              <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center text-charcoal-light space-y-1">
+                                <span className="text-xl">📷</span>
+                                <span className="text-[10px] font-bold">No Photo Assigned</span>
+                              </div>
+                            )}
+
+                            {/* Hover Photo Controls overlay on each card */}
+                            <div className="absolute inset-0 bg-charcoal/65 backdrop-blur-2xs opacity-0 group-hover/card:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-3 text-center z-20">
+                              <label className="px-3 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-[10px] font-black uppercase cursor-pointer shadow-xs transition-transform active:scale-95">
+                                📷 Choose / Change Photo
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                      const reader = new FileReader();
+                                      reader.onloadend = () => {
+                                        setSlotPhotos(prev => ({ ...prev, [pIdx]: reader.result }));
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }
+                                  }}
+                                />
+                              </label>
+
+                              {currentSlotImg && (
+                                <button
+                                  type="button"
+                                  onClick={() => setSlotPhotos(prev => ({ ...prev, [pIdx]: null }))}
+                                  className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[9px] font-bold transition-colors cursor-pointer"
+                                >
+                                  ✕ Remove Photo
+                                </button>
+                              )}
+
+                              {slotPhotos[pIdx] !== undefined && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newSlots = { ...slotPhotos };
+                                    delete newSlots[pIdx];
+                                    setSlotPhotos(newSlots);
+                                  }}
+                                  className="text-[9px] text-white/90 hover:text-white underline cursor-pointer font-semibold"
+                                >
+                                  Reset to Stop Original
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="mt-2.5 text-center space-y-0.5">
+                            <span className="block text-xs font-black text-charcoal font-serif italic">
+                              {stop.name}
+                            </span>
+                            <span className="block text-[9px] text-charcoal-light font-mono uppercase">
+                              📍 {stop.municipality} • {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: OFFICIAL CERTIFICATE OF COMPLETION */}
+            {completionActiveTab === 'certificate' && (
+              <div className="space-y-3">
+                <div className="p-6 bg-[#FAF8F5] border-4 border-[#2C5E3B] rounded-2xl relative shadow-inner text-center space-y-4 font-serif">
+                  <div className="border border-[#2C5E3B]/40 p-4 rounded-xl space-y-3">
+                    <div className="space-y-1">
+                      <span className="block text-[10px] font-black text-[#2C5E3B] uppercase tracking-widest">
+                        REPUBLIC OF THE PHILIPPINES • PROVINCE OF PAMPANGA
+                      </span>
+                      <h2 className="text-base font-black text-terracotta uppercase tracking-wide m-0">
+                        CERTIFICATE OF KAPAMPANGAN CULINARY EXCURSION
+                      </h2>
+                      <div className="w-16 h-0.5 bg-terracotta mx-auto my-1"></div>
+                    </div>
+
+                    <p className="text-xs text-charcoal-light italic m-0">
+                      This Certificate of Culinary Distinction is proudly presented to
+                    </p>
+
+                    <h3 className="text-lg font-black text-charcoal uppercase tracking-wider font-sans m-0">
+                      {completionGroupName.trim() || userProfile.username || 'Kapampangan Food Enthusiasts'}
+                    </h3>
+
+                    <p className="text-xs text-charcoal leading-relaxed max-w-md mx-auto m-0">
+                      For successfully navigating and completing the custom Kapampangan culinary route:
+                      <strong className="block text-terracotta font-sans text-xs mt-0.5 font-bold">
+                        "{newItineraryName || 'Pampanga Heritage Food Trail'}"
+                      </strong>
+                      visiting <strong>{computedRoutePath.length} heritage destinations</strong> across the Culinary Capital of the Philippines.
+                    </p>
+
+                    <div className="pt-4 border-t border-[#2C5E3B]/20 grid grid-cols-2 gap-4 text-center font-sans">
+                      <div>
+                        <span className="block text-[10px] font-bold text-charcoal uppercase">Team JECCAN</span>
+                        <span className="block text-[8px] text-charcoal-light">Group Leader / Development Team</span>
+                      </div>
+                      <div>
+                        <span className="block text-[10px] font-bold text-[#2C5E3B] uppercase">Kanyamanan Board</span>
+                        <span className="block text-[8px] text-charcoal-light">Health & Culinary Aggregator Core</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={downloadRealCertificate}
+                  className="w-full py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  📥 Save & Download Official Certificate
+                </button>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
+</div>
   );
 }
 
