@@ -1232,12 +1232,73 @@ function App() {
   };
 
   const handleLoadSavedItinerary = (itin) => {
-    const matchedRestaurants = itin.stops.map(stopName => 
-      restaurants.find(r => r.name === stopName)
-    ).filter(Boolean);
-    setActiveTrip(matchedRestaurants);
+    if (!itin || !itin.stops) return;
+
+    const matchedStops = itin.stops.map(stop => {
+      if (typeof stop === 'object' && stop !== null) return stop;
+
+      const stopNameStr = String(stop).trim();
+      const normalize = (str) => String(str || '').toLowerCase().replace(/santo|santa/g, 'san').replace(/[^a-z0-9]/g, '');
+
+      // 1. Exact or normalized name match in restaurants
+      let match = restaurants.find(r => 
+        r.name === stopNameStr || 
+        r.id === stopNameStr ||
+        normalize(r.name) === normalize(stopNameStr)
+      );
+
+      // 2. Exact or normalized name match in attractions
+      if (!match) {
+        match = attractions.find(a => 
+          a.name === stopNameStr || 
+          a.id === stopNameStr ||
+          normalize(a.name) === normalize(stopNameStr)
+        );
+      }
+
+      // 3. Partial substring match in restaurants
+      if (!match) {
+        match = restaurants.find(r => 
+          r.name.toLowerCase().includes(stopNameStr.toLowerCase()) || 
+          stopNameStr.toLowerCase().includes(r.name.toLowerCase())
+        );
+      }
+
+      // 4. Partial substring match in attractions
+      if (!match) {
+        match = attractions.find(a => 
+          a.name.toLowerCase().includes(stopNameStr.toLowerCase()) || 
+          stopNameStr.toLowerCase().includes(a.name.toLowerCase())
+        );
+      }
+
+      // 5. Fallback object if not found by exact string
+      if (!match) {
+        match = {
+          id: 'custom-' + stopNameStr.replace(/\s+/g, '-').toLowerCase(),
+          name: stopNameStr,
+          municipality: 'Pampanga',
+          corridor: 'Pampanga Tourism Line',
+          image: '/attractions/media_.png',
+          operatingHours: '08:00 AM - 08:00 PM',
+          priceTier: '$',
+          menu: []
+        };
+      }
+      return match;
+    }).filter(Boolean);
+
+    setActiveTrip(matchedStops);
     setDashboardTab('planner');
-    alert(`Loaded "${itin.name}" into active itinerary. You can now track your GPS or simulate navigation!`);
+
+    setTimeout(() => {
+      const plannerEl = document.getElementById('food-trip-planner-section');
+      if (plannerEl) {
+        plannerEl.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 300, behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const handleDeleteItinerary = (itinId, e) => {
@@ -4281,30 +4342,30 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     </button>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-3.5">
                   {savedItineraries.map(itin => (
                     <div
                       key={itin.id}
                       onClick={() => handleLoadSavedItinerary(itin)}
-                      className={`p-4 border rounded-xl text-left space-y-2 transition-all cursor-pointer group/itin relative ${
+                      className={`p-4 border rounded-xl text-left space-y-3 transition-all cursor-pointer group/itin relative shadow-sm hover:shadow-md ${
                         itin.isFinished 
-                          ? 'bg-[#FAF8F5]/60 border-[#E9E5DE] opacity-75' 
-                          : 'bg-[#FAF8F5] border-[#E9E5DE] hover:border-terracotta/20 hover:bg-white'
+                          ? 'bg-[#FAF8F5]/60 border-[#E9E5DE] opacity-80 hover:border-terracotta/40' 
+                          : 'bg-[#FAF8F5] border-[#E9E5DE] hover:border-terracotta hover:bg-white'
                       }`}
                       title="Click to load and execute this plan"
                     >
                       <div className="flex justify-between items-start gap-2">
                         <div className="flex-1 min-w-0">
-                          <span className={`text-xs font-black block truncate ${itin.isFinished ? 'text-charcoal-light line-through' : 'text-charcoal group-hover/itin:text-terracotta transition-colors'}`}>
+                          <span className={`text-sm font-black block truncate ${itin.isFinished ? 'text-charcoal-light line-through' : 'text-charcoal group-hover/itin:text-terracotta transition-colors'}`}>
                             {itin.name}
                           </span>
                           {itin.isFinished ? (
-                            <span className="inline-flex items-center gap-1 mt-0.5 text-[9px] font-extrabold text-bananaleaf animate-fade-in">
+                            <span className="inline-flex items-center gap-1 mt-0.5 text-[10px] font-extrabold text-bananaleaf animate-fade-in">
                               ✓ Finished Trip
                             </span>
                           ) : (
-                            <span className="text-[9px] text-charcoal-light font-bold">
-                              Active Plan
+                            <span className="text-[10px] text-charcoal-light font-bold">
+                              Active Plan • {itin.stops?.length || 0} Stops
                             </span>
                           )}
                         </div>
@@ -4313,33 +4374,53 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           <button
                             type="button"
                             onClick={(e) => handleToggleFinishItinerary(itin.id, e)}
-                            className={`p-1 rounded transition-colors ${
+                            className={`p-1.5 rounded-lg transition-colors ${
                               itin.isFinished 
                                 ? 'text-bananaleaf hover:bg-bananaleaf/10' 
                                 : 'text-charcoal-light hover:text-bananaleaf hover:bg-bananaleaf/5'
                             }`}
                             title={itin.isFinished ? "Mark as Active" : "Mark as Finished"}
                           >
-                            <CheckCircle className={`h-4 w-4 ${itin.isFinished ? 'fill-bananaleaf/10' : ''}`} />
+                            <CheckCircle className={`h-4.5 w-4.5 ${itin.isFinished ? 'fill-bananaleaf/10' : ''}`} />
                           </button>
 
                           <button
                             type="button"
                             onClick={(e) => handleDeleteItinerary(itin.id, e)}
-                            className="p-1 rounded text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 transition-colors"
+                            className="p-1.5 rounded-lg text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 transition-colors"
                             title="Delete Route"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4.5 w-4.5" />
                           </button>
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-1.5 pt-1">
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">
                         {itin.stops.map((stop, idx) => (
-                          <span key={idx} className={`text-[9px] px-2 py-0.5 rounded border border-[#E9E5DE] ${itin.isFinished ? 'bg-white/50 text-gray-400' : 'bg-white/90'}`}>
-                            {stop}
+                          <span 
+                            key={idx} 
+                            className={`text-[10px] px-2.5 py-1 rounded-md border font-semibold transition-all ${
+                              itin.isFinished 
+                                ? 'bg-white/50 text-gray-400 border-gray-200' 
+                                : 'bg-white text-charcoal border-[#E9E5DE] group-hover/itin:border-terracotta/30'
+                            }`}
+                          >
+                            {typeof stop === 'object' ? stop.name : stop}
                           </span>
                         ))}
+                      </div>
+
+                      <div className="pt-1 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLoadSavedItinerary(itin);
+                          }}
+                          className="px-3.5 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 group-hover/itin:bg-terracotta-dark"
+                        >
+                          <Compass className="h-3.5 w-3.5" /> Load & Execute Plan →
+                        </button>
                       </div>
                     </div>
                   ))}
