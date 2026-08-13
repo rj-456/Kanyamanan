@@ -761,10 +761,78 @@ function App() {
     }
   }, [isTrafficCongested]);
 
-  // Route Distance & Duration tracking states
-  const [routeDistanceKm, setRouteDistanceKm] = useState(0);
-  const [routeDurationMin, setRouteDurationMin] = useState(0);
-  const [attractions, setAttractions] = useState(PRESEEDED_ATTRACTIONS);
+  // Persistent Tourist Attractions Database State
+  const [attractions, setAttractions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_attractions_db');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const sanitized = parsed.map((attr, idx) => {
+            if (!attr || typeof attr !== 'object') return null;
+            return {
+              ...attr,
+              id: attr.id || `attr-${Date.now()}-${idx}`,
+              name: attr.name || `Heritage Destination #${idx + 1}`,
+              municipality: attr.municipality || 'City of San Fernando',
+              type: attr.type || '🏛️ Historic Parish Church',
+              description: attr.description || 'Cultural heritage destination in Pampanga.',
+              details: attr.details || attr.description || 'Cultural heritage destination in Pampanga.',
+              image: attr.image || (Array.isArray(attr.images) && attr.images[0]) || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=800&q=80',
+              images: Array.isArray(attr.images) && attr.images.length > 0 ? attr.images : [attr.image || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=800&q=80'],
+              lat: Number(attr.lat) || 15.0300,
+              lng: Number(attr.lng) || 120.6800
+            };
+          }).filter(Boolean);
+
+          if (sanitized.length > 0) {
+            return sanitized;
+          }
+        }
+      }
+    } catch (e) {
+      console.error("LocalStorage attractions load error:", e);
+    }
+    return PRESEEDED_ATTRACTIONS;
+  });
+
+  // Persistent localStorage synchronization effect for live attractions updates
+  useEffect(() => {
+    try {
+      localStorage.setItem('kanyamanan_attractions_db', JSON.stringify(attractions));
+    } catch (e) {
+      console.error("LocalStorage attractions save error:", e);
+    }
+  }, [attractions]);
+
+  // Live Cross-Tab & Storage Sync Listener for attractions
+  useEffect(() => {
+    const handleAttractionsStorage = (e) => {
+      if (e.key === 'kanyamanan_attractions_db' && e.newValue) {
+        try {
+          const updated = JSON.parse(e.newValue);
+          if (Array.isArray(updated) && updated.length > 0) {
+            setAttractions(updated);
+          }
+        } catch (err) {
+          console.error("Attractions storage sync error:", err);
+        }
+      }
+    };
+    window.addEventListener('storage', handleAttractionsStorage);
+    return () => window.removeEventListener('storage', handleAttractionsStorage);
+  }, []);
+
+  // Sync open attraction detail modal & active trip when attractions update
+  useEffect(() => {
+    if (selectedAttraction) {
+      const match = attractions.find(a => a.id === selectedAttraction.id);
+      if (match) {
+        setSelectedAttraction(match);
+      }
+    }
+  }, [attractions]);
+
   const [attractionMunFilter, setAttractionMunFilter] = useState('All');
   const [attractionTypeFilter, setAttractionTypeFilter] = useState('All');
   const [selectedAttraction, setSelectedAttraction] = useState(null);
@@ -1890,13 +1958,15 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
   const startAdminAttractionEdit = (attr) => {
     if (!attr) return;
     setAdminEditingAttractionId(attr.id);
+    const existingImgs = Array.isArray(attr.images) && attr.images.length > 0 ? attr.images : (attr.image ? [attr.image] : []);
     setAdminAttractionForm({
       name: attr.name || '',
       municipality: attr.municipality || 'City of San Fernando',
       type: attr.type || '🏛️ Historic Parish Church',
       description: attr.description || '',
-      details: attr.details || '',
-      image: attr.image || '',
+      details: attr.details || attr.description || '',
+      image: attr.image || (existingImgs[0] || ''),
+      images: existingImgs,
       lat: attr.lat || 15.0300,
       lng: attr.lng || 120.6800
     });
@@ -1906,27 +1976,54 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
   // Save/Update Tourist Attraction in Admin portal
   const handleSaveAdminAttraction = (e) => {
-    e.preventDefault();
-    if (!adminAttractionForm.name.trim()) return;
+    if (e && e.preventDefault) e.preventDefault();
+    const nameToSave = (adminAttractionForm.name || '').trim();
+    if (!nameToSave) {
+      alert("Please enter a Tourist Destination Name before saving.");
+      return;
+    }
+
+    const primaryImg = adminAttractionForm.image || (adminAttractionForm.images && adminAttractionForm.images[0]) || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=800&q=80';
+    const imagesToSave = adminAttractionForm.images && adminAttractionForm.images.length > 0 ? adminAttractionForm.images : [primaryImg];
+
+    const updatedAttrObj = {
+      name: nameToSave,
+      municipality: adminAttractionForm.municipality || 'City of San Fernando',
+      type: adminAttractionForm.type || '🏛️ Historic Parish Church',
+      description: adminAttractionForm.description || '',
+      details: adminAttractionForm.details || adminAttractionForm.description || '',
+      image: primaryImg,
+      images: imagesToSave,
+      lat: Number(adminAttractionForm.lat) || 15.0300,
+      lng: Number(adminAttractionForm.lng) || 120.6800
+    };
 
     if (adminEditingAttractionId) {
-      setAttractions(prev => prev.map(a => {
-        if (a.id === adminEditingAttractionId) {
-          return {
-            ...a,
-            ...adminAttractionForm
-          };
-        }
-        return a;
-      }));
-      alert(`✓ Successfully updated tourist attraction "${adminAttractionForm.name}"!`);
+      const confirmSave = window.confirm(`Are you sure you want to save changes for tourist destination "${nameToSave}"?`);
+      if (!confirmSave) return;
+
+      const updatedAttrFull = { id: adminEditingAttractionId, ...updatedAttrObj };
+      setAttractions(prev => prev.map(a => a.id === adminEditingAttractionId ? updatedAttrFull : a));
+
+      if (selectedAttraction && selectedAttraction.id === adminEditingAttractionId) {
+        setSelectedAttraction(updatedAttrFull);
+      }
+
+      if (activeTrip && activeTrip.length > 0) {
+        setActiveTrip(prevTrip => prevTrip.map(item => item.id === adminEditingAttractionId ? { ...item, ...updatedAttrFull } : item));
+      }
+
+      alert(`✅ Update Saved!\n\nThe tourist destination "${nameToSave}" has been successfully updated and published live.`);
     } else {
+      const confirmSave = window.confirm(`Are you sure you want to register and publish new tourist destination "${nameToSave}" live?`);
+      if (!confirmSave) return;
+
       const newAttr = {
         id: `attr-${Date.now()}`,
-        ...adminAttractionForm
+        ...updatedAttrObj
       };
-      setAttractions([newAttr, ...attractions]);
-      alert(`✓ Successfully registered new tourist destination "${newAttr.name}"!`);
+      setAttractions(prev => [newAttr, ...prev]);
+      alert(`✅ Destination Registered!\n\nThe new tourist destination "${nameToSave}" has been published live.`);
     }
 
     setAdminEditingAttractionId(null);
@@ -1937,6 +2034,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       description: '',
       details: '',
       image: '',
+      images: [],
       lat: 15.0300,
       lng: 120.6800
     });
@@ -3920,7 +4018,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           onChange={(e) => setAttractionMunFilter(e.target.value)}
                           className="w-full px-3 py-2 text-xs border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] font-bold focus:outline-none focus:bg-white"
                         >
-                          <option value="All">All Municipalities & Cities ({PRESEEDED_ATTRACTIONS.length} Heritage Sites)</option>
+                          <option value="All">All Municipalities & Cities ({attractions.length} Heritage Sites)</option>
                           {MUNICIPALITIES.map(mun => (
                             <option key={mun} value={mun}>📍 {mun}</option>
                           ))}
