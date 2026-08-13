@@ -823,6 +823,10 @@ function App() {
     return () => window.removeEventListener('storage', handleAttractionsStorage);
   }, []);
 
+  const [attractionMunFilter, setAttractionMunFilter] = useState('All');
+  const [attractionTypeFilter, setAttractionTypeFilter] = useState('All');
+  const [selectedAttraction, setSelectedAttraction] = useState(null);
+
   // Sync open attraction detail modal & active trip when attractions update
   useEffect(() => {
     if (selectedAttraction) {
@@ -832,10 +836,6 @@ function App() {
       }
     }
   }, [attractions]);
-
-  const [attractionMunFilter, setAttractionMunFilter] = useState('All');
-  const [attractionTypeFilter, setAttractionTypeFilter] = useState('All');
-  const [selectedAttraction, setSelectedAttraction] = useState(null);
 
   // OSRM Road Routing Fetch Effect with Live Distance & Duration Calculation
   useEffect(() => {
