@@ -1152,8 +1152,8 @@ function App() {
   const municipalityCounts = useMemo(() => {
     const counts = {};
     MUNICIPALITIES.forEach(m => {
-      counts[m] = restaurants.filter(r => 
-        r.municipality === m || (Array.isArray(r.branches) && r.branches.some(b => (typeof b === 'string' ? b : b.municipality) === m))
+      counts[m] = (restaurants || []).filter(r => 
+        r && (r.municipality === m || (Array.isArray(r.branches) && r.branches.some(b => b && (typeof b === 'string' ? b === m : b.municipality === m))))
       ).length;
     });
     return counts;
@@ -1161,15 +1161,21 @@ function App() {
 
   // Filtered Restaurant Feed
   const filteredRestaurants = useMemo(() => {
-    return restaurants.filter(res => {
-      const matchesSearch = res.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        res.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        res.menu.some(dish => dish.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    const q = (searchQuery || '').toLowerCase().trim();
+    return (restaurants || []).filter(res => {
+      if (!res || typeof res !== 'object') return false;
 
+      const resName = (res.name || '').toLowerCase();
+      const resDesc = (res.description || '').toLowerCase();
+      const matchesMenu = Array.isArray(res.menu) && res.menu.some(dish => 
+        dish && (dish.name || '').toLowerCase().includes(q)
+      );
+
+      const matchesSearch = !q || resName.includes(q) || resDesc.includes(q) || matchesMenu;
       const matchesCorridor = selectedCorridor === 'All' || res.corridor === selectedCorridor;
       const matchesMunicipality = selectedMunicipality === 'All' || 
         res.municipality === selectedMunicipality ||
-        (Array.isArray(res.branches) && res.branches.some(b => (typeof b === 'string' ? b : b.municipality) === selectedMunicipality));
+        (Array.isArray(res.branches) && res.branches.some(b => b && (typeof b === 'string' ? b === selectedMunicipality : b.municipality === selectedMunicipality)));
 
       return matchesSearch && matchesCorridor && matchesMunicipality;
     });
