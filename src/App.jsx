@@ -176,8 +176,101 @@ function App() {
     budgetLimit: 1500
   });
 
-  // Local state restaurants database
-  const [restaurants, setRestaurants] = useState(PRESEEDED_RESTAURANTS);
+  // Local state restaurants database with 100% unique usernames & permanent frontend-backend persistence
+  const [restaurants, setRestaurants] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_restaurants_db');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const sanitized = parsed.map((res, idx) => {
+            if (!res || typeof res !== 'object') return null;
+            return {
+              ...res,
+              id: res.id || `res-${Date.now()}-${idx}`,
+              name: res.name || `Heritage Kitchen #${idx + 1}`,
+              municipality: res.municipality || 'City of San Fernando',
+              corridor: res.corridor || 'MacArthur Highway Line',
+              operatingHours: res.operatingHours || '09:00 AM - 09:00 PM',
+              priceTier: res.priceTier || '$',
+              branches: Array.isArray(res.branches) && res.branches.length > 0 ? res.branches : [{ branchName: `${res.name || 'Restaurant'} (Main Branch)`, municipality: res.municipality || 'City of San Fernando', address: res.address || 'Pampanga', operatingHours: res.operatingHours || '09:00 AM - 09:00 PM', lat: res.lat || 15.0300, lng: res.lng || 120.6800 }],
+              menu: Array.isArray(res.menu) && res.menu.length > 0 ? res.menu : [{ id: `menu-${idx}-0`, name: 'Signature Sisig', price: 250, ingredients: 'Grilled pork snout, calamansi, onions', allergens: 'Contains Pork', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80', healthIndicators: 'Moderate Calorie', nutrition: { calories: 450, protein: 25, carbs: 10, fat: 35 } }],
+              username: res.username || `${(res.name || 'res').toLowerCase().replace(/[^a-z0-9]/g, '_')}_owner`,
+              password: res.password || 'password123'
+            };
+          }).filter(Boolean);
+
+          if (sanitized.length > 0) {
+            return sanitized;
+          }
+        }
+      }
+    } catch (e) {
+      console.error("LocalStorage load error:", e);
+    }
+
+    const usedUsernames = new Set();
+    return PRESEEDED_RESTAURANTS.map((res, idx) => {
+      let baseUser = res.username;
+      if (!baseUser || baseUser === 'owner') {
+        baseUser = (res.name || 'restaurant')
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_+|_+$/g, '') + '_owner';
+      }
+      let uniqueUser = baseUser;
+      let counter = 1;
+      while (usedUsernames.has(uniqueUser)) {
+        uniqueUser = `${baseUser}_${counter}`;
+        counter++;
+      }
+      usedUsernames.add(uniqueUser);
+
+      return {
+        ...res,
+        username: uniqueUser,
+        password: res.password || 'password123'
+      };
+    });
+  });
+
+  // Persistent localStorage synchronization effect for live frontend updates
+  useEffect(() => {
+    try {
+      localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(restaurants));
+    } catch (e) {
+      console.error("LocalStorage save error:", e);
+    }
+  }, [restaurants]);
+
+  // Live Cross-Tab & Storage Sync Listener so all open windows get updates
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'kanyamanan_restaurants_db' && e.newValue) {
+        try {
+          const updated = JSON.parse(e.newValue);
+          if (Array.isArray(updated) && updated.length > 0) {
+            setRestaurants(updated);
+          }
+        } catch (err) {
+          console.error("Storage sync error:", err);
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Sync open drawer & active trip when backend updates restaurants state
+  useEffect(() => {
+    if (selectedRestaurant) {
+      const match = restaurants.find(r => r.id === selectedRestaurant.id);
+      if (match) {
+        setSelectedRestaurant(match);
+      }
+    }
+  }, [restaurants]);
 
   // Search & Filtering States
   const [searchQuery, setSearchQuery] = useState('');
@@ -578,6 +671,7 @@ function App() {
 
   // Admin states
   const [adminSelectedMunicipality, setAdminSelectedMunicipality] = useState('All');
+  const [adminSearchQuery, setAdminSearchQuery] = useState('');
   const [adminEditingId, setAdminEditingId] = useState(null);
   const [adminForm, setAdminForm] = useState({
     name: '',
@@ -1370,7 +1464,7 @@ function App() {
     setAdminLoginError('');
 
     if (adminLoginType === 'superadmin') {
-      if (adminLoginUser === 'admin' && adminLoginPass === 'admin123') {
+      if (adminLoginUser.trim() === 'admin' && adminLoginPass === 'admin123') {
         setAdminRole('superadmin');
         setIsAdminAuthenticated(true);
         setAdminLoginUser('');
@@ -1379,18 +1473,20 @@ function App() {
         setAdminLoginError('Invalid Administrator credentials. (Use username "admin" and password "admin123")');
       }
     } else {
-      if (adminLoginPass === 'merchant123') {
-        const exists = restaurants.find(r => r.id === merchantResId);
-        if (exists) {
-          setAdminRole('merchant');
-          setIsAdminAuthenticated(true);
-          setAdminLoginUser('');
-          setAdminLoginPass('');
-        } else {
-          setAdminLoginError('Selected restaurant is invalid or not registered.');
-        }
+      // Authenticate Restaurant Owner using assigned username & password
+      const matchedRes = restaurants.find(r => 
+        (r.username || 'owner').trim().toLowerCase() === adminLoginUser.trim().toLowerCase() &&
+        (r.password || 'password123') === adminLoginPass
+      );
+
+      if (matchedRes) {
+        setAdminRole('merchant');
+        setMerchantResId(matchedRes.id);
+        setIsAdminAuthenticated(true);
+        setAdminLoginUser('');
+        setAdminLoginPass('');
       } else {
-        setAdminLoginError('Invalid Merchant Passkey. (Use passkey "merchant123")');
+        setAdminLoginError('Invalid Username or Password for Restaurant Owner account. Check the assigned credentials in the System Admin database.');
       }
     }
   };
@@ -1564,16 +1660,40 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
   };
 
   const handleSaveAdminListing = (e) => {
-    e.preventDefault();
-    if (!adminForm.name) return;
+    if (e && e.preventDefault) e.preventDefault();
+
+    const nameToSave = (adminForm.name || '').trim();
+    if (!nameToSave) {
+      alert("Please enter a Restaurant Establishment Name before saving.");
+      return;
+    }
+
+    const usernameToSave = (adminForm.username || '').trim().toLowerCase();
+    if (!usernameToSave) {
+      alert("Please enter a Merchant Account Username.");
+      return;
+    }
+
+    const passwordToSave = adminForm.password || 'password123';
+
+    // Strict Unique Username Validation Check
+    const duplicateUser = restaurants.find(r => 
+      r.id !== adminEditingId && 
+      (r.username || '').trim().toLowerCase() === usernameToSave
+    );
+
+    if (duplicateUser) {
+      alert(`⚠️ Duplicate Username Blocked!\n\nThe username "${usernameToSave}" is already assigned to "${duplicateUser.name}".\n\nPlease enter a unique username for this restaurant.`);
+      return;
+    }
 
     const formattedMenu = adminDishes
-      .filter(d => d.name.trim())
+      .filter(d => d.name && d.name.trim())
       .map((d, i) => ({
         id: 'menu-' + Date.now() + '-' + i,
-        name: d.name,
+        name: d.name.trim(),
         price: Number(d.price) || 100,
-        ingredients: d.ingredients,
+        ingredients: d.ingredients || 'Local Kapampangan ingredients',
         allergens: d.allergens || 'None',
         image: d.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80',
         healthIndicators: Number(d.calories) > 500 ? '⚠️ High Calories' : '🟢 Healthy Choice',
@@ -1585,97 +1705,123 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
     if (adminEditingId) {
       const originalRes = restaurants.find(r => r.id === adminEditingId);
+
+      const updatedBranches = adminBranches.length > 0 ? adminBranches.map((b, idx) => ({
+        branchName: b.branchName || `${nameToSave} Branch #${idx + 1}`,
+        municipality: b.municipality || adminForm.municipality || 'City of San Fernando',
+        address: b.address || adminForm.address || 'Pampanga',
+        operatingHours: b.operatingHours || adminForm.operatingHours || '09:00 AM - 09:00 PM',
+        lat: b.lat || 15.0300,
+        lng: b.lng || 120.6800
+      })) : (originalRes ? originalRes.branches : []);
+
+      const primaryBranch = updatedBranches && updatedBranches[0];
+
+      const updatedResObj = {
+        ...(originalRes || {}),
+        id: adminEditingId,
+        name: nameToSave,
+        municipality: primaryBranch?.municipality || adminForm.municipality || originalRes?.municipality || 'City of San Fernando',
+        operatingHours: primaryBranch?.operatingHours || adminForm.operatingHours || originalRes?.operatingHours || '09:00 AM - 09:00 PM',
+        priceTier: adminForm.priceTier || originalRes?.priceTier || '$',
+        address: primaryBranch?.address || adminForm.address || originalRes?.address || '',
+        image: adminForm.image || (adminForm.images && adminForm.images[0]) || originalRes?.image || '',
+        images: adminForm.images && adminForm.images.length > 0 ? adminForm.images : (adminForm.image ? [adminForm.image] : originalRes?.images || []),
+        description: adminForm.description || originalRes?.description || 'Heritage Kitchen in Pampanga',
+        branches: updatedBranches,
+        username: usernameToSave,
+        password: passwordToSave,
+        menu: formattedMenu.length > 0 ? formattedMenu : originalRes?.menu || []
+      };
+
+      // --- RESTAURANT OWNER WORKFLOW (Requires System Admin Approval) ---
       if (adminRole === 'merchant') {
+        const confirmSave = window.confirm(`Are you sure you want to submit profile changes for "${nameToSave}" to the System Administrator for vetting?`);
+        if (!confirmSave) return;
+
         const changes = {};
         const original = {};
 
-        if (originalRes.operatingHours !== adminForm.operatingHours) {
+        if (originalRes && originalRes.name !== nameToSave) {
+          changes.name = nameToSave;
+          original.name = originalRes.name;
+        }
+        if (originalRes && originalRes.operatingHours !== adminForm.operatingHours) {
           changes.operatingHours = adminForm.operatingHours;
           original.operatingHours = originalRes.operatingHours;
         }
-        if (originalRes.priceTier !== adminForm.priceTier) {
+        if (originalRes && originalRes.priceTier !== adminForm.priceTier) {
           changes.priceTier = adminForm.priceTier;
           original.priceTier = originalRes.priceTier;
         }
-        if (originalRes.description !== adminForm.description) {
+        if (originalRes && originalRes.description !== adminForm.description) {
           changes.description = adminForm.description;
           original.description = originalRes.description;
         }
-        if (originalRes.address !== adminForm.address) {
+        if (originalRes && originalRes.address !== adminForm.address) {
           changes.address = adminForm.address;
           original.address = originalRes.address;
         }
-        if (originalRes.image !== adminForm.image) {
+        if (originalRes && originalRes.image !== adminForm.image) {
           changes.image = adminForm.image;
           original.image = originalRes.image;
         }
         if (formattedMenu.length > 0) {
           changes.menu = formattedMenu.map(m => `${m.name} (₱${m.price})`).join(', ');
-          original.menu = originalRes.menu.map(m => `${m.name} (₱${m.price})`).join(', ');
-        }
-
-        if (Object.keys(changes).length === 0) {
-          alert("No changes detected in your profile settings.");
-          setAdminEditingId(null);
-          return;
+          original.menu = (originalRes?.menu || []).map(m => `${m.name} (₱${m.price})`).join(', ');
         }
 
         const newApprovalRequest = {
           id: 'appr-' + Date.now(),
-          restaurantId: originalRes.id,
-          restaurantName: originalRes.name,
+          restaurantId: adminEditingId,
+          restaurantName: nameToSave,
           submittedAt: 'Just now',
           original,
-          changes,
-          fullUpdatedRes: {
-            ...originalRes,
-            name: adminForm.name,
-            municipality: adminForm.municipality,
-            operatingHours: adminForm.operatingHours,
-            priceTier: adminForm.priceTier,
-            address: adminForm.address,
-            image: adminForm.image || originalRes.image,
-            images: adminForm.images && adminForm.images.length > 0 ? adminForm.images : originalRes.images || [],
-            description: adminForm.description,
-            menu: formattedMenu.length > 0 ? formattedMenu : originalRes.menu
-          }
+          changes: Object.keys(changes).length > 0 ? changes : { profile: 'Updated profile details' },
+          fullUpdatedRes: updatedResObj
         };
 
-        setPendingApprovals([newApprovalRequest, ...pendingApprovals]);
+        setPendingApprovals(prev => [newApprovalRequest, ...prev.filter(a => a.restaurantId !== adminEditingId)]);
+
         setAdminEditingId(null);
-        alert("Your profile modifications have been sent to the Admin Registry for vetting. Changes will go live once verified by the provincial administrator.");
-        
         setAdminForm({
           name: '', municipality: 'City of San Fernando',
           operatingHours: '09:00 AM - 09:00 PM', priceTier: '$$',
-          address: '', image: '', images: [], description: ''
+          address: '', image: '', images: [], description: '', username: '', password: ''
         });
+        setAdminBranches([]);
         setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
+
+        alert(`📋 Profile Changes Submitted!\n\nYour profile modifications for "${nameToSave}" have been submitted for administrator vetting. They will go live once reviewed and approved by the System Admin.`);
         return;
       }
 
-      setRestaurants(restaurants.map(res => {
-        if (res.id === adminEditingId) {
-          return {
-            ...res,
-            name: adminForm.name,
-            municipality: adminForm.municipality,
-            operatingHours: adminForm.operatingHours,
-            priceTier: adminForm.priceTier,
-            address: adminForm.address,
-            image: adminForm.image || res.image,
-            images: adminForm.images && adminForm.images.length > 0 ? adminForm.images : res.images || [],
-            description: adminForm.description,
-            branches: adminBranches.length > 0 ? adminBranches : res.branches,
-            username: adminForm.username || res.username || 'owner',
-            password: adminForm.password || res.password || 'password123',
-            menu: formattedMenu.length > 0 ? formattedMenu : res.menu
-          };
-        }
-        return res;
-      }));
+      // --- SYSTEM ADMIN WORKFLOW (Saves Immediately Live - No Approval Needed) ---
+      const confirmSave = window.confirm(`Are you sure you want to save all changes for "${nameToSave}"?`);
+      if (!confirmSave) return;
+
+      setRestaurants(prev => prev.map(res => res.id === adminEditingId ? updatedResObj : res));
+      setAdminSearchQuery('');
+
+      if (selectedRestaurant && selectedRestaurant.id === adminEditingId) {
+        setSelectedRestaurant(updatedResObj);
+      }
+
+      if (activeTrip && activeTrip.length > 0) {
+        setActiveTrip(prevTrip => prevTrip.map(item => item.id === adminEditingId ? { ...item, ...updatedResObj } : item));
+      }
+
       setAdminEditingId(null);
-      alert("Restaurant listing updated successfully.");
+      setAdminForm({
+        name: '', municipality: 'City of San Fernando',
+        operatingHours: '09:00 AM - 09:00 PM', priceTier: '$$',
+        address: '', image: '', images: [], description: '', username: '', password: ''
+      });
+      setAdminBranches([]);
+      setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
+
+      alert(`✅ Update Saved!\n\nThe restaurant information for "${nameToSave}" has been successfully updated and published live.`);
+      return;
     } else {
       const defaultCoord = { lat: 15.0300, lng: 120.6800 };
       if (adminForm.municipality === 'Angeles City') {
@@ -1930,23 +2076,20 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 <div className="space-y-3">
                   <div>
                     <label className="block text-[10px] font-bold text-gray-300 uppercase tracking-wider mb-1">
-                      Select Your Restaurant Listing
+                      Restaurant Account Username
                     </label>
-                    <select
-                      value={merchantResId}
-                      onChange={(e) => setMerchantResId(e.target.value)}
-                      className="block w-full px-3.5 py-2.5 bg-charcoal border border-[#3E3E3E] rounded-xl text-xs text-white focus:outline-none"
-                    >
-                      {restaurants.map(res => (
-                        <option key={res.id} value={res.id}>
-                          🏪 {res.name} ({res.municipality})
-                        </option>
-                      ))}
-                    </select>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. owner or kabigtings_owner"
+                      value={adminLoginUser}
+                      onChange={(e) => setAdminLoginUser(e.target.value)}
+                      className="block w-full px-3.5 py-2.5 bg-charcoal border border-[#3E3E3E] rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-terracotta font-bold"
+                    />
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-gray-300 uppercase tracking-wider mb-1">
-                      Merchant Passkey
+                      Account Password
                     </label>
                     <input
                       type="password"
@@ -1958,7 +2101,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     />
                   </div>
                   <span className="block text-[9px] text-gray-400 font-semibold italic">
-                    💡 Restaurant Owner Passkey: Choose your restaurant and enter passkey "merchant123"
+                    💡 Restaurant Owner Login: Enter your assigned username and password from the System Admin database (e.g. username "owner" and password "password123")
                   </span>
                 </div>
               )}
@@ -2119,15 +2262,27 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     Merchant Owner Panel: {restaurants.find(r => r.id === merchantResId)?.name || "Your Restaurant"}
                   </h3>
                   <p className="text-xs text-charcoal-light max-w-md mx-auto leading-relaxed">
-                    To modify operating hours, coordinates, price levels, or update your signature catalog dishes, click the <b>Edit</b> button in the database listing row below.
+                    To modify operating hours, coordinates, price levels, photos, branches, or update your signature catalog dishes, click the button below or in the database table.
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const targetRes = restaurants.find(r => r.id === merchantResId);
+                      if (targetRes) startAdminEdit(targetRes);
+                    }}
+                    className="mt-2 px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Edit className="h-4 w-4" /> Edit My Restaurant Profile
+                  </button>
                 </div>
               ) : (
                 <div className="bento-card p-6 bg-white space-y-4 shadow-sm border-[#E9E5DE]">
-                  <h3 className="text-sm font-extrabold text-charcoal tracking-tight flex items-center gap-2">
-                    <Plus className="h-4.5 w-4.5 text-terracotta" />
-                    {adminEditingId ? "Modify Registered Heritage Kitchen" : "Register New Heritage Kitchen"}
-                  </h3>
+                  <div className="flex flex-wrap items-center justify-between border-b border-[#E9E5DE] pb-3 gap-2">
+                    <h3 className="text-sm font-extrabold text-charcoal tracking-tight flex items-center gap-2 m-0">
+                      <Plus className="h-4.5 w-4.5 text-terracotta" />
+                      {adminEditingId ? "Modify Registered Heritage Kitchen" : "Register New Heritage Kitchen"}
+                    </h3>
+                  </div>
 
                   <form onSubmit={handleSaveAdminListing} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2137,7 +2292,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         </label>
                         <input
                           type="text"
-                          required
                           placeholder="ex. Everybody's Cafe"
                           name="name"
                           value={adminForm.name}
@@ -2318,7 +2472,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Name</label>
                                 <input
                                   type="text"
-                                  required
                                   placeholder="e.g. SOUQ San Fernando Branch"
                                   value={branch.branchName || ''}
                                   onChange={(e) => {
@@ -2349,7 +2502,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Operating Hours</label>
                                 <input
                                   type="text"
-                                  required
                                   placeholder="e.g. 11:00 AM - 10:00 PM"
                                   value={branch.operatingHours || '09:00 AM - 09:00 PM'}
                                   onChange={(e) => {
@@ -2364,7 +2516,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Exact Address</label>
                                 <input
                                   type="text"
-                                  required
                                   placeholder="e.g. McArthur Highway, Dolores"
                                   value={branch.address || ''}
                                   onChange={(e) => {
@@ -2389,7 +2540,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         </label>
                         <input
                           type="text"
-                          required
                           placeholder="ex. ningnangan_owner"
                           name="username"
                           value={adminForm.username || ''}
@@ -2403,7 +2553,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         </label>
                         <input
                           type="text"
-                          required
                           placeholder="ex. ningnangan123"
                           name="password"
                           value={adminForm.password || ''}
@@ -2419,7 +2568,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       </label>
                       <input
                         type="text"
-                        required
                         placeholder="Describe the lineage, heritage, or cooking philosophy..."
                         name="description"
                         value={adminForm.description}
@@ -2589,7 +2737,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                             <input
                               type="file"
                               accept="image/*"
-                              required={!dish.image}
                               onChange={(e) => {
                                 const file = e.target.files[0];
                                 if (file) {
@@ -2616,30 +2763,40 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     </div>
                   </div>
 
-                  <div className="flex gap-2 justify-end">
-                    {adminEditingId && (
+                  <div className="flex flex-wrap gap-2 justify-end pt-3 border-t border-[#E9E5DE]">
+                    {adminEditingId ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAdminEditingId(null);
+                            setAdminForm({
+                              name: '', municipality: 'City of San Fernando',
+                              operatingHours: '09:00 AM - 09:00 PM', priceTier: '$$',
+                              address: '', image: '', images: [], description: ''
+                            });
+                            setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
+                          }}
+                          className="px-4 py-2 border border-[#E9E5DE] rounded-xl text-xs font-bold text-charcoal hover:bg-[#FAF8F5] cursor-pointer"
+                        >
+                          Cancel Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveAdminListing}
+                          className="px-6 py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-98"
+                        >
+                          💾 Save Changes
+                        </button>
+                      </>
+                    ) : (
                       <button
-                        type="button"
-                        onClick={() => {
-                          setAdminEditingId(null);
-                          setAdminForm({
-                             name: '', municipality: 'City of San Fernando',
-                             operatingHours: '09:00 AM - 09:00 PM', priceTier: '$$',
-                             address: '', image: '', images: [], description: ''
-                           });
-                           setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
-                        }}
-                        className="px-4 py-2 border border-[#E9E5DE] rounded-xl text-xs font-semibold text-charcoal hover:bg-[#FAF8F5]"
+                        type="submit"
+                        className="px-6 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-black shadow-md transition-all cursor-pointer"
                       >
-                        Cancel Edit
+                        Register Heritage Kitchen
                       </button>
                     )}
-                    <button
-                      type="submit"
-                      className="px-5 py-2 bg-terracotta text-white rounded-xl text-xs font-bold hover:bg-terracotta-dark"
-                    >
-                      {adminEditingId ? "Update Listing" : "Register Listing"}
-                    </button>
                   </div>
                 </form>
               </div>
@@ -2705,33 +2862,64 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
               {/* Data Table */}
               <div className="bento-card p-5 bg-white space-y-4 shadow-sm border-[#E9E5DE]">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider">
-                    Heritage Kitchen Database Listings
-                  </h3>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider m-0">
+                      Heritage Kitchen Database Listings
+                    </h3>
+                    <span className="text-[10px] text-charcoal-light font-medium block mt-0.5">
+                      Alphabetically Sorted A-Z
+                    </span>
+                  </div>
 
-                  <div className="flex items-center gap-2 text-xs">
-                    <span>Filter Location:</span>
-                    <select
-                      value={adminSelectedMunicipality}
-                      onChange={(e) => setAdminSelectedMunicipality(e.target.value)}
-                      className="px-2.5 py-1.5 rounded-lg bg-ivory border border-[#E9E5DE]"
-                    >
-                      <option value="All">All Municipalities/Cities</option>
-                      {MUNICIPALITIES.map(mun => (
-                        <option key={mun} value={mun}>{mun}</option>
-                      ))}
-                    </select>
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    {/* Admin Search Bar */}
+                    <div className="relative flex items-center min-w-[220px]">
+                      <Search className="absolute left-2.5 h-3.5 w-3.5 text-charcoal-light pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="Search by restaurant, city, address..."
+                        value={adminSearchQuery}
+                        onChange={(e) => setAdminSearchQuery(e.target.value)}
+                        className="w-full pl-8 pr-7 py-1.5 rounded-lg bg-ivory border border-[#E9E5DE] text-xs focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white"
+                      />
+                      {adminSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setAdminSearchQuery('')}
+                          className="absolute right-2 text-charcoal-light hover:text-charcoal text-xs font-bold"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Location Filter */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold text-charcoal uppercase tracking-wider whitespace-nowrap">Filter Location:</span>
+                      <select
+                        value={adminSelectedMunicipality}
+                        onChange={(e) => setAdminSelectedMunicipality(e.target.value)}
+                        className="px-2.5 py-1.5 rounded-lg bg-ivory border border-[#E9E5DE] text-xs font-semibold focus:outline-none"
+                      >
+                        <option value="All">All Municipalities/Cities</option>
+                        {MUNICIPALITIES.map(mun => (
+                          <option key={mun} value={mun}>{mun}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </div>
 
                 <div className="overflow-x-auto border border-[#E9E5DE] rounded-xl">
                   <table className="min-w-full divide-y divide-[#E9E5DE] text-left text-xs">
-                    <thead className="bg-[#FAF8F5] text-charcoal-light uppercase font-bold tracking-wider">
+                    <thead className="bg-[#FAF8F5] text-charcoal-light uppercase font-bold tracking-wider text-[10px]">
                       <tr>
                         <th className="px-4 py-3">Kitchen/Restaurant</th>
+                        <th className="px-4 py-3">Branches</th>
+                        <th className="px-4 py-3">Account Credentials</th>
                         <th className="px-4 py-3">Municipality/City</th>
-                        <th className="px-4 py-3">Exact Address</th>
+                        <th className="px-4 py-3">Primary Address</th>
                         <th className="px-4 py-3">Hours</th>
                         <th className="px-4 py-3">Tier</th>
                         <th className="px-4 py-3 text-right">Actions</th>
@@ -2743,14 +2931,30 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           if (adminRole === 'merchant') {
                             return r.id === merchantResId;
                           }
-                          return isRestaurantInMunicipality(r, adminSelectedMunicipality);
+                          const matchesMun = isRestaurantInMunicipality(r, adminSelectedMunicipality);
+                          const q = adminSearchQuery.trim().toLowerCase();
+                          const matchesQuery = !q || (
+                            (r.name && r.name.toLowerCase().includes(q)) ||
+                            (r.municipality && r.municipality.toLowerCase().includes(q)) ||
+                            (r.address && r.address.toLowerCase().includes(q)) ||
+                            (r.username && r.username.toLowerCase().includes(q)) ||
+                            (Array.isArray(r.branches) && r.branches.some(b => (b.branchName || '').toLowerCase().includes(q) || (b.address || '').toLowerCase().includes(q) || (b.municipality || '').toLowerCase().includes(q)))
+                          );
+                          return matchesMun && matchesQuery;
                         })
+                        .sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }))
                         .map(res => (
-                          <tr key={res.id} className="hover:bg-ivory/40">
-                            <td className="px-4 py-3 font-extrabold">{res.name}</td>
+                          <tr key={res.id} className="hover:bg-ivory/40 transition-colors">
+                            <td
+                              className="px-4 py-3 font-extrabold text-charcoal hover:text-terracotta cursor-pointer"
+                              onClick={() => { setSelectedRestaurant(res); setActiveImgIdx(0); }}
+                              title="Click to view updated listing drawer"
+                            >
+                              {res.name}
+                            </td>
                             <td className="px-4 py-3 text-xs">
                               <span className="inline-flex items-center gap-1 bg-terracotta/10 text-terracotta px-2 py-0.5 rounded-full text-[10px] font-black border border-terracotta/20">
-                                📍 {Array.isArray(res.branches) && res.branches.length > 0 ? `${res.branches.length} Branches (${res.branches.map(b => b.municipality).join(' • ')})` : `1 Branch (${res.municipality})`}
+                                📍 {Array.isArray(res.branches) && res.branches.length > 0 ? `${res.branches.length} Branch${res.branches.length > 1 ? 'es' : ''}` : `1 Branch`}
                               </span>
                             </td>
                             <td className="px-4 py-3 text-xs">
@@ -2764,14 +2968,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 ? res.branches.map(b => b.municipality).join(' • ')
                                 : res.municipality}
                             </td>
-                            <td className="px-4 py-3 text-charcoal-light text-[10px] font-semibold max-w-xs">
+                            <td className="px-4 py-3 text-charcoal-light text-[10px] font-semibold max-w-xs truncate">
                               {Array.isArray(res.branches) && res.branches.length > 1
                                 ? res.branches.map((b, i) => `${i + 1}. ${b.address || b.municipality}`).join(' | ')
                                 : res.address}
                             </td>
                             <td className="px-4 py-3 text-charcoal-light">{res.operatingHours}</td>
                             <td className="px-4 py-3 text-bananaleaf font-bold">{res.priceTier}</td>
-                            <td className="px-4 py-3 text-right space-x-1 shrink-0">
+                            <td className="px-4 py-3 text-right space-x-1 shrink-0 whitespace-nowrap">
                               <button
                                 type="button"
                                 onClick={() => startAdminEdit(res)}
@@ -2782,10 +2986,12 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                               </button>
                               {adminRole !== 'merchant' && (
                                 <button
+                                  type="button"
                                   onClick={() => deleteRestaurant(res.id)}
-                                  className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex"
+                                  className="p-1.5 text-charcoal-light hover:text-red-600 rounded-lg hover:bg-red-50 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs hover:border-red-300"
+                                  title="Remove Listing"
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <Trash2 className="h-4 w-4 text-red-500" />
                                 </button>
                               )}
                             </td>
@@ -3070,13 +3276,59 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
         </main>
 
-        {/* Admin page footer */}
-        <footer className="bg-charcoal text-white/60 py-6 mt-12 border-t border-charcoal-dark">
-          <div className="max-w-7xl mx-auto px-4 text-center text-xs">
-            <span className="block font-black text-white uppercase tracking-wider">Kanyamanan Administrative Core</span>
-            <span className="block mt-1">
-              Authorized access only. Secure database access logs active.
-            </span>
+        {/* Admin page footer with GROUP JECCAN! Project Creators & Developers */}
+        <footer className="bg-charcoal text-white py-8 mt-12 border-t border-charcoal-dark font-sans">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            
+            {/* GROUP JECCAN! Section */}
+            <div className="bg-[#1A1A1A] border border-[#333333] rounded-2xl p-5 space-y-3 shadow-md border-l-4 border-l-terracotta">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-black text-terracotta uppercase tracking-wider">
+                  GROUP JECCAN!
+                </span>
+                <span className="bg-[#E2F1E7] text-[#2C5E3B] text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-[#2C5E3B]/20 inline-block">
+                  Project Creators & Developers
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-[#FAF8F5] border border-[#E9E5DE] p-3.5 rounded-xl space-y-0.5">
+                  <span className="block text-xs font-black text-charcoal">
+                    Rancis J. Santos
+                  </span>
+                  <span className="block text-[10px] font-bold text-terracotta">
+                    Team Leader
+                  </span>
+                </div>
+
+                <div className="bg-[#FAF8F5] border border-[#E9E5DE] p-3.5 rounded-xl space-y-0.5">
+                  <span className="block text-xs font-black text-charcoal">
+                    Lance Jerald D. Laxamana
+                  </span>
+                  <span className="block text-[10px] font-medium text-charcoal-light">
+                    Core Member
+                  </span>
+                </div>
+
+                <div className="bg-[#FAF8F5] border border-[#E9E5DE] p-3.5 rounded-xl space-y-0.5">
+                  <span className="block text-xs font-black text-charcoal">
+                    Kirsen Yaj B. Villanueva
+                  </span>
+                  <span className="block text-[10px] font-medium text-charcoal-light">
+                    Core Member
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom System Info */}
+            <div className="text-center text-xs text-gray-400 border-t border-[#333333] pt-4">
+              <span className="block font-black text-white uppercase tracking-wider">Kanyamanan Administrative Core</span>
+              <span className="block mt-1 text-[11px]">
+                Authorized access only. Secure database access logs active.
+              </span>
+            </div>
+
           </div>
         </footer>
 
