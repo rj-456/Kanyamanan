@@ -235,6 +235,42 @@ function App() {
     });
   });
 
+  // Persistent Tourist Attractions Database State with auto-healing error recovery
+  const [attractions, setAttractions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_attractions_db');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const sanitized = parsed.map((attr, idx) => {
+            if (!attr || typeof attr !== 'object') return null;
+            return {
+              ...attr,
+              id: attr.id || `attr-${Date.now()}-${idx}`,
+              name: attr.name || `Heritage Destination #${idx + 1}`,
+              municipality: attr.municipality || 'City of San Fernando',
+              type: attr.type || '🏛️ Historic Parish Church',
+              description: attr.description || 'Cultural heritage destination in Pampanga.',
+              details: attr.details || attr.description || 'Cultural heritage destination in Pampanga.',
+              image: attr.image || (Array.isArray(attr.images) && attr.images[0]) || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=800&q=80',
+              images: Array.isArray(attr.images) && attr.images.length > 0 ? attr.images : [attr.image || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=800&q=80'],
+              lat: Number(attr.lat) || 15.0300,
+              lng: Number(attr.lng) || 120.6800
+            };
+          }).filter(Boolean);
+
+          if (sanitized.length > 0) {
+            return sanitized;
+          }
+        }
+      }
+    } catch (e) {
+      console.error("LocalStorage attractions load error:", e);
+      try { localStorage.removeItem('kanyamanan_attractions_db'); } catch (err) {}
+    }
+    return PRESEEDED_ATTRACTIONS;
+  });
+
   // Search & Filtering States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCorridor, setSelectedCorridor] = useState('All');
@@ -760,41 +796,6 @@ function App() {
       ]);
     }
   }, [isTrafficCongested]);
-
-  // Persistent Tourist Attractions Database State
-  const [attractions, setAttractions] = useState(() => {
-    try {
-      const saved = localStorage.getItem('kanyamanan_attractions_db');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const sanitized = parsed.map((attr, idx) => {
-            if (!attr || typeof attr !== 'object') return null;
-            return {
-              ...attr,
-              id: attr.id || `attr-${Date.now()}-${idx}`,
-              name: attr.name || `Heritage Destination #${idx + 1}`,
-              municipality: attr.municipality || 'City of San Fernando',
-              type: attr.type || '🏛️ Historic Parish Church',
-              description: attr.description || 'Cultural heritage destination in Pampanga.',
-              details: attr.details || attr.description || 'Cultural heritage destination in Pampanga.',
-              image: attr.image || (Array.isArray(attr.images) && attr.images[0]) || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=800&q=80',
-              images: Array.isArray(attr.images) && attr.images.length > 0 ? attr.images : [attr.image || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=800&q=80'],
-              lat: Number(attr.lat) || 15.0300,
-              lng: Number(attr.lng) || 120.6800
-            };
-          }).filter(Boolean);
-
-          if (sanitized.length > 0) {
-            return sanitized;
-          }
-        }
-      }
-    } catch (e) {
-      console.error("LocalStorage attractions load error:", e);
-    }
-    return PRESEEDED_ATTRACTIONS;
-  });
 
   // Persistent localStorage synchronization effect for live attractions updates
   useEffect(() => {
