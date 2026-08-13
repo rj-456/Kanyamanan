@@ -235,6 +235,19 @@ function App() {
     });
   });
 
+  // Search & Filtering States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCorridor, setSelectedCorridor] = useState('All');
+  const [selectedMunicipality, setSelectedMunicipality] = useState('All');
+
+  // Restaurant Drawer State
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [selectedDetailBranch, setSelectedDetailBranch] = useState(null);
+  const [activeDish, setActiveDish] = useState(null);
+  const [cvUploadedMeal, setCvUploadedMeal] = useState(null);
+  const [isCVProcessing, setIsCVProcessing] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   // Persistent localStorage synchronization effect for live frontend updates
   useEffect(() => {
     try {
@@ -271,19 +284,6 @@ function App() {
       }
     }
   }, [restaurants]);
-
-  // Search & Filtering States
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCorridor, setSelectedCorridor] = useState('All');
-  const [selectedMunicipality, setSelectedMunicipality] = useState('All');
-
-  // Restaurant Drawer State
-  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
-  const [selectedDetailBranch, setSelectedDetailBranch] = useState(null);
-  const [activeDish, setActiveDish] = useState(null);
-  const [cvUploadedMeal, setCvUploadedMeal] = useState(null);
-  const [isCVProcessing, setIsCVProcessing] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Trip routing pipeline State
   const [activeTrip, setActiveTrip] = useState([]);
