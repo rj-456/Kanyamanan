@@ -366,6 +366,8 @@ function App() {
   const [distanceToTargetKm, setDistanceToTargetKm] = useState(null);
 
   const [roadRouteCoords, setRoadRouteCoords] = useState([]);
+  const [routeDistanceKm, setRouteDistanceKm] = useState(0);
+  const [routeDurationMin, setRouteDurationMin] = useState(0);
 
   const mapRef = useRef(null);
   const userMarkerRef = useRef(null);
