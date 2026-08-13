@@ -145,15 +145,26 @@ const getBranchLng = (r, targetMun) => {
 };
 
 function App() {
-  // Hash Routing for administrative standalone page
-  const [isAdminRoute, setIsAdminRoute] = useState(window.location.hash === '#/admin');
+  // Hash & Pathname Routing for administrative standalone page
+  const checkAdminRoute = () => {
+    if (typeof window === 'undefined') return false;
+    const hash = (window.location.hash || '').toLowerCase();
+    const path = (window.location.pathname || '').toLowerCase();
+    return hash.includes('admin') || path.endsWith('/admin') || path.includes('/admin');
+  };
+
+  const [isAdminRoute, setIsAdminRoute] = useState(checkAdminRoute);
 
   useEffect(() => {
     const handleHashChange = () => {
-      setIsAdminRoute(window.location.hash === '#/admin');
+      setIsAdminRoute(checkAdminRoute());
     };
     window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('popstate', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('popstate', handleHashChange);
+    };
   }, []);
 
   // Consumer Views: 'homepage', 'auth', 'dashboard'
