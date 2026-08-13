@@ -399,7 +399,7 @@ function App() {
 
   const [isTrafficCongested, setIsTrafficCongested] = useState(false);
   const [adminRole, setAdminRole] = useState('superadmin'); // 'superadmin' or 'merchant'
-  const [merchantResId, setMerchantResId] = useState(PRESEEDED_RESTAURANTS[0].id);
+  const [merchantResId, setMerchantResId] = useState(() => (Array.isArray(PRESEEDED_RESTAURANTS) && PRESEEDED_RESTAURANTS[0] ? PRESEEDED_RESTAURANTS[0].id : 'res-1'));
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [adminLoginType, setAdminLoginType] = useState('superadmin'); // 'superadmin' or 'merchant'
   const [adminLoginUser, setAdminLoginUser] = useState('');
