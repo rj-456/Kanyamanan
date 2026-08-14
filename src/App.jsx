@@ -42,6 +42,14 @@ import {
   OCCUPANCY_HOURS,
   PRESEEDED_ATTRACTIONS
 } from './mockData';
+import {
+  isFirebaseConfigured,
+  subscribeToChangeRequests,
+  saveChangeRequestToCloud,
+  updateChangeRequestInCloud,
+  subscribeToRestaurants,
+  saveRestaurantToCloud
+} from './firebase';
 
 
 // Distance calculator helper between two lat/lng points in kilometers
@@ -467,6 +475,21 @@ function App() {
     };
     window.addEventListener('storage', handleApprovalsStorage);
     return () => window.removeEventListener('storage', handleApprovalsStorage);
+  }, []);
+
+  // Firebase Cloud Real-Time Live Sync Listener (Cross-Device)
+  useEffect(() => {
+    if (isFirebaseConfigured()) {
+      const unsub = subscribeToChangeRequests((cloudRequests) => {
+        if (Array.isArray(cloudRequests)) {
+          setPendingApprovals(cloudRequests);
+          try {
+            localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(cloudRequests));
+          } catch (e) {}
+        }
+      });
+      return () => unsub();
+    }
   }, []);
   const [adminBranches, setAdminBranches] = useState([]);
 
@@ -1945,6 +1968,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           console.error("Save error for pending approvals:", e);
         }
 
+        // Sync to Firebase Cloud Firestore for real-time cross-device delivery
+        saveChangeRequestToCloud(newApprovalRequest);
+
         setAdminEditingId(null);
         setAdminForm({
           name: '', municipality: 'City of San Fernando',
@@ -2211,6 +2237,17 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       console.error("Save error during approval:", e);
     }
 
+    // Sync approval status to Firebase Cloud
+    updateChangeRequestInCloud(req.id, {
+      status: 'approved',
+      reviewedAt: nowFormatted,
+      adminNote: adminNote || 'Approved and published live by System Admin.',
+      dismissedByMerchant: false
+    });
+    if (req.fullUpdatedRes) {
+      saveRestaurantToCloud(req.fullUpdatedRes);
+    }
+
     // Sync selected restaurant drawer & active trip if present
     if (selectedRestaurant) {
       const match = updatedRestaurants.find(r => r.id === selectedRestaurant.id || r.name === selectedRestaurant.name);
@@ -2248,6 +2285,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     try {
       localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(updatedPending));
     } catch (e) {}
+
+    // Sync rejection status to Firebase Cloud
+    updateChangeRequestInCloud(req.id, {
+      status: 'rejected',
+      reviewedAt: nowFormatted,
+      adminNote: reason,
+      dismissedByMerchant: false
+    });
     alert(`Dismissed: Changes requested by "${req.restaurantName}" have been rejected. The restaurant owner will be notified in their portal.`);
   };
 
@@ -2262,6 +2307,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     try {
       localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(updatedPending));
     } catch (e) {}
+
+    // Sync dismissal to Firebase Cloud
+    updateChangeRequestInCloud(reqId, { dismissedByMerchant: true });
   };
 
   // =========================================================================
@@ -2422,6 +2470,15 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   <span className="text-[10px] bg-terracotta text-white px-2 py-0.5 rounded font-black uppercase">
                     {adminRole === 'superadmin' ? 'Super Admin' : 'Merchant Owner'}
                   </span>
+                  {isFirebaseConfigured() ? (
+                    <span className="text-[9px] bg-emerald-700 text-emerald-100 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-ping"></span> Cloud Live Sync Active
+                    </span>
+                  ) : (
+                    <span className="text-[9px] bg-white/10 text-gray-300 px-2 py-0.5 rounded-full font-bold">
+                      Local Sync Mode
+                    </span>
+                  )}
                 </h1>
                 <p className="text-[10px] text-gray-300 font-medium tracking-wide">
                   SECURE HERITAGE DATABASE MANAGER & MERCHANT ANALYTICS CORE
