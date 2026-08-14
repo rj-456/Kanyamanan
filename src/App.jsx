@@ -66,6 +66,26 @@ const calculateHaversineKm = (lat1, lon1, lat2, lon2) => {
   return R * c;
 };
 
+// Descriptive label formatter for profile modification fields
+const formatChangeKey = (key) => {
+  const map = {
+    operatingHours: '🕒 Operating Hours (Opening/Closing Time)',
+    branches: '📍 Branch Locations & Operating Schedule',
+    branchCount: '📍 Active Branch Count',
+    priceTier: '💰 Price Tier / Budget Category',
+    municipality: '🏙️ Municipality / City',
+    address: '🏠 Primary Establishment Address',
+    name: '🏷️ Establishment Name',
+    description: '📖 Heritage Story & Description',
+    menu: '🍲 Signature Dishes & Pricing',
+    pictures: '📷 Establishment Photo Gallery',
+    images: '📷 Establishment Photo Gallery',
+    username: '👤 Merchant Account Username',
+    password: '🔑 Account Password'
+  };
+  return map[key] || key.charAt(0).toUpperCase() + key.slice(1);
+};
+
 // Universal Multi-Branch Helper Functions
 const normalizeMun = (m) => {
   if (!m) return '';
@@ -1900,50 +1920,84 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         const changes = {};
         const original = {};
 
-        if (originalRes && originalRes.name !== nameToSave) {
+        // 1. Establishment Name
+        if (originalRes && originalRes.name && originalRes.name.trim() !== nameToSave) {
           changes.name = nameToSave;
           original.name = originalRes.name;
         }
-        if (originalRes && originalRes.municipality !== adminForm.municipality) {
-          changes.municipality = adminForm.municipality;
-          original.municipality = originalRes.municipality;
+
+        // 2. Operating Hours (Establishment / Primary Branch Time)
+        const origHours = originalRes?.operatingHours || (originalRes?.branches && originalRes.branches[0]?.operatingHours) || '09:00 AM - 09:00 PM';
+        const newHours = primaryBranch?.operatingHours || adminForm.operatingHours || '09:00 AM - 09:00 PM';
+        if (origHours.trim() !== newHours.trim()) {
+          changes.operatingHours = newHours;
+          original.operatingHours = origHours;
         }
-        if (originalRes && originalRes.operatingHours !== adminForm.operatingHours) {
-          changes.operatingHours = adminForm.operatingHours;
-          original.operatingHours = originalRes.operatingHours;
-        }
-        if (originalRes && originalRes.priceTier !== adminForm.priceTier) {
+
+        // 3. Price Tier
+        if (originalRes && originalRes.priceTier && originalRes.priceTier !== adminForm.priceTier) {
           changes.priceTier = adminForm.priceTier;
           original.priceTier = originalRes.priceTier;
         }
-        if (originalRes && originalRes.description !== adminForm.description) {
-          changes.description = adminForm.description;
-          original.description = originalRes.description;
-        }
-        if (originalRes && originalRes.address !== adminForm.address) {
-          changes.address = adminForm.address;
-          original.address = originalRes.address;
+
+        // 4. Municipality & Primary Address
+        const origMun = originalRes?.municipality || 'City of San Fernando';
+        const newMun = primaryBranch?.municipality || adminForm.municipality || 'City of San Fernando';
+        if (origMun !== newMun) {
+          changes.municipality = newMun;
+          original.municipality = origMun;
         }
 
-        // Compare cover photo and gallery photo array
+        const origAddr = originalRes?.address || '';
+        const newAddr = primaryBranch?.address || adminForm.address || '';
+        if (origAddr.trim() !== newAddr.trim()) {
+          changes.address = newAddr;
+          original.address = origAddr || 'None';
+        }
+
+        // 5. Description / Story
+        if (originalRes && (originalRes.description || '').trim() !== (adminForm.description || '').trim()) {
+          changes.description = adminForm.description;
+          original.description = originalRes.description || 'None';
+        }
+
+        // 6. Branch Locations (Added / Removed / Modified Hours or Locations)
+        const origBranches = Array.isArray(originalRes?.branches) ? originalRes.branches : [];
+        const origBranchSummary = origBranches.map((b, i) => `${b.branchName || `Branch #${i+1}`}: ${b.municipality || ''} (${b.operatingHours || ''})`).join(' | ');
+        const newBranchSummary = updatedBranches.map((b, i) => `${b.branchName || `Branch #${i+1}`}: ${b.municipality || ''} (${b.operatingHours || ''})`).join(' | ');
+
+        if (origBranchSummary !== newBranchSummary) {
+          if (updatedBranches.length !== origBranches.length) {
+            changes.branchCount = `${updatedBranches.length} Branch(es) (${updatedBranches.length > origBranches.length ? `+${updatedBranches.length - origBranches.length} branch added` : `-${origBranches.length - updatedBranches.length} branch removed`})`;
+            original.branchCount = `${origBranches.length} Branch(es)`;
+          }
+          changes.branches = newBranchSummary;
+          original.branches = origBranchSummary || 'None';
+        }
+
+        // 7. Photos / Gallery (ONLY if changed)
         const origImgs = originalRes?.images || (originalRes?.image ? [originalRes.image] : []);
         const newImgs = adminForm.images && adminForm.images.length > 0 ? adminForm.images : (adminForm.image ? [adminForm.image] : []);
         const origImgsStr = JSON.stringify(origImgs);
         const newImgsStr = JSON.stringify(newImgs);
 
         if (origImgsStr !== newImgsStr || (originalRes && originalRes.image !== adminForm.image)) {
-          changes.pictures = `Updated ${newImgs.length} photo(s) in establishment gallery`;
-          changes.image = adminForm.image || newImgs[0] || '';
+          changes.pictures = `Updated photo gallery (${newImgs.length} photo(s))`;
           changes.images = newImgs;
+          changes.image = adminForm.image || newImgs[0] || '';
 
-          original.pictures = `${origImgs.length} photo(s) in original gallery`;
-          original.image = originalRes?.image || '';
+          original.pictures = `Original gallery (${origImgs.length} photo(s))`;
           original.images = origImgs;
+          original.image = originalRes?.image || '';
         }
 
-        if (formattedMenu.length > 0) {
-          changes.menu = formattedMenu.map(m => `${m.name} (₱${m.price})`).join(', ');
-          original.menu = (originalRes?.menu || []).map(m => `${m.name} (₱${m.price})`).join(', ');
+        // 8. Signature Dishes / Menu (ONLY if dishes/prices actually modified!)
+        const origMenuStr = (originalRes?.menu || []).map(m => `${(m.name || '').trim()} (₱${m.price || 0})`).join(', ');
+        const newMenuStr = formattedMenu.map(m => `${m.name.trim()} (₱${m.price})`).join(', ');
+
+        if (formattedMenu.length > 0 && origMenuStr !== newMenuStr) {
+          changes.menu = newMenuStr;
+          original.menu = origMenuStr || 'None';
         }
 
         const nowFormatted = new Date().toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
@@ -2737,12 +2791,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                     </div>
                                   </div>
 
-                                  <div className="bg-white p-2.5 rounded-lg border border-[#E9E5DE] text-[11px] space-y-1">
+                                  <div className="bg-white p-2.5 rounded-lg border border-[#E9E5DE] text-[11px] space-y-1.5">
                                     <span className="font-bold text-charcoal block">Requested Profile Modifications:</span>
-                                    <div className="text-charcoal-light space-y-0.5">
-                                      {Object.keys(req.changes).map(k => (
-                                        <div key={k}>
-                                          <strong>{k}:</strong> <span className="text-bananaleaf">{typeof req.changes[k] === 'string' ? req.changes[k] : JSON.stringify(req.changes[k])}</span>
+                                    <div className="text-charcoal-light space-y-1">
+                                      {Object.keys(req.changes).filter(k => k !== 'images' && k !== 'image').map(k => (
+                                        <div key={k} className="flex flex-wrap gap-1 items-start">
+                                          <strong className="text-charcoal">{formatChangeKey(k)}:</strong>
+                                          <span className="text-bananaleaf font-bold">{typeof req.changes[k] === 'string' ? req.changes[k] : JSON.stringify(req.changes[k])}</span>
                                         </div>
                                       ))}
                                     </div>
@@ -3338,7 +3393,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                             <div className="space-y-1 bg-white border border-[#E9E5DE] p-2.5 rounded-lg text-charcoal-light leading-relaxed">
                               {Object.keys(req.original).filter(k => k !== 'images' && k !== 'image').map(key => (
                                 <div key={key}>
-                                  <strong>{key}:</strong> {typeof req.original[key] === 'string' ? req.original[key] : JSON.stringify(req.original[key])}
+                                  <strong className="text-charcoal">{formatChangeKey(key)}:</strong> {typeof req.original[key] === 'string' ? req.original[key] : JSON.stringify(req.original[key])}
                                 </div>
                               ))}
                               {Array.isArray(req.original.images) && req.original.images.length > 0 && (
@@ -3356,8 +3411,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                             <div className="space-y-1 bg-white border border-terracotta/20 p-2.5 rounded-lg text-charcoal font-semibold leading-relaxed">
                               {Object.keys(req.changes).filter(k => k !== 'images' && k !== 'image').map(key => (
                                 <div key={key} className="flex gap-1.5 items-center">
-                                  <span><strong>{key}:</strong></span>
-                                  <span className="text-bananaleaf">{typeof req.changes[key] === 'string' ? req.changes[key] : JSON.stringify(req.changes[key])}</span>
+                                  <strong className="text-charcoal">{formatChangeKey(key)}:</strong>
+                                  <span className="text-bananaleaf font-bold">{typeof req.changes[key] === 'string' ? req.changes[key] : JSON.stringify(req.changes[key])}</span>
                                 </div>
                               ))}
                               {Array.isArray(req.changes.images) && req.changes.images.length > 0 && (
@@ -3686,7 +3741,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <div className="space-y-1.5 bg-white border border-[#E9E5DE] p-3 rounded-xl text-charcoal-light leading-relaxed">
                                   {Object.keys(req.original).filter(k => k !== 'images' && k !== 'image').map(key => (
                                     <div key={key}>
-                                      <strong className="text-charcoal">{key}:</strong> {typeof req.original[key] === 'string' ? req.original[key] : JSON.stringify(req.original[key])}
+                                      <strong className="text-charcoal">{formatChangeKey(key)}:</strong> {typeof req.original[key] === 'string' ? req.original[key] : JSON.stringify(req.original[key])}
                                     </div>
                                   ))}
                                   {Array.isArray(req.original.images) && req.original.images.length > 0 && (
@@ -3706,8 +3761,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 </span>
                                 <div className="space-y-1.5 bg-white border border-terracotta/30 p-3 rounded-xl text-charcoal font-semibold leading-relaxed shadow-2xs">
                                   {Object.keys(req.changes).filter(k => k !== 'images' && k !== 'image').map(key => (
-                                    <div key={key} className="flex flex-wrap gap-1 items-center">
-                                      <span className="text-charcoal font-bold">{key}:</span>
+                                    <div key={key} className="flex flex-wrap gap-1.5 items-center">
+                                      <strong className="text-charcoal">{formatChangeKey(key)}:</strong>
                                       <span className="text-bananaleaf font-extrabold">{typeof req.changes[key] === 'string' ? req.changes[key] : JSON.stringify(req.changes[key])}</span>
                                     </div>
                                   ))}
