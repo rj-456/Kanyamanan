@@ -1865,6 +1865,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
       // --- RESTAURANT OWNER WORKFLOW (Requires System Admin Approval) ---
       if (adminRole === 'merchant') {
+        const targetResId = adminEditingId || merchantResId || (originalRes ? originalRes.id : 'res-1');
         const confirmSave = window.confirm(`Are you sure you want to submit profile changes for "${nameToSave}" to the System Administrator for vetting?`);
         if (!confirmSave) return;
 
@@ -1891,10 +1892,23 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           changes.address = adminForm.address;
           original.address = originalRes.address;
         }
-        if (originalRes && originalRes.image !== adminForm.image) {
-          changes.image = adminForm.image;
-          original.image = originalRes.image;
+
+        // Compare cover photo and gallery photo array
+        const origImgs = originalRes?.images || (originalRes?.image ? [originalRes.image] : []);
+        const newImgs = adminForm.images && adminForm.images.length > 0 ? adminForm.images : (adminForm.image ? [adminForm.image] : []);
+        const origImgsStr = JSON.stringify(origImgs);
+        const newImgsStr = JSON.stringify(newImgs);
+
+        if (origImgsStr !== newImgsStr || (originalRes && originalRes.image !== adminForm.image)) {
+          changes.pictures = `Updated ${newImgs.length} photo(s) in establishment gallery`;
+          changes.image = adminForm.image || newImgs[0] || '';
+          changes.images = newImgs;
+
+          original.pictures = `${origImgs.length} photo(s) in original gallery`;
+          original.image = originalRes?.image || '';
+          original.images = origImgs;
         }
+
         if (formattedMenu.length > 0) {
           changes.menu = formattedMenu.map(m => `${m.name} (₱${m.price})`).join(', ');
           original.menu = (originalRes?.menu || []).map(m => `${m.name} (₱${m.price})`).join(', ');
@@ -1902,19 +1916,21 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
         const newApprovalRequest = {
           id: 'appr-' + Date.now(),
-          restaurantId: adminEditingId,
+          restaurantId: targetResId,
           restaurantName: nameToSave,
-          submittedAt: 'Just now',
+          submittedAt: 'Today, ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           original,
-          changes: Object.keys(changes).length > 0 ? changes : { profile: 'Updated profile details' },
+          changes: Object.keys(changes).length > 0 ? changes : { profile: 'Updated establishment profile & pictures' },
           fullUpdatedRes: updatedResObj
         };
 
-        const nextPending = [newApprovalRequest, ...pendingApprovals.filter(a => a.restaurantId !== adminEditingId)];
+        const nextPending = [newApprovalRequest, ...pendingApprovals.filter(a => a.restaurantId !== targetResId && a.id !== newApprovalRequest.id)];
         setPendingApprovals(nextPending);
         try {
           localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(nextPending));
-        } catch (e) {}
+        } catch (e) {
+          console.error("Save error for pending approvals:", e);
+        }
 
         setAdminEditingId(null);
         setAdminForm({
@@ -3025,22 +3041,38 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           <div>
                             <span className="block text-[9px] font-black text-charcoal-light uppercase mb-1">Current Published Profile</span>
                             <div className="space-y-1 bg-white border border-[#E9E5DE] p-2.5 rounded-lg text-charcoal-light leading-relaxed">
-                              {Object.keys(req.original).map(key => (
+                              {Object.keys(req.original).filter(k => k !== 'images' && k !== 'image').map(key => (
                                 <div key={key}>
-                                  <strong>{key}:</strong> {req.original[key]}
+                                  <strong>{key}:</strong> {typeof req.original[key] === 'string' ? req.original[key] : JSON.stringify(req.original[key])}
                                 </div>
                               ))}
+                              {Array.isArray(req.original.images) && req.original.images.length > 0 && (
+                                <div className="pt-1.5 flex flex-wrap gap-1">
+                                  <span className="w-full text-[9px] font-bold text-charcoal-light">Original Photos:</span>
+                                  {req.original.images.map((img, i) => (
+                                    <img key={i} src={img} className="w-10 h-10 rounded object-cover border border-[#E9E5DE]" alt="Original photo" />
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div>
                             <span className="block text-[9px] font-black text-terracotta uppercase mb-1">Proposed Profile Changes</span>
                             <div className="space-y-1 bg-white border border-terracotta/20 p-2.5 rounded-lg text-charcoal font-semibold leading-relaxed">
-                              {Object.keys(req.changes).map(key => (
+                              {Object.keys(req.changes).filter(k => k !== 'images' && k !== 'image').map(key => (
                                 <div key={key} className="flex gap-1.5 items-center">
                                   <span><strong>{key}:</strong></span>
-                                  <span className="text-bananaleaf">{req.changes[key]}</span>
+                                  <span className="text-bananaleaf">{typeof req.changes[key] === 'string' ? req.changes[key] : JSON.stringify(req.changes[key])}</span>
                                 </div>
                               ))}
+                              {Array.isArray(req.changes.images) && req.changes.images.length > 0 && (
+                                <div className="pt-1.5 flex flex-wrap gap-1">
+                                  <span className="w-full text-[9px] font-bold text-terracotta">New Proposed Photos:</span>
+                                  {req.changes.images.map((img, i) => (
+                                    <img key={i} src={img} className="w-10 h-10 rounded object-cover border border-terracotta/40 shadow-xs" alt="New photo" />
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
