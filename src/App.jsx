@@ -407,22 +407,63 @@ function App() {
   const [adminLoginUser, setAdminLoginUser] = useState('');
   const [adminLoginPass, setAdminLoginPass] = useState('');
   const [adminLoginError, setAdminLoginError] = useState('');
-  const [pendingApprovals, setPendingApprovals] = useState([
-    {
-      id: 'appr-1',
-      restaurantId: 'res-1',
-      restaurantName: "Everybody's Cafe",
-      submittedAt: 'Today, 10:30 AM',
-      original: {
-        operatingHours: "07:00 AM - 09:00 PM",
-        priceTier: "$$"
-      },
-      changes: {
-        operatingHours: "06:30 AM - 10:00 PM",
-        priceTier: "$$$"
+  // Persistent Pending Approvals Database State
+  const [pendingApprovals, setPendingApprovals] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_pending_approvals_db');
+      if (saved !== null) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
       }
+    } catch (e) {
+      console.error("LocalStorage load error for pending approvals:", e);
     }
-  ]);
+    return [
+      {
+        id: 'appr-1',
+        restaurantId: 'res-1',
+        restaurantName: "Everybody's Cafe",
+        submittedAt: 'Today, 10:30 AM',
+        original: {
+          operatingHours: "07:00 AM - 09:00 PM",
+          priceTier: "$$"
+        },
+        changes: {
+          operatingHours: "06:30 AM - 10:00 PM",
+          priceTier: "$$$"
+        }
+      }
+    ];
+  });
+
+  // Persistent localStorage synchronization effect for pendingApprovals
+  useEffect(() => {
+    try {
+      localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(pendingApprovals));
+    } catch (e) {
+      console.error("LocalStorage save error for pending approvals:", e);
+    }
+  }, [pendingApprovals]);
+
+  // Live Cross-Tab & Storage Sync Listener for pendingApprovals
+  useEffect(() => {
+    const handleApprovalsStorage = (e) => {
+      if (e.key === 'kanyamanan_pending_approvals_db' && e.newValue !== null) {
+        try {
+          const updated = JSON.parse(e.newValue);
+          if (Array.isArray(updated)) {
+            setPendingApprovals(updated);
+          }
+        } catch (err) {
+          console.error("Storage sync error for pending approvals:", err);
+        }
+      }
+    };
+    window.addEventListener('storage', handleApprovalsStorage);
+    return () => window.removeEventListener('storage', handleApprovalsStorage);
+  }, []);
   const [adminBranches, setAdminBranches] = useState([]);
 
   // Photo URL input states
@@ -1869,7 +1910,11 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           fullUpdatedRes: updatedResObj
         };
 
-        setPendingApprovals(prev => [newApprovalRequest, ...prev.filter(a => a.restaurantId !== adminEditingId)]);
+        const nextPending = [newApprovalRequest, ...pendingApprovals.filter(a => a.restaurantId !== adminEditingId)];
+        setPendingApprovals(nextPending);
+        try {
+          localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(nextPending));
+        } catch (e) {}
 
         setAdminEditingId(null);
         setAdminForm({
@@ -2076,33 +2121,75 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
   };
 
   const handleApproveApproval = (req) => {
-    // If request contains fullUpdatedRes (from actual merchant updates)
+    if (!req) return;
+
+    let updatedRestaurants;
     if (req.fullUpdatedRes) {
-      setRestaurants(restaurants.map(res => {
-        if (res.id === req.restaurantId) {
-          return req.fullUpdatedRes;
-        }
-        return res;
-      }));
-    } else {
-      // Preseeded mock approval change logic
-      setRestaurants(restaurants.map(res => {
-        if (res.id === req.restaurantId) {
+      updatedRestaurants = restaurants.map(res => {
+        if (res.id === req.restaurantId || res.name === req.restaurantName) {
           return {
             ...res,
-            operatingHours: req.changes.operatingHours || res.operatingHours,
-            priceTier: req.changes.priceTier || res.priceTier
+            ...req.fullUpdatedRes,
+            id: res.id || req.restaurantId
           };
         }
         return res;
+      });
+    } else {
+      updatedRestaurants = restaurants.map(res => {
+        const isMatch = res.id === req.restaurantId ||
+          res.name === req.restaurantName ||
+          (req.id === 'appr-1' && (res.id === 'res-1' || (res.name && res.name.toLowerCase().includes('everybody'))));
+
+        if (isMatch) {
+          return {
+            ...res,
+            operatingHours: req.changes.operatingHours || res.operatingHours,
+            priceTier: req.changes.priceTier || res.priceTier,
+            ...(req.changes.name ? { name: req.changes.name } : {}),
+            ...(req.changes.address ? { address: req.changes.address } : {}),
+            ...(req.changes.branches ? { branches: req.changes.branches } : {}),
+            ...(req.changes.menu ? { menu: req.changes.menu } : {})
+          };
+        }
+        return res;
+      });
+    }
+
+    setRestaurants(updatedRestaurants);
+    const newPending = pendingApprovals.filter(a => a.id !== req.id);
+    setPendingApprovals(newPending);
+
+    // Save to localStorage immediately
+    try {
+      localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(updatedRestaurants));
+      localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(newPending));
+    } catch (e) {
+      console.error("Save error during approval:", e);
+    }
+
+    // Sync selected restaurant drawer & active trip if present
+    if (selectedRestaurant) {
+      const match = updatedRestaurants.find(r => r.id === selectedRestaurant.id || r.name === selectedRestaurant.name);
+      if (match) setSelectedRestaurant(match);
+    }
+    if (activeTrip && activeTrip.length > 0) {
+      setActiveTrip(prevTrip => prevTrip.map(item => {
+        const match = updatedRestaurants.find(r => r.id === item.id || r.name === item.name);
+        return match ? { ...item, ...match } : item;
       }));
     }
-    setPendingApprovals(pendingApprovals.filter(a => a.id !== req.id));
-    alert(`Success: Merchant changes for "${req.restaurantName}" approved and published to the public feed.`);
+
+    alert(`✅ Approved & Published Live!\n\nMerchant changes for "${req.restaurantName}" have been approved and published to the live public feed.`);
   };
 
   const handleRejectApproval = (req) => {
-    setPendingApprovals(pendingApprovals.filter(a => a.id !== req.id));
+    if (!req) return;
+    const newPending = pendingApprovals.filter(a => a.id !== req.id);
+    setPendingApprovals(newPending);
+    try {
+      localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(newPending));
+    } catch (e) {}
     alert(`Dismissed: Changes requested by "${req.restaurantName}" have been rejected and cleared.`);
   };
 
