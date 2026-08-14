@@ -2448,9 +2448,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   <span className="text-[10px] bg-terracotta text-white px-2 py-0.5 rounded font-black uppercase">
                     {adminRole === 'superadmin' ? 'Super Admin' : 'Merchant Owner'}
                   </span>
-                  <span className="text-[9px] bg-emerald-700/80 text-emerald-100 px-2 py-0.5 rounded-full font-bold inline-flex items-center gap-1 border border-emerald-500/40 shadow-2xs">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-ping"></span> Live Cross-Device Sync Active
-                  </span>
                 </h1>
                 <p className="text-[10px] text-gray-300 font-medium tracking-wide">
                   SECURE HERITAGE DATABASE MANAGER & MERCHANT ANALYTICS CORE
