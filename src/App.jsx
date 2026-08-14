@@ -27,7 +27,7 @@ import {
   Database,
   Briefcase,
   Layers,
-  Map,
+  Map as MapIcon,
   X,
   Sparkles,
   MessageSquare,
@@ -519,10 +519,13 @@ function App() {
       const unsub = subscribeToRestaurants((cloudRestaurants) => {
         if (Array.isArray(cloudRestaurants) && cloudRestaurants.length > 0) {
           setRestaurants(prev => {
-            const cloudMap = new Map(cloudRestaurants.map(r => [r.id, r]));
-            const merged = prev.map(r => cloudMap.get(r.id) || r);
+            const cloudDict = {};
+            cloudRestaurants.forEach(r => {
+              if (r && r.id) cloudDict[r.id] = r;
+            });
+            const merged = prev.map(r => cloudDict[r.id] || r);
             cloudRestaurants.forEach(cr => {
-              if (!merged.some(r => r.id === cr.id)) {
+              if (cr && cr.id && !merged.some(r => r.id === cr.id)) {
                 merged.push(cr);
               }
             });
@@ -5215,7 +5218,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   <div className="bento-card p-5 bg-[#FAF8F5] border border-[#E9E5DE] space-y-4 h-full flex flex-col">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#E9E5DE] pb-2">
                       <h3 className="text-xs font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5">
-                        <Map className="h-4.5 w-4.5 text-terracotta" /> Provincial Route Mapping Engine
+                        <MapIcon className="h-4.5 w-4.5 text-terracotta" /> Provincial Route Mapping Engine
                       </h3>
                       
                       {/* Nav Controls */}
