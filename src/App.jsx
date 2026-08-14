@@ -48,7 +48,8 @@ import {
   saveChangeRequestToCloud,
   updateChangeRequestInCloud,
   subscribeToRestaurants,
-  saveRestaurantToCloud
+  saveRestaurantToCloud,
+  deleteRestaurantFromCloud
 } from './firebase';
 
 
@@ -497,7 +498,7 @@ function App() {
     return () => window.removeEventListener('storage', handleApprovalsStorage);
   }, []);
 
-  // Firebase Real-Time Firestore Cloud Sync Listener (Cross-Device)
+  // Firebase Real-Time Firestore Cloud Sync Listener (Change Requests)
   useEffect(() => {
     if (isFirebaseConfigured()) {
       const unsub = subscribeToChangeRequests((cloudRequests) => {
@@ -506,6 +507,30 @@ function App() {
           try {
             localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(cloudRequests));
           } catch (e) {}
+        }
+      });
+      return () => unsub();
+    }
+  }, []);
+
+  // Firebase Real-Time Firestore Cloud Sync Listener (Permanent Restaurants Directory)
+  useEffect(() => {
+    if (isFirebaseConfigured()) {
+      const unsub = subscribeToRestaurants((cloudRestaurants) => {
+        if (Array.isArray(cloudRestaurants) && cloudRestaurants.length > 0) {
+          setRestaurants(prev => {
+            const cloudMap = new Map(cloudRestaurants.map(r => [r.id, r]));
+            const merged = prev.map(r => cloudMap.get(r.id) || r);
+            cloudRestaurants.forEach(cr => {
+              if (!merged.some(r => r.id === cr.id)) {
+                merged.push(cr);
+              }
+            });
+            try {
+              localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(merged));
+            } catch (e) {}
+            return merged;
+          });
         }
       });
       return () => unsub();
@@ -2044,8 +2069,18 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       const confirmSave = window.confirm(`Are you sure you want to save all changes for "${nameToSave}"?`);
       if (!confirmSave) return;
 
-      setRestaurants(prev => prev.map(res => res.id === adminEditingId ? updatedResObj : res));
+      setRestaurants(prev => {
+        const next = prev.map(res => res.id === adminEditingId ? updatedResObj : res);
+        try {
+          localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(next));
+        } catch (e) {}
+        return next;
+      });
       setAdminSearchQuery('');
+
+      if (isFirebaseConfigured()) {
+        saveRestaurantToCloud(updatedResObj);
+      }
 
       if (selectedRestaurant && selectedRestaurant.id === adminEditingId) {
         setSelectedRestaurant(updatedResObj);
@@ -2116,7 +2151,16 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           }
         ]
       };
-      setRestaurants([newRes, ...restaurants]);
+      setRestaurants(prev => {
+        const next = [newRes, ...prev];
+        try {
+          localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(next));
+        } catch (e) {}
+        return next;
+      });
+      if (isFirebaseConfigured()) {
+        saveRestaurantToCloud(newRes);
+      }
       alert("New Heritage Restaurant registered successfully.");
     }
 
@@ -2226,8 +2270,17 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
   const deleteRestaurant = (id) => {
     if (confirm("Are you sure you want to remove this Pampanga Heritage listing?")) {
-      setRestaurants(restaurants.filter(r => r.id !== id));
-      setActiveTrip(activeTrip.filter(r => r.id !== id));
+      setRestaurants(prev => {
+        const next = prev.filter(r => r.id !== id);
+        try {
+          localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(next));
+        } catch (e) {}
+        return next;
+      });
+      setActiveTrip(prev => prev.filter(r => r.id !== id));
+      if (isFirebaseConfigured()) {
+        deleteRestaurantFromCloud(id);
+      }
     }
   };
 
@@ -2285,7 +2338,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
     setPendingApprovals(updatedPending);
 
-    // Save to localStorage immediately
+    // Save to localStorage immediately for instant persistence across reloads
     try {
       localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(updatedRestaurants));
       localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(updatedPending));
@@ -2293,7 +2346,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       console.error("Save error during approval:", e);
     }
 
-    // Sync approval status to Firebase Firestore Cloud
+    // Sync approval status & approved restaurant to Firebase Firestore Cloud permanently
     if (isFirebaseConfigured()) {
       updateChangeRequestInCloud(req.id, {
         status: 'approved',
@@ -2301,8 +2354,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         adminNote: adminNote || 'Approved and published live by System Admin.',
         dismissedByMerchant: false
       });
-      if (req.fullUpdatedRes) {
-        saveRestaurantToCloud(req.fullUpdatedRes);
+      const approvedRes = updatedRestaurants.find(r => r.id === req.restaurantId || r.name === req.restaurantName) || req.fullUpdatedRes;
+      if (approvedRes) {
+        saveRestaurantToCloud(approvedRes);
       }
     }
 
