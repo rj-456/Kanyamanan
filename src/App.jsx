@@ -414,7 +414,10 @@ function App() {
       if (saved !== null) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return parsed;
+          return parsed.map(item => ({
+            ...item,
+            status: item.status || 'pending'
+          }));
         }
       }
     } catch (e) {
@@ -426,6 +429,7 @@ function App() {
         restaurantId: 'res-1',
         restaurantName: "Everybody's Cafe",
         submittedAt: 'Today, 10:30 AM',
+        status: 'pending',
         original: {
           operatingHours: "07:00 AM - 09:00 PM",
           priceTier: "$$"
@@ -708,8 +712,9 @@ function App() {
 
 
 
-  // Tourist Attraction Admin Management States
-  const [adminSectionTab, setAdminSectionTab] = useState('restaurants'); // 'restaurants' | 'attractions'
+  // Tourist Attraction & Change Request Admin Management States
+  const [adminSectionTab, setAdminSectionTab] = useState('restaurants'); // 'restaurants' | 'requests' | 'attractions'
+  const [adminRequestFilterTab, setAdminRequestFilterTab] = useState('pending'); // 'pending' | 'all' | 'approved' | 'rejected'
   const [adminEditingAttractionId, setAdminEditingAttractionId] = useState(null);
   const [adminAttractionForm, setAdminAttractionForm] = useState({
     name: '',
@@ -1876,6 +1881,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           changes.name = nameToSave;
           original.name = originalRes.name;
         }
+        if (originalRes && originalRes.municipality !== adminForm.municipality) {
+          changes.municipality = adminForm.municipality;
+          original.municipality = originalRes.municipality;
+        }
         if (originalRes && originalRes.operatingHours !== adminForm.operatingHours) {
           changes.operatingHours = adminForm.operatingHours;
           original.operatingHours = originalRes.operatingHours;
@@ -1914,17 +1923,21 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           original.menu = (originalRes?.menu || []).map(m => `${m.name} (₱${m.price})`).join(', ');
         }
 
+        const nowFormatted = new Date().toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+
         const newApprovalRequest = {
           id: 'appr-' + Date.now(),
           restaurantId: targetResId,
           restaurantName: nameToSave,
-          submittedAt: 'Today, ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          original,
+          submittedAt: nowFormatted,
+          status: 'pending',
+          original: Object.keys(original).length > 0 ? original : { profile: originalRes?.name || 'Current Published Profile' },
           changes: Object.keys(changes).length > 0 ? changes : { profile: 'Updated establishment profile & pictures' },
-          fullUpdatedRes: updatedResObj
+          fullUpdatedRes: updatedResObj,
+          dismissedByMerchant: false
         };
 
-        const nextPending = [newApprovalRequest, ...pendingApprovals.filter(a => a.restaurantId !== targetResId && a.id !== newApprovalRequest.id)];
+        const nextPending = [newApprovalRequest, ...pendingApprovals.filter(a => a.id !== newApprovalRequest.id)];
         setPendingApprovals(nextPending);
         try {
           localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(nextPending));
@@ -1941,7 +1954,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         setAdminBranches([]);
         setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
 
-        alert(`📋 Profile Changes Submitted!\n\nYour profile modifications for "${nameToSave}" have been submitted for administrator vetting. They will go live once reviewed and approved by the System Admin.`);
+        alert(`📋 Profile Changes Submitted!\n\nYour profile modifications for "${nameToSave}" have been submitted for administrator vetting. You can monitor its status under "My Change Requests Status & History" in your owner panel.`);
         return;
       }
 
@@ -2136,7 +2149,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     }
   };
 
-  const handleApproveApproval = (req) => {
+  const handleApproveApproval = (req, adminNote = '') => {
     if (!req) return;
 
     let updatedRestaurants;
@@ -2173,13 +2186,27 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     }
 
     setRestaurants(updatedRestaurants);
-    const newPending = pendingApprovals.filter(a => a.id !== req.id);
-    setPendingApprovals(newPending);
+
+    const nowFormatted = new Date().toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    const updatedPending = pendingApprovals.map(a => {
+      if (a.id === req.id) {
+        return {
+          ...a,
+          status: 'approved',
+          reviewedAt: nowFormatted,
+          adminNote: adminNote || 'Approved and published live by System Admin.',
+          dismissedByMerchant: false
+        };
+      }
+      return a;
+    });
+
+    setPendingApprovals(updatedPending);
 
     // Save to localStorage immediately
     try {
       localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(updatedRestaurants));
-      localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(newPending));
+      localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(updatedPending));
     } catch (e) {
       console.error("Save error during approval:", e);
     }
@@ -2196,17 +2223,45 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       }));
     }
 
-    alert(`✅ Approved & Published Live!\n\nMerchant changes for "${req.restaurantName}" have been approved and published to the live public feed.`);
+    alert(`✅ Approved & Published Live!\n\nMerchant changes for "${req.restaurantName}" have been approved and published to the live public feed. The restaurant owner will be notified in their portal.`);
   };
 
   const handleRejectApproval = (req) => {
     if (!req) return;
-    const newPending = pendingApprovals.filter(a => a.id !== req.id);
-    setPendingApprovals(newPending);
+    const reason = prompt(`Provide a reason for rejecting the change request from "${req.restaurantName}" (optional):`, "Information needs further verification by admin.") || "Request denied by administrator.";
+    const nowFormatted = new Date().toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+
+    const updatedPending = pendingApprovals.map(a => {
+      if (a.id === req.id) {
+        return {
+          ...a,
+          status: 'rejected',
+          reviewedAt: nowFormatted,
+          adminNote: reason,
+          dismissedByMerchant: false
+        };
+      }
+      return a;
+    });
+
+    setPendingApprovals(updatedPending);
     try {
-      localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(newPending));
+      localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(updatedPending));
     } catch (e) {}
-    alert(`Dismissed: Changes requested by "${req.restaurantName}" have been rejected and cleared.`);
+    alert(`Dismissed: Changes requested by "${req.restaurantName}" have been rejected. The restaurant owner will be notified in their portal.`);
+  };
+
+  const handleDismissMerchantNotification = (reqId) => {
+    const updatedPending = pendingApprovals.map(a => {
+      if (a.id === reqId) {
+        return { ...a, dismissedByMerchant: true };
+      }
+      return a;
+    });
+    setPendingApprovals(updatedPending);
+    try {
+      localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(updatedPending));
+    } catch (e) {}
   };
 
   // =========================================================================
@@ -2449,22 +2504,36 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         
         {/* Admin Section Navigation Tabs (Super Admin / Merchant) */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="flex border-b border-[#E9E5DE] bg-white rounded-xl p-1.5 shadow-xs">
+          <div className="flex border-b border-[#E9E5DE] bg-white rounded-xl p-1.5 shadow-xs gap-1">
             <button
               type="button"
               onClick={() => setAdminSectionTab('restaurants')}
               className={`flex-1 py-2.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${adminSectionTab === 'restaurants' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
             >
-              <span>🏪</span> Heritage Restaurants & Branches ({restaurants.length})
+              <span>🏪</span> Heritage Restaurants ({restaurants.length})
             </button>
             {adminRole === 'superadmin' && (
-              <button
-                type="button"
-                onClick={() => setAdminSectionTab('attractions')}
-                className={`flex-1 py-2.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${adminSectionTab === 'attractions' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
-              >
-                <span>🏛️</span> Tourist Attractions & Heritage Sites ({attractions.length})
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setAdminSectionTab('requests')}
+                  className={`flex-1 py-2.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 relative ${adminSectionTab === 'requests' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
+                >
+                  <span>📋</span> Change Requests Queue ({pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length})
+                  {pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length > 0 && (
+                    <span className="px-1.5 py-0.5 text-[9px] bg-amber-500 text-white font-black rounded-full animate-pulse ml-1">
+                      {pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length} PENDING
+                    </span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAdminSectionTab('attractions')}
+                  className={`flex-1 py-2.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${adminSectionTab === 'attractions' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
+                >
+                  <span>🏛️</span> Tourist Attractions ({attractions.length})
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -2477,24 +2546,168 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
               {/* Form panel */}
               {adminRole === 'merchant' && !adminEditingId ? (
-                <div className="bento-card p-6 bg-white space-y-3 shadow-sm border-[#E9E5DE] text-center">
-                  <span className="text-3xl block">🏪</span>
-                  <h3 className="text-sm font-extrabold text-charcoal tracking-tight">
-                    Merchant Owner Panel: {restaurants.find(r => r.id === merchantResId)?.name || "Your Restaurant"}
-                  </h3>
-                  <p className="text-xs text-charcoal-light max-w-md mx-auto leading-relaxed">
-                    To modify operating hours, coordinates, price levels, photos, branches, or update your signature catalog dishes, click the button below or in the database table.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const targetRes = restaurants.find(r => r.id === merchantResId);
-                      if (targetRes) startAdminEdit(targetRes);
-                    }}
-                    className="mt-2 px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs inline-flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Edit className="h-4 w-4" /> Edit My Restaurant Profile
-                  </button>
+                <div className="space-y-4">
+                  {/* Active Decision Notification Banner for Restaurant Owner */}
+                  {(() => {
+                    const currentRes = restaurants.find(r => r.id === merchantResId);
+                    const myRequests = pendingApprovals.filter(a => a.restaurantId === merchantResId || (currentRes && a.restaurantName === currentRes.name));
+                    const latestUnreadDecision = myRequests.find(a => (a.status === 'approved' || a.status === 'rejected') && !a.dismissedByMerchant);
+
+                    if (!latestUnreadDecision) return null;
+
+                    if (latestUnreadDecision.status === 'approved') {
+                      return (
+                        <div className="p-4 bg-emerald-50 border-2 border-emerald-400 rounded-xl shadow-xs flex items-start justify-between gap-3 animate-fade-in">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 bg-emerald-600 text-white rounded-lg mt-0.5">
+                              <CheckCircle className="h-5 w-5" />
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="text-xs font-black text-emerald-900 uppercase tracking-wider m-0">
+                                🎉 Change Request Approved & Live!
+                              </h4>
+                              <p className="text-xs text-emerald-800 font-medium m-0 leading-relaxed">
+                                Your submitted info updates for <strong>"{latestUnreadDecision.restaurantName}"</strong> (submitted on {latestUnreadDecision.submittedAt}) were <strong>APPROVED</strong> by the System Admin on {latestUnreadDecision.reviewedAt} and are now published live!
+                              </p>
+                              {latestUnreadDecision.adminNote && (
+                                <p className="text-[11px] text-emerald-700 italic m-0">
+                                  System Admin Note: "{latestUnreadDecision.adminNote}"
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleDismissMerchantNotification(latestUnreadDecision.id)}
+                            className="text-xs font-bold text-emerald-800 hover:text-emerald-950 underline shrink-0 cursor-pointer"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    if (latestUnreadDecision.status === 'rejected') {
+                      return (
+                        <div className="p-4 bg-rose-50 border-2 border-rose-400 rounded-xl shadow-xs flex items-start justify-between gap-3 animate-fade-in">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 bg-rose-600 text-white rounded-lg mt-0.5">
+                              <AlertTriangle className="h-5 w-5" />
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="text-xs font-black text-rose-900 uppercase tracking-wider m-0">
+                                ❌ Change Request Denied by Administrator
+                              </h4>
+                              <p className="text-xs text-rose-800 font-medium m-0 leading-relaxed">
+                                Your submitted info updates for <strong>"{latestUnreadDecision.restaurantName}"</strong> (submitted on {latestUnreadDecision.submittedAt}) were <strong>DENIED</strong> by the System Admin on {latestUnreadDecision.reviewedAt}.
+                              </p>
+                              <p className="text-xs font-bold text-rose-900 bg-white/80 p-2 rounded border border-rose-200 m-0">
+                                Reason: "{latestUnreadDecision.adminNote || 'Information needs further verification by administrator.'}"
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleDismissMerchantNotification(latestUnreadDecision.id)}
+                            className="text-xs font-bold text-rose-800 hover:text-rose-950 underline shrink-0 cursor-pointer"
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    return null;
+                  })()}
+
+                  <div className="bento-card p-6 bg-white space-y-4 shadow-sm border-[#E9E5DE]">
+                    <div className="text-center space-y-2">
+                      <span className="text-3xl block">🏪</span>
+                      <h3 className="text-sm font-extrabold text-charcoal tracking-tight">
+                        Merchant Owner Control Panel: {restaurants.find(r => r.id === merchantResId)?.name || "Your Restaurant"}
+                      </h3>
+                      <p className="text-xs text-charcoal-light max-w-md mx-auto leading-relaxed">
+                        To modify operating hours, coordinates, price levels, photos, branches, or update your signature catalog dishes, click the button below to submit a change request to the System Admin.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const targetRes = restaurants.find(r => r.id === merchantResId);
+                          if (targetRes) startAdminEdit(targetRes);
+                        }}
+                        className="mt-2 px-5 py-2.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-black transition-all shadow-xs inline-flex items-center gap-1.5 cursor-pointer active:scale-98"
+                      >
+                        <Edit className="h-4 w-4" /> Edit My Restaurant Profile Information
+                      </button>
+                    </div>
+
+                    {/* Restaurant Owner Request History & Status Section */}
+                    {(() => {
+                      const currentRes = restaurants.find(r => r.id === merchantResId);
+                      const myRequests = pendingApprovals.filter(a => a.restaurantId === merchantResId || (currentRes && a.restaurantName === currentRes.name));
+
+                      if (myRequests.length === 0) return null;
+
+                      return (
+                        <div className="mt-6 pt-5 border-t border-[#E9E5DE] text-left space-y-3">
+                          <h4 className="text-xs font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5 m-0">
+                            <span>📋</span> My Change Requests Status & History ({myRequests.length})
+                          </h4>
+                          <div className="space-y-2.5">
+                            {myRequests.map(req => {
+                              const reqStatus = req.status || 'pending';
+                              return (
+                                <div key={req.id} className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-xs space-y-2">
+                                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E9E5DE] pb-2">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-bold text-charcoal text-xs">Submitted on: {req.submittedAt}</span>
+                                    </div>
+                                    <div>
+                                      {reqStatus === 'pending' && (
+                                        <span className="px-2.5 py-1 bg-amber-100 text-amber-800 border border-amber-300 font-extrabold rounded-full text-[10px] inline-flex items-center gap-1">
+                                          <Clock className="h-3 w-3 animate-pulse text-amber-600" /> ⏳ Pending Admin Vetting
+                                        </span>
+                                      )}
+                                      {reqStatus === 'approved' && (
+                                        <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 font-extrabold rounded-full text-[10px] inline-flex items-center gap-1">
+                                          <CheckCircle className="h-3 w-3 text-emerald-600" /> ✅ Approved & Published Live
+                                        </span>
+                                      )}
+                                      {reqStatus === 'rejected' && (
+                                        <span className="px-2.5 py-1 bg-rose-100 text-rose-800 border border-rose-300 font-extrabold rounded-full text-[10px] inline-flex items-center gap-1">
+                                          <AlertTriangle className="h-3 w-3 text-rose-600" /> ❌ Denied / Rejected
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  <div className="bg-white p-2.5 rounded-lg border border-[#E9E5DE] text-[11px] space-y-1">
+                                    <span className="font-bold text-charcoal block">Requested Profile Modifications:</span>
+                                    <div className="text-charcoal-light space-y-0.5">
+                                      {Object.keys(req.changes).map(k => (
+                                        <div key={k}>
+                                          <strong>{k}:</strong> <span className="text-bananaleaf">{typeof req.changes[k] === 'string' ? req.changes[k] : JSON.stringify(req.changes[k])}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  {req.reviewedAt && (
+                                    <div className="text-[10px] text-charcoal-light flex items-center justify-between pt-1">
+                                      <span>Reviewed on: {req.reviewedAt}</span>
+                                      {req.adminNote && (
+                                        <span className="font-semibold text-charcoal italic">Admin Feedback: "{req.adminNote}"</span>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
                 </div>
               ) : (
                 <div className="bento-card p-6 bg-white space-y-4 shadow-sm border-[#E9E5DE]">
@@ -3023,14 +3236,40 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               </div>
               )}
 
-              {/* Super Admin Pending Approvals Queue */}
-              {adminRole === 'superadmin' && pendingApprovals.length > 0 && (
+              {/* Top Alert Banner for System Admin if Pending Requests exist */}
+              {adminRole === 'superadmin' && pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length > 0 && (
+                <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-xl flex flex-wrap items-center justify-between gap-3 shadow-xs animate-fade-in">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-amber-500 text-white rounded-xl shadow-xs animate-pulse">
+                      <Clock className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-amber-950 uppercase tracking-wider m-0">
+                        ⚠️ Pending Merchant Change Request(s) Requiring Admin Action
+                      </h4>
+                      <p className="text-xs text-amber-800 font-medium m-0">
+                        There are <strong>{pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length}</strong> restaurant info change request(s) submitted by owners waiting for vetting.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSectionTab('requests')}
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black rounded-xl transition-all shadow-xs cursor-pointer"
+                  >
+                    Review All Requests Now →
+                  </button>
+                </div>
+              )}
+
+              {/* Super Admin Pending Approvals Queue (Embedded in Restaurants tab) */}
+              {adminRole === 'superadmin' && pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length > 0 && (
                 <div className="bento-card p-5 bg-white border border-[#E9E5DE] rounded-xl space-y-4 shadow-sm">
                   <h3 className="text-xs font-bold text-terracotta uppercase tracking-wider flex items-center gap-1.5">
-                    <Clock className="h-4.5 w-4.5 text-terracotta animate-pulse" /> Pending Registry Approvals Queue ({pendingApprovals.length})
+                    <Clock className="h-4.5 w-4.5 text-terracotta animate-pulse" /> Pending Registry Approvals Queue ({pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length})
                   </h3>
                   <div className="space-y-3">
-                    {pendingApprovals.map(req => (
+                    {pendingApprovals.filter(a => (a.status || 'pending') === 'pending').map(req => (
                       <div key={req.id} className="p-4 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-xs space-y-3 animate-fade-in">
                         <div className="flex justify-between items-center border-b border-[#E9E5DE] pb-2">
                           <span className="font-extrabold text-charcoal text-sm">🏪 {req.restaurantName}</span>
@@ -3080,13 +3319,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         <div className="flex gap-2 justify-end pt-1 border-t border-[#E9E5DE]">
                           <button
                             onClick={() => handleRejectApproval(req)}
-                            className="px-3.5 py-1.5 border border-terracotta/20 text-terracotta font-extrabold rounded-lg hover:bg-terracotta/5 transition-colors"
+                            className="px-3.5 py-1.5 border border-terracotta/20 text-terracotta font-extrabold rounded-lg hover:bg-terracotta/5 transition-colors cursor-pointer"
                           >
                             Reject & Dismiss
                           </button>
                           <button
                             onClick={() => handleApproveApproval(req)}
-                            className="px-4 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white font-extrabold rounded-lg shadow-sm transition-colors"
+                            className="px-4 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white font-extrabold rounded-lg shadow-sm transition-colors cursor-pointer"
                           >
                             Approve & Publish Live
                           </button>
@@ -3237,6 +3476,228 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* SYSTEM ADMIN DEDICATED CHANGE REQUESTS VETTING & CONTROL PANEL */}
+          {/* ========================================================================= */}
+          {adminSectionTab === 'requests' && adminRole === 'superadmin' && (
+            <div className="space-y-6">
+              {/* Request Stats Banner */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div className="bento-card p-4 bg-white border border-[#E9E5DE] rounded-xl flex items-center gap-3">
+                  <div className="p-3 bg-terracotta/10 text-terracotta rounded-xl">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider block">Total Requests</span>
+                    <span className="text-xl font-black text-charcoal">{pendingApprovals.length}</span>
+                  </div>
+                </div>
+
+                <div className="bento-card p-4 bg-white border border-amber-200 rounded-xl flex items-center gap-3">
+                  <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                    <Clock className="h-5 w-5 animate-pulse" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider block">Pending Review</span>
+                    <span className="text-xl font-black text-amber-900">{pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length}</span>
+                  </div>
+                </div>
+
+                <div className="bento-card p-4 bg-white border border-emerald-200 rounded-xl flex items-center gap-3">
+                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <CheckCircle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Approved & Live</span>
+                    <span className="text-xl font-black text-emerald-900">{pendingApprovals.filter(a => a.status === 'approved').length}</span>
+                  </div>
+                </div>
+
+                <div className="bento-card p-4 bg-white border border-rose-200 rounded-xl flex items-center gap-3">
+                  <div className="p-3 bg-rose-50 text-rose-600 rounded-xl">
+                    <AlertTriangle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-rose-800 uppercase tracking-wider block">Denied / Rejected</span>
+                    <span className="text-xl font-black text-rose-900">{pendingApprovals.filter(a => a.status === 'rejected').length}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Request Filter Tabs & Queue */}
+              <div className="bento-card p-6 bg-white space-y-5 border-[#E9E5DE] shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E9E5DE] pb-4">
+                  <div>
+                    <h3 className="text-sm font-extrabold text-charcoal uppercase tracking-wider flex items-center gap-2 m-0">
+                      <span>📋</span> Merchant Profile Change Requests Vetting Center
+                    </h3>
+                    <span className="text-[11px] text-charcoal-light font-medium block mt-0.5">
+                      Review, vet, approve or deny restaurant owner profile modifications
+                    </span>
+                  </div>
+
+                  {/* Filter Pills */}
+                  <div className="flex items-center gap-1.5 bg-ivory p-1 rounded-xl border border-[#E9E5DE] text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setAdminRequestFilterTab('pending')}
+                      className={`px-3 py-1.5 rounded-lg font-extrabold transition-all cursor-pointer ${adminRequestFilterTab === 'pending' ? 'bg-amber-500 text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal'}`}
+                    >
+                      ⏳ Pending Queue ({pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAdminRequestFilterTab('all')}
+                      className={`px-3 py-1.5 rounded-lg font-extrabold transition-all cursor-pointer ${adminRequestFilterTab === 'all' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal'}`}
+                    >
+                      All Requests ({pendingApprovals.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAdminRequestFilterTab('approved')}
+                      className={`px-3 py-1.5 rounded-lg font-extrabold transition-all cursor-pointer ${adminRequestFilterTab === 'approved' ? 'bg-emerald-600 text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal'}`}
+                    >
+                      ✅ Approved ({pendingApprovals.filter(a => a.status === 'approved').length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAdminRequestFilterTab('rejected')}
+                      className={`px-3 py-1.5 rounded-lg font-extrabold transition-all cursor-pointer ${adminRequestFilterTab === 'rejected' ? 'bg-rose-600 text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal'}`}
+                    >
+                      ❌ Denied ({pendingApprovals.filter(a => a.status === 'rejected').length})
+                    </button>
+                  </div>
+                </div>
+
+                {/* Request List */}
+                {(() => {
+                  const filteredRequests = pendingApprovals.filter(req => {
+                    const status = req.status || 'pending';
+                    if (adminRequestFilterTab === 'pending') return status === 'pending';
+                    if (adminRequestFilterTab === 'approved') return status === 'approved';
+                    if (adminRequestFilterTab === 'rejected') return status === 'rejected';
+                    return true;
+                  });
+
+                  if (filteredRequests.length === 0) {
+                    return (
+                      <div className="py-12 text-center text-charcoal-light space-y-2 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE]">
+                        <span className="text-3xl block">📋</span>
+                        <p className="text-xs font-bold uppercase tracking-wider">No change requests found in this view filter</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-4">
+                      {filteredRequests.map(req => {
+                        const status = req.status || 'pending';
+                        return (
+                          <div key={req.id} className="p-5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-xs space-y-4 shadow-2xs animate-fade-in">
+                            <div className="flex flex-wrap items-center justify-between border-b border-[#E9E5DE] pb-3 gap-2">
+                              <div>
+                                <span className="font-extrabold text-charcoal text-base block">🏪 {req.restaurantName}</span>
+                                <span className="text-[10px] text-charcoal-light font-medium uppercase tracking-wider">Submitted: {req.submittedAt} • Request ID: {req.id}</span>
+                              </div>
+                              <div>
+                                {status === 'pending' && (
+                                  <span className="px-3 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 font-extrabold rounded-full text-xs inline-flex items-center gap-1.5">
+                                    <Clock className="h-3.5 w-3.5 text-amber-600 animate-pulse" /> ⏳ Pending Vetting
+                                  </span>
+                                )}
+                                {status === 'approved' && (
+                                  <span className="px-3 py-1.5 bg-emerald-100 text-emerald-900 border border-emerald-300 font-extrabold rounded-full text-xs inline-flex items-center gap-1.5">
+                                    <CheckCircle className="h-3.5 w-3.5 text-emerald-600" /> ✅ Approved & Published Live
+                                  </span>
+                                )}
+                                {status === 'rejected' && (
+                                  <span className="px-3 py-1.5 bg-rose-100 text-rose-900 border border-rose-300 font-extrabold rounded-full text-xs inline-flex items-center gap-1.5">
+                                    <AlertTriangle className="h-3.5 w-3.5 text-rose-600" /> ❌ Denied / Rejected
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <span className="block text-[10px] font-black text-charcoal-light uppercase tracking-wider mb-1.5">
+                                  Current Published Profile State
+                                </span>
+                                <div className="space-y-1.5 bg-white border border-[#E9E5DE] p-3 rounded-xl text-charcoal-light leading-relaxed">
+                                  {Object.keys(req.original).filter(k => k !== 'images' && k !== 'image').map(key => (
+                                    <div key={key}>
+                                      <strong className="text-charcoal">{key}:</strong> {typeof req.original[key] === 'string' ? req.original[key] : JSON.stringify(req.original[key])}
+                                    </div>
+                                  ))}
+                                  {Array.isArray(req.original.images) && req.original.images.length > 0 && (
+                                    <div className="pt-2 flex flex-wrap gap-1.5">
+                                      <span className="w-full text-[9px] font-bold text-charcoal-light uppercase">Original Gallery Photos:</span>
+                                      {req.original.images.map((img, i) => (
+                                        <img key={i} src={img} className="w-12 h-12 rounded-lg object-cover border border-[#E9E5DE]" alt="Original photo" />
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div>
+                                <span className="block text-[10px] font-black text-terracotta uppercase tracking-wider mb-1.5">
+                                  Proposed Profile Modifications
+                                </span>
+                                <div className="space-y-1.5 bg-white border border-terracotta/30 p-3 rounded-xl text-charcoal font-semibold leading-relaxed shadow-2xs">
+                                  {Object.keys(req.changes).filter(k => k !== 'images' && k !== 'image').map(key => (
+                                    <div key={key} className="flex flex-wrap gap-1 items-center">
+                                      <span className="text-charcoal font-bold">{key}:</span>
+                                      <span className="text-bananaleaf font-extrabold">{typeof req.changes[key] === 'string' ? req.changes[key] : JSON.stringify(req.changes[key])}</span>
+                                    </div>
+                                  ))}
+                                  {Array.isArray(req.changes.images) && req.changes.images.length > 0 && (
+                                    <div className="pt-2 flex flex-wrap gap-1.5">
+                                      <span className="w-full text-[9px] font-bold text-terracotta uppercase">New Proposed Gallery Photos:</span>
+                                      {req.changes.images.map((img, i) => (
+                                        <img key={i} src={img} className="w-12 h-12 rounded-lg object-cover border border-terracotta/40 shadow-xs" alt="New photo" />
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {status === 'pending' ? (
+                              <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-[#E9E5DE]">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRejectApproval(req)}
+                                  className="px-4 py-2 border border-rose-300 text-rose-700 font-extrabold rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
+                                >
+                                  ❌ Deny & Dismiss Request
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleApproveApproval(req)}
+                                  className="px-5 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white font-black rounded-xl shadow-sm transition-colors cursor-pointer flex items-center gap-1.5"
+                                >
+                                  <CheckCircle className="h-4 w-4" /> Approve & Publish Live
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="pt-2 border-t border-[#E9E5DE] text-[11px] text-charcoal-light flex flex-wrap items-center justify-between gap-2 bg-white p-2.5 rounded-lg border">
+                                <span><strong>Reviewed Date:</strong> {req.reviewedAt || 'Recently'}</span>
+                                {req.adminNote && (
+                                  <span className="font-bold text-charcoal"><strong>Admin Note:</strong> "{req.adminNote}"</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}
