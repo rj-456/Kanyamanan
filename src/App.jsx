@@ -43,9 +43,13 @@ import {
   PRESEEDED_ATTRACTIONS
 } from './mockData';
 import {
-  startCloudSync,
-  pushCloudChangeRequests
-} from './cloudSync';
+  isFirebaseConfigured,
+  subscribeToChangeRequests,
+  saveChangeRequestToCloud,
+  updateChangeRequestInCloud,
+  subscribeToRestaurants,
+  saveRestaurantToCloud
+} from './firebase';
 
 
 // Distance calculator helper between two lat/lng points in kilometers
@@ -473,14 +477,19 @@ function App() {
     return () => window.removeEventListener('storage', handleApprovalsStorage);
   }, []);
 
-  // Zero-Config Real-Time Cross-Device Cloud Sync Listener
+  // Firebase Real-Time Firestore Cloud Sync Listener (Cross-Device)
   useEffect(() => {
-    const unsub = startCloudSync((cloudRequests) => {
-      if (Array.isArray(cloudRequests)) {
-        setPendingApprovals(cloudRequests);
-      }
-    });
-    return () => unsub();
+    if (isFirebaseConfigured()) {
+      const unsub = subscribeToChangeRequests((cloudRequests) => {
+        if (Array.isArray(cloudRequests) && cloudRequests.length > 0) {
+          setPendingApprovals(cloudRequests);
+          try {
+            localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(cloudRequests));
+          } catch (e) {}
+        }
+      });
+      return () => unsub();
+    }
   }, []);
   const [adminBranches, setAdminBranches] = useState([]);
 
@@ -1959,8 +1968,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           console.error("Save error for pending approvals:", e);
         }
 
-        // Broadcast to shared cloud so all devices (phones & PCs) see it instantly
-        pushCloudChangeRequests(nextPending);
+        // Save to Firebase Firestore Cloud in real-time
+        if (isFirebaseConfigured()) {
+          saveChangeRequestToCloud(newApprovalRequest);
+        }
 
         setAdminEditingId(null);
         setAdminForm({
@@ -2228,8 +2239,18 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       console.error("Save error during approval:", e);
     }
 
-    // Broadcast approval to shared cloud so merchant device receives approval status
-    pushCloudChangeRequests(updatedPending);
+    // Sync approval status to Firebase Firestore Cloud
+    if (isFirebaseConfigured()) {
+      updateChangeRequestInCloud(req.id, {
+        status: 'approved',
+        reviewedAt: nowFormatted,
+        adminNote: adminNote || 'Approved and published live by System Admin.',
+        dismissedByMerchant: false
+      });
+      if (req.fullUpdatedRes) {
+        saveRestaurantToCloud(req.fullUpdatedRes);
+      }
+    }
 
     // Sync selected restaurant drawer & active trip if present
     if (selectedRestaurant) {
@@ -2269,8 +2290,15 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(updatedPending));
     } catch (e) {}
 
-    // Broadcast rejection to shared cloud so merchant device receives rejection status
-    pushCloudChangeRequests(updatedPending);
+    // Sync rejection status to Firebase Firestore Cloud
+    if (isFirebaseConfigured()) {
+      updateChangeRequestInCloud(req.id, {
+        status: 'rejected',
+        reviewedAt: nowFormatted,
+        adminNote: reason,
+        dismissedByMerchant: false
+      });
+    }
     alert(`Dismissed: Changes requested by "${req.restaurantName}" have been rejected. The restaurant owner will be notified in their portal.`);
   };
 
@@ -2286,8 +2314,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(updatedPending));
     } catch (e) {}
 
-    // Broadcast dismissal to shared cloud
-    pushCloudChangeRequests(updatedPending);
+    // Sync dismissal to Firebase Firestore Cloud
+    if (isFirebaseConfigured()) {
+      updateChangeRequestInCloud(reqId, { dismissedByMerchant: true });
+    }
   };
 
   // =========================================================================
