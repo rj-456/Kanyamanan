@@ -697,6 +697,42 @@ function App() {
   const [completionActiveTab, setCompletionActiveTab] = useState('polaroid');
   const [slotPhotos, setSlotPhotos] = useState({});
 
+  // Robust cross-origin safe image loader (prevents canvas tainting and download failures)
+  const loadSafeImage = (url) => {
+    if (!url) return Promise.resolve(null);
+    return new Promise((resolve) => {
+      if (typeof url === 'string' && url.startsWith('data:')) {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null);
+        img.src = url;
+        return;
+      }
+
+      // Try fetching as a blob first to get a local Object URL (never taints canvas!)
+      fetch(url, { mode: 'cors' })
+        .then((res) => {
+          if (!res.ok) throw new Error('Fetch failed with status ' + res.status);
+          return res.blob();
+        })
+        .then((blob) => {
+          const blobUrl = URL.createObjectURL(blob);
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = blobUrl;
+        })
+        .catch(() => {
+          // Fallback to Image element with crossOrigin
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = url;
+        });
+    });
+  };
+
   // Helper to distinguish tourist destination vs culinary kitchen for authentic Kapampangan praise
   const getPraiseText = (stop) => {
     if (!stop) return 'Manyaman Keni!';
@@ -718,7 +754,7 @@ function App() {
   };
 
   // Single Polaroid Card Downloader with Authentic Kapampangan Passport Stamp
-  const downloadSinglePolaroid = (stop, pIdx) => {
+  const downloadSinglePolaroid = async (stop, pIdx) => {
     const canvas = document.createElement('canvas');
     canvas.width = 600;
     canvas.height = 720;
@@ -744,58 +780,50 @@ function App() {
     const imgW = 530;
     const imgH = 460;
 
-    const renderTextAndStamp = () => {
-      // Clean Red Kapampangan Municipality Stamp (No duplicate praise)
-      ctx.strokeStyle = '#C85A32';
-      ctx.lineWidth = 2.5;
-      ctx.strokeRect(imgX + imgW - 140, imgY + imgH - 45, 130, 36);
-      ctx.fillStyle = '#C85A32';
-      ctx.font = '900 12px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 75, imgY + imgH - 22);
-
-      // Stop Title
-      ctx.fillStyle = '#1F2937';
-      ctx.font = 'bold 24px serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(stop.name, canvas.width / 2, 555);
-
-      // Dynamic Kapampangan Praise Subtitle (Manyaman Keni! for kitchens, Malagu Keni! for tourist spots)
-      const praise = getPraiseText(stop);
-      ctx.fillStyle = '#2C5E3B';
-      ctx.font = 'bold 16px sans-serif';
-      ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} ✨`, canvas.width / 2, 595);
-
-      // Date Stamp
-      ctx.fillStyle = '#9CA3AF';
-      ctx.font = '12px monospace';
-      ctx.fillText(`ENTRY DATE: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}`, canvas.width / 2, 640);
-
-      triggerCanvasDownload(canvas, `Kapampangan_Polaroid_${(stop.name || 'Stop').replace(/[^a-zA-Z0-9]/g, '_')}.png`);
-    };
-
-    if (currentSlotImg) {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        ctx.drawImage(img, imgX, imgY, imgW, imgH);
-        renderTextAndStamp();
-      };
-      img.onerror = () => {
+    const loadedImg = await loadSafeImage(currentSlotImg);
+    if (loadedImg) {
+      try {
+        ctx.drawImage(loadedImg, imgX, imgY, imgW, imgH);
+      } catch (err) {
         ctx.fillStyle = '#FAF8F5';
         ctx.fillRect(imgX, imgY, imgW, imgH);
-        renderTextAndStamp();
-      };
-      img.src = currentSlotImg;
+      }
     } else {
       ctx.fillStyle = '#FAF8F5';
       ctx.fillRect(imgX, imgY, imgW, imgH);
-      renderTextAndStamp();
     }
+
+    // Clean Red Kapampangan Municipality Stamp (No duplicate praise)
+    ctx.strokeStyle = '#C85A32';
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(imgX + imgW - 140, imgY + imgH - 45, 130, 36);
+    ctx.fillStyle = '#C85A32';
+    ctx.font = '900 12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 75, imgY + imgH - 22);
+
+    // Stop Title
+    ctx.fillStyle = '#1F2937';
+    ctx.font = 'bold 24px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(stop.name, canvas.width / 2, 555);
+
+    // Dynamic Kapampangan Praise Subtitle
+    const praise = getPraiseText(stop);
+    ctx.fillStyle = '#2C5E3B';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} ✨`, canvas.width / 2, 595);
+
+    // Date Stamp
+    ctx.fillStyle = '#9CA3AF';
+    ctx.font = '12px monospace';
+    ctx.fillText(`ENTRY DATE: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}`, canvas.width / 2, 640);
+
+    triggerCanvasDownload(canvas, `Kapampangan_Polaroid_${(stop.name || 'Stop').replace(/[^a-zA-Z0-9]/g, '_')}.png`);
   };
 
   // Real Client-Side Canvas Polaroid Album Downloader with Kapampangan Cultural Elements (Draws ALL stops)
-  const downloadRealPolaroidAlbum = () => {
+  const downloadRealPolaroidAlbum = async () => {
     const stops = computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Heritage Kitchen', municipality: 'Pampanga', image: '' }];
     const cardsToDraw = stops; // Draws all polaroids regardless of how many stops!
     const numCols = cardsToDraw.length === 1 ? 1 : 2;
@@ -844,98 +872,86 @@ function App() {
     ctx.font = 'bold 15px sans-serif';
     ctx.fillText(`Trail: "${newItineraryName || 'Pampanga Heritage Culinary Excursion'}" • ${cardsToDraw.length} Stops Visited`, canvas.width / 2, 115);
 
-    let loadedCount = 0;
-    const totalToLoad = cardsToDraw.length;
-
-    const renderCanvasAndDownload = () => {
-      cardsToDraw.forEach((stop, idx) => {
-        const col = idx % 2;
-        const row = Math.floor(idx / 2);
-        let x = 70 + col * (cardW + gapX);
-        if (cardsToDraw.length === 1) {
-          x = (canvas.width - cardW) / 2;
-        }
-        const y = startY + row * (cardH + gapY);
-        const cardW = 515;
-        const cardH = 345;
-
-        // Card Shadow & White Frame
-        ctx.fillStyle = '#FFFFFF';
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 4;
-        ctx.fillRect(x, y, cardW, cardH);
-        ctx.shadowColor = 'transparent';
-
-        // Border
-        ctx.strokeStyle = '#E9E5DE';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, cardW, cardH);
-
-        // Festive Washi Tape
-        ctx.fillStyle = idx % 2 === 0 ? 'rgba(229, 169, 60, 0.8)' : 'rgba(200, 90, 50, 0.75)';
-        ctx.fillRect(x + cardW / 2 - 45, y - 9, 90, 18);
-
-        // Image container
-        const imgX = x + 18;
-        const imgY = y + 18;
-        const imgW = cardW - 36;
-        const imgH = 225;
-
+    // Safely pre-load all images
+    const loadedImages = await Promise.all(
+      cardsToDraw.map((stop, idx) => {
         const currentSlotImg = slotPhotos[idx] !== undefined ? slotPhotos[idx] : (completionPhotos[idx] || stop.image);
+        return loadSafeImage(currentSlotImg);
+      })
+    );
 
-        const renderSingleCardContent = (loadedImg) => {
-          if (loadedImg) {
-            ctx.drawImage(loadedImg, imgX, imgY, imgW, imgH);
-          } else {
-            ctx.fillStyle = '#FAF8F5';
-            ctx.fillRect(imgX, imgY, imgW, imgH);
-          }
+    cardsToDraw.forEach((stop, idx) => {
+      const col = idx % 2;
+      const row = Math.floor(idx / 2);
+      let x = 70 + col * (cardW + gapX);
+      if (cardsToDraw.length === 1) {
+        x = (canvas.width - cardW) / 2;
+      }
+      const y = startY + row * (cardH + gapY);
 
-          // Clean Red Location Stamp on photo corner
-          ctx.strokeStyle = '#C85A32';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(imgX + imgW - 130, imgY + imgH - 36, 120, 28);
-          ctx.fillStyle = '#C85A32';
-          ctx.font = 'bold 10px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 70, imgY + imgH - 18);
+      // Card Shadow & White Frame
+      ctx.fillStyle = '#FFFFFF';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 4;
+      ctx.fillRect(x, y, cardW, cardH);
+      ctx.shadowColor = 'transparent';
 
-          // Name and Details
-          ctx.fillStyle = '#1F2937';
-          ctx.font = 'bold 18px serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 278);
+      // Border
+      ctx.strokeStyle = '#E9E5DE';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, cardW, cardH);
 
-          const praise = getPraiseText(stop);
-          ctx.fillStyle = '#2C5E3B';
-          ctx.font = 'bold 12px sans-serif';
-          ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} • Stop #${idx + 1} ✨`, x + cardW / 2, y + 304);
+      // Festive Washi Tape
+      ctx.fillStyle = idx % 2 === 0 ? 'rgba(229, 169, 60, 0.8)' : 'rgba(200, 90, 50, 0.75)';
+      ctx.fillRect(x + cardW / 2 - 45, y - 9, 90, 18);
 
-          ctx.fillStyle = '#9CA3AF';
-          ctx.font = '10px monospace';
-          ctx.fillText(`DATE: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`, x + cardW / 2, y + 326);
+      // Image container
+      const imgX = x + 18;
+      const imgY = y + 18;
+      const imgW = cardW - 36;
+      const imgH = 225;
 
-          loadedCount++;
-          if (loadedCount === totalToLoad) {
-            triggerCanvasDownload(canvas, `Kanyamanan_Kapampangan_Memory_Album.png`);
-          }
-        };
-
-        if (currentSlotImg) {
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = () => renderSingleCardContent(img);
-          img.onerror = () => renderSingleCardContent(null);
-          img.src = currentSlotImg;
-        } else {
-          renderSingleCardContent(null);
+      const loadedImg = loadedImages[idx];
+      if (loadedImg) {
+        try {
+          ctx.drawImage(loadedImg, imgX, imgY, imgW, imgH);
+        } catch (err) {
+          ctx.fillStyle = '#FAF8F5';
+          ctx.fillRect(imgX, imgY, imgW, imgH);
         }
-      });
-    };
+      } else {
+        ctx.fillStyle = '#FAF8F5';
+        ctx.fillRect(imgX, imgY, imgW, imgH);
+      }
 
-    renderCanvasAndDownload();
+      // Clean Red Location Stamp on photo corner
+      ctx.strokeStyle = '#C85A32';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(imgX + imgW - 130, imgY + imgH - 36, 120, 28);
+      ctx.fillStyle = '#C85A32';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 70, imgY + imgH - 18);
+
+      // Name and Details
+      ctx.fillStyle = '#1F2937';
+      ctx.font = 'bold 18px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 278);
+
+      const praise = getPraiseText(stop);
+      ctx.fillStyle = '#2C5E3B';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} • Stop #${idx + 1} ✨`, x + cardW / 2, y + 304);
+
+      ctx.fillStyle = '#9CA3AF';
+      ctx.font = '10px monospace';
+      ctx.fillText(`DATE: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`, x + cardW / 2, y + 326);
+    });
+
+    triggerCanvasDownload(canvas, `Kanyamanan_Kapampangan_Memory_Album.png`);
   };
 
   // Real Client-Side Certificate Downloader with Fun Kapampangan Aesthetics & Logo
@@ -1111,14 +1127,52 @@ function App() {
     logo.onerror = () => renderCanvas(null);
   };
 
-  // Helper function to trigger browser file download
+  // Robust helper function to trigger browser file download without canvas security errors
   const triggerCanvasDownload = (canvas, filename) => {
-    const link = document.createElement('a');
-    link.download = filename;
-    link.href = canvas.toDataURL('image/png');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      if (canvas.toBlob) {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => {
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+            }, 300);
+          } else {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            setTimeout(() => document.body.removeChild(link), 300);
+          }
+        }, 'image/png');
+      } else {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => document.body.removeChild(link), 300);
+      }
+    } catch (err) {
+      console.warn("Canvas toBlob/toDataURL direct export hit security restriction, attempting fallback:", err);
+      try {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => document.body.removeChild(link), 300);
+      } catch (err2) {
+        console.error("Direct download failed:", err2);
+      }
+    }
   };
 
 
