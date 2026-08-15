@@ -87,6 +87,32 @@ const formatChangeKey = (key) => {
   return map[key] || key.charAt(0).toUpperCase() + key.slice(1);
 };
 
+// Accurate Provincial Reference Coordinates for all 22 Municipalities of Pampanga
+const MUNICIPALITY_COORDINATES = {
+  'Angeles City': { lat: 15.1441, lng: 120.5887 },
+  'Apalit': { lat: 14.9497, lng: 120.7583 },
+  'Arayat': { lat: 15.1492, lng: 120.7694 },
+  'Bacolor': { lat: 14.9980, lng: 120.6450 },
+  'Candaba': { lat: 15.0933, lng: 120.8265 },
+  'City of San Fernando': { lat: 15.0300, lng: 120.6800 },
+  'Floridablanca': { lat: 14.9740, lng: 120.5290 },
+  'Guagua': { lat: 14.9701, lng: 120.6300 },
+  'Lubao': { lat: 14.9380, lng: 120.5980 },
+  'Mabalacat City': { lat: 15.2230, lng: 120.5730 },
+  'Macabebe': { lat: 14.9080, lng: 120.7160 },
+  'Magalang': { lat: 15.2180, lng: 120.6600 },
+  'Masantol': { lat: 14.8980, lng: 120.7130 },
+  'Mexico': { lat: 15.0640, lng: 120.7200 },
+  'Minalin': { lat: 14.9680, lng: 120.6840 },
+  'Porac': { lat: 15.0710, lng: 120.5420 },
+  'San Luis': { lat: 15.0410, lng: 120.7930 },
+  'San Simon': { lat: 14.9970, lng: 120.7760 },
+  'Santa Ana': { lat: 15.0960, lng: 120.7700 },
+  'Santa Rita': { lat: 15.0000, lng: 120.6170 },
+  'Santo Tomas': { lat: 14.9850, lng: 120.7150 },
+  'Sasmuan': { lat: 14.9370, lng: 120.6270 }
+};
+
 // Universal Multi-Branch Helper Functions
 const normalizeMun = (m) => {
   if (!m) return '';
@@ -3057,10 +3083,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         </button>
                       </div>
 
-                      <div className="space-y-2.5">
+                      <div className="space-y-3">
                         {adminBranches.map((branch, bIdx) => (
-                          <div key={bIdx} className="p-3 bg-white border border-[#E9E5DE] rounded-xl space-y-2 text-xs shadow-2xs">
-                            <div className="flex items-center justify-between gap-2">
+                          <div key={bIdx} className="p-3.5 bg-white border border-[#E9E5DE] rounded-xl space-y-2.5 text-xs shadow-2xs">
+                            <div className="flex items-center justify-between gap-2 border-b border-[#E9E5DE] pb-1.5">
                               <strong className="text-xs font-black text-charcoal flex items-center gap-1">
                                 📍 Branch #{bIdx + 1}:
                               </strong>
@@ -3080,7 +3106,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Name</label>
                                 <input
                                   type="text"
-                                  placeholder="e.g. SOUQ San Fernando Branch"
+                                  placeholder="e.g. Everybody's Cafe Main Branch"
                                   value={branch.branchName || ''}
                                   onChange={(e) => {
                                     const updated = [...adminBranches];
@@ -3095,8 +3121,15 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <select
                                   value={branch.municipality || 'City of San Fernando'}
                                   onChange={(e) => {
+                                    const mun = e.target.value;
+                                    const coords = MUNICIPALITY_COORDINATES[mun] || { lat: 15.0300, lng: 120.6800 };
                                     const updated = [...adminBranches];
-                                    updated[bIdx] = { ...updated[bIdx], municipality: e.target.value };
+                                    updated[bIdx] = {
+                                      ...updated[bIdx],
+                                      municipality: mun,
+                                      lat: updated[bIdx].lat || coords.lat,
+                                      lng: updated[bIdx].lng || coords.lng
+                                    };
                                     setAdminBranches(updated);
                                   }}
                                   className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] font-bold"
@@ -3110,7 +3143,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Operating Hours</label>
                                 <input
                                   type="text"
-                                  placeholder="e.g. 11:00 AM - 10:00 PM"
+                                  placeholder="e.g. 08:00 AM - 09:00 PM"
                                   value={branch.operatingHours || '09:00 AM - 09:00 PM'}
                                   onChange={(e) => {
                                     const updated = [...adminBranches];
@@ -3121,10 +3154,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 />
                               </div>
                               <div>
-                                <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Exact Address</label>
+                                <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Exact Street / Barangay Address</label>
                                 <input
                                   type="text"
-                                  placeholder="e.g. McArthur Highway, Dolores"
+                                  placeholder="e.g. MacArthur Highway, Del Pilar"
                                   value={branch.address || ''}
                                   onChange={(e) => {
                                     const updated = [...adminBranches];
@@ -3133,6 +3166,86 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   }}
                                   className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5]"
                                 />
+                              </div>
+                            </div>
+
+                            {/* Geo Coordinates & Live Google Maps Pinpoint Helper */}
+                            <div className="p-2.5 bg-ivory rounded-lg border border-[#E9E5DE] space-y-1.5">
+                              <div className="flex flex-wrap items-center justify-between gap-1.5">
+                                <span className="text-[9px] font-black text-charcoal uppercase tracking-wider flex items-center gap-1">
+                                  🧭 Exact Geo-Coordinates (For GPS Routing & Navigation)
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const query = `${branch.branchName || adminForm.name || 'Restaurant'} ${branch.address || ''} ${branch.municipality || 'Pampanga'} Philippines`;
+                                      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
+                                    }}
+                                    className="px-2 py-1 bg-white hover:bg-ivory border border-[#E9E5DE] text-[9px] font-bold text-terracotta rounded-md inline-flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                                    title="Open Google Maps to find exact spot and right-click to copy coordinates"
+                                  >
+                                    🔍 Search on Google Maps ↗
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (!navigator.geolocation) {
+                                        alert("Geolocation not supported by this browser.");
+                                        return;
+                                      }
+                                      navigator.geolocation.getCurrentPosition(
+                                        (pos) => {
+                                          const updated = [...adminBranches];
+                                          updated[bIdx] = {
+                                            ...updated[bIdx],
+                                            lat: Number(pos.coords.latitude.toFixed(6)),
+                                            lng: Number(pos.coords.longitude.toFixed(6))
+                                          };
+                                          setAdminBranches(updated);
+                                          alert(`📍 Current GPS location detected!\n\nLatitude: ${pos.coords.latitude.toFixed(6)}\nLongitude: ${pos.coords.longitude.toFixed(6)}`);
+                                        },
+                                        () => alert("Unable to detect GPS position. Please enter manually or use Google Maps search.")
+                                      );
+                                    }}
+                                    className="px-2 py-1 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-[9px] font-bold rounded-md inline-flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                                  >
+                                    📍 Use My GPS Location
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <div>
+                                  <label className="block text-[8px] font-bold text-charcoal-light uppercase">Latitude (Decimal)</label>
+                                  <input
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g. 15.0320"
+                                    value={branch.lat !== undefined ? branch.lat : 15.0300}
+                                    onChange={(e) => {
+                                      const updated = [...adminBranches];
+                                      updated[bIdx] = { ...updated[bIdx], lat: parseFloat(e.target.value) || 0 };
+                                      setAdminBranches(updated);
+                                    }}
+                                    className="block w-full px-2 py-1 text-xs border border-[#E9E5DE] rounded bg-white font-mono font-bold text-charcoal"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[8px] font-bold text-charcoal-light uppercase">Longitude (Decimal)</label>
+                                  <input
+                                    type="number"
+                                    step="any"
+                                    placeholder="e.g. 120.6860"
+                                    value={branch.lng !== undefined ? branch.lng : 120.6800}
+                                    onChange={(e) => {
+                                      const updated = [...adminBranches];
+                                      updated[bIdx] = { ...updated[bIdx], lng: parseFloat(e.target.value) || 0 };
+                                      setAdminBranches(updated);
+                                    }}
+                                    className="block w-full px-2 py-1 text-xs border border-[#E9E5DE] rounded bg-white font-mono font-bold text-charcoal"
+                                  />
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -3945,21 +4058,95 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     </div>
                   </div>
 
-                  {/* Row 2: Exact Address Input (Distinct from Stories) */}
-                  <div className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl space-y-1">
-                    <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5">
-                      <span>🏠</span> Exact Street / Barangay Address & Location
-                    </label>
-                    <span className="text-[10px] text-charcoal-light block">
-                      Specify the precise street, barangay, or landmark location (separate from description)
-                    </span>
-                    <input
-                      type="text"
-                      placeholder="e.g. Barangay San Nicolas (Sepung Ilog), Santa Ana, Pampanga"
-                      value={adminAttractionForm.address}
-                      onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, address: e.target.value })}
-                      className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-white text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-terracotta"
-                    />
+                  {/* Row 2: Exact Address & Geo-Coordinates with Live Search */}
+                  <div className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl space-y-3">
+                    <div>
+                      <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                        <span>🏠</span> Exact Street / Barangay Address & Location
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Barangay San Nicolas (Sepung Ilog), Santa Ana, Pampanga"
+                        value={adminAttractionForm.address}
+                        onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, address: e.target.value })}
+                        className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-white text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-terracotta"
+                      />
+                    </div>
+
+                    {/* Geo Coordinates & Google Maps Finder for Tourist Destinations */}
+                    <div className="p-3 bg-white rounded-xl border border-[#E9E5DE] space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <span className="text-[10px] font-black text-charcoal uppercase tracking-wider flex items-center gap-1">
+                            🧭 Exact Geo-Coordinates (For GPS Routing & Navigation)
+                          </span>
+                          <span className="text-[9px] text-charcoal-light block">
+                            Used by the Road Route Mapping Engine to navigate tourists accurately to this destination.
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const query = `${adminAttractionForm.name || 'Tourist Attraction'} ${adminAttractionForm.address || ''} ${adminAttractionForm.municipality || 'Pampanga'} Philippines`;
+                              window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, '_blank');
+                            }}
+                            className="px-2.5 py-1 bg-white hover:bg-ivory border border-[#E9E5DE] text-[10px] font-bold text-terracotta rounded-md inline-flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                            title="Open Google Maps to find exact location and right-click to copy coordinates"
+                          >
+                            🔍 Search on Google Maps ↗
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!navigator.geolocation) {
+                                alert("Geolocation not supported by this browser.");
+                                return;
+                              }
+                              navigator.geolocation.getCurrentPosition(
+                                (pos) => {
+                                  setAdminAttractionForm({
+                                    ...adminAttractionForm,
+                                    lat: Number(pos.coords.latitude.toFixed(6)),
+                                    lng: Number(pos.coords.longitude.toFixed(6))
+                                  });
+                                  alert(`📍 Current GPS coordinates detected!\n\nLatitude: ${pos.coords.latitude.toFixed(6)}\nLongitude: ${pos.coords.longitude.toFixed(6)}`);
+                                },
+                                () => alert("Unable to detect GPS position. Please enter coordinates manually or use Google Maps search.")
+                              );
+                            }}
+                            className="px-2.5 py-1 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-[10px] font-bold rounded-md inline-flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                          >
+                            📍 Use My GPS Location
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Latitude (Decimal)</label>
+                          <input
+                            type="number"
+                            step="any"
+                            placeholder="e.g. 15.0960"
+                            value={adminAttractionForm.lat !== undefined ? adminAttractionForm.lat : 15.0300}
+                            onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, lat: parseFloat(e.target.value) || 0 })}
+                            className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] font-mono font-bold text-charcoal"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Longitude (Decimal)</label>
+                          <input
+                            type="number"
+                            step="any"
+                            placeholder="e.g. 120.7700"
+                            value={adminAttractionForm.lng !== undefined ? adminAttractionForm.lng : 120.6800}
+                            onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, lng: parseFloat(e.target.value) || 0 })}
+                            className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] font-mono font-bold text-charcoal"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Row 3: Differentiated Descriptions & Heritage Context */}
@@ -5815,9 +6002,25 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     {selectedRestaurant.priceTier === '$' ? 'Budget' : selectedRestaurant.priceTier === '$$' ? 'Moderate' : 'Premium'}
                   </div>
                   <div>
-                    <strong className="block text-charcoal">Geocoordinates:</strong>
-                    {selectedRestaurant.lat.toFixed(4)}, {selectedRestaurant.lng.toFixed(4)}
+                    <strong className="block text-charcoal">GPS Navigation:</strong>
+                    <span className="font-mono font-bold text-charcoal block">
+                      {(selectedRestaurant.lat || 15.0300).toFixed(4)}°, {(selectedRestaurant.lng || 120.6800).toFixed(4)}°
+                    </span>
                   </div>
+                </div>
+
+                <div className="pt-2 border-t border-[#E9E5DE] flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const lat = selectedRestaurant.lat || 15.0300;
+                      const lng = selectedRestaurant.lng || 120.6800;
+                      window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+                    }}
+                    className="px-3 py-1.5 bg-white hover:bg-ivory border border-[#E9E5DE] rounded-lg text-xs font-bold text-terracotta inline-flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all hover:border-terracotta"
+                  >
+                    🧭 Open in Google Maps Turn-by-Turn Directions ↗
+                  </button>
                 </div>
               </div>
 
@@ -6025,9 +6228,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
             <div className="space-y-1">
               <h3 className="text-base font-extrabold text-charcoal m-0">{selectedAttraction.name}</h3>
-              <span className="text-xs font-bold text-terracotta flex items-center gap-1">
-                📍 {selectedAttraction.address || `${selectedAttraction.municipality}, Pampanga`}
-              </span>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-bold text-terracotta flex items-center gap-1">
+                  📍 {selectedAttraction.address || `${selectedAttraction.municipality}, Pampanga`}
+                </span>
+                <span className="text-[10px] font-mono font-bold text-charcoal-light bg-ivory px-2 py-0.5 rounded border border-[#E9E5DE]">
+                  GPS: {(Number(selectedAttraction.lat) || 15.0300).toFixed(4)}°, {(Number(selectedAttraction.lng) || 120.6800).toFixed(4)}°
+                </span>
+              </div>
             </div>
 
             <div className="space-y-3 text-xs leading-relaxed">
@@ -6041,6 +6249,20 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   <p className="text-charcoal-light leading-relaxed m-0">{selectedAttraction.details}</p>
                 </div>
               )}
+            </div>
+
+            <div className="pt-1 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  const lat = Number(selectedAttraction.lat) || 15.0300;
+                  const lng = Number(selectedAttraction.lng) || 120.6800;
+                  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+                }}
+                className="px-3 py-1.5 bg-white hover:bg-ivory border border-[#E9E5DE] rounded-lg text-xs font-bold text-terracotta inline-flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all hover:border-terracotta"
+              >
+                🧭 Open in Google Maps Turn-by-Turn Directions ↗
+              </button>
             </div>
 
             <div className="pt-3 border-t border-[#E9E5DE] flex gap-2 justify-end">
