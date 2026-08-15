@@ -477,6 +477,8 @@ function App() {
   });
 
   const [newItineraryName, setNewItineraryName] = useState('');
+  const [loadedItineraryId, setLoadedItineraryId] = useState(null);
+  const [loadedItineraryName, setLoadedItineraryName] = useState('');
   const [editingItinId, setEditingItinId] = useState(null);
   const [editingItinName, setEditingItinName] = useState('');
 
@@ -1670,13 +1672,43 @@ function App() {
 
     const updated = [newItin, ...savedItineraries];
     persistSavedItineraries(updated);
-    setNewItineraryName('');
+    setLoadedItineraryId(newItin.id);
+    setLoadedItineraryName(newItin.name);
     setDashboardTab('history');
     alert(`✓ "${newItin.name}" saved permanently to your account (${userProfile.username})!\n\nYour travel history will stay intact even after refreshing or opening from another browser.`);
   };
 
+  const handleUpdateLoadedItinerary = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!loadedItineraryId) return;
+    if (activeTrip.length === 0) {
+      alert("Your trip itinerary has no stops. Please add at least one destination before saving.");
+      return;
+    }
+
+    const nameToUse = (newItineraryName || loadedItineraryName || 'My Itinerary').trim();
+    const updated = savedItineraries.map(item => {
+      if (item.id === loadedItineraryId) {
+        return {
+          ...item,
+          name: nameToUse,
+          stops: computedRoutePath.map(r => r.name),
+          updatedAt: Date.now()
+        };
+      }
+      return item;
+    });
+
+    persistSavedItineraries(updated);
+    setLoadedItineraryName(nameToUse);
+    alert(`✅ Plan Updated!\n\nThe changes to "${nameToUse}" (${activeTrip.length} stops) have been saved directly to your account history.`);
+  };
+
   const handleLoadSavedItinerary = (itin) => {
     if (!itin || !itin.stops) return;
+    setLoadedItineraryId(itin.id);
+    setLoadedItineraryName(itin.name);
+    setNewItineraryName(itin.name);
 
     const matchedStops = itin.stops.map(stop => {
       if (typeof stop === 'object' && stop !== null) return stop;
@@ -5498,28 +5530,79 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                             ))}
                           </div>
 
-                          {/* Save Plan Form */}
-                          <form onSubmit={handleSaveActiveTrip} className="mt-4 pt-4 border-t border-[#E9E5DE] space-y-2">
-                            <label className="block text-[10px] font-black text-charcoal-light uppercase tracking-wider">
-                              Name and Store Your Plan
-                            </label>
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                required
-                                placeholder="e.g. My Heritage Weekend Crawl"
-                                value={newItineraryName}
-                                onChange={(e) => setNewItineraryName(e.target.value)}
-                                className="flex-1 px-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs font-semibold focus:outline-none focus:bg-white"
-                              />
-                              <button
-                                type="submit"
-                                className="px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0"
-                              >
-                                Save Route
-                              </button>
+                          {/* Save or Direct Update Plan Form */}
+                          {loadedItineraryId ? (
+                            <div className="mt-4 pt-4 border-t border-[#E9E5DE] space-y-3">
+                              <div className="p-3 bg-[#E2F1E7]/70 border border-[#2C5E3B]/20 rounded-xl space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] font-black text-[#2C5E3B] uppercase tracking-wider flex items-center gap-1">
+                                    <span>📂</span> Currently Editing: <strong className="text-charcoal underline">{loadedItineraryName}</strong>
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setLoadedItineraryId(null);
+                                      setLoadedItineraryName('');
+                                      setNewItineraryName('');
+                                    }}
+                                    className="text-[10px] font-bold text-terracotta hover:underline cursor-pointer"
+                                    title="Unlink from this plan to save as a new separate plan"
+                                  >
+                                    + Save as New Instead
+                                  </button>
+                                </div>
+                                <div>
+                                  <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Plan Name</label>
+                                  <input
+                                    type="text"
+                                    value={newItineraryName}
+                                    onChange={(e) => setNewItineraryName(e.target.value)}
+                                    placeholder="Itinerary Name"
+                                    className="px-3 py-1.5 text-xs font-bold text-charcoal border border-[#2C5E3B]/30 rounded-lg bg-white w-full focus:outline-none focus:ring-1 focus:ring-[#2C5E3B]"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="flex flex-wrap gap-2 justify-end">
+                                <button
+                                  type="button"
+                                  onClick={handleUpdateLoadedItinerary}
+                                  className="px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  <span>💾</span> Update Plan ({activeTrip.length} Stops)
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleSaveActiveTrip}
+                                  className="px-3.5 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                                >
+                                  + Save as New Copy
+                                </button>
+                              </div>
                             </div>
-                          </form>
+                          ) : (
+                            <form onSubmit={handleSaveActiveTrip} className="mt-4 pt-4 border-t border-[#E9E5DE] space-y-2">
+                              <label className="block text-[10px] font-black text-charcoal-light uppercase tracking-wider">
+                                Name and Store Your Plan
+                              </label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  required
+                                  placeholder="e.g. My Heritage Weekend Crawl"
+                                  value={newItineraryName}
+                                  onChange={(e) => setNewItineraryName(e.target.value)}
+                                  className="flex-1 px-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs font-semibold focus:outline-none focus:bg-white"
+                                />
+                                <button
+                                  type="submit"
+                                  className="px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer"
+                                >
+                                  Save Route
+                                </button>
+                              </div>
+                            </form>
+                          )}
                         </div>
                       )}
                     </div>
