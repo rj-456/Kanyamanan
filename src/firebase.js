@@ -147,3 +147,65 @@ export const deleteRestaurantFromCloud = async (restaurantId) => {
     return false;
   }
 };
+
+/**
+ * Save user itineraries to Firestore (per-account document)
+ */
+export const saveUserItinerariesToCloud = async (userKey, itineraries) => {
+  if (!db || !userKey) return false;
+  try {
+    const cleanKey = String(userKey).toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    const docRef = doc(db, 'user_itineraries', cleanKey);
+    await setDoc(docRef, {
+      userKey: cleanKey,
+      itineraries: itineraries || [],
+      updatedAt: Date.now()
+    }, { merge: true });
+    return true;
+  } catch (err) {
+    console.error("Firestore save user itineraries error:", err);
+    return false;
+  }
+};
+
+/**
+ * Realtime listener for per-account user itineraries in Firestore
+ */
+export const subscribeToUserItineraries = (userKey, onData, onError) => {
+  if (!db || !userKey) return () => {};
+  try {
+    const cleanKey = String(userKey).toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    const docRef = doc(db, 'user_itineraries', cleanKey);
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (Array.isArray(data.itineraries)) {
+          onData(data.itineraries);
+        }
+      }
+    }, (err) => {
+      console.warn("Firestore user itineraries listener error:", err);
+      if (onError) onError(err);
+    });
+    return unsubscribe;
+  } catch (err) {
+    console.warn("Error subscribing to user itineraries:", err);
+    return () => {};
+  }
+};
+
+/**
+ * Save user profile to Firestore
+ */
+export const saveUserProfileToCloud = async (userProfile) => {
+  if (!db || !userProfile) return false;
+  try {
+    const userKey = (userProfile.email || userProfile.username || 'user').toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    const docRef = doc(db, 'users', userKey);
+    await setDoc(docRef, { ...userProfile, updatedAt: Date.now() }, { merge: true });
+    return true;
+  } catch (err) {
+    console.error("Firestore save user profile error:", err);
+    return false;
+  }
+};

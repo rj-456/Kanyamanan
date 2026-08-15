@@ -49,7 +49,10 @@ import {
   updateChangeRequestInCloud,
   subscribeToRestaurants,
   saveRestaurantToCloud,
-  deleteRestaurantFromCloud
+  deleteRestaurantFromCloud,
+  saveUserItinerariesToCloud,
+  subscribeToUserItineraries,
+  saveUserProfileToCloud
 } from './firebase';
 
 
@@ -118,6 +121,40 @@ const normalizeMun = (m) => {
   if (!m) return '';
   if (m === 'Mabalacat') return 'Mabalacat City';
   return m;
+};
+
+// Safe Key Formatter for Per-Account Itinerary & User Data Isolation
+const getUserAccountKey = (profile) => {
+  if (!profile) return 'default_explorer';
+  const raw = profile.email || profile.username || 'default_explorer';
+  return String(raw).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_');
+};
+
+const getSavedItinerariesForUser = (profile) => {
+  const userKey = getUserAccountKey(profile);
+  try {
+    const saved = localStorage.getItem(`kanyamanan_itineraries_${userKey}`);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  return [
+    {
+      id: 'trail-1',
+      name: 'San Fernando Heritage Trail',
+      stops: ["Everybody's Cafe", "Santo Tomas Palayok Kitchen"],
+      isFinished: false,
+      updatedAt: Date.now()
+    },
+    {
+      id: 'trail-2',
+      name: 'Angeles City Sisig Hop',
+      stops: ["Aling Lucing's Sisig", "Atching Lillian's Ancestral Kitchen"],
+      isFinished: false,
+      updatedAt: Date.now()
+    }
+  ];
 };
 
 const getRestaurantMunicipalities = (r) => {
@@ -225,7 +262,19 @@ function App() {
   // Consumer Views: 'homepage', 'auth', 'dashboard'
   const [activeView, setActiveView] = useState('homepage');
   const [branchSelectTarget, setBranchSelectTarget] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  
+  // Persistent Authenticated User Session
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_active_user');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && (parsed.username || parsed.email)) return true;
+      }
+    } catch (e) {}
+    return true; // Default logged in for smooth exploration
+  });
+
   const [isGuest, setIsGuest] = useState(false);
   const [isRegistering, setIsRegistering] = useState(true);
 
@@ -235,11 +284,20 @@ function App() {
   // Simulated dynamic toast/status state
   const [showToast, setShowToast] = useState(false);
 
-  const [userProfile, setUserProfile] = useState({
-    username: 'rancis',
-    email: 'rancis@pampanga.gov.ph',
-    calorieLimit: 2200,
-    budgetLimit: 1500
+  const [userProfile, setUserProfile] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_active_user');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && (parsed.username || parsed.email)) return parsed;
+      }
+    } catch (e) {}
+    return {
+      username: 'rancis',
+      email: 'rancis@pampanga.gov.ph',
+      calorieLimit: 2200,
+      budgetLimit: 1500
+    };
   });
 
   // Local state restaurants database with 100% unique usernames & permanent frontend-backend persistence
@@ -391,21 +449,81 @@ function App() {
   // Trip routing pipeline State
   const [activeTrip, setActiveTrip] = useState([]);
   const [draggedIndex, setDraggedIndex] = useState(null);
-  const [savedItineraries, setSavedItineraries] = useState([
-    {
-      id: 'trail-1',
-      name: 'San Fernando Heritage Trail',
-      stops: ["Everybody's Cafe", "Santo Tomas Palayok Kitchen"],
-      isFinished: false
-    },
-    {
-      id: 'trail-2',
-      name: 'Angeles City Sisig Hop',
-      stops: ["Aling Lucing's Sisig", "Atching Lillian's Ancestral Kitchen"],
-      isFinished: false
+  
+  // Per-Account Saved Itineraries (Dual Persistence: LocalStorage + Firebase Firestore)
+  const [savedItineraries, setSavedItineraries] = useState(() => {
+    try {
+      const activeUser = localStorage.getItem('kanyamanan_active_user');
+      const profile = activeUser ? JSON.parse(activeUser) : { username: 'rancis', email: 'rancis@pampanga.gov.ph' };
+      return getSavedItinerariesForUser(profile);
+    } catch (e) {
+      return [
+        {
+          id: 'trail-1',
+          name: 'San Fernando Heritage Trail',
+          stops: ["Everybody's Cafe", "Santo Tomas Palayok Kitchen"],
+          isFinished: false,
+          updatedAt: Date.now()
+        },
+        {
+          id: 'trail-2',
+          name: 'Angeles City Sisig Hop',
+          stops: ["Aling Lucing's Sisig", "Atching Lillian's Ancestral Kitchen"],
+          isFinished: false,
+          updatedAt: Date.now()
+        }
+      ];
     }
-  ]);
+  });
+
   const [newItineraryName, setNewItineraryName] = useState('');
+  const [editingItinId, setEditingItinId] = useState(null);
+  const [editingItinName, setEditingItinName] = useState('');
+
+  // Dual-Layer Persistence helper for Saved Itineraries
+  const persistSavedItineraries = (updatedList) => {
+    setSavedItineraries(updatedList);
+    const userKey = getUserAccountKey(userProfile);
+    try {
+      localStorage.setItem(`kanyamanan_itineraries_${userKey}`, JSON.stringify(updatedList));
+    } catch (e) {}
+    saveUserItinerariesToCloud(userKey, updatedList);
+  };
+
+  // Sync Saved Itineraries per account from LocalStorage and Realtime Firestore
+  useEffect(() => {
+    const userKey = getUserAccountKey(userProfile);
+    
+    // 1. Instant pull from localStorage for the active account
+    try {
+      const local = localStorage.getItem(`kanyamanan_itineraries_${userKey}`);
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSavedItineraries(parsed);
+        }
+      } else {
+        const starter = getSavedItinerariesForUser(userProfile);
+        setSavedItineraries(starter);
+        localStorage.setItem(`kanyamanan_itineraries_${userKey}`, JSON.stringify(starter));
+        saveUserItinerariesToCloud(userKey, starter);
+      }
+    } catch (e) {}
+
+    // 2. Realtime listener from Firestore for multi-device sync
+    const unsubscribe = subscribeToUserItineraries(userKey, (cloudItins) => {
+      if (Array.isArray(cloudItins)) {
+        setSavedItineraries(cloudItins);
+        try {
+          localStorage.setItem(`kanyamanan_itineraries_${userKey}`, JSON.stringify(cloudItins));
+        } catch (e) {}
+      }
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [userProfile?.email, userProfile?.username]);
 
   // Constraints & Simulated traffic Adjuster
   const [stopCeiling, setStopCeiling] = useState(3);
@@ -1543,20 +1661,23 @@ function App() {
   };
 
   const handleSaveActiveTrip = (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (!newItineraryName.trim() || activeTrip.length === 0) return;
 
     const newItin = {
       id: 'trail-' + Date.now(),
       name: newItineraryName.trim(),
       stops: computedRoutePath.map(r => r.name),
-      isFinished: false
+      isFinished: false,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
     };
 
-    setSavedItineraries([newItin, ...savedItineraries]);
+    const updated = [newItin, ...savedItineraries];
+    persistSavedItineraries(updated);
     setNewItineraryName('');
     setDashboardTab('history');
-    alert(`"${newItin.name}" saved successfully! Opened Itinerary History to check. Click any saved route to load and do the plan!`);
+    alert(`✓ "${newItin.name}" saved permanently to your account (${userProfile.username})!\n\nYour travel history will stay intact even after refreshing or opening from another browser.`);
   };
 
   const handleLoadSavedItinerary = (itin) => {
@@ -1630,20 +1751,72 @@ function App() {
   };
 
   const handleDeleteItinerary = (itinId, e) => {
-    e.stopPropagation();
-    if (confirm("Are you sure you want to delete this saved route?")) {
-      setSavedItineraries(savedItineraries.filter(item => item.id !== itinId));
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (window.confirm("Are you sure you want to permanently delete this saved route?")) {
+      const updated = savedItineraries.filter(item => item.id !== itinId);
+      persistSavedItineraries(updated);
     }
   };
 
   const handleToggleFinishItinerary = (itinId, e) => {
-    e.stopPropagation();
-    setSavedItineraries(savedItineraries.map(item => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    const updated = savedItineraries.map(item => {
       if (item.id === itinId) {
-        return { ...item, isFinished: !item.isFinished };
+        return { ...item, isFinished: !item.isFinished, updatedAt: Date.now() };
       }
       return item;
-    }));
+    });
+    persistSavedItineraries(updated);
+  };
+
+  const startEditingItinerary = (itin, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    setEditingItinId(itin.id);
+    setEditingItinName(itin.name);
+  };
+
+  const handleSaveEditedItinerary = (itinId, e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!editingItinName.trim()) {
+      alert("Please enter an itinerary name.");
+      return;
+    }
+    const updated = savedItineraries.map(item => {
+      if (item.id === itinId) {
+        return {
+          ...item,
+          name: editingItinName.trim(),
+          updatedAt: Date.now()
+        };
+      }
+      return item;
+    });
+    persistSavedItineraries(updated);
+    setEditingItinId(null);
+    setEditingItinName('');
+  };
+
+  const handleOverwriteItineraryStopsWithActive = (itinId, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (activeTrip.length === 0) {
+      alert("Your active trip planner is currently empty. Add restaurants or tourist destinations in the Food Trip Planner first.");
+      return;
+    }
+    if (window.confirm(`Update this saved itinerary's stops with your current active plan (${activeTrip.length} stops)?`)) {
+      const updated = savedItineraries.map(item => {
+        if (item.id === itinId) {
+          return {
+            ...item,
+            stops: computedRoutePath.map(r => r.name),
+            updatedAt: Date.now()
+          };
+        }
+        return item;
+      });
+      persistSavedItineraries(updated);
+      setEditingItinId(null);
+      alert("✓ Itinerary stops updated and saved permanently to your account!");
+    }
   };
 
   const handleRegister = (e) => {
@@ -1659,12 +1832,17 @@ function App() {
     }
 
     setFormErrors({});
-    setUserProfile({
+    const newProfile = {
       username: regForm.username,
       email: regForm.email,
       calorieLimit: Number(regForm.calorieLimit) || 2200,
       budgetLimit: Number(regForm.budgetLimit) || 1500
-    });
+    };
+    setUserProfile(newProfile);
+    try {
+      localStorage.setItem('kanyamanan_active_user', JSON.stringify(newProfile));
+    } catch (err) {}
+    saveUserProfileToCloud(newProfile);
     setIsAuthenticated(true);
     setIsGuest(false);
     setActiveView('homepage');
@@ -1682,14 +1860,20 @@ function App() {
     }
 
     setFormErrors({});
-    const computedUser = regForm.email.split('@')[0] || "Explorer";
-    setUserProfile({
+    const computedUser = regForm.username || regForm.email.split('@')[0] || "Explorer";
+    const newProfile = {
       username: computedUser,
       email: regForm.email,
       calorieLimit: 2200,
       budgetLimit: 1500
-    });
+    };
+    setUserProfile(newProfile);
+    try {
+      localStorage.setItem('kanyamanan_active_user', JSON.stringify(newProfile));
+    } catch (err) {}
+    saveUserProfileToCloud(newProfile);
     setIsAuthenticated(true);
+    setIsGuest(false);
     setActiveView('homepage');
   };
 
@@ -4511,6 +4695,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </span>
                   <button
                     onClick={() => {
+                      try {
+                        localStorage.removeItem('kanyamanan_active_user');
+                      } catch (e) {}
                       setIsAuthenticated(false);
                       setIsGuest(false);
                       setActiveView('homepage');
@@ -5668,9 +5855,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             {/* TAB CONTENT: 4. User Travel History */}
             {dashboardTab === 'history' && (
               <div className="bento-card p-6 bg-white space-y-4 max-w-xl mx-auto border-[#E9E5DE]">
-                <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-2">
-                  <Star className="h-4.5 w-4.5 text-saffron" /> Saved Itineraries History
-                </h3>
+                <div className="flex items-center justify-between border-b border-[#E9E5DE] pb-3">
+                  <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-2 m-0">
+                    <Star className="h-4.5 w-4.5 text-saffron" /> Saved Itineraries History
+                  </h3>
+                  <span className="text-[10px] font-bold text-terracotta bg-terracotta/10 px-2.5 py-0.5 rounded-full border border-terracotta/20">
+                    Account: {userProfile.username}
+                  </span>
+                </div>
 
                 {(!isAuthenticated || isGuest) ? (
                   <div className="p-8 text-center space-y-4 bg-[#FAF8F5] border border-dashed border-[#E9E5DE] rounded-2xl">
@@ -5694,87 +5886,145 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </div>
                 ) : (
                   <div className="space-y-3.5">
-                  {savedItineraries.map(itin => (
-                    <div
-                      key={itin.id}
-                      onClick={() => handleLoadSavedItinerary(itin)}
-                      className={`p-4 border rounded-xl text-left space-y-3 transition-all cursor-pointer group/itin relative shadow-sm hover:shadow-md ${
-                        itin.isFinished 
-                          ? 'bg-[#FAF8F5]/60 border-[#E9E5DE] opacity-80 hover:border-terracotta/40' 
-                          : 'bg-[#FAF8F5] border-[#E9E5DE] hover:border-terracotta hover:bg-white'
-                      }`}
-                      title="Click to load and execute this plan"
-                    >
-                      <div className="flex justify-between items-start gap-2">
-                        <div className="flex-1 min-w-0">
-                          <span className={`text-sm font-black block truncate ${itin.isFinished ? 'text-charcoal-light line-through' : 'text-charcoal group-hover/itin:text-terracotta transition-colors'}`}>
-                            {itin.name}
-                          </span>
-                          {itin.isFinished ? (
-                            <span className="inline-flex items-center gap-1 mt-0.5 text-[10px] font-extrabold text-bananaleaf animate-fade-in">
-                              ✓ Finished Trip
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-charcoal-light font-bold">
-                              Active Plan • {itin.stops?.length || 0} Stops
-                            </span>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            type="button"
-                            onClick={(e) => handleToggleFinishItinerary(itin.id, e)}
-                            className={`p-1.5 rounded-lg transition-colors ${
-                              itin.isFinished 
-                                ? 'text-bananaleaf hover:bg-bananaleaf/10' 
-                                : 'text-charcoal-light hover:text-bananaleaf hover:bg-bananaleaf/5'
-                            }`}
-                            title={itin.isFinished ? "Mark as Active" : "Mark as Finished"}
-                          >
-                            <CheckCircle className={`h-4.5 w-4.5 ${itin.isFinished ? 'fill-bananaleaf/10' : ''}`} />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={(e) => handleDeleteItinerary(itin.id, e)}
-                            className="p-1.5 rounded-lg text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 transition-colors"
-                            title="Delete Route"
-                          >
-                            <Trash2 className="h-4.5 w-4.5" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-1.5 pt-0.5">
-                        {itin.stops.map((stop, idx) => (
-                          <span 
-                            key={idx} 
-                            className={`text-[10px] px-2.5 py-1 rounded-md border font-semibold transition-all ${
-                              itin.isFinished 
-                                ? 'bg-white/50 text-gray-400 border-gray-200' 
-                                : 'bg-white text-charcoal border-[#E9E5DE] group-hover/itin:border-terracotta/30'
-                            }`}
-                          >
-                            {typeof stop === 'object' ? stop.name : stop}
-                          </span>
-                        ))}
-                      </div>
-
-                      <div className="pt-1 flex justify-end">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleLoadSavedItinerary(itin);
-                          }}
-                          className="px-3.5 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 group-hover/itin:bg-terracotta-dark"
-                        >
-                          <Compass className="h-3.5 w-3.5" /> Load & Execute Plan →
-                        </button>
-                      </div>
+                  {savedItineraries.length === 0 ? (
+                    <div className="p-8 text-center bg-[#FAF8F5] rounded-xl border border-dashed border-[#E9E5DE] space-y-2">
+                      <span className="text-2xl block">🗺️</span>
+                      <p className="text-xs font-bold text-charcoal m-0">No saved itineraries found for this account.</p>
+                      <p className="text-[11px] text-charcoal-light m-0">Create your custom trip route in the Food Trip Planner and click "Save Route to Travel History".</p>
                     </div>
-                  ))}
+                  ) : (
+                    savedItineraries.map(itin => (
+                      <div
+                        key={itin.id}
+                        onClick={() => handleLoadSavedItinerary(itin)}
+                        className={`p-4 border rounded-xl text-left space-y-3 transition-all cursor-pointer group/itin relative shadow-sm hover:shadow-md ${
+                          itin.isFinished 
+                            ? 'bg-[#FAF8F5]/60 border-[#E9E5DE] opacity-80 hover:border-terracotta/40' 
+                            : 'bg-[#FAF8F5] border-[#E9E5DE] hover:border-terracotta hover:bg-white'
+                        }`}
+                        title="Click to load and execute this plan"
+                      >
+                        {editingItinId === itin.id ? (
+                          <div className="p-3 bg-white rounded-xl border border-terracotta/30 space-y-2" onClick={(e) => e.stopPropagation()}>
+                            <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
+                              ✏️ Edit Itinerary Name:
+                            </label>
+                            <div className="flex gap-1.5">
+                              <input
+                                type="text"
+                                value={editingItinName}
+                                onChange={(e) => setEditingItinName(e.target.value)}
+                                className="flex-1 px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-ivory font-bold focus:outline-none focus:ring-1 focus:ring-terracotta"
+                              />
+                              <button
+                                type="button"
+                                onClick={(e) => handleSaveEditedItinerary(itin.id, e)}
+                                className="px-3 py-1.5 bg-[#2C5E3B] text-white text-xs font-bold rounded-lg shadow-2xs cursor-pointer hover:bg-[#20452B]"
+                              >
+                                Save
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingItinId(null)}
+                                className="px-2.5 py-1.5 border border-[#E9E5DE] text-xs font-semibold rounded-lg hover:bg-ivory"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+
+                            <div className="pt-1.5 border-t border-[#E9E5DE] flex justify-between items-center">
+                              <span className="text-[10px] text-charcoal-light">Want to update the stops too?</span>
+                              <button
+                                type="button"
+                                onClick={(e) => handleOverwriteItineraryStopsWithActive(itin.id, e)}
+                                className="text-[10px] font-bold text-terracotta hover:underline cursor-pointer"
+                              >
+                                🔄 Replace with Active Plan ({activeTrip.length} stops)
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex justify-between items-start gap-2">
+                            <div className="flex-1 min-w-0">
+                              <span className={`text-sm font-black block truncate ${itin.isFinished ? 'text-charcoal-light line-through' : 'text-charcoal group-hover/itin:text-terracotta transition-colors'}`}>
+                                {itin.name}
+                              </span>
+                              {itin.isFinished ? (
+                                <span className="inline-flex items-center gap-1 mt-0.5 text-[10px] font-extrabold text-bananaleaf animate-fade-in">
+                                  ✓ Finished Trip
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-charcoal-light font-bold">
+                                  Active Plan • {itin.stops?.length || 0} Stops
+                                </span>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                type="button"
+                                onClick={(e) => startEditingItinerary(itin, e)}
+                                className="p-1.5 rounded-lg text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 transition-colors"
+                                title="Edit Itinerary Name / Update Stops"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={(e) => handleToggleFinishItinerary(itin.id, e)}
+                                className={`p-1.5 rounded-lg transition-colors ${
+                                  itin.isFinished 
+                                    ? 'text-bananaleaf hover:bg-bananaleaf/10' 
+                                    : 'text-charcoal-light hover:text-bananaleaf hover:bg-bananaleaf/5'
+                                }`}
+                                title={itin.isFinished ? "Mark as Active" : "Mark as Finished"}
+                              >
+                                <CheckCircle className={`h-4.5 w-4.5 ${itin.isFinished ? 'fill-bananaleaf/10' : ''}`} />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={(e) => handleDeleteItinerary(itin.id, e)}
+                                className="p-1.5 rounded-lg text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 transition-colors"
+                                title="Delete Route"
+                              >
+                                <Trash2 className="h-4.5 w-4.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex flex-wrap gap-1.5 pt-0.5">
+                          {itin.stops.map((stop, idx) => (
+                            <span 
+                              key={idx} 
+                              className={`text-[10px] px-2.5 py-1 rounded-md border font-semibold transition-all ${
+                                itin.isFinished 
+                                  ? 'bg-white/50 text-gray-400 border-gray-200' 
+                                  : 'bg-white text-charcoal border-[#E9E5DE] group-hover/itin:border-terracotta/30'
+                              }`}
+                            >
+                              {typeof stop === 'object' ? stop.name : stop}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="pt-1 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleLoadSavedItinerary(itin);
+                            }}
+                            className="px-3.5 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 group-hover/itin:bg-terracotta-dark"
+                          >
+                            <Compass className="h-3.5 w-3.5" /> Load & Execute Plan →
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
                 )}
               </div>
