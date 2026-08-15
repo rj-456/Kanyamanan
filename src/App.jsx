@@ -697,6 +697,26 @@ function App() {
   const [completionActiveTab, setCompletionActiveTab] = useState('polaroid');
   const [slotPhotos, setSlotPhotos] = useState({});
 
+  // Helper to distinguish tourist destination vs culinary kitchen for authentic Kapampangan praise
+  const getPraiseText = (stop) => {
+    if (!stop) return 'Manyaman Keni!';
+    const isAttraction = (
+      (stop.id && String(stop.id).startsWith('att-')) ||
+      (stop.type && (
+        stop.type.includes('Parish') ||
+        stop.type.includes('Church') ||
+        stop.type.includes('Tourist') ||
+        stop.type.includes('Park') ||
+        stop.type.includes('Heritage') ||
+        stop.type.includes('Museum') ||
+        stop.type.includes('Eco') ||
+        stop.type.includes('Attraction')
+      )) ||
+      (Array.isArray(attractions) && attractions.some(a => a && (a.id === stop.id || a.name === stop.name)))
+    );
+    return isAttraction ? 'Malagu Keni!' : 'Manyaman Keni!';
+  };
+
   // Single Polaroid Card Downloader with Authentic Kapampangan Passport Stamp
   const downloadSinglePolaroid = (stop, pIdx) => {
     const canvas = document.createElement('canvas');
@@ -725,17 +745,14 @@ function App() {
     const imgH = 460;
 
     const renderTextAndStamp = () => {
-      // Red Kapampangan Location Stamp
+      // Clean Red Kapampangan Municipality Stamp (No duplicate praise)
       ctx.strokeStyle = '#C85A32';
       ctx.lineWidth = 2.5;
-      ctx.strokeRect(imgX + imgW - 140, imgY + imgH - 55, 130, 45);
+      ctx.strokeRect(imgX + imgW - 140, imgY + imgH - 45, 130, 36);
       ctx.fillStyle = '#C85A32';
       ctx.font = '900 12px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 75, imgY + imgH - 32);
-      ctx.fillStyle = '#2C5E3B';
-      ctx.font = 'bold 8px sans-serif';
-      ctx.fillText('★ MANYAMAN KENI! ★', imgX + imgW - 75, imgY + imgH - 18);
+      ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 75, imgY + imgH - 22);
 
       // Stop Title
       ctx.fillStyle = '#1F2937';
@@ -743,10 +760,11 @@ function App() {
       ctx.textAlign = 'center';
       ctx.fillText(stop.name, canvas.width / 2, 555);
 
-      // Kapampangan Praise / Location Subtitle
+      // Dynamic Kapampangan Praise Subtitle (Manyaman Keni! for kitchens, Malagu Keni! for tourist spots)
+      const praise = getPraiseText(stop);
       ctx.fillStyle = '#2C5E3B';
       ctx.font = 'bold 16px sans-serif';
-      ctx.fillText(`✨ Manyaman Keni! • ${stop.municipality || 'Pampanga'} ✨`, canvas.width / 2, 595);
+      ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} ✨`, canvas.width / 2, 595);
 
       // Date Stamp
       ctx.fillStyle = '#9CA3AF';
@@ -812,7 +830,7 @@ function App() {
 
     ctx.fillStyle = '#6B5E51';
     ctx.font = 'bold 15px sans-serif';
-    ctx.fillText(`Trail: "${newItineraryName || 'Pampanga Heritage Culinary Excursion'}" • Manyaman Keni!`, canvas.width / 2, 115);
+    ctx.fillText(`Trail: "${newItineraryName || 'Pampanga Heritage Culinary Excursion'}"`, canvas.width / 2, 115);
 
     const stops = computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Heritage Kitchen', municipality: 'Pampanga', image: '' }];
     const cardsToDraw = stops.slice(0, 4);
@@ -863,17 +881,14 @@ function App() {
             ctx.fillRect(imgX, imgY, imgW, imgH);
           }
 
-          // Red Kapampangan Location Stamp on photo corner
+          // Clean Red Location Stamp on photo corner
           ctx.strokeStyle = '#C85A32';
           ctx.lineWidth = 2;
-          ctx.strokeRect(imgX + imgW - 130, imgY + imgH - 44, 120, 36);
+          ctx.strokeRect(imgX + imgW - 130, imgY + imgH - 36, 120, 28);
           ctx.fillStyle = '#C85A32';
           ctx.font = 'bold 10px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 70, imgY + imgH - 24);
-          ctx.fillStyle = '#2C5E3B';
-          ctx.font = 'bold 7px sans-serif';
-          ctx.fillText('★ MANYAMAN KENI! ★', imgX + imgW - 70, imgY + imgH - 13);
+          ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 70, imgY + imgH - 18);
 
           // Name and Details
           ctx.fillStyle = '#1F2937';
@@ -881,9 +896,10 @@ function App() {
           ctx.textAlign = 'center';
           ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 278);
 
+          const praise = getPraiseText(stop);
           ctx.fillStyle = '#2C5E3B';
           ctx.font = 'bold 12px sans-serif';
-          ctx.fillText(`✨ Manyaman Keni! • ${stop.municipality || 'Pampanga'} • Stop #${idx + 1} ✨`, x + cardW / 2, y + 304);
+          ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} • Stop #${idx + 1} ✨`, x + cardW / 2, y + 304);
 
           ctx.fillStyle = '#9CA3AF';
           ctx.font = '10px monospace';
@@ -7033,10 +7049,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                               </div>
                             )}
 
-                            {/* Authentic Location Stamp overlay on photo */}
-                            <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-xs px-2 py-1 rounded border-2 border-[#C85A32] text-[#C85A32] shadow-xs rotate-[-3deg] pointer-events-none select-none">
+                            {/* Clean Location Stamp overlay on photo */}
+                            <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded border-2 border-[#C85A32] text-[#C85A32] shadow-xs rotate-[-3deg] pointer-events-none select-none">
                               <strong className="block text-[9px] font-black uppercase leading-tight">📍 {stop.municipality || 'Pampanga'}</strong>
-                              <span className="block text-[7px] font-bold text-[#2C5E3B] uppercase tracking-wider leading-none mt-0.5">Manyaman Keni!</span>
                             </div>
 
                             {/* Hover Photo Controls overlay on each card */}
@@ -7091,7 +7106,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                               {stop.name}
                             </strong>
                             <span className="block text-[10px] font-bold text-[#2C5E3B] font-sans">
-                              ✨ Manyaman Keni! • {stop.municipality || 'Pampanga'} • Stop #{pIdx + 1}
+                              ✨ {getPraiseText(stop)} • {stop.municipality || 'Pampanga'} • Stop #{pIdx + 1}
                             </span>
                             <span className="block text-[9px] text-charcoal-light font-mono uppercase">
                               🗓️ {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
