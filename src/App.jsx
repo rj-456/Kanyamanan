@@ -782,7 +782,7 @@ function App() {
     try {
       const canvas = document.createElement('canvas');
       canvas.width = 600;
-      canvas.height = 720;
+      canvas.height = 760;
       const ctx = canvas.getContext('2d');
 
       // Background
@@ -818,31 +818,79 @@ function App() {
         ctx.fillRect(imgX, imgY, imgW, imgH);
       }
 
-      // Clean Red Kapampangan Municipality Stamp (No duplicate praise)
-      ctx.strokeStyle = '#C85A32';
-      ctx.lineWidth = 2.5;
-      ctx.strokeRect(imgX + imgW - 140, imgY + imgH - 45, 130, 36);
-      ctx.fillStyle = '#C85A32';
-      ctx.font = '900 12px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 75, imgY + imgH - 22);
+      // Clean Red Location Badge with White Backdrop on Photo Corner
+      const stampText = `📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`;
+      ctx.font = 'bold 11px sans-serif';
+      const textWidth = ctx.measureText(stampText).width;
+      const stampW = Math.max(130, textWidth + 24);
+      const stampH = 28;
+      const stampX = imgX + imgW - stampW - 12;
+      const stampY = imgY + imgH - stampH - 12;
 
-      // Stop Title
-      ctx.fillStyle = '#1F2937';
-      ctx.font = 'bold 24px serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
+      ctx.fillRect(stampX, stampY, stampW, stampH);
+      ctx.strokeStyle = '#C85A32';
+      ctx.lineWidth = 1.8;
+      ctx.strokeRect(stampX, stampY, stampW, stampH);
+
+      ctx.fillStyle = '#C85A32';
+      ctx.font = 'bold 11px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(stop.name, canvas.width / 2, 555);
+      ctx.fillText(stampText, stampX + stampW / 2, stampY + 18);
+
+      // Auto-wrap and auto-scale Stop Title so it NEVER overflows
+      const maxTitleWidth = 510;
+      let fontSize = 22;
+      const words = (stop.name || 'Destination').split(' ');
+
+      const buildLines = (sz) => {
+        ctx.font = `bold ${sz}px serif`;
+        let lns = [];
+        let cur = '';
+        for (let w of words) {
+          let test = cur ? `${cur} ${w}` : w;
+          if (ctx.measureText(test).width > maxTitleWidth) {
+            if (cur) lns.push(cur);
+            cur = w;
+          } else {
+            cur = test;
+          }
+        }
+        if (cur) lns.push(cur);
+        return lns;
+      };
+
+      let lines = buildLines(fontSize);
+      if (lines.length > 2) {
+        fontSize = 18;
+        lines = buildLines(fontSize);
+      }
+      if (lines.length > 2) {
+        fontSize = 15;
+        lines = buildLines(fontSize);
+      }
+
+      ctx.fillStyle = '#1F2937';
+      ctx.font = `bold ${fontSize}px serif`;
+      ctx.textAlign = 'center';
+
+      let titleStartY = lines.length === 1 ? 550 : (lines.length === 2 ? 538 : 528);
+      lines.forEach((line, lIdx) => {
+        ctx.fillText(line, canvas.width / 2, titleStartY + lIdx * (fontSize + 6));
+      });
+
+      const titleBottomY = titleStartY + (lines.length - 1) * (fontSize + 6);
 
       // Dynamic Kapampangan Praise Subtitle
       const praise = getPraiseText(stop);
       ctx.fillStyle = '#2C5E3B';
-      ctx.font = 'bold 16px sans-serif';
-      ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} ✨`, canvas.width / 2, 595);
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} ✨`, canvas.width / 2, titleBottomY + 30);
 
       // Date Stamp
       ctx.fillStyle = '#9CA3AF';
       ctx.font = '12px monospace';
-      ctx.fillText(`ENTRY DATE: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}`, canvas.width / 2, 640);
+      ctx.fillText(`ENTRY DATE: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}`, canvas.width / 2, titleBottomY + 56);
 
       triggerCanvasDownload(canvas, `Kapampangan_Polaroid_${(stop.name || 'Stop').replace(/[^a-zA-Z0-9]/g, '_')}.png`);
     } catch (error) {
@@ -862,7 +910,7 @@ function App() {
       const numRows = Math.ceil(cardsToDraw.length / numCols);
 
       const cardW = 515;
-      const cardH = 345;
+      const cardH = 370;
       const gapX = 30;
       const gapY = 25;
       const startY = 145;
@@ -958,29 +1006,73 @@ function App() {
           ctx.fillRect(imgX, imgY, imgW, imgH);
         }
 
-        // Clean Red Location Stamp on photo corner
-        ctx.strokeStyle = '#C85A32';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(imgX + imgW - 130, imgY + imgH - 36, 120, 28);
-        ctx.fillStyle = '#C85A32';
-        ctx.font = 'bold 10px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 70, imgY + imgH - 18);
+        // Clean Red Location Badge on photo corner with white background
+        const stampText = `📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`;
+        ctx.font = 'bold 9px sans-serif';
+        const textWidth = ctx.measureText(stampText).width;
+        const stampW = Math.max(100, textWidth + 18);
+        const stampH = 24;
+        const stampX = imgX + imgW - stampW - 8;
+        const stampY = imgY + imgH - stampH - 8;
 
-        // Name and Details
-        ctx.fillStyle = '#1F2937';
-        ctx.font = 'bold 18px serif';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
+        ctx.fillRect(stampX, stampY, stampW, stampH);
+        ctx.strokeStyle = '#C85A32';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(stampX, stampY, stampW, stampH);
+
+        ctx.fillStyle = '#C85A32';
+        ctx.font = 'bold 9px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 278);
+        ctx.fillText(stampText, stampX + stampW / 2, stampY + 15);
+
+        // Auto-wrap Stop Title for album cards
+        const maxTitleWidth = cardW - 40;
+        let fontSize = 16;
+        const words = (stop.name || `Stop #${idx + 1}`).split(' ');
+
+        const buildLines = (sz) => {
+          ctx.font = `bold ${sz}px serif`;
+          let lns = [];
+          let cur = '';
+          for (let w of words) {
+            let test = cur ? `${cur} ${w}` : w;
+            if (ctx.measureText(test).width > maxTitleWidth) {
+              if (cur) lns.push(cur);
+              cur = w;
+            } else {
+              cur = test;
+            }
+          }
+          if (cur) lns.push(cur);
+          return lns;
+        };
+
+        let lines = buildLines(fontSize);
+        if (lines.length > 2) {
+          fontSize = 13;
+          lines = buildLines(fontSize);
+        }
+
+        ctx.fillStyle = '#1F2937';
+        ctx.font = `bold ${fontSize}px serif`;
+        ctx.textAlign = 'center';
+
+        let titleStartY = y + 270;
+        lines.forEach((line, lIdx) => {
+          ctx.fillText(line, x + cardW / 2, titleStartY + lIdx * (fontSize + 4));
+        });
+
+        const titleBottomY = titleStartY + (lines.length - 1) * (fontSize + 4);
 
         const praise = getPraiseText(stop);
         ctx.fillStyle = '#2C5E3B';
         ctx.font = 'bold 12px sans-serif';
-        ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} • Stop #${idx + 1} ✨`, x + cardW / 2, y + 304);
+        ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} • Stop #${idx + 1} ✨`, x + cardW / 2, titleBottomY + 24);
 
         ctx.fillStyle = '#9CA3AF';
         ctx.font = '10px monospace';
-        ctx.fillText(`DATE: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`, x + cardW / 2, y + 326);
+        ctx.fillText(`DATE: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`, x + cardW / 2, titleBottomY + 44);
       });
 
       triggerCanvasDownload(canvas, `Kanyamanan_Kapampangan_Memory_Album.png`);
