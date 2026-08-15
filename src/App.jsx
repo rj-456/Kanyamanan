@@ -794,11 +794,23 @@ function App() {
     }
   };
 
-  // Real Client-Side Canvas Polaroid Album Downloader with Kapampangan Cultural Elements
+  // Real Client-Side Canvas Polaroid Album Downloader with Kapampangan Cultural Elements (Draws ALL stops)
   const downloadRealPolaroidAlbum = () => {
+    const stops = computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Heritage Kitchen', municipality: 'Pampanga', image: '' }];
+    const cardsToDraw = stops; // Draws all polaroids regardless of how many stops!
+    const numCols = cardsToDraw.length === 1 ? 1 : 2;
+    const numRows = Math.ceil(cardsToDraw.length / numCols);
+
+    const cardW = 515;
+    const cardH = 345;
+    const gapX = 30;
+    const gapY = 25;
+    const startY = 145;
+    const footerH = 60;
+
     const canvas = document.createElement('canvas');
     canvas.width = 1200;
-    canvas.height = 950;
+    canvas.height = Math.max(920, startY + numRows * (cardH + gapY) + footerH);
     const ctx = canvas.getContext('2d');
 
     // Canvas Background
@@ -830,10 +842,7 @@ function App() {
 
     ctx.fillStyle = '#6B5E51';
     ctx.font = 'bold 15px sans-serif';
-    ctx.fillText(`Trail: "${newItineraryName || 'Pampanga Heritage Culinary Excursion'}"`, canvas.width / 2, 115);
-
-    const stops = computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Heritage Kitchen', municipality: 'Pampanga', image: '' }];
-    const cardsToDraw = stops.slice(0, 4);
+    ctx.fillText(`Trail: "${newItineraryName || 'Pampanga Heritage Culinary Excursion'}" • ${cardsToDraw.length} Stops Visited`, canvas.width / 2, 115);
 
     let loadedCount = 0;
     const totalToLoad = cardsToDraw.length;
@@ -842,8 +851,11 @@ function App() {
       cardsToDraw.forEach((stop, idx) => {
         const col = idx % 2;
         const row = Math.floor(idx / 2);
-        const x = 70 + col * 545;
-        const y = 145 + row * 370;
+        let x = 70 + col * (cardW + gapX);
+        if (cardsToDraw.length === 1) {
+          x = (canvas.width - cardW) / 2;
+        }
+        const y = startY + row * (cardH + gapY);
         const cardW = 515;
         const cardH = 345;
 
@@ -7007,7 +7019,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         ✨ Mamasyal Ta Pampanga! Memory Album
                       </span>
                       <h4 className="text-sm font-black text-charcoal m-0 flex items-center gap-1.5">
-                        <span>📸</span> Authentic Food Crawl Polaroids & Passport Badges
+                        <span>📸</span> Authentic Food Crawl Polaroids ({computedRoutePath.length} Destinations)
                       </h4>
                     </div>
                     <button
