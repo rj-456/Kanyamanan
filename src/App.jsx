@@ -6002,25 +6002,11 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     {selectedRestaurant.priceTier === '$' ? 'Budget' : selectedRestaurant.priceTier === '$$' ? 'Moderate' : 'Premium'}
                   </div>
                   <div>
-                    <strong className="block text-charcoal">GPS Navigation:</strong>
+                    <strong className="block text-charcoal">GPS Coordinates:</strong>
                     <span className="font-mono font-bold text-charcoal block">
                       {(selectedRestaurant.lat || 15.0300).toFixed(4)}°, {(selectedRestaurant.lng || 120.6800).toFixed(4)}°
                     </span>
                   </div>
-                </div>
-
-                <div className="pt-2 border-t border-[#E9E5DE] flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const lat = selectedRestaurant.lat || 15.0300;
-                      const lng = selectedRestaurant.lng || 120.6800;
-                      window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
-                    }}
-                    className="px-3 py-1.5 bg-white hover:bg-ivory border border-[#E9E5DE] rounded-lg text-xs font-bold text-terracotta inline-flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all hover:border-terracotta"
-                  >
-                    🧭 Open in Google Maps Turn-by-Turn Directions ↗
-                  </button>
                 </div>
               </div>
 
@@ -6249,20 +6235,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   <p className="text-charcoal-light leading-relaxed m-0">{selectedAttraction.details}</p>
                 </div>
               )}
-            </div>
-
-            <div className="pt-1 flex justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  const lat = Number(selectedAttraction.lat) || 15.0300;
-                  const lng = Number(selectedAttraction.lng) || 120.6800;
-                  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
-                }}
-                className="px-3 py-1.5 bg-white hover:bg-ivory border border-[#E9E5DE] rounded-lg text-xs font-bold text-terracotta inline-flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all hover:border-terracotta"
-              >
-                🧭 Open in Google Maps Turn-by-Turn Directions ↗
-              </button>
             </div>
 
             <div className="pt-3 border-t border-[#E9E5DE] flex gap-2 justify-end">
