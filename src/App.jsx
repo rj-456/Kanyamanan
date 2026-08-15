@@ -192,48 +192,41 @@ const getBranchAddressForMunicipality = (r, targetMun) => {
 const getBranchLat = (r, targetMun) => {
   if (!r) return 15.0300;
   const normTarget = normalizeMun(targetMun);
-  if (Array.isArray(r.branches)) {
-    const match = r.branches.find(b => normalizeMun(typeof b === 'string' ? b : b.municipality) === normTarget);
-    if (match && typeof match === 'object' && match.lat) return match.lat;
-  }
-  return r.lat || 15.0300;
-};
-
-
-const getBranchOperatingHours = (r, targetMun) => {
-  if (!r) return '09:00 AM - 09:00 PM';
-  const normTarget = normalizeMun(targetMun);
   if (normTarget && normTarget !== 'All') {
-    if (normalizeMun(r.municipality) === normTarget && r.operatingHours) return r.operatingHours;
     if (Array.isArray(r.branches)) {
       const match = r.branches.find(b => normalizeMun(typeof b === 'string' ? b : b.municipality) === normTarget);
-      if (match && typeof match === 'object' && match.operatingHours) return match.operatingHours;
+      if (match && typeof match === 'object' && match.lat !== undefined && match.lat !== null && !isNaN(Number(match.lat))) {
+        return Number(match.lat);
+      }
+    }
+    if (normalizeMun(r.municipality) === normTarget && r.lat !== undefined && r.lat !== null && !isNaN(Number(r.lat))) {
+      return Number(r.lat);
+    }
+    if (MUNICIPALITY_COORDINATES[normTarget]) {
+      return MUNICIPALITY_COORDINATES[normTarget].lat;
     }
   }
-  return r.operatingHours || '09:00 AM - 09:00 PM';
-};
-
-const getBranchOccupancy = (r, targetMun) => {
-  if (!r) return [20, 40, 60, 80, 95, 80, 60, 40, 60, 80, 95, 80, 40, 20, 10];
-  const normTarget = normalizeMun(targetMun);
-  if (normTarget && normTarget !== 'All') {
-    if (normalizeMun(r.municipality) === normTarget && r.occupancy) return r.occupancy;
-    if (Array.isArray(r.branches)) {
-      const match = r.branches.find(b => normalizeMun(typeof b === 'string' ? b : b.municipality) === normTarget);
-      if (match && typeof match === 'object' && match.occupancy) return match.occupancy;
-    }
-  }
-  return r.occupancy || [20, 40, 60, 80, 95, 80, 60, 40, 60, 80, 95, 80, 40, 20, 10];
+  return Number(r.lat) || 15.0300;
 };
 
 const getBranchLng = (r, targetMun) => {
   if (!r) return 120.6800;
   const normTarget = normalizeMun(targetMun);
-  if (Array.isArray(r.branches)) {
-    const match = r.branches.find(b => normalizeMun(typeof b === 'string' ? b : b.municipality) === normTarget);
-    if (match && typeof match === 'object' && match.lng) return match.lng;
+  if (normTarget && normTarget !== 'All') {
+    if (Array.isArray(r.branches)) {
+      const match = r.branches.find(b => normalizeMun(typeof b === 'string' ? b : b.municipality) === normTarget);
+      if (match && typeof match === 'object' && match.lng !== undefined && match.lng !== null && !isNaN(Number(match.lng))) {
+        return Number(match.lng);
+      }
+    }
+    if (normalizeMun(r.municipality) === normTarget && r.lng !== undefined && r.lng !== null && !isNaN(Number(r.lng))) {
+      return Number(r.lng);
+    }
+    if (MUNICIPALITY_COORDINATES[normTarget]) {
+      return MUNICIPALITY_COORDINATES[normTarget].lng;
+    }
   }
-  return r.lng || 120.6800;
+  return Number(r.lng) || 120.6800;
 };
 
 function App() {
@@ -2230,14 +2223,18 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     if (adminEditingId) {
       const originalRes = restaurants.find(r => r.id === adminEditingId);
 
-      const updatedBranches = adminBranches.length > 0 ? adminBranches.map((b, idx) => ({
-        branchName: b.branchName || `${nameToSave} Branch #${idx + 1}`,
-        municipality: b.municipality || adminForm.municipality || 'City of San Fernando',
-        address: b.address || adminForm.address || 'Pampanga',
-        operatingHours: b.operatingHours || adminForm.operatingHours || '09:00 AM - 09:00 PM',
-        lat: b.lat || 15.0300,
-        lng: b.lng || 120.6800
-      })) : (originalRes ? originalRes.branches : []);
+      const updatedBranches = adminBranches.length > 0 ? adminBranches.map((b, idx) => {
+        const mun = b.municipality || adminForm.municipality || 'City of San Fernando';
+        const defaultCoord = MUNICIPALITY_COORDINATES[mun] || { lat: 15.0300, lng: 120.6800 };
+        return {
+          branchName: (b.branchName || `${nameToSave} Branch #${idx + 1}`).trim(),
+          municipality: mun,
+          address: (b.address || '').trim() || `${mun}, Pampanga`,
+          operatingHours: (b.operatingHours || adminForm.operatingHours || '09:00 AM - 09:00 PM').trim(),
+          lat: Number(b.lat) && !isNaN(Number(b.lat)) ? Number(b.lat) : defaultCoord.lat,
+          lng: Number(b.lng) && !isNaN(Number(b.lng)) ? Number(b.lng) : defaultCoord.lng
+        };
+      }) : (originalRes ? originalRes.branches : []);
 
       const primaryBranch = updatedBranches && updatedBranches[0];
 
@@ -6287,18 +6284,32 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       <span className="text-[10px] font-black text-terracotta uppercase tracking-wider block">
                         🏪 All Active Branches ({getRestaurantMunicipalities(selectedRestaurant).length} Locations)
                       </span>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
-                        {getRestaurantMunicipalities(selectedRestaurant).map((mun, idx) => (
-                          <div key={idx} className="p-2 bg-white rounded-lg border border-[#E9E5DE] flex items-start gap-1.5 shadow-2xs">
-                            <span className="text-terracotta font-bold text-xs shrink-0 mt-0.5">📍</span>
-                            <div className="min-w-0">
-                              <strong className="text-[11px] font-black text-charcoal block leading-tight">{mun} Branch</strong>
-                              <span className="text-[9px] text-charcoal-light font-medium block truncate">
-                                {getBranchAddressForMunicipality(selectedRestaurant, mun)}
-                              </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        {getRestaurantMunicipalities(selectedRestaurant).map((mun, idx) => {
+                          const branchAddr = getBranchAddressForMunicipality(selectedRestaurant, mun);
+                          const branchLat = getBranchLat(selectedRestaurant, mun);
+                          const branchLng = getBranchLng(selectedRestaurant, mun);
+                          const branchHours = getBranchOperatingHours(selectedRestaurant, mun);
+                          return (
+                            <div key={idx} className="p-2.5 bg-white rounded-lg border border-[#E9E5DE] flex items-start gap-2 shadow-2xs">
+                              <span className="text-terracotta font-bold text-xs shrink-0 mt-0.5">📍</span>
+                              <div className="min-w-0 flex-1">
+                                <strong className="text-[11px] font-black text-charcoal block leading-tight">{mun} Branch</strong>
+                                <span className="text-[9px] text-charcoal-light font-medium block truncate mt-0.5">
+                                  {branchAddr}
+                                </span>
+                                <div className="flex flex-wrap items-center gap-2 mt-1 text-[8px] font-mono text-charcoal-light">
+                                  <span className="bg-ivory px-1.5 py-0.5 rounded border border-[#E9E5DE] font-bold text-terracotta">
+                                    GPS: {branchLat.toFixed(4)}°, {branchLng.toFixed(4)}°
+                                  </span>
+                                  <span className="text-[8px] font-sans text-charcoal-light">
+                                    🕒 {branchHours}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   ) : (
@@ -6705,6 +6716,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       </strong>
                       <span className="block text-[11px] text-charcoal-light font-medium truncate mt-0.5">
                         {address}
+                      </span>
+                      <span className="inline-block mt-1 text-[9px] font-mono font-bold text-charcoal-light bg-white px-2 py-0.5 rounded border border-[#E9E5DE]">
+                        📍 GPS: {lat.toFixed(4)}° N, {lng.toFixed(4)}° E
                       </span>
                     </div>
                     <span className="text-xs font-extrabold text-terracotta self-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
