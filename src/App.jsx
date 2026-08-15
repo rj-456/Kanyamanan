@@ -697,37 +697,60 @@ function App() {
   const [completionActiveTab, setCompletionActiveTab] = useState('polaroid');
   const [slotPhotos, setSlotPhotos] = useState({});
 
-  // Robust cross-origin safe image loader (prevents canvas tainting and download failures)
+  const [isGeneratingAlbum, setIsGeneratingAlbum] = useState(false);
+  const [generatingSingleIdx, setGeneratingSingleIdx] = useState(null);
+
+  // Bulletproof cross-origin safe image loader (converts to base64 to guarantee clean canvas export)
   const loadSafeImage = (url) => {
     if (!url) return Promise.resolve(null);
     return new Promise((resolve) => {
+      let resolved = false;
+      const done = (img) => {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeoutId);
+          resolve(img);
+        }
+      };
+
+      // 3-second timeout safeguard so generation never hangs
+      const timeoutId = setTimeout(() => {
+        done(null);
+      }, 3000);
+
+      // If already base64 data URL
       if (typeof url === 'string' && url.startsWith('data:')) {
         const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = () => resolve(null);
+        img.onload = () => done(img);
+        img.onerror = () => done(null);
         img.src = url;
         return;
       }
 
-      // Try fetching as a blob first to get a local Object URL (never taints canvas!)
+      // Try fetching as blob and converting to base64 Data URL
       fetch(url, { mode: 'cors' })
         .then((res) => {
-          if (!res.ok) throw new Error('Fetch failed with status ' + res.status);
+          if (!res.ok) throw new Error('Fetch failed ' + res.status);
           return res.blob();
         })
         .then((blob) => {
-          const blobUrl = URL.createObjectURL(blob);
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = () => resolve(null);
-          img.src = blobUrl;
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const dataUrl = reader.result;
+            const img = new Image();
+            img.onload = () => done(img);
+            img.onerror = () => done(null);
+            img.src = dataUrl;
+          };
+          reader.onerror = () => done(null);
+          reader.readAsDataURL(blob);
         })
         .catch(() => {
-          // Fallback to Image element with crossOrigin
+          // If fetch CORS is rejected by remote server, attempt direct Image with crossOrigin
           const img = new Image();
           img.crossOrigin = 'anonymous';
-          img.onload = () => resolve(img);
-          img.onerror = () => resolve(null);
+          img.onload = () => done(img);
+          img.onerror = () => done(null);
           img.src = url;
         });
     });
@@ -755,165 +778,34 @@ function App() {
 
   // Single Polaroid Card Downloader with Authentic Kapampangan Passport Stamp
   const downloadSinglePolaroid = async (stop, pIdx) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 600;
-    canvas.height = 720;
-    const ctx = canvas.getContext('2d');
+    setGeneratingSingleIdx(pIdx);
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 600;
+      canvas.height = 720;
+      const ctx = canvas.getContext('2d');
 
-    // Background
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Outer border
-    ctx.strokeStyle = '#E9E5DE';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(12, 12, canvas.width - 24, canvas.height - 24);
-
-    // Festive Washi Tape
-    ctx.fillStyle = 'rgba(229, 169, 60, 0.85)';
-    ctx.fillRect(canvas.width / 2 - 60, 14, 120, 22);
-
-    // Photo slot
-    const currentSlotImg = slotPhotos[pIdx] !== undefined ? slotPhotos[pIdx] : (completionPhotos[pIdx] || stop.image);
-    const imgX = 35;
-    const imgY = 48;
-    const imgW = 530;
-    const imgH = 460;
-
-    const loadedImg = await loadSafeImage(currentSlotImg);
-    if (loadedImg) {
-      try {
-        ctx.drawImage(loadedImg, imgX, imgY, imgW, imgH);
-      } catch (err) {
-        ctx.fillStyle = '#FAF8F5';
-        ctx.fillRect(imgX, imgY, imgW, imgH);
-      }
-    } else {
-      ctx.fillStyle = '#FAF8F5';
-      ctx.fillRect(imgX, imgY, imgW, imgH);
-    }
-
-    // Clean Red Kapampangan Municipality Stamp (No duplicate praise)
-    ctx.strokeStyle = '#C85A32';
-    ctx.lineWidth = 2.5;
-    ctx.strokeRect(imgX + imgW - 140, imgY + imgH - 45, 130, 36);
-    ctx.fillStyle = '#C85A32';
-    ctx.font = '900 12px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 75, imgY + imgH - 22);
-
-    // Stop Title
-    ctx.fillStyle = '#1F2937';
-    ctx.font = 'bold 24px serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(stop.name, canvas.width / 2, 555);
-
-    // Dynamic Kapampangan Praise Subtitle
-    const praise = getPraiseText(stop);
-    ctx.fillStyle = '#2C5E3B';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} ✨`, canvas.width / 2, 595);
-
-    // Date Stamp
-    ctx.fillStyle = '#9CA3AF';
-    ctx.font = '12px monospace';
-    ctx.fillText(`ENTRY DATE: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}`, canvas.width / 2, 640);
-
-    triggerCanvasDownload(canvas, `Kapampangan_Polaroid_${(stop.name || 'Stop').replace(/[^a-zA-Z0-9]/g, '_')}.png`);
-  };
-
-  // Real Client-Side Canvas Polaroid Album Downloader with Kapampangan Cultural Elements (Draws ALL stops)
-  const downloadRealPolaroidAlbum = async () => {
-    const stops = computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Heritage Kitchen', municipality: 'Pampanga', image: '' }];
-    const cardsToDraw = stops; // Draws all polaroids regardless of how many stops!
-    const numCols = cardsToDraw.length === 1 ? 1 : 2;
-    const numRows = Math.ceil(cardsToDraw.length / numCols);
-
-    const cardW = 515;
-    const cardH = 345;
-    const gapX = 30;
-    const gapY = 25;
-    const startY = 145;
-    const footerH = 60;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 1200;
-    canvas.height = Math.max(920, startY + numRows * (cardH + gapY) + footerH);
-    const ctx = canvas.getContext('2d');
-
-    // Canvas Background
-    const bgGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    bgGrad.addColorStop(0, '#FFFDF9');
-    bgGrad.addColorStop(0.5, '#FDF6EC');
-    bgGrad.addColorStop(1, '#FBF0DF');
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Banana leaf green & gold border
-    ctx.strokeStyle = '#2C5E3B';
-    ctx.lineWidth = 8;
-    ctx.strokeRect(16, 16, canvas.width - 32, canvas.height - 32);
-
-    ctx.strokeStyle = '#E5A93C';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(28, 28, canvas.width - 56, canvas.height - 56);
-
-    // Title Header with Kapampangan Tagline
-    ctx.fillStyle = '#2C5E3B';
-    ctx.font = 'bold 13px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('✨ KANYAMANAN • MAMASYAL TA PAMPANGA! ✨', canvas.width / 2, 56);
-
-    ctx.fillStyle = '#C85A32';
-    ctx.font = '900 26px serif';
-    ctx.fillText('MAMASYAL TA PAMPANGA! MEMORY ALBUM', canvas.width / 2, 88);
-
-    ctx.fillStyle = '#6B5E51';
-    ctx.font = 'bold 15px sans-serif';
-    ctx.fillText(`Trail: "${newItineraryName || 'Pampanga Heritage Culinary Excursion'}" • ${cardsToDraw.length} Stops Visited`, canvas.width / 2, 115);
-
-    // Safely pre-load all images
-    const loadedImages = await Promise.all(
-      cardsToDraw.map((stop, idx) => {
-        const currentSlotImg = slotPhotos[idx] !== undefined ? slotPhotos[idx] : (completionPhotos[idx] || stop.image);
-        return loadSafeImage(currentSlotImg);
-      })
-    );
-
-    cardsToDraw.forEach((stop, idx) => {
-      const col = idx % 2;
-      const row = Math.floor(idx / 2);
-      let x = 70 + col * (cardW + gapX);
-      if (cardsToDraw.length === 1) {
-        x = (canvas.width - cardW) / 2;
-      }
-      const y = startY + row * (cardH + gapY);
-
-      // Card Shadow & White Frame
+      // Background
       ctx.fillStyle = '#FFFFFF';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
-      ctx.shadowBlur = 8;
-      ctx.shadowOffsetX = 2;
-      ctx.shadowOffsetY = 4;
-      ctx.fillRect(x, y, cardW, cardH);
-      ctx.shadowColor = 'transparent';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Border
+      // Outer border
       ctx.strokeStyle = '#E9E5DE';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x, y, cardW, cardH);
+      ctx.lineWidth = 3;
+      ctx.strokeRect(12, 12, canvas.width - 24, canvas.height - 24);
 
       // Festive Washi Tape
-      ctx.fillStyle = idx % 2 === 0 ? 'rgba(229, 169, 60, 0.8)' : 'rgba(200, 90, 50, 0.75)';
-      ctx.fillRect(x + cardW / 2 - 45, y - 9, 90, 18);
+      ctx.fillStyle = 'rgba(229, 169, 60, 0.85)';
+      ctx.fillRect(canvas.width / 2 - 60, 14, 120, 22);
 
-      // Image container
-      const imgX = x + 18;
-      const imgY = y + 18;
-      const imgW = cardW - 36;
-      const imgH = 225;
+      // Photo slot
+      const currentSlotImg = slotPhotos[pIdx] !== undefined ? slotPhotos[pIdx] : (completionPhotos[pIdx] || stop.image);
+      const imgX = 35;
+      const imgY = 48;
+      const imgW = 530;
+      const imgH = 460;
 
-      const loadedImg = loadedImages[idx];
+      const loadedImg = await loadSafeImage(currentSlotImg);
       if (loadedImg) {
         try {
           ctx.drawImage(loadedImg, imgX, imgY, imgW, imgH);
@@ -926,32 +818,177 @@ function App() {
         ctx.fillRect(imgX, imgY, imgW, imgH);
       }
 
-      // Clean Red Location Stamp on photo corner
+      // Clean Red Kapampangan Municipality Stamp (No duplicate praise)
       ctx.strokeStyle = '#C85A32';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(imgX + imgW - 130, imgY + imgH - 36, 120, 28);
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(imgX + imgW - 140, imgY + imgH - 45, 130, 36);
       ctx.fillStyle = '#C85A32';
-      ctx.font = 'bold 10px sans-serif';
+      ctx.font = '900 12px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 70, imgY + imgH - 18);
+      ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 75, imgY + imgH - 22);
 
-      // Name and Details
+      // Stop Title
       ctx.fillStyle = '#1F2937';
-      ctx.font = 'bold 18px serif';
+      ctx.font = 'bold 24px serif';
       ctx.textAlign = 'center';
-      ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 278);
+      ctx.fillText(stop.name, canvas.width / 2, 555);
 
+      // Dynamic Kapampangan Praise Subtitle
       const praise = getPraiseText(stop);
       ctx.fillStyle = '#2C5E3B';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} • Stop #${idx + 1} ✨`, x + cardW / 2, y + 304);
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} ✨`, canvas.width / 2, 595);
 
+      // Date Stamp
       ctx.fillStyle = '#9CA3AF';
-      ctx.font = '10px monospace';
-      ctx.fillText(`DATE: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`, x + cardW / 2, y + 326);
-    });
+      ctx.font = '12px monospace';
+      ctx.fillText(`ENTRY DATE: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}`, canvas.width / 2, 640);
 
-    triggerCanvasDownload(canvas, `Kanyamanan_Kapampangan_Memory_Album.png`);
+      triggerCanvasDownload(canvas, `Kapampangan_Polaroid_${(stop.name || 'Stop').replace(/[^a-zA-Z0-9]/g, '_')}.png`);
+    } catch (error) {
+      console.error("Error generating single polaroid:", error);
+    } finally {
+      setGeneratingSingleIdx(null);
+    }
+  };
+
+  // Real Client-Side Canvas Polaroid Album Downloader with Kapampangan Cultural Elements (Draws ALL stops)
+  const downloadRealPolaroidAlbum = async () => {
+    setIsGeneratingAlbum(true);
+    try {
+      const stops = computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Heritage Kitchen', municipality: 'Pampanga', image: '' }];
+      const cardsToDraw = stops; // Draws all polaroids regardless of how many stops!
+      const numCols = cardsToDraw.length === 1 ? 1 : 2;
+      const numRows = Math.ceil(cardsToDraw.length / numCols);
+
+      const cardW = 515;
+      const cardH = 345;
+      const gapX = 30;
+      const gapY = 25;
+      const startY = 145;
+      const footerH = 60;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = Math.max(920, startY + numRows * (cardH + gapY) + footerH);
+      const ctx = canvas.getContext('2d');
+
+      // Canvas Background
+      const bgGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      bgGrad.addColorStop(0, '#FFFDF9');
+      bgGrad.addColorStop(0.5, '#FDF6EC');
+      bgGrad.addColorStop(1, '#FBF0DF');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Banana leaf green & gold border
+      ctx.strokeStyle = '#2C5E3B';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(16, 16, canvas.width - 32, canvas.height - 32);
+
+      ctx.strokeStyle = '#E5A93C';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(28, 28, canvas.width - 56, canvas.height - 56);
+
+      // Title Header with Kapampangan Tagline
+      ctx.fillStyle = '#2C5E3B';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✨ KANYAMANAN • MAMASYAL TA PAMPANGA! ✨', canvas.width / 2, 56);
+
+      ctx.fillStyle = '#C85A32';
+      ctx.font = '900 26px serif';
+      ctx.fillText('MAMASYAL TA PAMPANGA! MEMORY ALBUM', canvas.width / 2, 88);
+
+      ctx.fillStyle = '#6B5E51';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillText(`Trail: "${newItineraryName || 'Pampanga Heritage Culinary Excursion'}" • ${cardsToDraw.length} Stops Visited`, canvas.width / 2, 115);
+
+      // Safely pre-load all images
+      const loadedImages = await Promise.all(
+        cardsToDraw.map((stop, idx) => {
+          const currentSlotImg = slotPhotos[idx] !== undefined ? slotPhotos[idx] : (completionPhotos[idx] || stop.image);
+          return loadSafeImage(currentSlotImg);
+        })
+      );
+
+      cardsToDraw.forEach((stop, idx) => {
+        const col = idx % 2;
+        const row = Math.floor(idx / 2);
+        let x = 70 + col * (cardW + gapX);
+        if (cardsToDraw.length === 1) {
+          x = (canvas.width - cardW) / 2;
+        }
+        const y = startY + row * (cardH + gapY);
+
+        // Card Shadow & White Frame
+        ctx.fillStyle = '#FFFFFF';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 4;
+        ctx.fillRect(x, y, cardW, cardH);
+        ctx.shadowColor = 'transparent';
+
+        // Border
+        ctx.strokeStyle = '#E9E5DE';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, cardW, cardH);
+
+        // Festive Washi Tape
+        ctx.fillStyle = idx % 2 === 0 ? 'rgba(229, 169, 60, 0.8)' : 'rgba(200, 90, 50, 0.75)';
+        ctx.fillRect(x + cardW / 2 - 45, y - 9, 90, 18);
+
+        // Image container
+        const imgX = x + 18;
+        const imgY = y + 18;
+        const imgW = cardW - 36;
+        const imgH = 225;
+
+        const loadedImg = loadedImages[idx];
+        if (loadedImg) {
+          try {
+            ctx.drawImage(loadedImg, imgX, imgY, imgW, imgH);
+          } catch (err) {
+            ctx.fillStyle = '#FAF8F5';
+            ctx.fillRect(imgX, imgY, imgW, imgH);
+          }
+        } else {
+          ctx.fillStyle = '#FAF8F5';
+          ctx.fillRect(imgX, imgY, imgW, imgH);
+        }
+
+        // Clean Red Location Stamp on photo corner
+        ctx.strokeStyle = '#C85A32';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(imgX + imgW - 130, imgY + imgH - 36, 120, 28);
+        ctx.fillStyle = '#C85A32';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 70, imgY + imgH - 18);
+
+        // Name and Details
+        ctx.fillStyle = '#1F2937';
+        ctx.font = 'bold 18px serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 278);
+
+        const praise = getPraiseText(stop);
+        ctx.fillStyle = '#2C5E3B';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText(`✨ ${praise} • ${stop.municipality || 'Pampanga'} • Stop #${idx + 1} ✨`, x + cardW / 2, y + 304);
+
+        ctx.fillStyle = '#9CA3AF';
+        ctx.font = '10px monospace';
+        ctx.fillText(`DATE: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`, x + cardW / 2, y + 326);
+      });
+
+      triggerCanvasDownload(canvas, `Kanyamanan_Kapampangan_Memory_Album.png`);
+    } catch (error) {
+      console.error("Error generating memory album:", error);
+    } finally {
+      setIsGeneratingAlbum(false);
+    }
   };
 
   // Real Client-Side Certificate Downloader with Fun Kapampangan Aesthetics & Logo
@@ -7078,10 +7115,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     </div>
                     <button
                       type="button"
+                      disabled={isGeneratingAlbum}
                       onClick={downloadRealPolaroidAlbum}
-                      className="px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+                      className={`px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer ${
+                        isGeneratingAlbum ? 'opacity-70 cursor-not-allowed' : 'active:scale-95'
+                      }`}
                     >
-                      <span>📥</span> Save Full Album (PNG)
+                      <span>{isGeneratingAlbum ? '⏳' : '📥'}</span> 
+                      {isGeneratingAlbum ? 'Generating Full Album...' : 'Save Full Album (PNG)'}
                     </button>
                   </div>
 
@@ -7182,10 +7223,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                             <div className="pt-2 border-t border-[#E9E5DE]/60 flex justify-center">
                               <button
                                 type="button"
+                                disabled={generatingSingleIdx === pIdx}
                                 onClick={() => downloadSinglePolaroid(stop, pIdx)}
-                                className="px-3 py-1 bg-ivory hover:bg-[#E9E5DE] border border-[#E9E5DE] rounded-lg text-[10px] font-bold text-charcoal hover:text-terracotta transition-colors cursor-pointer flex items-center gap-1"
+                                className={`px-3 py-1 bg-ivory hover:bg-[#E9E5DE] border border-[#E9E5DE] rounded-lg text-[10px] font-bold text-charcoal hover:text-terracotta transition-colors cursor-pointer flex items-center gap-1 ${
+                                  generatingSingleIdx === pIdx ? 'opacity-70 cursor-not-allowed' : ''
+                                }`}
                               >
-                                <span>📥</span> Download This Polaroid
+                                <span>{generatingSingleIdx === pIdx ? '⏳' : '📥'}</span>
+                                {generatingSingleIdx === pIdx ? 'Generating...' : 'Download This Polaroid'}
                               </button>
                             </div>
                           </div>
