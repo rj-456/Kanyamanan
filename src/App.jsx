@@ -725,18 +725,17 @@ function App() {
     const imgH = 460;
 
     const renderTextAndStamp = () => {
-      // Red Kapampangan Passport Stamp
+      // Red Kapampangan Location Stamp
       ctx.strokeStyle = '#C85A32';
       ctx.lineWidth = 2.5;
-      ctx.strokeRect(imgX + imgW - 150, imgY + imgH - 65, 140, 55);
+      ctx.strokeRect(imgX + imgW - 140, imgY + imgH - 55, 130, 45);
       ctx.fillStyle = '#C85A32';
-      ctx.font = 'bold 9px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('PASASYAL PAMPANGA', imgX + imgW - 80, imgY + imgH - 46);
       ctx.font = '900 12px sans-serif';
-      ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 80, imgY + imgH - 28);
+      ctx.textAlign = 'center';
+      ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 75, imgY + imgH - 32);
+      ctx.fillStyle = '#2C5E3B';
       ctx.font = 'bold 8px sans-serif';
-      ctx.fillText('★ 100% MANYAMAN ★', imgX + imgW - 80, imgY + imgH - 15);
+      ctx.fillText('★ MANYAMAN KENI! ★', imgX + imgW - 75, imgY + imgH - 18);
 
       // Stop Title
       ctx.fillStyle = '#1F2937';
@@ -805,11 +804,11 @@ function App() {
     ctx.fillStyle = '#2C5E3B';
     ctx.font = 'bold 13px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('✨ KANYAMANAN • PAMAMASYAL KAPAMPANGAN MEMORY ALBUM ✨', canvas.width / 2, 56);
+    ctx.fillText('✨ KANYAMANAN • MAMASYAL TA PAMPANGA! ✨', canvas.width / 2, 56);
 
     ctx.fillStyle = '#C85A32';
     ctx.font = '900 26px serif';
-    ctx.fillText('ALBUM NING PAMANYALESE SA PAMPANGA', canvas.width / 2, 88);
+    ctx.fillText('MAMASYAL TA PAMPANGA! MEMORY ALBUM', canvas.width / 2, 88);
 
     ctx.fillStyle = '#6B5E51';
     ctx.font = 'bold 15px sans-serif';
@@ -864,16 +863,17 @@ function App() {
             ctx.fillRect(imgX, imgY, imgW, imgH);
           }
 
-          // Red Kapampangan Stamp on photo corner
+          // Red Kapampangan Location Stamp on photo corner
           ctx.strokeStyle = '#C85A32';
           ctx.lineWidth = 2;
-          ctx.strokeRect(imgX + imgW - 130, imgY + imgH - 48, 120, 40);
+          ctx.strokeRect(imgX + imgW - 130, imgY + imgH - 44, 120, 36);
           ctx.fillStyle = '#C85A32';
-          ctx.font = 'bold 8px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('PASASYAL PAMPANGA', imgX + imgW - 70, imgY + imgH - 33);
           ctx.font = 'bold 10px sans-serif';
-          ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 70, imgY + imgH - 18);
+          ctx.textAlign = 'center';
+          ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 70, imgY + imgH - 24);
+          ctx.fillStyle = '#2C5E3B';
+          ctx.font = 'bold 7px sans-serif';
+          ctx.fillText('★ MANYAMAN KENI! ★', imgX + imgW - 70, imgY + imgH - 13);
 
           // Name and Details
           ctx.fillStyle = '#1F2937';
@@ -6970,7 +6970,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 onClick={() => setCompletionActiveTab('polaroid')}
                 className={`flex-1 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 ${completionActiveTab === 'polaroid' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
               >
-                <span>📸</span> AI Polaroid Album
+                <span>📸</span> Polaroid Album
               </button>
               <button
                 type="button"
@@ -6981,14 +6981,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               </button>
             </div>
 
-            {/* TAB 1: AI POLAROID ALBUM GALLERY */}
+            {/* TAB 1: POLAROID ALBUM GALLERY */}
             {completionActiveTab === 'polaroid' && (
               <div className="space-y-4">
                 <div className="p-4 sm:p-6 bg-gradient-to-b from-[#FFFDF9] via-[#FDF6EC] to-[#FBF0DF] border-2 border-[#E5A93C]/50 rounded-2xl shadow-inner space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#E5A93C]/30">
                     <div>
                       <span className="text-[10px] font-black text-terracotta uppercase tracking-wider block">
-                        ✨ Pamamasyal Kapampangan Memory Album
+                        ✨ Mamasyal Ta Pampanga! Memory Album
                       </span>
                       <h4 className="text-sm font-black text-charcoal m-0 flex items-center gap-1.5">
                         <span>📸</span> Authentic Food Crawl Polaroids & Passport Badges
@@ -7033,10 +7033,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                               </div>
                             )}
 
-                            {/* Authentic Kapampangan Passport Stamp overlay on photo */}
+                            {/* Authentic Location Stamp overlay on photo */}
                             <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-xs px-2 py-1 rounded border-2 border-[#C85A32] text-[#C85A32] shadow-xs rotate-[-3deg] pointer-events-none select-none">
-                              <span className="block text-[7px] font-black uppercase tracking-wider leading-none">PASASYAL PAMPANGA</span>
                               <strong className="block text-[9px] font-black uppercase leading-tight">📍 {stop.municipality || 'Pampanga'}</strong>
+                              <span className="block text-[7px] font-bold text-[#2C5E3B] uppercase tracking-wider leading-none mt-0.5">Manyaman Keni!</span>
                             </div>
 
                             {/* Hover Photo Controls overlay on each card */}
