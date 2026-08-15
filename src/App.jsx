@@ -809,103 +809,177 @@ function App() {
     renderCanvasAndDownload();
   };
 
-  // Real Client-Side Certificate Downloader
+  // Real Client-Side Certificate Downloader with Fun Kapampangan Aesthetics & Logo
   const downloadRealCertificate = () => {
     const canvas = document.createElement('canvas');
     canvas.width = 1200;
     canvas.height = 850;
     const ctx = canvas.getContext('2d');
 
-    // Background
-    ctx.fillStyle = '#FAF8F5';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const renderCanvas = (logoImg) => {
+      // Warm Cream to Festive Ivory Gradient Background
+      const bgGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      bgGrad.addColorStop(0, '#FFFDF9');
+      bgGrad.addColorStop(0.5, '#FDF6EC');
+      bgGrad.addColorStop(1, '#FBF0DF');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Double Border
-    ctx.strokeStyle = '#2C5E3B';
-    ctx.lineWidth = 12;
-    ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
+      // Outer Banana Leaf (#2C5E3B) Frame with Rounded Corners
+      ctx.strokeStyle = '#2C5E3B';
+      ctx.lineWidth = 14;
+      ctx.strokeRect(26, 26, canvas.width - 52, canvas.height - 52);
 
-    ctx.strokeStyle = '#C85A32';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
+      // Middle Festive Golden Sunburst Line (#E5A93C)
+      ctx.strokeStyle = '#E5A93C';
+      ctx.lineWidth = 3.5;
+      ctx.strokeRect(42, 42, canvas.width - 84, canvas.height - 84);
 
-    // Header
-    ctx.fillStyle = '#2C5E3B';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('REPUBLIC OF THE PHILIPPINES • PROVINCE OF PAMPANGA', canvas.width / 2, 110);
+      // Inner Warm Terracotta (#C85A32) Trim
+      ctx.strokeStyle = '#C85A32';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(52, 52, canvas.width - 104, canvas.height - 104);
 
-    ctx.fillStyle = '#C85A32';
-    ctx.font = 'bold 28px serif';
-    ctx.fillText('CERTIFICATE OF KAPAMPANGAN CULINARY EXCURSION', canvas.width / 2, 160);
+      // Decorative Corner Medallions (Kapampangan Star / Parul Accent)
+      const cornerPoints = [
+        { x: 52, y: 52 },
+        { x: canvas.width - 52, y: 52 },
+        { x: 52, y: canvas.height - 52 },
+        { x: canvas.width - 52, y: canvas.height - 52 }
+      ];
+      cornerPoints.forEach(pt => {
+        ctx.fillStyle = '#E5A93C';
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 11, 0, Math.PI * 2);
+        ctx.fill();
 
-    ctx.strokeStyle = '#C85A32';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2 - 100, 180);
-    ctx.lineTo(canvas.width / 2 + 100, 180);
-    ctx.stroke();
+        ctx.fillStyle = '#C85A32';
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
 
-    ctx.fillStyle = '#555555';
-    ctx.font = 'italic 18px serif';
-    ctx.fillText('This Certificate of Culinary Distinction is proudly presented to', canvas.width / 2, 230);
+      // Draw Kanyamanan Logo (Centered at the top)
+      if (logoImg) {
+        try {
+          ctx.drawImage(logoImg, canvas.width / 2 - 40, 68, 80, 80);
+        } catch (e) {}
+      }
 
-    // Recipient Name
-    const recipient = completionGroupName.trim() || userProfile.username || 'Kapampangan Food Enthusiasts';
-    ctx.fillStyle = '#2C3E50';
-    ctx.font = 'bold 36px sans-serif';
-    ctx.fillText(recipient, canvas.width / 2, 300);
+      // Festive Header Tagline
+      ctx.fillStyle = '#2C5E3B';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('✨ MANYAMAN KENI! • PROVINCE OF PAMPANGA • CULINARY CAPITAL OF THE PHILIPPINES ✨', canvas.width / 2, 172);
 
-    // Body Text
-    ctx.fillStyle = '#333333';
-    ctx.font = '18px sans-serif';
-    ctx.fillText('For successfully navigating and completing the custom Kapampangan culinary route:', canvas.width / 2, 360);
+      // Main Certificate Title
+      ctx.fillStyle = '#C85A32';
+      ctx.font = '900 32px serif';
+      ctx.fillText('KATIBAYAN NING PAMANYALESE', canvas.width / 2, 215);
 
-    ctx.fillStyle = '#C85A32';
-    ctx.font = 'bold 24px sans-serif';
-    ctx.fillText(`"${newItineraryName || 'Pampanga Heritage Food Trail'}"`, canvas.width / 2, 410);
+      ctx.fillStyle = '#2C5E3B';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText('CERTIFICATE OF KAPAMPANGAN CULINARY EXCURSION', canvas.width / 2, 245);
 
-    ctx.fillStyle = '#333333';
-    ctx.font = '16px sans-serif';
-    ctx.fillText(`visiting ${computedRoutePath.length || 1} heritage destinations across the Culinary Capital of the Philippines.`, canvas.width / 2, 460);
+      // Golden Ribbon Divider with Stars
+      ctx.strokeStyle = '#E5A93C';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2 - 160, 265);
+      ctx.lineTo(canvas.width / 2 + 160, 265);
+      ctx.stroke();
 
-    // Signatures
-    const sigY = 620;
-    ctx.strokeStyle = '#2C5E3B';
-    ctx.lineWidth = 1.5;
+      ctx.fillStyle = '#C85A32';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('★  ★  ★', canvas.width / 2, 270);
 
-    // Left Signature
-    ctx.beginPath();
-    ctx.moveTo(250, sigY);
-    ctx.lineTo(480, sigY);
-    ctx.stroke();
+      // Presentation Sentence
+      ctx.fillStyle = '#6B5E51';
+      ctx.font = 'italic 18px serif';
+      ctx.fillText('This Certificate of Culinary Distinction is proudly presented to', canvas.width / 2, 310);
 
-    ctx.fillStyle = '#2C3E50';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.fillText('Team JECCAN', 365, sigY + 30);
-    ctx.fillStyle = '#777777';
-    ctx.font = '12px sans-serif';
-    ctx.fillText('Group Leader / Development Team', 365, sigY + 50);
+      // Recipient Name Highlight
+      const recipient = completionGroupName.trim() || userProfile.username || 'Kapampangan Food Enthusiasts';
+      ctx.fillStyle = '#1F2937';
+      ctx.font = '900 40px sans-serif';
+      ctx.fillText(recipient.toUpperCase(), canvas.width / 2, 365);
 
-    // Right Signature
-    ctx.beginPath();
-    ctx.moveTo(720, sigY);
-    ctx.lineTo(950, sigY);
-    ctx.stroke();
+      // Accomplishment Paragraph
+      ctx.fillStyle = '#4B5563';
+      ctx.font = '16px sans-serif';
+      ctx.fillText('For successfully navigating and conquering the authentic Kapampangan culinary trail:', canvas.width / 2, 415);
 
-    ctx.fillStyle = '#2C5E3B';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.fillText('Kanyamanan Board', 835, sigY + 30);
-    ctx.fillStyle = '#777777';
-    ctx.font = '12px sans-serif';
-    ctx.fillText('Health & Culinary Aggregator Core', 835, sigY + 50);
+      ctx.fillStyle = '#C85A32';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText(`"${newItineraryName || 'Pampanga Heritage Food Trail'}"`, canvas.width / 2, 455);
 
-    // Official Stamp
-    ctx.fillStyle = '#C85A32';
-    ctx.font = 'bold 12px monospace';
-    ctx.fillText(`OFFICIAL ENTRY STAMP • ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`, canvas.width / 2, 750);
+      ctx.fillStyle = '#2C5E3B';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText(`🎉 Visiting ${computedRoutePath.length || 1} Heritage Stops • Certified 100% Legit Kapampangan Foodie! 🎉`, canvas.width / 2, 495);
 
-    triggerCanvasDownload(canvas, `Kapampangan_Culinary_Excursion_Certificate.png`);
+      // Circular Golden Stamp Badge (Middle Bottom)
+      const badgeY = 575;
+      ctx.fillStyle = '#E5A93C';
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, badgeY, 40, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#C85A32';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillText('KANYAMANAN', canvas.width / 2, badgeY - 6);
+      ctx.font = '900 12px sans-serif';
+      ctx.fillText('AUTHENTIC', canvas.width / 2, badgeY + 10);
+      ctx.font = 'bold 9px sans-serif';
+      ctx.fillText('★ QUALITY ★', canvas.width / 2, badgeY + 24);
+
+      // Signature Lines
+      const sigY = 675;
+      ctx.strokeStyle = '#2C5E3B';
+      ctx.lineWidth = 1.5;
+
+      // Left Signature: TEAM JECCAN (Developers)
+      ctx.beginPath();
+      ctx.moveTo(220, sigY);
+      ctx.lineTo(460, sigY);
+      ctx.stroke();
+
+      ctx.fillStyle = '#1F2937';
+      ctx.font = 'bold 17px sans-serif';
+      ctx.fillText('Team JECCAN', 340, sigY + 26);
+      ctx.fillStyle = '#C85A32';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('System Developers', 340, sigY + 44);
+
+      // Right Signature: Kanyamanan Board
+      ctx.beginPath();
+      ctx.moveTo(740, sigY);
+      ctx.lineTo(980, sigY);
+      ctx.stroke();
+
+      ctx.fillStyle = '#1F2937';
+      ctx.font = 'bold 17px sans-serif';
+      ctx.fillText('Kanyamanan Core Board', 860, sigY + 26);
+      ctx.fillStyle = '#2C5E3B';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('Health & Culinary Aggregator', 860, sigY + 44);
+
+      // Official Timestamp
+      ctx.fillStyle = '#9CA3AF';
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText(`OFFICIAL STAMP OF COMPLETION • ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`, canvas.width / 2, 785);
+
+      triggerCanvasDownload(canvas, `Kapampangan_Culinary_Excursion_Certificate.png`);
+    };
+
+    const logo = new Image();
+    logo.crossOrigin = 'anonymous';
+    logo.src = '/kanyamanan-logo.png';
+    logo.onload = () => renderCanvas(logo);
+    logo.onerror = () => renderCanvas(null);
   };
 
   // Helper function to trigger browser file download
@@ -6907,54 +6981,88 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
             {/* TAB 2: OFFICIAL CERTIFICATE OF COMPLETION */}
             {completionActiveTab === 'certificate' && (
-              <div className="space-y-3">
-                <div className="p-6 bg-[#FAF8F5] border-4 border-[#2C5E3B] rounded-2xl relative shadow-inner text-center space-y-4 font-serif">
-                  <div className="border border-[#2C5E3B]/40 p-4 rounded-xl space-y-3">
-                    <div className="space-y-1">
-                      <span className="block text-[10px] font-black text-[#2C5E3B] uppercase tracking-widest">
-                        REPUBLIC OF THE PHILIPPINES • PROVINCE OF PAMPANGA
+              <div className="space-y-4">
+                <div className="p-6 sm:p-8 bg-gradient-to-b from-[#FFFDF9] via-[#FDF6EC] to-[#FBF0DF] border-4 border-[#2C5E3B] rounded-3xl relative shadow-xl text-center space-y-4 font-serif">
+                  {/* Decorative Double Gold & Terracotta Inner Border */}
+                  <div className="border-2 border-[#E5A93C] p-4 sm:p-6 rounded-2xl space-y-4 relative bg-white/70 backdrop-blur-xs">
+                    
+                    {/* Top Logo & Tagline */}
+                    <div className="flex flex-col items-center justify-center space-y-1.5">
+                      <img 
+                        src="/kanyamanan-logo.png" 
+                        alt="Kanyamanan Logo" 
+                        className="h-16 w-16 object-contain drop-shadow-sm"
+                      />
+                      <span className="block text-[10px] sm:text-[11px] font-black text-[#2C5E3B] uppercase tracking-widest font-sans">
+                        ✨ MANYAMAN KENI! • PROVINCE OF PAMPANGA • CULINARY CAPITAL OF THE PH ✨
                       </span>
-                      <h2 className="text-base font-black text-terracotta uppercase tracking-wide m-0">
-                        CERTIFICATE OF KAPAMPANGAN CULINARY EXCURSION
+                    </div>
+
+                    {/* Certificate Title */}
+                    <div className="space-y-0.5">
+                      <h2 className="text-lg sm:text-xl font-black text-terracotta tracking-wide m-0">
+                        KATIBAYAN NING PAMANYALESE
                       </h2>
-                      <div className="w-16 h-0.5 bg-terracotta mx-auto my-1"></div>
+                      <p className="text-xs font-black text-[#2C5E3B] tracking-wider font-sans uppercase m-0">
+                        Certificate of Kapampangan Culinary Excursion
+                      </p>
+                      <div className="flex items-center justify-center gap-2 pt-1">
+                        <div className="w-12 h-0.5 bg-[#E5A93C]"></div>
+                        <span className="text-[#C85A32] text-xs">★ ★ ★</span>
+                        <div className="w-12 h-0.5 bg-[#E5A93C]"></div>
+                      </div>
                     </div>
 
                     <p className="text-xs text-charcoal-light italic m-0">
                       This Certificate of Culinary Distinction is proudly presented to
                     </p>
 
-                    <h3 className="text-lg font-black text-charcoal uppercase tracking-wider font-sans m-0">
-                      {completionGroupName.trim() || userProfile.username || 'Kapampangan Food Enthusiasts'}
-                    </h3>
+                    {/* Recipient Name */}
+                    <div className="py-1">
+                      <h3 className="text-xl sm:text-2xl font-black text-charcoal uppercase tracking-wider font-sans m-0 underline decoration-terracotta decoration-2 underline-offset-4">
+                        {completionGroupName.trim() || userProfile.username || 'Kapampangan Food Enthusiasts'}
+                      </h3>
+                    </div>
 
-                    <p className="text-xs text-charcoal leading-relaxed max-w-md mx-auto m-0">
-                      For successfully navigating and completing the custom Kapampangan culinary route:
-                      <strong className="block text-terracotta font-sans text-xs mt-0.5 font-bold">
+                    <p className="text-xs text-charcoal leading-relaxed max-w-lg mx-auto m-0">
+                      For successfully navigating and conquering the authentic Kapampangan culinary route:
+                      <strong className="block text-terracotta font-sans text-sm mt-1 font-bold">
                         "{newItineraryName || 'Pampanga Heritage Food Trail'}"
                       </strong>
-                      visiting <strong>{computedRoutePath.length} heritage destinations</strong> across the Culinary Capital of the Philippines.
+                      <span className="block mt-1 text-[11px] font-bold text-[#2C5E3B] font-sans">
+                        🎉 Visiting {computedRoutePath.length} Heritage Stops • Certified 100% Legit Kapampangan Foodie! 🎉
+                      </span>
                     </p>
 
-                    <div className="pt-4 border-t border-[#2C5E3B]/20 grid grid-cols-2 gap-4 text-center font-sans">
-                      <div>
-                        <span className="block text-[10px] font-bold text-charcoal uppercase">Team JECCAN</span>
-                        <span className="block text-[8px] text-charcoal-light">Group Leader / Development Team</span>
+                    {/* Official Stamp & Signatures */}
+                    <div className="pt-5 border-t border-[#2C5E3B]/20 grid grid-cols-2 gap-4 text-center font-sans">
+                      <div className="space-y-0.5">
+                        <div className="w-32 h-px bg-[#2C5E3B] mx-auto mb-1"></div>
+                        <strong className="block text-xs font-black text-charcoal uppercase">Team JECCAN</strong>
+                        <span className="block text-[9px] font-bold text-terracotta">System Developers</span>
                       </div>
-                      <div>
-                        <span className="block text-[10px] font-bold text-[#2C5E3B] uppercase">Kanyamanan Board</span>
-                        <span className="block text-[8px] text-charcoal-light">Health & Culinary Aggregator Core</span>
+                      <div className="space-y-0.5">
+                        <div className="w-32 h-px bg-[#2C5E3B] mx-auto mb-1"></div>
+                        <strong className="block text-xs font-black text-[#2C5E3B] uppercase">Kanyamanan Core Board</strong>
+                        <span className="block text-[9px] font-bold text-charcoal-light">Health & Culinary Aggregator</span>
                       </div>
                     </div>
+
+                    <div className="pt-2 text-center">
+                      <span className="text-[9px] font-mono text-charcoal-light uppercase tracking-wider">
+                        Official Entry Stamp • {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      </span>
+                    </div>
+
                   </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={downloadRealCertificate}
-                  className="w-full py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-2xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer hover:shadow-lg active:scale-[0.99]"
                 >
-                  📥 Save & Download Official Certificate
+                  <span>📥</span> Save & Download Official Certificate (PNG)
                 </button>
               </div>
             )}
