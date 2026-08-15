@@ -289,9 +289,10 @@ function App() {
               id: attr.id || `attr-${Date.now()}-${idx}`,
               name: attr.name || `Heritage Destination #${idx + 1}`,
               municipality: attr.municipality || 'City of San Fernando',
+              address: attr.address || `${attr.municipality || 'Pampanga'}, Pampanga`,
               type: attr.type || '🏛️ Historic Parish Church',
               description: attr.description || 'Cultural heritage destination in Pampanga.',
-              details: attr.details || attr.description || 'Cultural heritage destination in Pampanga.',
+              details: attr.details || '',
               image: attr.image || (Array.isArray(attr.images) && attr.images[0]) || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=800&q=80',
               images: Array.isArray(attr.images) && attr.images.length > 0 ? attr.images : [attr.image || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=800&q=80'],
               lat: Number(attr.lat) || 15.0300,
@@ -790,10 +791,12 @@ function App() {
   const [adminAttractionForm, setAdminAttractionForm] = useState({
     name: '',
     municipality: 'City of San Fernando',
+    address: '',
     type: '🏛️ Historic Parish Church',
     description: '',
     details: '',
     image: '',
+    images: [],
     lat: 15.0300,
     lng: 120.6800
   });
@@ -2185,9 +2188,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     setAdminAttractionForm({
       name: attr.name || '',
       municipality: attr.municipality || 'City of San Fernando',
+      address: attr.address || '',
       type: attr.type || '🏛️ Historic Parish Church',
       description: attr.description || '',
-      details: attr.details || attr.description || '',
+      details: attr.details || '',
       image: attr.image || (existingImgs[0] || ''),
       images: existingImgs,
       lat: attr.lat || 15.0300,
@@ -2212,9 +2216,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     const updatedAttrObj = {
       name: nameToSave,
       municipality: adminAttractionForm.municipality || 'City of San Fernando',
+      address: (adminAttractionForm.address || '').trim() || `${adminAttractionForm.municipality || 'Pampanga'}, Pampanga`,
       type: adminAttractionForm.type || '🏛️ Historic Parish Church',
-      description: adminAttractionForm.description || '',
-      details: adminAttractionForm.details || adminAttractionForm.description || '',
+      description: (adminAttractionForm.description || '').trim(),
+      details: (adminAttractionForm.details || '').trim(),
       image: primaryImg,
       images: imagesToSave,
       lat: Number(adminAttractionForm.lat) || 15.0300,
@@ -2253,6 +2258,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     setAdminAttractionForm({
       name: '',
       municipality: 'City of San Fernando',
+      address: '',
       type: '🏛️ Historic Parish Church',
       description: '',
       details: '',
@@ -3890,6 +3896,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 </div>
 
                 <form onSubmit={handleSaveAdminAttraction} className="space-y-4 text-xs">
+                  {/* Row 1: Basic Info */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
@@ -3898,7 +3905,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Candaba Wetland Reserve"
+                        placeholder="e.g. Santa Ana Eco Park"
                         value={adminAttractionForm.name}
                         onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, name: e.target.value })}
                         className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-ivory text-xs font-extrabold focus:outline-none focus:ring-1 focus:ring-terracotta"
@@ -3938,118 +3945,157 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     </div>
                   </div>
 
+                  {/* Row 2: Exact Address Input (Distinct from Stories) */}
+                  <div className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl space-y-1">
+                    <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5">
+                      <span>🏠</span> Exact Street / Barangay Address & Location
+                    </label>
+                    <span className="text-[10px] text-charcoal-light block">
+                      Specify the precise street, barangay, or landmark location (separate from description)
+                    </span>
+                    <input
+                      type="text"
+                      placeholder="e.g. Barangay San Nicolas (Sepung Ilog), Santa Ana, Pampanga"
+                      value={adminAttractionForm.address}
+                      onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, address: e.target.value })}
+                      className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-white text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-terracotta"
+                    />
+                  </div>
+
+                  {/* Row 3: Differentiated Descriptions & Heritage Context */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl space-y-2.5">
-                      <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
-                        📷 Tourist Destination Photos (Upload Local Files or Add Photo URLs)
+                    <div className="p-3.5 bg-white border border-[#E9E5DE] rounded-xl space-y-1.5 shadow-2xs">
+                      <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5">
+                        <span>📖</span> Historical / Cultural Summary (Description)
                       </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <span className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">Option 1: Upload Local Picture Files</span>
-                          <input
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            onChange={(e) => {
-                              const files = Array.from(e.target.files);
-                              if (files.length > 0) {
-                                const base64Promises = files.map(file => {
-                                  return new Promise((resolve) => {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => resolve(reader.result);
-                                    reader.readAsDataURL(file);
-                                  });
-                                });
-                                Promise.all(base64Promises).then(results => {
-                                  const existing = adminAttractionForm.images || (adminAttractionForm.image ? [adminAttractionForm.image] : []);
-                                  const updatedImages = [...existing, ...results];
-                                  setAdminAttractionForm({
-                                    ...adminAttractionForm,
-                                    images: updatedImages,
-                                    image: updatedImages[0] || ''
-                                  });
-                                });
-                              }
-                            }}
-                            className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white text-charcoal focus:outline-none"
-                          />
-                        </div>
-
-                        <div>
-                          <span className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">Option 2: Add Image Web URL</span>
-                          <div className="flex gap-1.5">
-                            <input
-                              type="text"
-                              placeholder="/attractions/candaba_bird_sanctuary.jpg or https://..."
-                              value={attrPhotoUrlInput}
-                              onChange={(e) => setAttrPhotoUrlInput(e.target.value)}
-                              className="flex-1 px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white focus:outline-none"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (attrPhotoUrlInput.trim()) {
-                                  const existing = adminAttractionForm.images || (adminAttractionForm.image ? [adminAttractionForm.image] : []);
-                                  const updatedImages = [...existing, attrPhotoUrlInput.trim()];
-                                  setAdminAttractionForm({
-                                    ...adminAttractionForm,
-                                    images: updatedImages,
-                                    image: updatedImages[0] || ''
-                                  });
-                                  setAttrPhotoUrlInput('');
-                                }
-                              }}
-                              className="px-3 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-bold cursor-pointer shrink-0"
-                            >
-                              + Add URL
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {((adminAttractionForm.images && adminAttractionForm.images.length > 0) || adminAttractionForm.image) && (
-                        <div className="pt-2 border-t border-[#E9E5DE] space-y-1">
-                          <div className="flex flex-wrap gap-2">
-                            {(adminAttractionForm.images && adminAttractionForm.images.length > 0 ? adminAttractionForm.images : [adminAttractionForm.image]).map((imgSrc, idx) => (
-                              <div key={idx} className="relative w-12 h-12 shrink-0">
-                                <img src={imgSrc} className="w-full h-full rounded-lg object-cover border border-[#E9E5DE] shadow-xs" alt="Preview" />
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const currentImgs = adminAttractionForm.images || [adminAttractionForm.image];
-                                    const updated = currentImgs.filter((_, i) => i !== idx);
-                                    setAdminAttractionForm({
-                                      ...adminAttractionForm,
-                                      images: updated,
-                                      image: updated[0] || ''
-                                    });
-                                  }}
-                                  className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-[8px] font-black flex items-center justify-center shadow-md cursor-pointer transition-colors"
-                                >
-                                  ✕
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                          <span className="text-[9px] text-bananaleaf font-black block pt-0.5">
-                            ✓ {(adminAttractionForm.images || [adminAttractionForm.image]).length} Photos Attached
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
-                        Historical / Cultural Summary
-                      </label>
-                      <input
-                        type="text"
+                      <span className="text-[10px] text-charcoal-light block">
+                        Overview of this destination, visitor experience, and general background
+                      </span>
+                      <textarea
+                        rows={3}
                         required
-                        placeholder="e.g. National Cultural Treasure built in 1575..."
+                        placeholder="e.g. A serene community ecotourism destination developed for nature walks, local recreation, and river protection..."
                         value={adminAttractionForm.description}
                         onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, description: e.target.value })}
-                        className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-white text-xs focus:outline-none"
+                        className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-terracotta resize-none font-medium text-charcoal"
                       />
                     </div>
+
+                    <div className="p-3.5 bg-white border border-[#E9E5DE] rounded-xl space-y-1.5 shadow-2xs">
+                      <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🏛️</span> Heritage Context & Visitor Highlights (Optional)
+                      </label>
+                      <span className="text-[10px] text-charcoal-light block">
+                        Specific architectural features, historical facts, or special activities
+                      </span>
+                      <textarea
+                        rows={3}
+                        placeholder="e.g. Features scenic riverfront views, picnic spots, local food stalls, and bird-watching spots by the Sepung Ilog..."
+                        value={adminAttractionForm.details}
+                        onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, details: e.target.value })}
+                        className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs leading-relaxed focus:outline-none focus:ring-1 focus:ring-terracotta resize-none font-medium text-charcoal"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 4: Photos Upload & URL Management */}
+                  <div className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl space-y-2.5">
+                    <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
+                      📷 Tourist Destination Photos (Upload Local Files or Add Photo URLs)
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <span className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">Option 1: Upload Local Picture Files</span>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files);
+                            if (files.length > 0) {
+                              const base64Promises = files.map(file => {
+                                return new Promise((resolve) => {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => resolve(reader.result);
+                                  reader.readAsDataURL(file);
+                                });
+                              });
+                              Promise.all(base64Promises).then(results => {
+                                const existing = adminAttractionForm.images || (adminAttractionForm.image ? [adminAttractionForm.image] : []);
+                                const updatedImages = [...existing, ...results];
+                                setAdminAttractionForm({
+                                  ...adminAttractionForm,
+                                  images: updatedImages,
+                                  image: updatedImages[0] || ''
+                                });
+                              });
+                            }
+                          }}
+                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white text-charcoal focus:outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <span className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">Option 2: Add Image Web URL</span>
+                        <div className="flex gap-1.5">
+                          <input
+                            type="text"
+                            placeholder="/attractions/candaba_bird_sanctuary.jpg or https://..."
+                            value={attrPhotoUrlInput}
+                            onChange={(e) => setAttrPhotoUrlInput(e.target.value)}
+                            className="flex-1 px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (attrPhotoUrlInput.trim()) {
+                                const existing = adminAttractionForm.images || (adminAttractionForm.image ? [adminAttractionForm.image] : []);
+                                const updatedImages = [...existing, attrPhotoUrlInput.trim()];
+                                setAdminAttractionForm({
+                                  ...adminAttractionForm,
+                                  images: updatedImages,
+                                  image: updatedImages[0] || ''
+                                });
+                                setAttrPhotoUrlInput('');
+                              }
+                            }}
+                            className="px-3 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-bold cursor-pointer shrink-0"
+                          >
+                            + Add URL
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {((adminAttractionForm.images && adminAttractionForm.images.length > 0) || adminAttractionForm.image) && (
+                      <div className="pt-2 border-t border-[#E9E5DE] space-y-1">
+                        <div className="flex flex-wrap gap-2">
+                          {(adminAttractionForm.images && adminAttractionForm.images.length > 0 ? adminAttractionForm.images : [adminAttractionForm.image]).map((imgSrc, idx) => (
+                            <div key={idx} className="relative w-12 h-12 shrink-0">
+                              <img src={imgSrc} className="w-full h-full rounded-lg object-cover border border-[#E9E5DE] shadow-xs" alt="Preview" />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const currentImgs = adminAttractionForm.images || [adminAttractionForm.image];
+                                  const updated = currentImgs.filter((_, i) => i !== idx);
+                                  setAdminAttractionForm({
+                                    ...adminAttractionForm,
+                                    images: updated,
+                                    image: updated[0] || ''
+                                  });
+                                }}
+                                className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-[8px] font-black flex items-center justify-center shadow-md cursor-pointer transition-colors"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <span className="text-[9px] text-bananaleaf font-black block pt-0.5">
+                          ✓ {(adminAttractionForm.images || [adminAttractionForm.image]).length} Photos Attached
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-2 justify-end pt-2 border-t border-[#E9E5DE]">
@@ -5979,19 +6025,23 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
             <div className="space-y-1">
               <h3 className="text-base font-extrabold text-charcoal m-0">{selectedAttraction.name}</h3>
-              <span className="text-xs font-bold text-terracotta block">
-                📍 {selectedAttraction.municipality}, Pampanga
+              <span className="text-xs font-bold text-terracotta flex items-center gap-1">
+                📍 {selectedAttraction.address || `${selectedAttraction.municipality}, Pampanga`}
               </span>
             </div>
 
-            <p className="text-xs text-charcoal leading-relaxed">{selectedAttraction.description}</p>
-            
-            {selectedAttraction.details && (
-              <div className="p-3 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-xs space-y-1">
-                <strong className="text-[10px] uppercase font-black text-terracotta block">Heritage & Cultural Context:</strong>
-                <p className="text-charcoal-light leading-relaxed m-0">{selectedAttraction.details}</p>
-              </div>
-            )}
+            <div className="space-y-3 text-xs leading-relaxed">
+              <p className="text-charcoal font-medium leading-relaxed m-0">{selectedAttraction.description}</p>
+              
+              {selectedAttraction.details && selectedAttraction.details !== selectedAttraction.description && (
+                <div className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-xs space-y-1 shadow-2xs">
+                  <strong className="text-[10px] uppercase font-black text-terracotta tracking-wider flex items-center gap-1">
+                    🏛️ Heritage & Cultural Context
+                  </strong>
+                  <p className="text-charcoal-light leading-relaxed m-0">{selectedAttraction.details}</p>
+                </div>
+              )}
+            </div>
 
             <div className="pt-3 border-t border-[#E9E5DE] flex gap-2 justify-end">
               <button
