@@ -1657,6 +1657,25 @@ function App() {
     setActiveTrip(activeTrip.filter(item => item.id !== resId));
   };
 
+  // Helper to serialize itinerary stops while preserving specific branch locations and coordinates
+  const serializeItineraryStops = (stopsList) => {
+    return (stopsList || []).map(r => ({
+      id: r.id,
+      name: r.name,
+      municipality: r.municipality || 'Pampanga',
+      address: r.address || '',
+      lat: Number(r.lat) || 15.0300,
+      lng: Number(r.lng) || 120.6800,
+      type: r.type || '🍽️ Heritage Kitchen',
+      corridor: r.corridor || 'Pampanga Tourism Line',
+      image: r.image || '',
+      priceTier: r.priceTier || '$',
+      operatingHours: r.operatingHours || '09:00 AM - 09:00 PM',
+      selectedBranchName: r.selectedBranchName || r.municipality || '',
+      menu: Array.isArray(r.menu) ? r.menu : []
+    }));
+  };
+
   const handleSaveActiveTrip = (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!newItineraryName.trim() || activeTrip.length === 0) return;
@@ -1664,7 +1683,7 @@ function App() {
     const newItin = {
       id: 'trail-' + Date.now(),
       name: newItineraryName.trim(),
-      stops: computedRoutePath.map(r => r.name),
+      stops: serializeItineraryStops(computedRoutePath),
       isFinished: false,
       createdAt: Date.now(),
       updatedAt: Date.now()
@@ -1692,7 +1711,7 @@ function App() {
         return {
           ...item,
           name: nameToUse,
-          stops: computedRoutePath.map(r => r.name),
+          stops: serializeItineraryStops(computedRoutePath),
           updatedAt: Date.now()
         };
       }
@@ -1711,57 +1730,110 @@ function App() {
     setNewItineraryName(itin.name);
 
     const matchedStops = itin.stops.map(stop => {
-      if (typeof stop === 'object' && stop !== null) return stop;
+      // 1. If stop is already a rich object with specific municipality and lat/lng
+      if (typeof stop === 'object' && stop !== null && stop.name) {
+        const baseRestaurant = (restaurants || []).find(r => r && (
+          r.id === stop.id ||
+          r.name === stop.name ||
+          stop.name.startsWith(r.name) ||
+          r.name.startsWith(stop.name)
+        ));
 
+        if (baseRestaurant) {
+          const targetMun = stop.municipality || stop.selectedBranchName || baseRestaurant.municipality;
+          const branchAddress = getBranchAddressForMunicipality(baseRestaurant, targetMun) || stop.address || baseRestaurant.address;
+          const branchLat = getBranchLat(baseRestaurant, targetMun) || stop.lat || baseRestaurant.lat;
+          const branchLng = getBranchLng(baseRestaurant, targetMun) || stop.lng || baseRestaurant.lng;
+
+          return {
+            ...baseRestaurant,
+            ...stop,
+            id: stop.id || `${baseRestaurant.id}-${targetMun.toLowerCase().replace(/\s+/g, '-')}`,
+            name: stop.name,
+            municipality: targetMun,
+            address: branchAddress,
+            lat: branchLat,
+            lng: branchLng,
+            selectedBranchName: targetMun
+          };
+        }
+
+        const baseAttraction = (attractions || []).find(a => a && (
+          a.id === stop.id ||
+          a.name === stop.name
+        ));
+
+        if (baseAttraction) {
+          return {
+            ...baseAttraction,
+            ...stop
+          };
+        }
+
+        return stop;
+      }
+
+      // 2. Fallback for legacy string names (e.g. "Kabigting's Halo-Halo (Floridablanca Branch)")
       const stopNameStr = String(stop).trim();
       const normalize = (str) => String(str || '').toLowerCase().replace(/santo|santa/g, 'san').replace(/[^a-z0-9]/g, '');
 
-      // 1. Exact or normalized name match in restaurants
+      // Detect if municipality is enclosed in parentheses
+      let extractedMun = null;
+      const munMatch = stopNameStr.match(/\(([^)]+)\)/);
+      if (munMatch) {
+        const inside = munMatch[1].replace(/branch/i, '').trim();
+        const foundMun = MUNICIPALITIES.find(m => m.toLowerCase() === inside.toLowerCase() || inside.toLowerCase().includes(m.toLowerCase()));
+        if (foundMun) extractedMun = foundMun;
+      }
+
+      // Match restaurant
       let match = (restaurants || []).find(r => r && (
         r.name === stopNameStr || 
         r.id === stopNameStr ||
-        normalize(r.name) === normalize(stopNameStr)
+        normalize(r.name) === normalize(stopNameStr) ||
+        stopNameStr.toLowerCase().includes(r.name.toLowerCase())
       ));
 
-      // 2. Exact or normalized name match in attractions
-      if (!match) {
-        match = (attractions || []).find(a => a && (
-          a.name === stopNameStr || 
-          a.id === stopNameStr ||
-          normalize(a.name) === normalize(stopNameStr)
-        ));
-      }
+      if (match) {
+        const munToUse = extractedMun || match.municipality;
+        const branchAddress = getBranchAddressForMunicipality(match, munToUse) || match.address;
+        const branchLat = getBranchLat(match, munToUse) || match.lat;
+        const branchLng = getBranchLng(match, munToUse) || match.lng;
 
-      // 3. Partial substring match in restaurants
-      if (!match) {
-        match = (restaurants || []).find(r => r && r.name && (
-          r.name.toLowerCase().includes(stopNameStr.toLowerCase()) || 
-          stopNameStr.toLowerCase().includes(r.name.toLowerCase())
-        ));
-      }
-
-      // 4. Partial substring match in attractions
-      if (!match) {
-        match = (attractions || []).find(a => a && a.name && (
-          a.name.toLowerCase().includes(stopNameStr.toLowerCase()) || 
-          stopNameStr.toLowerCase().includes(a.name.toLowerCase())
-        ));
-      }
-
-      // 5. Fallback object if not found by exact string
-      if (!match) {
-        match = {
-          id: 'custom-' + stopNameStr.replace(/\s+/g, '-').toLowerCase(),
-          name: stopNameStr,
-          municipality: 'Pampanga',
-          corridor: 'Pampanga Tourism Line',
-          image: '/attractions/media_.png',
-          operatingHours: '08:00 AM - 08:00 PM',
-          priceTier: '$',
-          menu: []
+        return {
+          ...match,
+          id: `${match.id}-${munToUse.toLowerCase().replace(/\s+/g, '-')}`,
+          name: stopNameStr.includes('Branch') ? stopNameStr : (munToUse !== match.municipality ? `${match.name} (${munToUse} Branch)` : match.name),
+          municipality: munToUse,
+          address: branchAddress,
+          lat: branchLat,
+          lng: branchLng,
+          selectedBranchName: munToUse
         };
       }
-      return match;
+
+      // Match attraction
+      let attrMatch = (attractions || []).find(a => a && (
+        a.name === stopNameStr || 
+        a.id === stopNameStr ||
+        normalize(a.name) === normalize(stopNameStr) ||
+        stopNameStr.toLowerCase().includes(a.name.toLowerCase())
+      ));
+
+      if (attrMatch) {
+        return attrMatch;
+      }
+
+      return {
+        id: 'custom-' + stopNameStr.replace(/\s+/g, '-').toLowerCase(),
+        name: stopNameStr,
+        municipality: extractedMun || 'Pampanga',
+        corridor: 'Pampanga Tourism Line',
+        image: '/attractions/media_.png',
+        operatingHours: '08:00 AM - 08:00 PM',
+        priceTier: '$',
+        menu: []
+      };
     }).filter(Boolean);
 
     setActiveTrip(matchedStops);
@@ -1782,6 +1854,10 @@ function App() {
     if (window.confirm("Are you sure you want to permanently delete this saved route?")) {
       const updated = savedItineraries.filter(item => item.id !== itinId);
       persistSavedItineraries(updated);
+      if (loadedItineraryId === itinId) {
+        setLoadedItineraryId(null);
+        setLoadedItineraryName('');
+      }
     }
   };
 
@@ -1819,6 +1895,9 @@ function App() {
       return item;
     });
     persistSavedItineraries(updated);
+    if (loadedItineraryId === itinId) {
+      setLoadedItineraryName(editingItinName.trim());
+    }
     setEditingItinId(null);
     setEditingItinName('');
   };
@@ -1834,7 +1913,7 @@ function App() {
         if (item.id === itinId) {
           return {
             ...item,
-            stops: computedRoutePath.map(r => r.name),
+            stops: serializeItineraryStops(computedRoutePath),
             updatedAt: Date.now()
           };
         }
@@ -6049,18 +6128,23 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         )}
 
                         <div className="flex flex-wrap gap-1.5 pt-0.5">
-                          {itin.stops.map((stop, idx) => (
-                            <span 
-                              key={idx} 
-                              className={`text-[10px] px-2.5 py-1 rounded-md border font-semibold transition-all ${
-                                itin.isFinished 
-                                  ? 'bg-white/50 text-gray-400 border-gray-200' 
-                                  : 'bg-white text-charcoal border-[#E9E5DE] group-hover/itin:border-terracotta/30'
-                              }`}
-                            >
-                              {typeof stop === 'object' ? stop.name : stop}
-                            </span>
-                          ))}
+                          {itin.stops.map((stop, idx) => {
+                            const stopName = typeof stop === 'object' ? stop.name : String(stop);
+                            const stopMun = typeof stop === 'object' ? stop.municipality : null;
+                            const displayName = stopMun && !stopName.includes(stopMun) ? `${stopName} (${stopMun})` : stopName;
+                            return (
+                              <span 
+                                key={idx} 
+                                className={`text-[10px] px-2.5 py-1 rounded-md border font-semibold transition-all ${
+                                  itin.isFinished 
+                                    ? 'bg-white/50 text-gray-400 border-gray-200' 
+                                    : 'bg-white text-charcoal border-[#E9E5DE] group-hover/itin:border-terracotta/30'
+                                }`}
+                              >
+                                {displayName}
+                              </span>
+                            );
+                          })}
                         </div>
 
                         <div className="pt-1 flex justify-end">
