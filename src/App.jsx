@@ -525,8 +525,7 @@ function App() {
     };
   }, [userProfile?.email, userProfile?.username]);
 
-  // Constraints & Simulated traffic Adjuster
-  const [stopCeiling, setStopCeiling] = useState(3);
+  // Constraints & Group Size Adjuster
   const [numPersons, setNumPersons] = useState(1);
   const [activeImgIdx, setActiveImgIdx] = useState(0);
   const [zoomedDishImg, setZoomedDishImg] = useState(null);
@@ -1027,7 +1026,7 @@ function App() {
   const computedRoutePath = useMemo(() => {
     if (activeTrip.length === 0) return [];
 
-    let stops = activeTrip.slice(0, stopCeiling);
+    let stops = activeTrip;
 
     if (isTrafficCongested) {
       const macArthurStops = stops.filter(s => s.corridor === 'MacArthur Highway Line');
@@ -1036,7 +1035,7 @@ function App() {
     }
 
     return stops;
-  }, [activeTrip, stopCeiling, isTrafficCongested]);
+  }, [activeTrip, isTrafficCongested]);
 
   // Trigger loading toast when itinerary changes
   useEffect(() => {
@@ -1045,7 +1044,7 @@ function App() {
       const timer = setTimeout(() => setShowToast(false), 3000);
       return () => clearTimeout(timer);
     }
-  }, [activeTrip, stopCeiling, isTrafficCongested]);
+  }, [activeTrip, isTrafficCongested]);
 
   // Traffic alert ticker effect
   useEffect(() => {
@@ -1569,11 +1568,11 @@ function App() {
         // Route/itinerary query
         if (activeTrip.length > 0) {
           const stops = activeTrip.map((r, i) => `${i + 1}. ${r.name} — ${r.municipality}`).join('\n');
-          botResponse = `🗺️ Your current itinerary stops (${activeTrip.length}/${stopCeiling}):\n\n${stops}\n\n`;
+          botResponse = `🗺️ Your current itinerary stops (${activeTrip.length} total destinations):\n\n${stops}\n\n`;
           botResponse += `📊 Total metrics: ${activeTripMetrics.calories} kcal | ₱${activeTripMetrics.cost}\n`;
-          botResponse += `💡 ${activeTrip.length < stopCeiling ? `You can add ${stopCeiling - activeTrip.length} more stop(s). Maghanap sa map planner of other heritage kitchens!` : 'Nakarating ka na sa limitasyon ng inyong stops (stop ceiling). You can swap high-calorie stops to keep a healthy trip.'}`;
+          botResponse += `💡 You can add as many restaurants and heritage tourist destinations as you like!`;
         } else {
-          botResponse = `🗺️ You don't have any stops in your itinerary yet! Head to the Provincial Food Trip Planner to select and add heritage kitchens.`;
+          botResponse = `🗺️ You don't have any stops in your itinerary yet! Head to the Provincial Food Trip Planner to select and add heritage kitchens and tourist attractions.`;
         }
 
       } else if (msgLower.includes('open') || msgLower.includes('hour') || msgLower.includes('time') || msgLower.includes('when') || msgLower.includes('close')) {
@@ -1639,10 +1638,6 @@ function App() {
 
   const handleAddToItinerary = (res) => {
     if (activeTrip.some(item => item.id === res.id)) return;
-    if (activeTrip.length >= 5) {
-      alert("Itinerary limit reached. Please optimize your list.");
-      return;
-    }
     setActiveTrip([...activeTrip, res]);
   };
 
@@ -5257,31 +5252,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                             </div>
                           );
                         })}
-                      </div>
-                    </div>
-
-
-                    {/* Enforceable Stop Ceiling Slider (1-5 stops limit) */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-xs font-bold text-charcoal">
-                        <span>Same-day Excursionist Stop Ceiling</span>
-                        <strong className="text-terracotta bg-terracotta/5 px-2 py-0.5 rounded border border-terracotta/10 text-xs">
-                          {stopCeiling} stops limit
-                        </strong>
-                      </div>
-
-                      <input
-                        type="range"
-                        min="1"
-                        max="5"
-                        step="1"
-                        value={stopCeiling}
-                        onChange={(e) => setStopCeiling(Number(e.target.value))}
-                        className="w-full h-1.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-lg appearance-none cursor-pointer accent-terracotta"
-                      />
-                      <div className="flex items-center justify-between text-[9px] text-charcoal-light font-black tracking-wider uppercase">
-                        <span>1 Stop (Nominal)</span>
-                        <span>5 Stops (Maximum Limit)</span>
                       </div>
                     </div>
 
