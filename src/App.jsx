@@ -697,26 +697,123 @@ function App() {
   const [completionActiveTab, setCompletionActiveTab] = useState('polaroid');
   const [slotPhotos, setSlotPhotos] = useState({});
 
-  // Real Client-Side Canvas Polaroid Album Downloader
+  // Single Polaroid Card Downloader with Authentic Kapampangan Passport Stamp
+  const downloadSinglePolaroid = (stop, pIdx) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 720;
+    const ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Outer border
+    ctx.strokeStyle = '#E9E5DE';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(12, 12, canvas.width - 24, canvas.height - 24);
+
+    // Festive Washi Tape
+    ctx.fillStyle = 'rgba(229, 169, 60, 0.85)';
+    ctx.fillRect(canvas.width / 2 - 60, 14, 120, 22);
+
+    // Photo slot
+    const currentSlotImg = slotPhotos[pIdx] !== undefined ? slotPhotos[pIdx] : (completionPhotos[pIdx] || stop.image);
+    const imgX = 35;
+    const imgY = 48;
+    const imgW = 530;
+    const imgH = 460;
+
+    const renderTextAndStamp = () => {
+      // Red Kapampangan Passport Stamp
+      ctx.strokeStyle = '#C85A32';
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(imgX + imgW - 150, imgY + imgH - 65, 140, 55);
+      ctx.fillStyle = '#C85A32';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('PASASYAL PAMPANGA', imgX + imgW - 80, imgY + imgH - 46);
+      ctx.font = '900 12px sans-serif';
+      ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 80, imgY + imgH - 28);
+      ctx.font = 'bold 8px sans-serif';
+      ctx.fillText('★ 100% MANYAMAN ★', imgX + imgW - 80, imgY + imgH - 15);
+
+      // Stop Title
+      ctx.fillStyle = '#1F2937';
+      ctx.font = 'bold 24px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(stop.name, canvas.width / 2, 555);
+
+      // Kapampangan Praise / Location Subtitle
+      ctx.fillStyle = '#2C5E3B';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText(`✨ Manyaman Keni! • ${stop.municipality || 'Pampanga'} ✨`, canvas.width / 2, 595);
+
+      // Date Stamp
+      ctx.fillStyle = '#9CA3AF';
+      ctx.font = '12px monospace';
+      ctx.fillText(`ENTRY DATE: ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}`, canvas.width / 2, 640);
+
+      triggerCanvasDownload(canvas, `Kapampangan_Polaroid_${(stop.name || 'Stop').replace(/[^a-zA-Z0-9]/g, '_')}.png`);
+    };
+
+    if (currentSlotImg) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        ctx.drawImage(img, imgX, imgY, imgW, imgH);
+        renderTextAndStamp();
+      };
+      img.onerror = () => {
+        ctx.fillStyle = '#FAF8F5';
+        ctx.fillRect(imgX, imgY, imgW, imgH);
+        renderTextAndStamp();
+      };
+      img.src = currentSlotImg;
+    } else {
+      ctx.fillStyle = '#FAF8F5';
+      ctx.fillRect(imgX, imgY, imgW, imgH);
+      renderTextAndStamp();
+    }
+  };
+
+  // Real Client-Side Canvas Polaroid Album Downloader with Kapampangan Cultural Elements
   const downloadRealPolaroidAlbum = () => {
     const canvas = document.createElement('canvas');
     canvas.width = 1200;
-    canvas.height = 900;
+    canvas.height = 950;
     const ctx = canvas.getContext('2d');
 
     // Canvas Background
-    ctx.fillStyle = '#FAF8F5';
+    const bgGrad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    bgGrad.addColorStop(0, '#FFFDF9');
+    bgGrad.addColorStop(0.5, '#FDF6EC');
+    bgGrad.addColorStop(1, '#FBF0DF');
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Title Header
-    ctx.fillStyle = '#2C3E50';
-    ctx.font = 'bold 28px sans-serif';
+    // Banana leaf green & gold border
+    ctx.strokeStyle = '#2C5E3B';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(16, 16, canvas.width - 32, canvas.height - 32);
+
+    ctx.strokeStyle = '#E5A93C';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(28, 28, canvas.width - 56, canvas.height - 56);
+
+    // Title Header with Kapampangan Tagline
+    ctx.fillStyle = '#2C5E3B';
+    ctx.font = 'bold 13px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('KANYAMANAN PAMPANGA FOOD CRAWL - MEMORY ALBUM', canvas.width / 2, 50);
+    ctx.fillText('✨ KANYAMANAN • PAMAMASYAL KAPAMPANGAN MEMORY ALBUM ✨', canvas.width / 2, 56);
 
     ctx.fillStyle = '#C85A32';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.fillText(newItineraryName || 'Pampanga Heritage Culinary Excursion', canvas.width / 2, 80);
+    ctx.font = '900 26px serif';
+    ctx.fillText('ALBUM NING PAMANYALESE SA PAMPANGA', canvas.width / 2, 88);
+
+    ctx.fillStyle = '#6B5E51';
+    ctx.font = 'bold 15px sans-serif';
+    ctx.fillText(`Trail: "${newItineraryName || 'Pampanga Heritage Culinary Excursion'}" • Manyaman Keni!`, canvas.width / 2, 115);
 
     const stops = computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Heritage Kitchen', municipality: 'Pampanga', image: '' }];
     const cardsToDraw = stops.slice(0, 4);
@@ -728,17 +825,17 @@ function App() {
       cardsToDraw.forEach((stop, idx) => {
         const col = idx % 2;
         const row = Math.floor(idx / 2);
-        const x = 80 + col * 540;
-        const y = 120 + row * 360;
-        const cardW = 500;
-        const cardH = 330;
+        const x = 70 + col * 545;
+        const y = 145 + row * 370;
+        const cardW = 515;
+        const cardH = 345;
 
         // Card Shadow & White Frame
         ctx.fillStyle = '#FFFFFF';
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetX = 3;
-        ctx.shadowOffsetY = 5;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 4;
         ctx.fillRect(x, y, cardW, cardH);
         ctx.shadowColor = 'transparent';
 
@@ -747,61 +844,65 @@ function App() {
         ctx.lineWidth = 2;
         ctx.strokeRect(x, y, cardW, cardH);
 
-        // Tape effect
-        ctx.fillStyle = 'rgba(245, 230, 190, 0.7)';
-        ctx.fillRect(x + cardW / 2 - 40, y - 10, 80, 20);
+        // Festive Washi Tape
+        ctx.fillStyle = idx % 2 === 0 ? 'rgba(229, 169, 60, 0.8)' : 'rgba(200, 90, 50, 0.75)';
+        ctx.fillRect(x + cardW / 2 - 45, y - 9, 90, 18);
 
         // Image container
-        const imgX = x + 20;
-        const imgY = y + 20;
-        const imgW = cardW - 40;
-        const imgH = 220;
+        const imgX = x + 18;
+        const imgY = y + 18;
+        const imgW = cardW - 36;
+        const imgH = 225;
 
         const currentSlotImg = slotPhotos[idx] !== undefined ? slotPhotos[idx] : (completionPhotos[idx] || stop.image);
+
+        const renderSingleCardContent = (loadedImg) => {
+          if (loadedImg) {
+            ctx.drawImage(loadedImg, imgX, imgY, imgW, imgH);
+          } else {
+            ctx.fillStyle = '#FAF8F5';
+            ctx.fillRect(imgX, imgY, imgW, imgH);
+          }
+
+          // Red Kapampangan Stamp on photo corner
+          ctx.strokeStyle = '#C85A32';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(imgX + imgW - 130, imgY + imgH - 48, 120, 40);
+          ctx.fillStyle = '#C85A32';
+          ctx.font = 'bold 8px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('PASASYAL PAMPANGA', imgX + imgW - 70, imgY + imgH - 33);
+          ctx.font = 'bold 10px sans-serif';
+          ctx.fillText(`📍 ${(stop.municipality || 'Pampanga').toUpperCase()}`, imgX + imgW - 70, imgY + imgH - 18);
+
+          // Name and Details
+          ctx.fillStyle = '#1F2937';
+          ctx.font = 'bold 18px serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 278);
+
+          ctx.fillStyle = '#2C5E3B';
+          ctx.font = 'bold 12px sans-serif';
+          ctx.fillText(`✨ Manyaman Keni! • ${stop.municipality || 'Pampanga'} • Stop #${idx + 1} ✨`, x + cardW / 2, y + 304);
+
+          ctx.fillStyle = '#9CA3AF';
+          ctx.font = '10px monospace';
+          ctx.fillText(`DATE: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`, x + cardW / 2, y + 326);
+
+          loadedCount++;
+          if (loadedCount === totalToLoad) {
+            triggerCanvasDownload(canvas, `Kanyamanan_Kapampangan_Memory_Album.png`);
+          }
+        };
 
         if (currentSlotImg) {
           const img = new Image();
           img.crossOrigin = 'anonymous';
-          img.onload = () => {
-            ctx.drawImage(img, imgX, imgY, imgW, imgH);
-            ctx.fillStyle = '#2C3E50';
-            ctx.font = 'italic bold 18px serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 265);
-
-            ctx.fillStyle = '#7F8C8D';
-            ctx.font = '13px monospace';
-            ctx.fillText(`📍 ${stop.municipality || 'Pampanga'} • ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`, x + cardW / 2, y + 295);
-
-            loadedCount++;
-            if (loadedCount === totalToLoad) {
-              triggerCanvasDownload(canvas, `Kanyamanan_Polaroid_Memory_Album.png`);
-            }
-          };
-          img.onerror = () => {
-            ctx.fillStyle = '#F4F1EA';
-            ctx.fillRect(imgX, imgY, imgW, imgH);
-            ctx.fillStyle = '#2C3E50';
-            ctx.font = 'italic bold 18px serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 265);
-            loadedCount++;
-            if (loadedCount === totalToLoad) {
-              triggerCanvasDownload(canvas, `Kanyamanan_Polaroid_Memory_Album.png`);
-            }
-          };
+          img.onload = () => renderSingleCardContent(img);
+          img.onerror = () => renderSingleCardContent(null);
           img.src = currentSlotImg;
         } else {
-          ctx.fillStyle = '#F4F1EA';
-          ctx.fillRect(imgX, imgY, imgW, imgH);
-          ctx.fillStyle = '#2C3E50';
-          ctx.font = 'italic bold 18px serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(stop.name || `Stop #${idx + 1}`, x + cardW / 2, y + 265);
-          loadedCount++;
-          if (loadedCount === totalToLoad) {
-            triggerCanvasDownload(canvas, `Kanyamanan_Polaroid_Memory_Album.png`);
-          }
+          renderSingleCardContent(null);
         }
       });
     };
@@ -6883,43 +6984,65 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             {/* TAB 1: AI POLAROID ALBUM GALLERY */}
             {completionActiveTab === 'polaroid' && (
               <div className="space-y-4">
-                <div className="p-4 bg-[#FAF8F5] border border-[#E9E5DE] rounded-2xl">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-black text-charcoal uppercase tracking-wider block">
-                      📷 Memory Polaroid Album
-                    </span>
+                <div className="p-4 sm:p-6 bg-gradient-to-b from-[#FFFDF9] via-[#FDF6EC] to-[#FBF0DF] border-2 border-[#E5A93C]/50 rounded-2xl shadow-inner space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#E5A93C]/30">
+                    <div>
+                      <span className="text-[10px] font-black text-terracotta uppercase tracking-wider block">
+                        ✨ Pamamasyal Kapampangan Memory Album
+                      </span>
+                      <h4 className="text-sm font-black text-charcoal m-0 flex items-center gap-1.5">
+                        <span>📸</span> Authentic Food Crawl Polaroids & Passport Badges
+                      </h4>
+                    </div>
                     <button
                       type="button"
                       onClick={downloadRealPolaroidAlbum}
-                      className="px-3 py-1 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                      className="px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                     >
-                      📥 Save & Download Album
+                      <span>📥</span> Save Full Album (PNG)
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {(computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Heritage Kitchen Stop #1', municipality: 'Pampanga', image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80' }]).map((stop, pIdx) => {
                       const currentSlotImg = slotPhotos[pIdx] !== undefined ? slotPhotos[pIdx] : (completionPhotos[pIdx] || stop.image);
 
                       return (
-                        <div key={pIdx} className="bg-white p-3 pt-4 rounded-xl border border-[#E9E5DE] shadow-md transform hover:scale-[1.01] transition-transform relative group/card">
-                          {/* Tape effect */}
-                          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-12 h-4 bg-saffron/30 border border-saffron/40 rotate-1 shadow-2xs z-10"></div>
+                        <div 
+                          key={pIdx} 
+                          className={`bg-white p-3.5 pt-5 pb-4 rounded-xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all relative group/card flex flex-col justify-between ${
+                            pIdx % 2 === 0 ? 'hover:-rotate-0.5' : 'hover:rotate-0.5'
+                          }`}
+                        >
+                          {/* Kapampangan Festive Washi Tape */}
+                          <div className={`absolute -top-2.5 left-1/2 -translate-x-1/2 w-20 h-5 border shadow-2xs z-10 flex items-center justify-center text-[8px] font-black uppercase tracking-wider ${
+                            pIdx % 2 === 0 
+                              ? 'bg-amber-100/90 text-amber-900 border-amber-300 -rotate-1' 
+                              : 'bg-orange-100/90 text-orange-900 border-orange-300 rotate-1'
+                          }`}>
+                            Pampanga #{pIdx + 1}
+                          </div>
                           
-                          <div className="aspect-4/3 rounded-lg overflow-hidden border border-[#E9E5DE] bg-ivory relative">
+                          <div className="aspect-4/3 rounded-lg overflow-hidden border border-[#E9E5DE] bg-[#FAF8F5] relative shadow-inner">
                             {currentSlotImg ? (
                               <img src={currentSlotImg} className="w-full h-full object-cover" alt={stop.name} />
                             ) : (
                               <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center text-charcoal-light space-y-1">
-                                <span className="text-xl">📷</span>
+                                <span className="text-2xl">📷</span>
                                 <span className="text-[10px] font-bold">No Photo Assigned</span>
                               </div>
                             )}
 
+                            {/* Authentic Kapampangan Passport Stamp overlay on photo */}
+                            <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-xs px-2 py-1 rounded border-2 border-[#C85A32] text-[#C85A32] shadow-xs rotate-[-3deg] pointer-events-none select-none">
+                              <span className="block text-[7px] font-black uppercase tracking-wider leading-none">PASASYAL PAMPANGA</span>
+                              <strong className="block text-[9px] font-black uppercase leading-tight">📍 {stop.municipality || 'Pampanga'}</strong>
+                            </div>
+
                             {/* Hover Photo Controls overlay on each card */}
-                            <div className="absolute inset-0 bg-charcoal/65 backdrop-blur-2xs opacity-0 group-hover/card:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-3 text-center z-20">
+                            <div className="absolute inset-0 bg-charcoal/70 backdrop-blur-2xs opacity-0 group-hover/card:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-3 text-center z-20">
                               <label className="px-3 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-[10px] font-black uppercase cursor-pointer shadow-xs transition-transform active:scale-95">
-                                📷 Choose / Change Photo
+                                📷 Choose Custom Photo
                                 <input
                                   type="file"
                                   accept="image/*"
@@ -6957,19 +7080,33 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   }}
                                   className="text-[9px] text-white/90 hover:text-white underline cursor-pointer font-semibold"
                                 >
-                                  Reset to Stop Original
+                                  Reset to Original Photo
                                 </button>
                               )}
                             </div>
                           </div>
 
-                          <div className="mt-2.5 text-center space-y-0.5">
-                            <span className="block text-xs font-black text-charcoal font-serif italic">
+                          <div className="mt-3 text-center space-y-1">
+                            <strong className="block text-sm font-black text-charcoal font-serif">
                               {stop.name}
+                            </strong>
+                            <span className="block text-[10px] font-bold text-[#2C5E3B] font-sans">
+                              ✨ Manyaman Keni! • {stop.municipality || 'Pampanga'} • Stop #{pIdx + 1}
                             </span>
                             <span className="block text-[9px] text-charcoal-light font-mono uppercase">
-                              📍 {stop.municipality} • {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              🗓️ {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </span>
+
+                            {/* Download Single Polaroid Button */}
+                            <div className="pt-2 border-t border-[#E9E5DE]/60 flex justify-center">
+                              <button
+                                type="button"
+                                onClick={() => downloadSinglePolaroid(stop, pIdx)}
+                                className="px-3 py-1 bg-ivory hover:bg-[#E9E5DE] border border-[#E9E5DE] rounded-lg text-[10px] font-bold text-charcoal hover:text-terracotta transition-colors cursor-pointer flex items-center gap-1"
+                              >
+                                <span>📥</span> Download This Polaroid
+                              </button>
+                            </div>
                           </div>
                         </div>
                       );
