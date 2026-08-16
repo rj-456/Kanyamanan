@@ -123,6 +123,17 @@ const normalizeMun = (m) => {
   return m;
 };
 
+// Helper to identify legacy demo / guest accounts that should NOT auto-login
+const isDemoUserObj = (parsed) => {
+  if (!parsed || typeof parsed !== 'object') return true;
+  const uname = String(parsed.username || '').toLowerCase().trim();
+  const uemail = String(parsed.email || '').toLowerCase().trim();
+  if (!uname && !uemail) return true;
+  if (uname.includes('rancis') || uemail.includes('rancis')) return true;
+  if (uname === 'guest' || uname === 'default_explorer' || uname === 'explorer') return true;
+  return false;
+};
+
 // Safe Key Formatter for Per-Account Itinerary & User Data Isolation
 const getUserAccountKey = (profile) => {
   if (!profile) return 'default_explorer';
@@ -281,10 +292,13 @@ function App() {
       const saved = localStorage.getItem('kanyamanan_active_user');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && (parsed.username || parsed.email)) return true;
+        if (!isDemoUserObj(parsed)) {
+          return true;
+        }
       }
     } catch (e) {}
-    return true; // Default logged in for smooth exploration
+    try { localStorage.removeItem('kanyamanan_active_user'); } catch (e) {}
+    return false; // Default to logged out / guest mode when no active session exists
   });
 
   const [isGuest, setIsGuest] = useState(false);
@@ -301,16 +315,37 @@ function App() {
       const saved = localStorage.getItem('kanyamanan_active_user');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && (parsed.username || parsed.email)) return parsed;
+        if (!isDemoUserObj(parsed)) {
+          return parsed;
+        }
       }
     } catch (e) {}
+    try { localStorage.removeItem('kanyamanan_active_user'); } catch (e) {}
     return {
-      username: 'rancis',
-      email: 'rancis@pampanga.gov.ph',
+      username: 'Guest',
+      email: '',
       calorieLimit: 2200,
       budgetLimit: 1500
     };
   });
+
+  // Mandatory mount check to force-purge any legacy demo user data from localStorage on load
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_active_user');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (isDemoUserObj(parsed)) {
+          localStorage.removeItem('kanyamanan_active_user');
+          setIsAuthenticated(false);
+          setIsGuest(false);
+          setUserProfile({ username: 'Guest', email: '', calorieLimit: 2200, budgetLimit: 1500 });
+        }
+      }
+    } catch (e) {
+      try { localStorage.removeItem('kanyamanan_active_user'); } catch (err) {}
+    }
+  }, []);
 
   // Local state restaurants database with 100% unique usernames & permanent frontend-backend persistence
   const [restaurants, setRestaurants] = useState(() => {
@@ -466,7 +501,8 @@ function App() {
   const [savedItineraries, setSavedItineraries] = useState(() => {
     try {
       const activeUser = localStorage.getItem('kanyamanan_active_user');
-      const profile = activeUser ? JSON.parse(activeUser) : { username: 'rancis', email: 'rancis@pampanga.gov.ph' };
+      const parsed = activeUser ? JSON.parse(activeUser) : null;
+      const profile = (!parsed || isDemoUserObj(parsed)) ? { username: 'Guest', email: '' } : parsed;
       return getSavedItinerariesForUser(profile);
     } catch (e) {
       return [
@@ -5212,9 +5248,11 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     onClick={() => {
                       try {
                         localStorage.removeItem('kanyamanan_active_user');
+                        localStorage.removeItem('kanyamanan_user_profile');
                       } catch (e) {}
                       setIsAuthenticated(false);
                       setIsGuest(false);
+                      setUserProfile({ username: 'Guest', email: '', calorieLimit: 2200, budgetLimit: 1500 });
                       setActiveView('homepage');
                       setActiveTrip([]);
                     }}
