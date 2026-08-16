@@ -347,8 +347,9 @@ function App() {
     }
   }, []);
 
-  // Local state restaurants database with 100% unique usernames & permanent frontend-backend persistence
+  // Local state restaurants database with 100% unique usernames & permanent frontend-backend persistence (Sorted Alphabetically A-Z)
   const [restaurants, setRestaurants] = useState(() => {
+    let initialList = [];
     try {
       const saved = localStorage.getItem('kanyamanan_restaurants_db');
       if (saved) {
@@ -372,7 +373,7 @@ function App() {
           }).filter(Boolean);
 
           if (sanitized.length > 0) {
-            return sanitized;
+            initialList = sanitized;
           }
         }
       }
@@ -380,30 +381,34 @@ function App() {
       console.error("LocalStorage load error:", e);
     }
 
-    const usedUsernames = new Set();
-    return PRESEEDED_RESTAURANTS.map((res, idx) => {
-      let baseUser = res.username;
-      if (!baseUser || baseUser === 'owner') {
-        baseUser = (res.name || 'restaurant')
-          .toLowerCase()
-          .replace(/[^a-z0-9]/g, '_')
-          .replace(/_+/g, '_')
-          .replace(/^_+|_+$/g, '') + '_owner';
-      }
-      let uniqueUser = baseUser;
-      let counter = 1;
-      while (usedUsernames.has(uniqueUser)) {
-        uniqueUser = `${baseUser}_${counter}`;
-        counter++;
-      }
-      usedUsernames.add(uniqueUser);
+    if (initialList.length === 0) {
+      const usedUsernames = new Set();
+      initialList = PRESEEDED_RESTAURANTS.map((res, idx) => {
+        let baseUser = res.username;
+        if (!baseUser || baseUser === 'owner') {
+          baseUser = (res.name || 'restaurant')
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '_')
+            .replace(/_+/g, '_')
+            .replace(/^_+|_+$/g, '') + '_owner';
+        }
+        let uniqueUser = baseUser;
+        let counter = 1;
+        while (usedUsernames.has(uniqueUser)) {
+          uniqueUser = `${baseUser}_${counter}`;
+          counter++;
+        }
+        usedUsernames.add(uniqueUser);
 
-      return {
-        ...res,
-        username: uniqueUser,
-        password: res.password || 'password123'
-      };
-    });
+        return {
+          ...res,
+          username: uniqueUser,
+          password: res.password || 'password123'
+        };
+      });
+    }
+
+    return [...initialList].sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
   });
 
   // Persistent Tourist Attractions Database State with auto-healing error recovery
@@ -1867,10 +1872,17 @@ function App() {
     return counts;
   }, [restaurants]);
 
-  // Filtered Restaurant Feed
+  // Alphabetically Sorted Restaurants Helper (A to Z)
+  const sortedRestaurants = useMemo(() => {
+    return [...(restaurants || [])].sort((a, b) => 
+      (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
+    );
+  }, [restaurants]);
+
+  // Filtered Restaurant Feed (Sorted Alphabetically A-Z)
   const filteredRestaurants = useMemo(() => {
     const q = (searchQuery || '').toLowerCase().trim();
-    return (restaurants || []).filter(res => {
+    const list = (restaurants || []).filter(res => {
       if (!res || typeof res !== 'object') return false;
 
       const resName = (res.name || '').toLowerCase();
@@ -1887,6 +1899,8 @@ function App() {
 
       return matchesSearch && matchesCorridor && matchesMunicipality;
     });
+
+    return [...list].sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
   }, [restaurants, searchQuery, selectedCorridor, selectedMunicipality]);
 
   // Chatbot logic
@@ -3390,7 +3404,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   >
                     <option value="superadmin">👑 System Admin (All Access)</option>
                     <optgroup label="Simulate Merchant Owners">
-                      {restaurants.map(res => (
+                      {sortedRestaurants.map(res => (
                         <option key={res.id} value={`merchant-${res.id}`}>
                           🏪 Owner: {res.name}
                         </option>

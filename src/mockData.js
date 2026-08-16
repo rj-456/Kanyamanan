@@ -61,7 +61,7 @@ export const PRESEEDED_RESTAURANTS = [
       { id: 'kabigting-1', name: "Special Kabigting's Halo-Halo", price: 110, ingredients: 'Carabao milk, pastillas, sweet beans, halayang ube', allergens: 'Contains Dairy', healthIndicators: 'Moderate Calorie', nutrition: { calories: 340, protein: 8, carbs: 54, fat: 10 }, image: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=500&q=80' },
       { id: 'kabigting-2', name: 'Kapampangan Palabok', price: 120, ingredients: 'Rice noodles, shrimp sauce, crushed chicharon, boiled egg', allergens: 'Contains Eggs, Crustaceans', healthIndicators: 'High Protein', nutrition: { calories: 420, protein: 18, carbs: 48, fat: 16 }, image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80' }
     ]
-  },,
+  },
   {
     id: 'res-apung-otings-floridablanca',
     name: "Apung Oting's Heritage Restaurant",
@@ -2451,6 +2451,8 @@ PRESEEDED_RESTAURANTS.forEach((res, resIdx) => {
     });
   }
 });
+
+RAW_RESTAURANTS.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
 
 
 export const PRESEEDED_ATTRACTIONS = [
