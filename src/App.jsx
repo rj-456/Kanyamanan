@@ -130,35 +130,24 @@ const getUserAccountKey = (profile) => {
   return String(raw).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_');
 };
 
-// Resilient Multi-Key Recovery Helper for Saved User Plans
+// Resilient Multi-Key Recovery Helper for Saved User Plans with Strict Account Isolation
 const getSavedItinerariesForUser = (profile) => {
   const userKey = getUserAccountKey(profile);
-  const possibleKeys = [
+  const isDefaultUser = !profile || userKey === 'default_explorer' || userKey.includes('rancis');
+
+  // Account-specific keys for strict privacy & isolation
+  const accountSpecificKeys = [
     `kanyamanan_itineraries_${userKey}`,
     profile?.email ? `kanyamanan_itineraries_${String(profile.email).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}` : null,
-    profile?.username ? `kanyamanan_itineraries_${String(profile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}` : null,
-    'kanyamanan_master_itineraries',
-    'kanyamanan_itineraries_rancis_pampanga_gov_ph',
-    'kanyamanan_itineraries_rancis',
-    'kanyamanan_itineraries_default_explorer'
+    profile?.username ? `kanyamanan_itineraries_${String(profile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}` : null
   ].filter(Boolean);
 
-  // 1. First priority: look for custom user-created itineraries across all storage keys
-  for (const key of possibleKeys) {
-    try {
-      const saved = localStorage.getItem(key);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const hasCustom = parsed.some(p => p && p.id && !['trail-1', 'trail-2'].includes(p.id));
-          if (hasCustom) return parsed;
-        }
-      }
-    } catch (e) {}
+  // If default / rancis account, include legacy fallback keys
+  if (isDefaultUser) {
+    accountSpecificKeys.push('kanyamanan_master_itineraries', 'kanyamanan_itineraries_rancis_pampanga_gov_ph', 'kanyamanan_itineraries_rancis', 'kanyamanan_itineraries_default_explorer');
   }
 
-  // 2. Second priority: any non-empty list
-  for (const key of possibleKeys) {
+  for (const key of accountSpecificKeys) {
     try {
       const saved = localStorage.getItem(key);
       if (saved) {
@@ -168,6 +157,7 @@ const getSavedItinerariesForUser = (profile) => {
     } catch (e) {}
   }
 
+  // Initial starter templates for new accounts
   return [
     {
       id: 'trail-1',
