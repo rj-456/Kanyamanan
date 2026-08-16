@@ -2452,7 +2452,7 @@ PRESEEDED_RESTAURANTS.forEach((res, resIdx) => {
   }
 });
 
-RAW_RESTAURANTS.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
+PRESEEDED_RESTAURANTS.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
 
 
 export const PRESEEDED_ATTRACTIONS = [
