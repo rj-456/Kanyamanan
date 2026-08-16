@@ -130,15 +130,44 @@ const getUserAccountKey = (profile) => {
   return String(raw).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_');
 };
 
+// Resilient Multi-Key Recovery Helper for Saved User Plans
 const getSavedItinerariesForUser = (profile) => {
   const userKey = getUserAccountKey(profile);
-  try {
-    const saved = localStorage.getItem(`kanyamanan_itineraries_${userKey}`);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch (e) {}
+  const possibleKeys = [
+    `kanyamanan_itineraries_${userKey}`,
+    profile?.email ? `kanyamanan_itineraries_${String(profile.email).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}` : null,
+    profile?.username ? `kanyamanan_itineraries_${String(profile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}` : null,
+    'kanyamanan_master_itineraries',
+    'kanyamanan_itineraries_rancis_pampanga_gov_ph',
+    'kanyamanan_itineraries_rancis',
+    'kanyamanan_itineraries_default_explorer'
+  ].filter(Boolean);
+
+  // 1. First priority: look for custom user-created itineraries across all storage keys
+  for (const key of possibleKeys) {
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const hasCustom = parsed.some(p => p && p.id && !['trail-1', 'trail-2'].includes(p.id));
+          if (hasCustom) return parsed;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 2. Second priority: any non-empty list
+  for (const key of possibleKeys) {
+    try {
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+  }
+
   return [
     {
       id: 'trail-1',
@@ -481,37 +510,44 @@ function App() {
     const userKey = getUserAccountKey(userProfile);
     try {
       localStorage.setItem(`kanyamanan_itineraries_${userKey}`, JSON.stringify(updatedList));
+      localStorage.setItem('kanyamanan_master_itineraries', JSON.stringify(updatedList));
+      if (userProfile?.username) {
+        localStorage.setItem(`kanyamanan_itineraries_${String(userProfile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`, JSON.stringify(updatedList));
+      }
+      if (userProfile?.email) {
+        localStorage.setItem(`kanyamanan_itineraries_${String(userProfile.email).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`, JSON.stringify(updatedList));
+      }
     } catch (e) {}
     saveUserItinerariesToCloud(userKey, updatedList);
+    if (userProfile?.username) {
+      saveUserItinerariesToCloud(String(userProfile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_'), updatedList);
+    }
   };
 
-  // Sync Saved Itineraries per account from LocalStorage and Realtime Firestore
+  // Sync Saved Itineraries per account from LocalStorage and Realtime Firestore (Non-Destructive)
   useEffect(() => {
     const userKey = getUserAccountKey(userProfile);
     
-    // 1. Instant pull from localStorage for the active account
-    try {
-      const local = localStorage.getItem(`kanyamanan_itineraries_${userKey}`);
-      if (local) {
-        const parsed = JSON.parse(local);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setSavedItineraries(parsed);
-        }
-      } else {
-        const starter = getSavedItinerariesForUser(userProfile);
-        setSavedItineraries(starter);
-        localStorage.setItem(`kanyamanan_itineraries_${userKey}`, JSON.stringify(starter));
-        saveUserItinerariesToCloud(userKey, starter);
-      }
-    } catch (e) {}
+    // 1. Instant pull from localStorage or auto-recovery
+    const localRecovered = getSavedItinerariesForUser(userProfile);
+    if (Array.isArray(localRecovered) && localRecovered.length > 0) {
+      setSavedItineraries(localRecovered);
+    }
 
     // 2. Realtime listener from Firestore for multi-device sync
     const unsubscribe = subscribeToUserItineraries(userKey, (cloudItins) => {
-      if (Array.isArray(cloudItins)) {
+      if (Array.isArray(cloudItins) && cloudItins.length > 0) {
         setSavedItineraries(cloudItins);
         try {
           localStorage.setItem(`kanyamanan_itineraries_${userKey}`, JSON.stringify(cloudItins));
+          localStorage.setItem('kanyamanan_master_itineraries', JSON.stringify(cloudItins));
         } catch (e) {}
+      } else {
+        // If cloud document is new/empty, safely upload local custom itineraries to cloud
+        const currentLocal = getSavedItinerariesForUser(userProfile);
+        if (Array.isArray(currentLocal) && currentLocal.length > 0) {
+          saveUserItinerariesToCloud(userKey, currentLocal);
+        }
       }
     });
 
