@@ -1,0 +1,17 @@
+[
+  {
+    "id": "NLEX",
+    "name": "NLEX Corridor",
+    "route": "North Luzon Expressway"
+  },
+  {
+    "id": "MacArthur",
+    "name": "MacArthur Highway Line",
+    "route": "MacArthur Highway"
+  },
+  {
+    "id": "JASA",
+    "name": "Jose Abad Santos Avenue (JASA) Line",
+    "route": "Jose Abad Santos Avenue"
+  }
+]

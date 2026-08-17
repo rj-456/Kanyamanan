@@ -54,6 +54,16 @@ import {
   subscribeToUserItineraries,
   saveUserProfileToCloud
 } from './firebase';
+import {
+  fetchDjangoRestaurants,
+  updateDjangoRestaurant,
+  createDjangoRestaurant,
+  deleteDjangoRestaurant,
+  loginViaDjango,
+  registerTouristInDjango,
+  fetchDjangoUserItineraries,
+  saveDjangoUserItinerary
+} from './djangoApi';
 
 
 // Distance calculator helper between two lat/lng points in kilometers
@@ -488,6 +498,20 @@ function App() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
+  // Sync with Live Django REST API Backend
+  useEffect(() => {
+    const syncDjangoData = async () => {
+      const liveData = await fetchDjangoRestaurants();
+      if (Array.isArray(liveData) && liveData.length > 0) {
+        setRestaurants(liveData);
+        try {
+          localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(liveData));
+        } catch (e) {}
+      }
+    };
+    syncDjangoData();
+  }, []);
+
   // Sync open drawer & active trip when backend updates restaurants state
   useEffect(() => {
     if (selectedRestaurant) {
@@ -552,6 +576,12 @@ function App() {
     saveUserItinerariesToCloud(userKey, updatedList);
     if (userProfile?.username) {
       saveUserItinerariesToCloud(String(userProfile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_'), updatedList);
+    }
+    // Sync itineraries to Django REST API
+    if (Array.isArray(updatedList)) {
+      updatedList.forEach(itin => {
+        saveDjangoUserItinerary(userKey, itin);
+      });
     }
   };
 
@@ -2404,6 +2434,7 @@ function App() {
       localStorage.setItem('kanyamanan_active_user', JSON.stringify(newProfile));
     } catch (err) {}
     saveUserProfileToCloud(newProfile);
+    registerTouristInDjango(regForm.username, regForm.email, regForm.password);
     setIsAuthenticated(true);
     setIsGuest(false);
     setActiveView('homepage');
@@ -2863,6 +2894,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         saveRestaurantToCloud(updatedResObj);
       }
 
+      // Sync updated restaurant to Django REST API Backend
+      updateDjangoRestaurant(adminEditingId, updatedResObj);
+
       if (selectedRestaurant && selectedRestaurant.id === adminEditingId) {
         setSelectedRestaurant(updatedResObj);
       }
@@ -2896,7 +2930,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         id: 'res-' + Date.now(),
         name: adminForm.name,
         municipality: adminForm.municipality,
-        corridor: 'MacArthur Highway Line',
         operatingHours: adminForm.operatingHours,
         priceTier: adminForm.priceTier,
         lat: defaultCoord.lat + (Math.random() - 0.5) * 0.02,
@@ -2939,9 +2972,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         } catch (e) {}
         return next;
       });
+
       if (isFirebaseConfigured()) {
         saveRestaurantToCloud(newRes);
       }
+
+      // Sync new restaurant to Django REST API Backend
+      createDjangoRestaurant(newRes);
       alert("New Heritage Restaurant registered successfully.");
     }
 
@@ -3065,6 +3102,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       if (isFirebaseConfigured()) {
         deleteRestaurantFromCloud(id);
       }
+      deleteDjangoRestaurant(id);
     }
   };
 
