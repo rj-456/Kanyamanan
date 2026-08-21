@@ -6696,9 +6696,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           <div className="space-y-6">
 
             {/* Hero Section */}
-            <div className="bento-card relative overflow-hidden p-6 sm:p-10 bg-gradient-to-br from-white via-[#FAF9F6] to-ivory border-2 border-saffron/20 shadow-md">
+            <div className="bento-card relative overflow-hidden p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFEB] border border-[#E9E5DE] rounded-3xl shadow-sm">
               {/* Background Parul Sampernandu (Giant Lantern) Watermark */}
-              <div className="absolute right-0 bottom-0 w-36 h-36 sm:w-56 sm:h-56 text-saffron/10 opacity-30 pointer-events-none z-0">
+              <div className="absolute right-[-20px] bottom-[-20px] w-44 h-44 sm:w-64 sm:h-64 text-terracotta/10 opacity-30 pointer-events-none z-0">
                 <svg viewBox="0 0 100 100" className="w-full h-full stroke-current fill-none" strokeWidth="1">
                   <polygon points="50,15 57,38 80,38 61,52 69,75 50,60 31,75 39,52 20,38 43,38" />
                   <circle cx="50" cy="50" r="30" />
@@ -6710,30 +6710,44 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 </svg>
               </div>
 
-              <div className="relative z-10 max-w-3xl">
-                {/* Cultural Greeting Subtitle */}
-                <div className="space-y-2.5 mb-6 select-none">
-                  <div>
-                    <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-black tracking-wider uppercase bg-terracotta/5 text-terracotta border border-terracotta/10">
-                      Manyaman a Kayamanan • A Delicious Treasure
-                    </span>
-                  </div>
-                  <h3 className="text-2xl sm:text-4xl font-black text-bananaleaf tracking-wide leading-tight flex items-center gap-2">
-                    <span>🍽️ Mekeni, Mangan Tana king Pampanga!</span>
-                  </h3>
-                  <span className="block text-[10px] sm:text-xs font-black text-charcoal-light uppercase tracking-widest">
-                    Come, Let's Eat in Pampanga! • Culinary Heritage
-                  </span>
+              <div className="relative z-10 max-w-3xl space-y-4">
+                {/* Top Cultural Badge */}
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-black tracking-wider uppercase bg-terracotta/10 text-terracotta border border-terracotta/20 shadow-2xs">
+                  <span>✨ Manyaman a Kayamanan</span>
+                  <span className="text-terracotta/40">•</span>
+                  <span>Culinary Heritage of Pampanga</span>
                 </div>
                 
-                <h2 className="text-3xl sm:text-5xl font-extrabold text-[#1A1A1A] leading-tight tracking-tight m-0">
-                  Explore Pampanga's <span className="text-transparent bg-clip-text bg-gradient-to-r from-terracotta to-[#993A16] relative inline-block">Culinary Map<span className="absolute bottom-1 left-0 w-full h-1 bg-saffron/35 rounded-full"></span></span>
-                </h2>
+                {/* Main Headline */}
+                <div>
+                  <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-charcoal tracking-tight leading-tight m-0">
+                    Mekeni, Mangan Tana!
+                  </h2>
+                  <div className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron mt-1">
+                    Explore Pampanga’s Culinary Map
+                  </div>
+                </div>
                 
-                <p className="mt-4 text-sm sm:text-base text-charcoal-light leading-relaxed max-w-3xl font-medium">
-                  Welcome to <span className="font-extrabold text-terracotta">Kanyamanan</span>. Discover slow-cooked ancestral recipes,
-                  analyze regional traffic sequence delays, and optimize your nutritional boundaries in one centralized, heritage-optimized grid.
+                {/* Description */}
+                <p className="text-xs sm:text-sm text-charcoal-light leading-relaxed max-w-2xl font-medium m-0">
+                  Welcome to <strong className="text-charcoal font-bold">Kanyamanan</strong>, your provincial culinary guide and health informatics portal. Discover ancestral heirloom recipes, explore verified restaurants across all 22 municipalities, and map your personalized food trails.
                 </p>
+
+                {/* Quick Highlights / Pill Badges */}
+                <div className="flex flex-wrap items-center gap-2 pt-3">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-[#E9E5DE] text-xs font-bold text-charcoal shadow-2xs">
+                    <span>🍲</span> 40+ Kapampangan Kitchens
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-[#E9E5DE] text-xs font-bold text-charcoal shadow-2xs">
+                    <span>🏛️</span> 22 Municipalities &amp; Cities
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-[#E9E5DE] text-xs font-bold text-charcoal shadow-2xs">
+                    <span>🥗</span> Nutritional Info &amp; Calories
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-[#E9E5DE] text-xs font-bold text-charcoal shadow-2xs">
+                    <span>🧭</span> Interactive Route Planner
+                  </div>
+                </div>
               </div>
             </div>
 
