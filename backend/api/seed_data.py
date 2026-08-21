@@ -13,15 +13,35 @@ except Exception:
     django.setup()
 
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 from api.models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary
+
+ADMIN_PASSWORD_HASH = make_password('admin123', salt='KanyamananAdminSalt2026', hasher='pbkdf2_sha256')
 
 def seed():
     print("[+] Seeding Complete Kanyamanan Database...")
 
-    # 1. Superuser
-    if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser('admin', 'admin@kanyamanan.ph', 'admin123')
+    # 1. Superuser (Deterministic across all lambda containers)
+    admin_user = User.objects.filter(username='admin').first()
+    if not admin_user:
+        admin_user = User(
+            id=1,
+            username='admin',
+            email='admin@kanyamanan.ph',
+            is_staff=True,
+            is_superuser=True,
+            is_active=True,
+            password=ADMIN_PASSWORD_HASH
+        )
+        admin_user.save()
         print("  - Created Super Admin account (admin / admin123)")
+    else:
+        admin_user.is_staff = True
+        admin_user.is_superuser = True
+        admin_user.is_active = True
+        if admin_user.password != ADMIN_PASSWORD_HASH:
+            admin_user.password = ADMIN_PASSWORD_HASH
+            admin_user.save()
 
     # 2. Municipalities
     municipalities = [
