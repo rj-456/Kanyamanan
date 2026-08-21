@@ -8089,45 +8089,74 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       </div>
 
       {/* Footer status bar with Group JECCAN! & Members */}
-      <footer className="bg-white border-t border-[#E9E5DE] py-8 mt-12 relative z-10">
+      <footer className="bg-charcoal text-white border-t border-charcoal-dark py-10 mt-16 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            {/* Brand column */}
-            <div className="md:col-span-4 text-center md:text-left space-y-2">
-              <div className="flex items-center justify-center md:justify-start gap-2">
-                <span className="text-base font-black text-charcoal uppercase tracking-widest">Kanyamanan</span>
-                <span className="px-2.5 py-0.5 bg-terracotta/10 text-terracotta text-[10px] font-extrabold rounded-full">v1.0</span>
+            {/* Brand Column */}
+            <div className="lg:col-span-4 text-center lg:text-left space-y-2.5">
+              <div className="flex items-center justify-center lg:justify-start gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-terracotta flex items-center justify-center text-white shadow-sm font-black text-sm">
+                  K
+                </div>
+                <span className="text-lg font-black text-white tracking-tight">Kanyamanan</span>
+                <span className="px-2 py-0.5 bg-white/10 text-saffron text-[10px] font-black rounded-full border border-white/10">
+                  v1.0
+                </span>
               </div>
-              <p className="text-xs text-charcoal-light leading-relaxed max-w-sm m-0">
-                Pampanga Provincial Culinary Tourism & Health Informatics Infrastructure Platform.
+              <p className="text-xs text-gray-400 leading-relaxed max-w-sm m-0">
+                Pampanga Provincial Culinary Tourism &amp; Health Informatics Infrastructure Platform.
               </p>
-              <span className="text-[10px] text-charcoal-light block pt-1 font-medium">
-                © 2026 Pampanga, Philippines. All rights reserved.
-              </span>
+              <div className="flex items-center justify-center lg:justify-start gap-2 text-[10px] text-gray-400 font-medium pt-1">
+                <span>© 2026 Province of Pampanga, Philippines</span>
+                <span>•</span>
+                <span className="text-bananaleaf font-semibold">100% Authentic Heritage</span>
+              </div>
             </div>
 
-            {/* Team JECCAN! Members column */}
-            <div className="md:col-span-8 text-center md:text-left space-y-3 border-t md:border-t-0 md:border-l border-[#E9E5DE] pt-6 md:pt-0 md:pl-8">
-              <div className="flex items-center justify-center md:justify-start gap-2">
-                <span className="text-xs font-black text-terracotta uppercase tracking-wider">Group JECCAN!</span>
-                <span className="px-2.5 py-0.5 bg-bananaleaf/10 text-bananaleaf text-[10px] font-extrabold rounded-md">Project Creators & Developers</span>
+            {/* Team JECCAN! Developers Column */}
+            <div className="lg:col-span-8 space-y-3.5 border-t lg:border-t-0 lg:border-l border-white/10 pt-6 lg:pt-0 lg:pl-8">
+              <div className="flex items-center justify-center lg:justify-start gap-2">
+                <span className="text-xs font-black text-saffron uppercase tracking-wider">Group JECCAN!</span>
+                <span className="px-2.5 py-0.5 bg-white/10 text-gray-300 text-[10px] font-bold rounded-full border border-white/10">
+                  Project Creators &amp; Lead Developers
+                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] shadow-xs text-left">
-                  <span className="font-extrabold text-xs text-charcoal block truncate">Rancis J. Santos</span>
-                  <span className="text-[10px] font-bold text-terracotta block mt-0.5">Team Leader</span>
+                {/* Rancis */}
+                <div className="p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-left flex items-center gap-3 group">
+                  <div className="w-9 h-9 rounded-lg bg-terracotta/20 border border-terracotta/40 flex items-center justify-center text-terracotta font-black text-xs shrink-0 group-hover:scale-105 transition-transform">
+                    RS
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-extrabold text-xs text-white block truncate">Rancis J. Santos</span>
+                    <span className="text-[10px] font-bold text-saffron flex items-center gap-1 mt-0.5">
+                      👑 Team Leader
+                    </span>
+                  </div>
                 </div>
 
-                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] shadow-xs text-left">
-                  <span className="font-extrabold text-xs text-charcoal block truncate">Lance Jerald D. Laxamana</span>
-                  <span className="text-[10px] text-charcoal-light block mt-0.5">Core Member</span>
+                {/* Lance */}
+                <div className="p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-left flex items-center gap-3 group">
+                  <div className="w-9 h-9 rounded-lg bg-bananaleaf/20 border border-bananaleaf/40 flex items-center justify-center text-bananaleaf font-black text-xs shrink-0 group-hover:scale-105 transition-transform">
+                    LL
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-extrabold text-xs text-white block truncate">Lance Jerald D. Laxamana</span>
+                    <span className="text-[10px] font-medium text-gray-400 block mt-0.5">Core Developer</span>
+                  </div>
                 </div>
 
-                <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] shadow-xs text-left">
-                  <span className="font-extrabold text-xs text-charcoal block truncate">Kirsen Yaj B. Villanueva</span>
-                  <span className="text-[10px] text-charcoal-light block mt-0.5">Core Member</span>
+                {/* Kirsen */}
+                <div className="p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-left flex items-center gap-3 group">
+                  <div className="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-xs shrink-0 group-hover:scale-105 transition-transform">
+                    KV
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-extrabold text-xs text-white block truncate">Kirsen Yaj B. Villanueva</span>
+                    <span className="text-[10px] font-medium text-gray-400 block mt-0.5">Core Developer</span>
+                  </div>
                 </div>
               </div>
             </div>
