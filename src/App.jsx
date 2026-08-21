@@ -4717,57 +4717,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
-              {/* Access Role Selection Dropdown - Super Admins Only */}
-              {adminRole === 'superadmin' ? (
-                <div className="flex items-center gap-2 text-xs bg-charcoal-light/35 border border-charcoal-dark px-2.5 py-1.5 rounded-xl">
-                  <span className="text-gray-300 font-semibold uppercase tracking-wider text-[9px] whitespace-nowrap">Active Role:</span>
-                  <select
-                    value={adminRole === 'superadmin' ? 'superadmin' : `merchant-${merchantResId}`}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === 'superadmin') {
-                        setAdminRole('superadmin');
-                      } else {
-                        setAdminRole('merchant');
-                        setMerchantResId(val.replace('merchant-', ''));
-                      }
-                      setAdminEditingId(null);
-                      setAdminForm({
-                        name: '', municipality: 'City of San Fernando',
-                        operatingHours: '09:00 AM - 09:00 PM', priceTier: '$',
-                        address: '', image: '', images: [], description: '', username: '', password: ''
-                      });
-                      setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
-                    }}
-                    className="bg-charcoal text-white rounded text-xs font-bold py-0.5 px-1 border-none focus:outline-none max-w-[180px]"
-                  >
-                    <option value="superadmin">👑 System Admin (All Access)</option>
-                    <optgroup label="Simulate Merchant Owners">
-                      {sortedRestaurants.map(res => (
-                        <option key={res.id} value={`merchant-${res.id}`}>
-                          🏪 Owner: {res.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  </select>
-                </div>
-              ) : (
-                <div className="px-3 py-1.5 rounded-lg bg-bananaleaf/10 text-bananaleaf border border-bananaleaf/25 text-xs font-black">
-                  🏪 Owner Mode: {selectedMerchantRes?.name}
-                </div>
-              )}
-
-
-
-              <a
-                href="#/"
-                onClick={() => setIsAdminRoute(false)}
-                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border border-white/10"
-              >
-                <Compass className="h-4.5 w-4.5" />
-                Go to Public Aggregator
-              </a>
-
               <button
                 type="button"
                 onClick={() => {
