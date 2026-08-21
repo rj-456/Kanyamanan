@@ -349,6 +349,23 @@ const getBranchLng = (r, targetMun) => {
   return Number(r.lng) || 120.6800;
 };
 
+const getBranchOperatingHours = (r, targetMun) => {
+  if (!r) return '09:00 AM - 09:00 PM';
+  const normTarget = normalizeMun(targetMun);
+  if (normTarget && normTarget !== 'All') {
+    if (Array.isArray(r.branches)) {
+      const match = r.branches.find(b => normalizeMun(typeof b === 'string' ? b : b.municipality) === normTarget);
+      if (match && typeof match === 'object' && (match.operatingHours || match.hours)) {
+        return match.operatingHours || match.hours;
+      }
+    }
+    if (normalizeMun(r.municipality) === normTarget && (r.operatingHours || r.hours)) {
+      return r.operatingHours || r.hours;
+    }
+  }
+  return r.operatingHours || r.hours || (r.branches && r.branches[0] && (r.branches[0].operatingHours || r.branches[0].hours)) || '09:00 AM - 09:00 PM';
+};
+
 function App() {
   // Hash & Pathname Routing for administrative standalone page
   const checkAdminRoute = () => {
