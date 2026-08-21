@@ -4739,35 +4739,80 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         {/* Admin main work grid */}
         
         {/* Admin Section Navigation Tabs (Super Admin / Merchant) */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-          <div className="flex border-b border-[#E9E5DE] bg-white rounded-xl p-1.5 shadow-xs gap-1">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <div className="bg-white border border-[#E9E5DE] rounded-2xl p-1.5 shadow-sm flex flex-col sm:flex-row items-stretch gap-1.5">
             <button
               type="button"
               onClick={() => setAdminSectionTab('restaurants')}
-              className={`flex-1 py-2.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${adminSectionTab === 'restaurants' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
+              className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                adminSectionTab === 'restaurants'
+                  ? 'bg-terracotta text-white shadow-md'
+                  : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+              }`}
             >
-              <span>🏪</span> Heritage Restaurants ({restaurants.length})
+              <span className="text-sm">🏪</span>
+              <span className="tracking-wide uppercase">Heritage Restaurants</span>
+              <span
+                className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${
+                  adminSectionTab === 'restaurants'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
+                }`}
+              >
+                {restaurants.length}
+              </span>
             </button>
+
             {adminRole === 'superadmin' && (
               <>
                 <button
                   type="button"
                   onClick={() => setAdminSectionTab('requests')}
-                  className={`flex-1 py-2.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 relative ${adminSectionTab === 'requests' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    adminSectionTab === 'requests'
+                      ? 'bg-terracotta text-white shadow-md'
+                      : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                  }`}
                 >
-                  <span>📋</span> Change Requests Queue ({pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length})
-                  {pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length > 0 && (
-                    <span className="px-1.5 py-0.5 text-[9px] bg-amber-500 text-white font-black rounded-full animate-pulse ml-1">
-                      {pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length} PENDING
+                  <span className="text-sm">📋</span>
+                  <span className="tracking-wide uppercase">Change Requests</span>
+                  {pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length > 0 ? (
+                    <span className="px-2 py-0.5 text-[10px] bg-amber-500 text-white font-black rounded-full shadow-xs animate-pulse">
+                      {pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length} Pending
+                    </span>
+                  ) : (
+                    <span
+                      className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${
+                        adminSectionTab === 'requests'
+                          ? 'bg-white/20 text-white'
+                          : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
+                      }`}
+                    >
+                      {pendingApprovals.length}
                     </span>
                   )}
                 </button>
+
                 <button
                   type="button"
                   onClick={() => setAdminSectionTab('attractions')}
-                  className={`flex-1 py-2.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${adminSectionTab === 'attractions' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    adminSectionTab === 'attractions'
+                      ? 'bg-terracotta text-white shadow-md'
+                      : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                  }`}
                 >
-                  <span>🏛️</span> Tourist Attractions ({attractions.length})
+                  <span className="text-sm">🏛️</span>
+                  <span className="tracking-wide uppercase">Tourist Attractions</span>
+                  <span
+                    className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${
+                      adminSectionTab === 'attractions'
+                        ? 'bg-white/20 text-white'
+                        : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
+                    }`}
+                  >
+                    {attractions.length}
+                  </span>
                 </button>
               </>
             )}
