@@ -8145,8 +8145,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </div>
                   <div className="min-w-0">
                     <span className="font-extrabold text-xs text-white block truncate">Rancis J. Santos</span>
-                    <span className="text-[10px] font-bold text-saffron flex items-center gap-1 mt-0.5">
-                      👑 Team Leader
+                    <span className="text-[10px] font-bold text-terracotta block mt-0.5">
+                      Team Leader
                     </span>
                   </div>
                 </div>
