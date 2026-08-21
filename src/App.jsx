@@ -6785,7 +6785,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     </div>
                     <div className="pt-2 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
                       <span className="truncate">Giant Lantern</span>
-                      <span className="text-saffron-dark shrink-0 text-[9px]">San Fernando</span>
+                      <span className="text-saffron-dark shrink-0 text-[9px]">Festival</span>
                     </div>
                   </div>
 
@@ -6793,10 +6793,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   <div className="w-36 sm:w-40 xl:w-44 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                     <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative">
                       <img 
-                        src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80" 
+                        src="/restaurants/authentic_sisig.jpg" 
                         alt="Authentic Kapampangan Sizzling Sisig" 
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"; }}
+                        onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"; }}
                       />
                       <span className="absolute bottom-1.5 left-1.5 bg-terracotta/90 backdrop-blur-xs text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-white/10">
                         🔥 Sizzling Sisig
@@ -6804,7 +6804,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     </div>
                     <div className="pt-2 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
                       <span className="truncate">Culinary Capital</span>
-                      <span className="text-terracotta shrink-0 text-[9px]">Angeles City</span>
+                      <span className="text-terracotta shrink-0 text-[9px]">Food</span>
                     </div>
                   </div>
                 </div>
