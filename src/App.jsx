@@ -5033,9 +5033,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           className="block w-full px-3 py-2 text-xs border border-[#E9E5DE] rounded-xl bg-ivory font-bold focus:outline-none"
                         >
                           <option value="$">$ (Budget)</option>
-                          <option value="$">$ (Moderate)</option>
-                          <option value="$$">$$ (Premium)</option>
-                          <option value="$$">$$ (Fine Degustation)</option>
+                          <option value="$$">$$ (Moderate)</option>
+                          <option value="$$$">$$$ (Premium)</option>
+                          <option value="$$$$">$$$$ (Fine Degustation)</option>
                         </select>
                       </div>
                     </div>
@@ -8285,7 +8285,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </div>
                   <div>
                     <strong className="block text-charcoal">Price Points:</strong>
-                    {selectedRestaurant.priceTier === '$' ? 'Budget' : selectedRestaurant.priceTier === '$$' ? 'Moderate' : 'Premium'}
+                    {selectedRestaurant.priceTier === '$' ? 'Budget ($)' : selectedRestaurant.priceTier === '$$' ? 'Moderate ($$)' : selectedRestaurant.priceTier === '$$$' ? 'Premium ($$$)' : selectedRestaurant.priceTier === '$$$$' ? 'Fine Degustation ($$$$)' : selectedRestaurant.priceTier || 'Budget ($)'}
                   </div>
                   <div>
                     <strong className="block text-charcoal">GPS Coordinates:</strong>

@@ -12,11 +12,18 @@ class Municipality(models.Model):
         return self.name
 
 class Restaurant(models.Model):
+    PRICE_TIER_CHOICES = [
+        ('$', '$ (Budget)'),
+        ('$$', '$$ (Moderate)'),
+        ('$$$', '$$$ (Premium)'),
+        ('$$$$', '$$$$ (Fine Degustation)'),
+    ]
+
     restaurant_id = models.CharField(max_length=100, primary_key=True)
     name = models.CharField(max_length=200)
     municipality = models.CharField(max_length=100)
     operating_hours = models.CharField(max_length=100, default='09:00 AM - 08:00 PM')
-    price_tier = models.CharField(max_length=10, default='$')
+    price_tier = models.CharField(max_length=10, choices=PRICE_TIER_CHOICES, default='$')
     lat = models.FloatField(default=15.0320)
     lng = models.FloatField(default=120.6860)
     categories = models.JSONField(default=list, blank=True)
