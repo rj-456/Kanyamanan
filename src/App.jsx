@@ -4714,7 +4714,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </span>
                 </div>
                 <p className="text-[11px] text-gray-400 font-medium tracking-normal mt-0.5 m-0 truncate">
-                  Heritage Database Manager &amp; Merchant Analytics Core
+                  Kapampangan Restaurants Database Manager &amp; Merchant Analytics Core
                 </p>
               </div>
             </div>
@@ -4754,7 +4754,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               }`}
             >
               <span className="text-sm">🏪</span>
-              <span className="tracking-wide uppercase">Heritage Restaurants</span>
+              <span className="tracking-wide uppercase">Kapampangan Restaurants</span>
               <span
                 className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${
                   adminSectionTab === 'restaurants'
@@ -4999,7 +4999,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   <div className="flex flex-wrap items-center justify-between border-b border-[#E9E5DE] pb-3 gap-2">
                     <h3 className="text-sm font-extrabold text-charcoal tracking-tight flex items-center gap-2 m-0">
                       <Plus className="h-4.5 w-4.5 text-terracotta" />
-                      {adminEditingId ? "Modify Registered Heritage Kitchen" : "Register New Heritage Kitchen"}
+                      {adminEditingId ? "Modify Registered Kapampangan Restaurant" : "Register New Kapampangan Restaurant"}
                     </h3>
                   </div>
 
@@ -5600,7 +5600,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         type="submit"
                         className="px-6 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-black shadow-md transition-all cursor-pointer"
                       >
-                        Register Heritage Kitchen
+                        Register Kapampangan Restaurant
                       </button>
                     )}
                   </div>
@@ -5713,7 +5713,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider m-0">
-                      Heritage Kitchen Database Listings
+                      Kapampangan Restaurants Database Listings
                     </h3>
                     <span className="text-[10px] text-charcoal-light font-medium block mt-0.5">
                       Alphabetically Sorted A-Z
@@ -5763,7 +5763,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   <table className="min-w-full divide-y divide-[#E9E5DE] text-left text-xs">
                     <thead className="bg-[#FAF8F5] text-charcoal-light uppercase font-bold tracking-wider text-[10px]">
                       <tr>
-                        <th className="px-4 py-3">Kitchen/Restaurant</th>
+                        <th className="px-4 py-3">Kapampangan Restaurant</th>
                         <th className="px-4 py-3">Branches</th>
                         <th className="px-4 py-3">Account Credentials</th>
                         <th className="px-4 py-3">Municipality/City</th>
