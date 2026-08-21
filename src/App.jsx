@@ -6730,7 +6730,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 
                 {/* Description */}
                 <p className="text-xs sm:text-sm text-charcoal-light leading-relaxed max-w-2xl font-medium m-0">
-                  Welcome to <strong className="text-charcoal font-bold">Kanyamanan</strong>, your provincial culinary guide and health informatics portal. Discover ancestral heirloom recipes, explore verified restaurants across all 22 municipalities, and map your personalized food trails.
+                  Welcome to <strong className="text-charcoal font-bold">Kanyamanan</strong>, your provincial culinary guide and health informatics portal. Discover ancestral heirloom recipes, explore verified restaurants across all 22 municipalities and cities, and map your personalized food trails.
                 </p>
               </div>
             </div>
