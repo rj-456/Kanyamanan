@@ -6695,11 +6695,11 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         {activeView === 'homepage' && (
           <div className="space-y-6">
 
-            {/* Hero Section */}
+            {/* Hero Section with Kapampangan Cultural & Food Imagery */}
             <div className="bento-card relative overflow-hidden p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFEB] border border-[#E9E5DE] rounded-3xl shadow-sm">
-              {/* Background Parul Sampernandu (Giant Lantern) Watermark */}
-              <div className="absolute right-[-20px] bottom-[-20px] w-44 h-44 sm:w-64 sm:h-64 text-terracotta/10 opacity-30 pointer-events-none z-0">
-                <svg viewBox="0 0 100 100" className="w-full h-full stroke-current fill-none" strokeWidth="1">
+              {/* Background Parul Sampernandu (Giant Lantern) & Mount Arayat Outline Watermark */}
+              <div className="absolute right-0 bottom-0 w-72 h-72 sm:w-96 sm:h-96 text-terracotta/10 opacity-25 pointer-events-none z-0">
+                <svg viewBox="0 0 100 100" className="w-full h-full stroke-current fill-none" strokeWidth="0.8">
                   <polygon points="50,15 57,38 80,38 61,52 69,75 50,60 31,75 39,52 20,38 43,38" />
                   <circle cx="50" cy="50" r="30" />
                   <circle cx="50" cy="50" r="42" />
@@ -6710,28 +6710,87 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 </svg>
               </div>
 
-              <div className="relative z-10 max-w-3xl space-y-4">
-                {/* Top Cultural Badge */}
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-black tracking-wider uppercase bg-terracotta/10 text-terracotta border border-terracotta/20 shadow-2xs">
-                  <span>✨ Manyaman a Kayamanan</span>
-                  <span className="text-terracotta/40">•</span>
-                  <span>Culinary Heritage of Pampanga</span>
-                </div>
-                
-                {/* Main Headline */}
-                <div>
-                  <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-charcoal tracking-tight leading-tight m-0">
-                    Mekeni, Mangan Tana!
-                  </h2>
-                  <div className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron mt-1">
-                    Explore Pampanga’s Culinary Map
+              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                {/* Left Column: Typography & Narrative */}
+                <div className="lg:col-span-7 space-y-4">
+                  {/* Top Cultural Badge */}
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-black tracking-wider uppercase bg-terracotta/10 text-terracotta border border-terracotta/20 shadow-2xs">
+                    <span>✨ Manyaman a Kayamanan</span>
+                    <span className="text-terracotta/40">•</span>
+                    <span>Culinary Heritage of Pampanga</span>
+                  </div>
+                  
+                  {/* Main Headline */}
+                  <div>
+                    <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-charcoal tracking-tight leading-tight m-0">
+                      Mekeni, Mangan Tana!
+                    </h2>
+                    <div className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron mt-1">
+                      Explore Pampanga’s Culinary Map
+                    </div>
+                  </div>
+                  
+                  {/* Description */}
+                  <p className="text-xs sm:text-sm text-charcoal-light leading-relaxed max-w-2xl font-medium m-0">
+                    Welcome to <strong className="text-charcoal font-bold">Kanyamanan</strong>, your provincial culinary guide and health informatics portal. Discover ancestral heirloom recipes, explore verified restaurants across all 22 municipalities and cities, and map your personalized food trails.
+                  </p>
+
+                  {/* Cultural Keywords Pill Tag */}
+                  <div className="flex flex-wrap items-center gap-2 pt-2 text-[11px] font-bold text-charcoal-light">
+                    <span className="px-2.5 py-1 rounded-lg bg-white border border-[#E9E5DE] shadow-2xs text-charcoal flex items-center gap-1.5">
+                      🍲 Palayok Clay Pot Cooking
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-white border border-[#E9E5DE] shadow-2xs text-charcoal flex items-center gap-1.5">
+                      🔥 Authentic Sizzling Sisig
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg bg-white border border-[#E9E5DE] shadow-2xs text-charcoal flex items-center gap-1.5">
+                      🏛️ Heirlooms &amp; Landmarks
+                    </span>
                   </div>
                 </div>
-                
-                {/* Description */}
-                <p className="text-xs sm:text-sm text-charcoal-light leading-relaxed max-w-2xl font-medium m-0">
-                  Welcome to <strong className="text-charcoal font-bold">Kanyamanan</strong>, your provincial culinary guide and health informatics portal. Discover ancestral heirloom recipes, explore verified restaurants across all 22 municipalities and cities, and map your personalized food trails.
-                </p>
+
+                {/* Right Column: Kapampangan Culture & Food Showcase Visuals */}
+                <div className="lg:col-span-5 relative flex items-center justify-center lg:justify-end">
+                  <div className="relative w-full max-w-sm h-52 sm:h-56">
+                    {/* Visual 1: Mount Arayat */}
+                    <div className="absolute top-0 right-4 w-44 sm:w-48 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md transform rotate-2 hover:rotate-0 transition-transform duration-300 z-10">
+                      <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative">
+                        <img 
+                          src="/attractions/mt_arayat_park.png" 
+                          alt="Mount Arayat" 
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=500&q=80"; }}
+                        />
+                        <span className="absolute bottom-1.5 left-1.5 bg-black/60 backdrop-blur-xs text-white text-[9px] font-black px-2 py-0.5 rounded-full">
+                          ⛰️ Bunduk Alaya (Mt. Arayat)
+                        </span>
+                      </div>
+                      <div className="pt-1 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
+                        <span>Pampanga Provincial Icon</span>
+                        <span className="text-bananaleaf">Sacred Peak</span>
+                      </div>
+                    </div>
+
+                    {/* Visual 2: Giant Lantern & Sisig Food Culture */}
+                    <div className="absolute bottom-0 left-2 w-48 sm:w-52 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-xl transform -rotate-3 hover:rotate-0 transition-transform duration-300 z-20">
+                      <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative">
+                        <img 
+                          src="/attractions/giant_lantern_san_fernando.png" 
+                          alt="Parul Sampernandu Giant Lantern" 
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"; }}
+                        />
+                        <span className="absolute bottom-1.5 left-1.5 bg-terracotta/90 backdrop-blur-xs text-white text-[9px] font-black px-2 py-0.5 rounded-full">
+                          ✨ Parul &amp; Sisig Capital
+                        </span>
+                      </div>
+                      <div className="pt-1 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
+                        <span>Culinary &amp; Lantern Heritage</span>
+                        <span className="text-terracotta">San Fernando</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
