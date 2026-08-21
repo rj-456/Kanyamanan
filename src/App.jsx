@@ -8110,9 +8110,11 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             {/* Brand Column */}
             <div className="lg:col-span-4 text-center lg:text-left space-y-2.5">
               <div className="flex items-center justify-center lg:justify-start gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-terracotta flex items-center justify-center text-white shadow-sm font-black text-sm">
-                  K
-                </div>
+                <img 
+                  src="/kanyamanan-logo.png" 
+                  alt="Kanyamanan Logo" 
+                  className="w-8 h-8 rounded-lg object-contain shadow-xs bg-white/5 p-0.5 border border-white/10" 
+                />
                 <span className="text-lg font-black text-white tracking-tight">Kanyamanan</span>
                 <span className="px-2 py-0.5 bg-white/10 text-saffron text-[10px] font-black rounded-full border border-white/10">
                   v1.0
@@ -8124,7 +8126,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               <div className="flex items-center justify-center lg:justify-start gap-2 text-[10px] text-gray-400 font-medium pt-1">
                 <span>© 2026 Province of Pampanga, Philippines</span>
                 <span>•</span>
-                <span className="text-bananaleaf font-semibold">100% Authentic Heritage</span>
+                <span className="text-bananaleaf font-semibold">100% Kapampangan By Heart</span>
               </div>
             </div>
 
