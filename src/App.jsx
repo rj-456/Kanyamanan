@@ -6732,22 +6732,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 <p className="text-xs sm:text-sm text-charcoal-light leading-relaxed max-w-2xl font-medium m-0">
                   Welcome to <strong className="text-charcoal font-bold">Kanyamanan</strong>, your provincial culinary guide and health informatics portal. Discover ancestral heirloom recipes, explore verified restaurants across all 22 municipalities, and map your personalized food trails.
                 </p>
-
-                {/* Quick Highlights / Pill Badges */}
-                <div className="flex flex-wrap items-center gap-2 pt-3">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-[#E9E5DE] text-xs font-bold text-charcoal shadow-2xs">
-                    <span>🍲</span> 40+ Kapampangan Kitchens
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-[#E9E5DE] text-xs font-bold text-charcoal shadow-2xs">
-                    <span>🏛️</span> 22 Municipalities &amp; Cities
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-[#E9E5DE] text-xs font-bold text-charcoal shadow-2xs">
-                    <span>🥗</span> Nutritional Info &amp; Calories
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-[#E9E5DE] text-xs font-bold text-charcoal shadow-2xs">
-                    <span>🧭</span> Interactive Route Planner
-                  </div>
-                </div>
               </div>
             </div>
 
