@@ -5335,14 +5335,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     </div>
 
                   
-                  {/* Free AI Menu OCR & Text Scanner Component */}
+                  {/* AI Menu OCR & Text Scanner Component */}
                   <div className="bg-gradient-to-r from-terracotta/10 via-saffron/10 to-[#2C5E3B]/10 border border-terracotta/30 p-4 rounded-xl space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-xl">🤖</span>
                         <div>
                           <h4 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
-                            Free AI Menu OCR & Automatic Dish Cataloger
+                            AI Menu OCR & Automatic Dish Cataloger
                           </h4>
                           <span className="text-[10px] text-charcoal-light font-medium block">
                             Upload a menu photo or paste raw menu text to auto-generate dishes, prices, ingredients & allergen warnings
@@ -5350,7 +5350,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         </div>
                       </div>
                       <span className="text-[10px] font-black text-bananaleaf bg-white px-2.5 py-1 rounded-full border border-bananaleaf/30 shadow-2xs">
-                        ⚡ 100% Free AI Engine
+                        ⚡ AI Engine
                       </span>
                     </div>
 
@@ -5394,7 +5394,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       onClick={handleAiAnalyzeMenu}
                       className="w-full py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
                     >
-                      {isAiScanning ? "🤖 AI Scanning & Organizing Menu Items..." : "✨ Analyze & Auto-Organize Menu with AI (Free)"}
+                      {isAiScanning ? "🤖 AI Scanning & Organizing Menu Items..." : "✨ Analyze & Auto-Organize Menu with AI"}
                     </button>
                   </div>
 
