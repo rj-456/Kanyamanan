@@ -4696,22 +4696,25 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       <div className="min-h-screen bg-ivory text-charcoal flex flex-col font-sans">
 
         {/* Dedicated Admin Header */}
-        <header className="bg-charcoal text-white border-b border-charcoal-dark shadow-md py-4 px-6 sticky top-0 z-40">
+        <header className="bg-charcoal text-white border-b border-charcoal-dark shadow-md py-3.5 px-6 sticky top-0 z-40">
           <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
 
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-terracotta flex items-center justify-center shadow-lg">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-terracotta to-[#C2410C] flex items-center justify-center shadow-md border border-white/10 ring-2 ring-terracotta/25 shrink-0">
                 <Database className="h-5 w-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-lg font-black tracking-tight text-white m-0 flex items-center gap-2">
-                  Kanyamanan Portal
-                  <span className="text-[10px] bg-terracotta text-white px-2 py-0.5 rounded font-black uppercase">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-base sm:text-lg font-black tracking-tight text-white m-0">
+                    Kanyamanan Portal
+                  </h1>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-terracotta/20 text-[#FB923C] border border-terracotta/35">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FB923C] animate-pulse"></span>
                     {adminRole === 'superadmin' ? 'Super Admin' : 'Merchant Owner'}
                   </span>
-                </h1>
-                <p className="text-[10px] text-gray-300 font-medium tracking-wide">
-                  SECURE HERITAGE DATABASE MANAGER & MERCHANT ANALYTICS CORE
+                </div>
+                <p className="text-[11px] text-gray-400 font-medium tracking-normal mt-0.5 m-0 truncate">
+                  Heritage Database Manager &amp; Merchant Analytics Core
                 </p>
               </div>
             </div>
@@ -4724,7 +4727,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   setAdminRole('superadmin');
                   setAdminLoginPass('');
                 }}
-                className="px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow"
+                className="px-4 py-2 bg-white/10 hover:bg-terracotta text-white rounded-xl text-xs font-black transition-all flex items-center gap-1.5 border border-white/15 hover:border-terracotta shadow-xs cursor-pointer active:scale-95"
               >
                 Sign Out
               </button>
