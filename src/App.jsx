@@ -6780,16 +6780,6 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </div>
                 </div>
 
-                {/* Local Info */}
-                <div className="bento-card p-5 bg-gradient-to-br from-[#2C5E3B]/5 to-transparent border-[#2C5E3B]/10">
-                  <h3 className="text-xs font-bold text-bananaleaf uppercase tracking-wider flex items-center gap-2 mb-2">
-                    <Info className="h-4 w-4" /> Kapampangan Kitchens
-                  </h3>
-                  <p className="text-xs text-charcoal-light leading-relaxed">
-                    Local dishes preserve traditional <b>palayok</b> cooking methods (clay pot slow simmer) and wood-fired stoves.
-                  </p>
-                </div>
-
               </div>
 
               {/* Feed Grid Area (col-span-9) */}
