@@ -6710,9 +6710,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 </svg>
               </div>
 
-              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="relative z-10 grid grid-cols-1 xl:grid-cols-12 gap-8 items-center">
                 {/* Left Column: Typography & Narrative */}
-                <div className="lg:col-span-7 space-y-4">
+                <div className="xl:col-span-6 space-y-4">
                   {/* Top Cultural Badge */}
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-black tracking-wider uppercase bg-terracotta/10 text-terracotta border border-terracotta/20 shadow-2xs">
                     <span>✨ Manyaman a Kayamanan</span>
@@ -6749,43 +6749,62 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </div>
                 </div>
 
-                {/* Right Column: Kapampangan Culture & Food Showcase Visuals (Both fully visible side-by-side) */}
-                <div className="lg:col-span-5 flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-3.5 sm:gap-4">
+                {/* Right Column: Kapampangan Culture & Food Showcase Visuals (3 Cards Fully Visible) */}
+                <div className="xl:col-span-6 flex flex-wrap sm:flex-nowrap items-center justify-center xl:justify-end gap-3 sm:gap-3.5">
                   {/* Card 1: Real Mount Arayat (Bunduk Alaya) */}
-                  <div className="w-full sm:w-44 lg:w-48 bg-white p-2.5 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                    <div className="h-28 sm:h-32 rounded-xl overflow-hidden relative">
+                  <div className="w-36 sm:w-40 xl:w-44 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative">
                       <img 
-                        src="/attractions/mt_arayat_park.jpg" 
+                        src="/attractions/real_mt_arayat.png" 
                         alt="Mount Arayat (Bunduk Alaya) Pampanga" 
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        onError={(e) => { e.target.src = "/attractions/mt_arayat_park.png"; }}
+                        onError={(e) => { e.target.src = "/attractions/mt_arayat_park.jpg"; }}
                       />
-                      <span className="absolute bottom-1.5 left-1.5 bg-black/65 backdrop-blur-xs text-white text-[9px] font-black px-2 py-0.5 rounded-full border border-white/10">
+                      <span className="absolute bottom-1.5 left-1.5 bg-black/65 backdrop-blur-xs text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-white/10">
                         ⛰️ Mt. Arayat
                       </span>
                     </div>
                     <div className="pt-2 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
                       <span className="truncate">Bunduk Alaya</span>
-                      <span className="text-bananaleaf shrink-0">Sacred Icon</span>
+                      <span className="text-bananaleaf shrink-0 text-[9px]">Sacred Peak</span>
                     </div>
                   </div>
 
-                  {/* Card 2: Giant Lantern & Food Heritage (Parul Sampernandu) */}
-                  <div className="w-full sm:w-44 lg:w-48 bg-white p-2.5 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                    <div className="h-28 sm:h-32 rounded-xl overflow-hidden relative">
+                  {/* Card 2: Giant Lantern (Parul Sampernandu) */}
+                  <div className="w-36 sm:w-40 xl:w-44 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative">
                       <img 
                         src="/attractions/giant_lantern_san_fernando.jpg" 
-                        alt="Parul Sampernandu Giant Lantern & Food Culture" 
+                        alt="Parul Sampernandu Giant Lantern" 
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                         onError={(e) => { e.target.src = "/attractions/giant_lantern_san_fernando.png"; }}
                       />
-                      <span className="absolute bottom-1.5 left-1.5 bg-terracotta/90 backdrop-blur-xs text-white text-[9px] font-black px-2 py-0.5 rounded-full border border-white/10">
-                        ✨ Parul &amp; Sisig
+                      <span className="absolute bottom-1.5 left-1.5 bg-saffron/90 backdrop-blur-xs text-charcoal text-[8px] font-black px-2 py-0.5 rounded-full border border-white/10">
+                        ✨ Giant Lantern
+                      </span>
+                    </div>
+                    <div className="pt-2 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
+                      <span className="truncate">Giant Lantern</span>
+                      <span className="text-saffron-dark shrink-0 text-[9px]">San Fernando</span>
+                    </div>
+                  </div>
+
+                  {/* Card 3: Sizzling Sisig (Culinary Capital) */}
+                  <div className="w-36 sm:w-40 xl:w-44 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative">
+                      <img 
+                        src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80" 
+                        alt="Authentic Kapampangan Sizzling Sisig" 
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"; }}
+                      />
+                      <span className="absolute bottom-1.5 left-1.5 bg-terracotta/90 backdrop-blur-xs text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-white/10">
+                        🔥 Sizzling Sisig
                       </span>
                     </div>
                     <div className="pt-2 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
                       <span className="truncate">Culinary Capital</span>
-                      <span className="text-terracotta shrink-0">San Fernando</span>
+                      <span className="text-terracotta shrink-0 text-[9px]">Angeles City</span>
                     </div>
                   </div>
                 </div>
