@@ -6749,45 +6749,43 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </div>
                 </div>
 
-                {/* Right Column: Kapampangan Culture & Food Showcase Visuals */}
-                <div className="lg:col-span-5 relative flex items-center justify-center lg:justify-end">
-                  <div className="relative w-full max-w-sm h-52 sm:h-56">
-                    {/* Visual 1: Mount Arayat */}
-                    <div className="absolute top-0 right-4 w-44 sm:w-48 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md transform rotate-2 hover:rotate-0 transition-transform duration-300 z-10">
-                      <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative">
-                        <img 
-                          src="/attractions/mt_arayat_park.png" 
-                          alt="Mount Arayat" 
-                          className="w-full h-full object-cover"
-                          onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=500&q=80"; }}
-                        />
-                        <span className="absolute bottom-1.5 left-1.5 bg-black/60 backdrop-blur-xs text-white text-[9px] font-black px-2 py-0.5 rounded-full">
-                          ⛰️ Bunduk Alaya (Mt. Arayat)
-                        </span>
-                      </div>
-                      <div className="pt-1 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
-                        <span>Pampanga Provincial Icon</span>
-                        <span className="text-bananaleaf">Sacred Peak</span>
-                      </div>
+                {/* Right Column: Kapampangan Culture & Food Showcase Visuals (Both fully visible side-by-side) */}
+                <div className="lg:col-span-5 flex flex-col sm:flex-row items-center justify-center lg:justify-end gap-3.5 sm:gap-4">
+                  {/* Card 1: Real Mount Arayat (Bunduk Alaya) */}
+                  <div className="w-full sm:w-44 lg:w-48 bg-white p-2.5 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div className="h-28 sm:h-32 rounded-xl overflow-hidden relative">
+                      <img 
+                        src="/attractions/mt_arayat_park.jpg" 
+                        alt="Mount Arayat (Bunduk Alaya) Pampanga" 
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        onError={(e) => { e.target.src = "/attractions/mt_arayat_park.png"; }}
+                      />
+                      <span className="absolute bottom-1.5 left-1.5 bg-black/65 backdrop-blur-xs text-white text-[9px] font-black px-2 py-0.5 rounded-full border border-white/10">
+                        ⛰️ Mt. Arayat
+                      </span>
                     </div>
+                    <div className="pt-2 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
+                      <span className="truncate">Bunduk Alaya</span>
+                      <span className="text-bananaleaf shrink-0">Sacred Icon</span>
+                    </div>
+                  </div>
 
-                    {/* Visual 2: Giant Lantern & Sisig Food Culture */}
-                    <div className="absolute bottom-0 left-2 w-48 sm:w-52 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-xl transform -rotate-3 hover:rotate-0 transition-transform duration-300 z-20">
-                      <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative">
-                        <img 
-                          src="/attractions/giant_lantern_san_fernando.png" 
-                          alt="Parul Sampernandu Giant Lantern" 
-                          className="w-full h-full object-cover"
-                          onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"; }}
-                        />
-                        <span className="absolute bottom-1.5 left-1.5 bg-terracotta/90 backdrop-blur-xs text-white text-[9px] font-black px-2 py-0.5 rounded-full">
-                          ✨ Parul &amp; Sisig Capital
-                        </span>
-                      </div>
-                      <div className="pt-1 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
-                        <span>Culinary &amp; Lantern Heritage</span>
-                        <span className="text-terracotta">San Fernando</span>
-                      </div>
+                  {/* Card 2: Giant Lantern & Food Heritage (Parul Sampernandu) */}
+                  <div className="w-full sm:w-44 lg:w-48 bg-white p-2.5 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                    <div className="h-28 sm:h-32 rounded-xl overflow-hidden relative">
+                      <img 
+                        src="/attractions/giant_lantern_san_fernando.jpg" 
+                        alt="Parul Sampernandu Giant Lantern & Food Culture" 
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        onError={(e) => { e.target.src = "/attractions/giant_lantern_san_fernando.png"; }}
+                      />
+                      <span className="absolute bottom-1.5 left-1.5 bg-terracotta/90 backdrop-blur-xs text-white text-[9px] font-black px-2 py-0.5 rounded-full border border-white/10">
+                        ✨ Parul &amp; Sisig
+                      </span>
+                    </div>
+                    <div className="pt-2 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
+                      <span className="truncate">Culinary Capital</span>
+                      <span className="text-terracotta shrink-0">San Fernando</span>
                     </div>
                   </div>
                 </div>
