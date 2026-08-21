@@ -67,7 +67,7 @@ def seed():
             username = r.get('username') or f"owner_{res_idx+1}"
             password = r.get('password') or 'password123'
             
-            restaurant_obj, created = Restaurant.objects.get_or_create(
+            restaurant_obj, _ = Restaurant.objects.update_or_create(
                 restaurant_id=res_id,
                 defaults={
                     'name': r.get('name', 'Restaurant'),
@@ -122,7 +122,7 @@ def seed():
             for m_idx, m in enumerate(menu_items):
                 item_id = m.get('id') or f"{res_id}-item-{m_idx+1}"
                 nutrition = m.get('nutrition', {})
-                MenuItem.objects.get_or_create(
+                MenuItem.objects.update_or_create(
                     restaurant=restaurant_obj,
                     item_id=item_id,
                     defaults={
@@ -131,10 +131,10 @@ def seed():
                         'ingredients': m.get('ingredients', ''),
                         'allergens': m.get('allergens', ''),
                         'health_indicators': m.get('healthIndicators', ''),
-                        'calories': int(nutrition.get('calories', 0)),
-                        'protein': int(nutrition.get('protein', 0)),
-                        'carbs': int(nutrition.get('carbs', 0)),
-                        'fat': int(nutrition.get('fat', 0)),
+                        'calories': int(nutrition.get('calories', 0) if isinstance(nutrition, dict) else 0),
+                        'protein': int(nutrition.get('protein', 0) if isinstance(nutrition, dict) else 0),
+                        'carbs': int(nutrition.get('carbs', 0) if isinstance(nutrition, dict) else 0),
+                        'fat': int(nutrition.get('fat', 0) if isinstance(nutrition, dict) else 0),
                         'image': m.get('image', '')
                     }
                 )

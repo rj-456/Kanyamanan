@@ -9,7 +9,7 @@
     "lat": 15.1328,
     "lng": 120.5976,
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional"
+      "🪵 Wood-Fired Traditional"
     ],
     "description": "The birth site of modern Sisig. Lucia \"Aling Lucing\" Cunanan revolutionized Kapampangan cuisine here by grilling and serving chopped pig ears, cheeks, and snout.",
     "occupancy": [
@@ -35,8 +35,8 @@
         "name": "Original Sizzling Sisig",
         "price": 280,
         "ingredients": "Grilled pig ears, cheeks, snout, chicken liver, calamansi, onions, chili",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Traces of Poultry (Chicken liver) and Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: Very High Saturated Fats and Purines. High Cholesterol Trigger.",
+        "allergens": "⚠️ ALLERGEN WARNING: Traces of Poultry (Chicken liver) and Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Very High Saturated Fats and Purines. High Cholesterol Trigger.",
         "nutrition": {
           "calories": 840,
           "protein": 48,
@@ -50,8 +50,8 @@
         "name": "Mila's Style Tokwa't Baboy",
         "price": 180,
         "ingredients": "Deep fried tofu, boiled pork snout, soy-vinegar sauce, local celery",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Soy and Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: Moderate Saturated Fats, Soy Isoflavones present.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Soy and Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Moderate Saturated Fats, Soy Isoflavones present.",
         "nutrition": {
           "calories": 450,
           "protein": 28,
@@ -76,9 +76,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 224 5024",
-    "contactEmail": "info@alinglucingsisig.gov.ph",
-    "username": "aling_lucing_sisig",
-    "password": "alinglucing"
+    "contactEmail": "info@alinglucingsisig.gov.ph"
   },
   {
     "id": "res-alviz-farm-santa-rita",
@@ -90,8 +88,8 @@
     "lat": 15.002,
     "lng": 120.614,
     "categories": [
-      "\ud83c\udf3f Eco-Dining & Farm",
-      "\ud83c\udfdb\ufe0f Heritage Institution"
+      "🌿 Eco-Dining & Farm",
+      "🏛️ Heritage Institution"
     ],
     "description": "Famous Santa Rita heritage farm offering interactive Suman & Barquillos making workshops and an authentic Kapampangan fiesta buffet feast.",
     "address": "Barangay Lourdes, Santa Rita, Pampanga",
@@ -197,7 +195,7 @@
     "lat": 14.9654,
     "lng": 120.7602,
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional"
+      "🪵 Wood-Fired Traditional"
     ],
     "description": "Famous for Apalit-style charcoal spit-roasted pork with a rich liver gravy base, cooked over red clay brick ovens.",
     "occupancy": [
@@ -223,8 +221,8 @@
         "name": "Apalit Charcoal Lechon Plate",
         "price": 380,
         "ingredients": "Whole roasted pig, lemongrass, garlic, native vinegar liver sauce",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork. Liver sauce contains Gluten.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Saturated Fats and Purines.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork. Liver sauce contains Gluten.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fats and Purines.",
         "nutrition": {
           "calories": 690,
           "protein": 38,
@@ -238,8 +236,8 @@
         "name": "Pancit Alanganin Apalit",
         "price": 180,
         "ingredients": "Local noodles, creamy pork bone marrow broth, dynamic cabbage, chicharon",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Gluten, Soy, and Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Sodium. Carbohydrate dense.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Gluten, Soy, and Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Sodium. Carbohydrate dense.",
         "nutrition": {
           "calories": 510,
           "protein": 20,
@@ -264,9 +262,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 225 5025",
-    "contactEmail": "info@apalitlechon.gov.ph",
-    "username": "apag_apalit_lechon_grill_owner",
-    "password": "password123"
+    "contactEmail": "info@apalitlechon.gov.ph"
   },
   {
     "id": "abag-marangle-lubao",
@@ -278,7 +274,7 @@
     "lat": 14.9452,
     "lng": 120.5982,
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional"
+      "🪵 Wood-Fired Traditional"
     ],
     "description": "An eco-restaurant styled like a nipa hut over water, offering traditional farmer dishes cooked over fire and served in clay pots (palayok).",
     "occupancy": [
@@ -304,8 +300,8 @@
         "name": "Pidpid (Stuffed Catfish)",
         "price": 390,
         "ingredients": "Freshwater catfish, ground pork filling, lemongrass, ginger, vinegar basting",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Fish and Pork allergen.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Lean Protein, healthy fish lipids (omega-3). Low Carb.",
+        "allergens": "⚠️ ALLERGEN WARNING: Fish and Pork allergen.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Lean Protein, healthy fish lipids (omega-3). Low Carb.",
         "nutrition": {
           "calories": 380,
           "protein": 35,
@@ -330,9 +326,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 231 5031",
-    "contactEmail": "info@abagmaranglelubao.gov.ph",
-    "username": "apag_marangle_owner",
-    "password": "password123"
+    "contactEmail": "info@abagmaranglelubao.gov.ph"
   },
   {
     "id": "res-apung-otings-floridablanca",
@@ -344,8 +338,8 @@
     "lat": 14.975,
     "lng": 120.531,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen",
-      "\ud83d\udd25 Heritage Sisig"
+      "🏛️ Ancestral Kitchen",
+      "🔥 Heritage Sisig"
     ],
     "description": "Traditional Floridablanca ancestral kitchen celebrated for authentic heirloom Pork Sisig, Asadong Babi, and slow-cooked Bringhe.",
     "address": "Barangay San Jose, Floridablanca, Pampanga",
@@ -436,9 +430,9 @@
     "lat": 15.2215,
     "lng": 120.6612,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
-    "description": "The culinary shrine of Lillian Borromeo, Pampanga\u2019s culinary historian. Offers pre-booked ancestral cooking demos and authentic pastillas.",
+    "description": "The culinary shrine of Lillian Borromeo, Pampanga’s culinary historian. Offers pre-booked ancestral cooking demos and authentic pastillas.",
     "occupancy": [
       5,
       5,
@@ -462,8 +456,8 @@
         "name": "Pistu (Heritage Egg Hash)",
         "price": 380,
         "ingredients": "Egg custard batter, minced beef, pork bits, raisins, peas, butter, native spices",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Eggs, Dairy, Beef, and Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Cholesterol and Sodium.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Eggs, Dairy, Beef, and Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Cholesterol and Sodium.",
         "nutrition": {
           "calories": 490,
           "protein": 32,
@@ -488,9 +482,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 234 5034",
-    "contactEmail": "info@magalangkitchen.gov.ph",
-    "username": "atching_lillian_s_ancestral_kitchen_owner",
-    "password": "password123"
+    "contactEmail": "info@magalangkitchen.gov.ph"
   },
   {
     "id": "candaba-b-farm-cafe",
@@ -502,8 +494,8 @@
     "lat": 15.0935,
     "lng": 120.8268,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen",
-      "\ud83c\udf3f Farm-to-Table"
+      "🏛️ Ancestral Kitchen",
+      "🌿 Farm-to-Table"
     ],
     "description": "Scenic Candaba garden farm cafe famous for traditional Kapampangan feast set meals, Serkele bloodless pork offal stew, liempo kare-kare, and fresh buttered garlic prawns.",
     "occupancy": [
@@ -539,8 +531,8 @@
         "name": "Set Meal 1 (Pansit Bihon, Chicken Basket, Shanghai, Rice, Iced Tea)",
         "price": 958,
         "ingredients": "Pansit bihon noodles, deep-fried chicken, pork lumpia shanghai, steamed rice, iced tea (Serves 3-5 pax)",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Soy, Gluten, Pork, and Eggs.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Balanced Family Feast, High Protein.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Soy, Gluten, Pork, and Eggs.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Balanced Family Feast, High Protein.",
         "nutrition": {
           "calories": 1450,
           "protein": 65,
@@ -554,8 +546,8 @@
         "name": "Set Meal 2 (Pansit Canton, Chicken Basket, Sisig Tofu, Rice, Iced Tea)",
         "price": 958,
         "ingredients": "Pansit canton noodles, crispy fried chicken, sizzling sisig tofu, steamed rice, iced tea (Serves 3-5 pax)",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Soy, Tofu, Gluten, and Eggs.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Low-Fat Tofu Protein Option Included.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Soy, Tofu, Gluten, and Eggs.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Low-Fat Tofu Protein Option Included.",
         "nutrition": {
           "calories": 1380,
           "protein": 60,
@@ -569,8 +561,8 @@
         "name": "Set Meal 3 (Pansit Canton, Chicken, Pork Sisig, Shanghai, Rice, Iced Tea)",
         "price": 1588,
         "ingredients": "Pansit canton, fried chicken basket, sizzling pork sisig, lumpia shanghai, steamed rice, iced tea (Serves 4-6 pax)",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork, Soy, Gluten, and Eggs.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Saturated Fat and Sodium.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Soy, Gluten, and Eggs.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fat and Sodium.",
         "nutrition": {
           "calories": 1850,
           "protein": 85,
@@ -584,8 +576,8 @@
         "name": "Set Meal 4 (Liempo Kare-Kare, Pansit, Chicken, Sisig, 12pcs BBQ, 1.5L Coke)",
         "price": 1988,
         "ingredients": "Crispy liempo kare-kare in peanut sauce, pansit canton, chicken basket, pork sisig, 12pcs pork BBQ, rice, Coke (Serves 6-8 pax)",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Peanuts, Pork, Soy, and Gluten.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: Rich Peanut Sauce & High Calorie Feast.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Peanuts, Pork, Soy, and Gluten.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Rich Peanut Sauce & High Calorie Feast.",
         "nutrition": {
           "calories": 2450,
           "protein": 110,
@@ -599,8 +591,8 @@
         "name": "Set Meal 5 (3 Serkele, Pansit Bihon, 2 Chicken, Pinakbet, Sinigang, 12pcs BBQ, Coke)",
         "price": 2989,
         "ingredients": "Candaba Serkele bloodless pork stew, pansit bihon, 2 chicken baskets, pinakbet veggies, sinigang broth, 12pcs BBQ, rice (Serves 8-10 pax)",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork, Soy, Gluten, and Shrimp paste.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Authentic Ancestral Stew & Fiber-Rich Pinakbet.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Soy, Gluten, and Shrimp paste.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Authentic Ancestral Stew & Fiber-Rich Pinakbet.",
         "nutrition": {
           "calories": 3100,
           "protein": 145,
@@ -614,8 +606,8 @@
         "name": "Candaba Serkele (Bloodless Pork Offal Stew)",
         "price": 240,
         "ingredients": "Authentic Candaba heritage bloodless pork internal organs, green chili peppers, garlic, onion, local vinegar",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork Offal & Purines.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Iron, Low Sugar, Traditional Heritage Recipe.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork Offal & Purines.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Iron, Low Sugar, Traditional Heritage Recipe.",
         "nutrition": {
           "calories": 420,
           "protein": 34,
@@ -629,8 +621,8 @@
         "name": "Liempo Kare-Kare",
         "price": 380,
         "ingredients": "Crispy deep-fried pork liempo, roasted ground peanuts, banana blossoms, eggplant, string beans, bagoong alamang",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Peanuts, Crustaceans (Bagoong), and Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: Rich Caloric Content & Nut Fats.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Peanuts, Crustaceans (Bagoong), and Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Rich Caloric Content & Nut Fats.",
         "nutrition": {
           "calories": 780,
           "protein": 42,
@@ -644,8 +636,8 @@
         "name": "Buttered Garlic Prawns",
         "price": 420,
         "ingredients": "Fresh Candaba freshwater prawns, butter, minced garlic, parsley, lemon juice",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Shellfish/Crustaceans (Prawns) and Dairy (Butter).",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Protein, Low Carbohydrates, Rich Omega-3.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish/Crustaceans (Prawns) and Dairy (Butter).",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Protein, Low Carbohydrates, Rich Omega-3.",
         "nutrition": {
           "calories": 390,
           "protein": 36,
@@ -661,9 +653,7 @@
     "deliveryEnabled": true,
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
-    "contactNumber": "+63 917 220 5020",
-    "username": "b_farm_cafe_by_alexa_s_kitchen_owner",
-    "password": "password123"
+    "contactNumber": "+63 917 220 5020"
   },
   {
     "id": "res-bala-kayu-sasmuan",
@@ -675,8 +665,8 @@
     "lat": 14.939,
     "lng": 120.615,
     "categories": [
-      "\ud83c\udf5a Rice Bowls & Silog",
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🍚 Rice Bowls & Silog",
+      "🏛️ Ancestral Kitchen"
     ],
     "description": "Budget-friendly Sasmuan silogan serving Combisilog, Lechon Kawali Ala Carte, and Special Pork & Tuna Sisig.",
     "address": "Barangay Santa Lucia, Sasmuan, Pampanga",
@@ -760,15 +750,15 @@
   {
     "id": "san-fernando-bale-capampangan",
     "name": "Bale Capampangan",
-    "municipality": "Bacolor",
+    "municipality": "City of San Fernando",
     "corridor": "MacArthur Highway Line",
     "operatingHours": "10:00 AM - 09:00 PM",
     "priceTier": "$",
     "lat": 15.0298,
     "lng": 120.6902,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen",
-      "\ud83e\udeb5 Wood-Fired Traditional"
+      "🏛️ Ancestral Kitchen",
+      "🪵 Wood-Fired Traditional"
     ],
     "branches": [
       {
@@ -812,8 +802,8 @@
         "name": "All-You-Can-Eat Lunch Buffet (Adults)",
         "price": 599,
         "ingredients": "Unlimited access to 25+ native Kapampangan dishes, lechon kawali, sisig babi, kilayin, adobo balot, bistig damulag, desserts & drinks",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork, Beef, Poultry, Eggs, Shellfish, and Dairy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Diverse Traditional Heritage Buffet Feast.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Beef, Poultry, Eggs, Shellfish, and Dairy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Diverse Traditional Heritage Buffet Feast.",
         "nutrition": {
           "calories": 1250,
           "protein": 65,
@@ -827,8 +817,8 @@
         "name": "All-You-Can-Eat Dinner Promo (Adults & Kids)",
         "price": 399,
         "ingredients": "Special evening promo buffet with unlimited native dishes, pork sisig, kare-kare, and dessert bar (4PM-8PM)",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork, Peanuts, and Eggs.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Budget Friendly Evening Heritage Buffet.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Peanuts, and Eggs.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Budget Friendly Evening Heritage Buffet.",
         "nutrition": {
           "calories": 1100,
           "protein": 55,
@@ -842,8 +832,8 @@
         "name": "Bistig Damulag (Carabao Beef Steak)",
         "price": 395,
         "ingredients": "Tender native carabao beef marinated in calamansi lime, soy sauce, garlic, and caramelized white onions",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Carabao Beef and Soy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Lean Protein, Iron Rich Heritage Special.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Carabao Beef and Soy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Lean Protein, Iron Rich Heritage Special.",
         "nutrition": {
           "calories": 480,
           "protein": 45,
@@ -857,8 +847,8 @@
         "name": "Adobo Balot",
         "price": 385,
         "ingredients": "Fertilized duck eggs simmered in rich Kapampangan adobo garlic vinegar sauce and toasted garlic chips",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Duck Eggs and Soy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Ultra High Protein & Calcium.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Duck Eggs and Soy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Ultra High Protein & Calcium.",
         "nutrition": {
           "calories": 410,
           "protein": 32,
@@ -872,8 +862,8 @@
         "name": "Kilayin Babi",
         "price": 365,
         "ingredients": "Traditional Kapampangan pork meat and liver stewed in natural vinegar, garlic, black peppercorns, and lard",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork and Liver (Purines).",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Iron, Low Sugar Heritage Stew.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork and Liver (Purines).",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Iron, Low Sugar Heritage Stew.",
         "nutrition": {
           "calories": 520,
           "protein": 38,
@@ -887,8 +877,8 @@
         "name": "Sisig Babi (Kapampangan Pork Sisig)",
         "price": 365,
         "ingredients": "Charcoal-grilled pig ears and belly, onions, calamansi, green chili peppers",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Saturated Fat & Cholesterol.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fat & Cholesterol.",
         "nutrition": {
           "calories": 680,
           "protein": 36,
@@ -902,8 +892,8 @@
         "name": "Kare-Kare Baka",
         "price": 395,
         "ingredients": "Tender beef shank and tripe cooked in rich peanut sauce, banana blossoms, eggplant, string beans, bagoong alamang",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Peanuts, Beef, and Crustaceans (Bagoong).",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: Rich Caloric Content & Nut Fats.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Peanuts, Beef, and Crustaceans (Bagoong).",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Rich Caloric Content & Nut Fats.",
         "nutrition": {
           "calories": 750,
           "protein": 42,
@@ -931,8 +921,8 @@
     "lat": 14.936,
     "lng": 120.601,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen",
-      "\ud83d\udc1f Local Seafood"
+      "🏛️ Ancestral Kitchen",
+      "🐟 Local Seafood"
     ],
     "description": "Rustic heritage restaurant in Lubao serving signature Crispy Pata, Inihaw na Tilapia with Buro, and traditional Pancit Luglug.",
     "address": "Barangay San Agustin, Lubao, Pampanga",
@@ -1023,8 +1013,8 @@
     "lat": 14.978,
     "lng": 120.535,
     "categories": [
-      "\ud83c\udf3f Eco-Dining & Farm",
-      "\ud83c\udf56 Buffet & Grill"
+      "🌿 Eco-Dining & Farm",
+      "🍖 Buffet & Grill"
     ],
     "description": "Scenic farm garden buffet destination offering unlimited Kapampangan fiesta spreads, grilled specialties, and refreshing farm juices.",
     "address": "Barangay Santa Lucia, Floridablanca, Pampanga",
@@ -1100,8 +1090,8 @@
     "lat": 15.034,
     "lng": 120.684,
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional",
-      "\ud83d\udd25 Comfort Lugawan"
+      "🪵 Wood-Fired Traditional",
+      "🔥 Comfort Lugawan"
     ],
     "description": "Popular San Fernando comfort food hub famous for Special Goto Overload, sizzling bulalo steak, beef pares, and affordable fiesta reservation packages.",
     "occupancy": [
@@ -1139,8 +1129,8 @@
         "name": "Special Goto Overload (Goto Anne)",
         "price": 120,
         "ingredients": "Hot rice porridge, ox tripe, chicharon cracklings, hard-boiled egg, toasted garlic, scallions",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Beef Offal, Pork (Chicharon), and Egg.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Comforting Warm Rice Porridge.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef Offal, Pork (Chicharon), and Egg.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Comforting Warm Rice Porridge.",
         "nutrition": {
           "calories": 410,
           "protein": 24,
@@ -1154,8 +1144,8 @@
         "name": "Sizzling Bulalo Steak",
         "price": 280,
         "ingredients": "Beef shank cutlet served on hot sizzling plate with garlic butter gravy and mushroom peppers",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Beef, Soy, and Gluten.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Saturated Fat & Caloric Content.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef, Soy, and Gluten.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fat & Caloric Content.",
         "nutrition": {
           "calories": 720,
           "protein": 48,
@@ -1169,8 +1159,8 @@
         "name": "Beef Pares Special",
         "price": 150,
         "ingredients": "Tender braised beef brisket simmered in sweet anise soy broth, garlic fried rice, clear beef soup",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Beef and Soy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Protein Energy Meal.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef and Soy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Protein Energy Meal.",
         "nutrition": {
           "calories": 580,
           "protein": 36,
@@ -1184,8 +1174,8 @@
         "name": "Reservation Package A (Per Pax)",
         "price": 265,
         "ingredients": "Sizzling chicken, pork sisig, sweet & sour fish fillet, fried veggie lumpia, pancit guisado, rice, iced tea, buko pandan",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork, Fish, Soy, Gluten, and Dairy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Complete Feast Course Package.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Fish, Soy, Gluten, and Dairy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Complete Feast Course Package.",
         "nutrition": {
           "calories": 980,
           "protein": 48,
@@ -1213,8 +1203,8 @@
     "lat": 15.097,
     "lng": 120.769,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen",
-      "\ud83c\udf56 Barbecue & Grill"
+      "🏛️ Ancestral Kitchen",
+      "🍖 Barbecue & Grill"
     ],
     "description": "Santa Ana's favorite dining kitchen famed for Ernesto's Signature Sisig, Sizzling Beef Tapa, and Crispy Pata.",
     "address": "Barangay Santo Rosario, Santa Ana, Pampanga",
@@ -1290,7 +1280,7 @@
     "lat": 15.0315,
     "lng": 120.6865,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
     "branches": [
       {
@@ -1368,8 +1358,8 @@
         "name": "Kapampangan Morcon",
         "price": 450,
         "ingredients": "Ground beef, pork fat, chorizo de bilbao, duck egg yolks, cheese, lard",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Eggs, Dairy, and traces of Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Saturated Fats and Sodium Detected. Consume in moderation.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Eggs, Dairy, and traces of Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fats and Sodium Detected. Consume in moderation.",
         "nutrition": {
           "calories": 720,
           "protein": 42,
@@ -1383,8 +1373,8 @@
         "name": "Adobong Kamaru (Rice Field Crickets)",
         "price": 320,
         "ingredients": "Mole crickets, garlic, vinegar, soy sauce, tomatoes",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Shellfish/Chitin-like insect proteins. Potential allergen for sensitive individuals.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Protein, Low Saturated Fats, Organic Source.",
+        "allergens": "⚠️ ALLERGEN WARNING: Shellfish/Chitin-like insect proteins. Potential allergen for sensitive individuals.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Protein, Low Saturated Fats, Organic Source.",
         "nutrition": {
           "calories": 280,
           "protein": 38,
@@ -1409,9 +1399,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 223 5023",
-    "contactEmail": "info@everybodyscafe.gov.ph",
-    "username": "everybody_s_cafe_owner",
-    "password": "everybody123"
+    "contactEmail": "info@everybodyscafe.gov.ph"
   },
   {
     "id": "res-fat-grille-santa-rita",
@@ -1423,8 +1411,8 @@
     "lat": 15.004,
     "lng": 120.617,
     "categories": [
-      "\ud83c\udf56 Barbecue & Grill",
-      "\ud83d\udd25 Heritage Sisig"
+      "🍖 Barbecue & Grill",
+      "🔥 Heritage Sisig"
     ],
     "description": "Popular Santa Rita grill destination serving Crispy Pata, Crispy Ulo, Sizzling Sisig, and Lechon Kawali Kare-Kare.",
     "address": "Barangay San Nicolas, Santa Rita, Pampanga",
@@ -1515,9 +1503,9 @@
     "lat": 14.9752,
     "lng": 120.5012,
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional"
+      "🪵 Wood-Fired Traditional"
     ],
-    "description": "Celebrating Floridablanca\u2019s agricultural history, this kitchen infuses heritage sugar-curing methods into wood-fired pork and sweet native puddings.",
+    "description": "Celebrating Floridablanca’s agricultural history, this kitchen infuses heritage sugar-curing methods into wood-fired pork and sweet native puddings.",
     "occupancy": [
       10,
       20,
@@ -1541,8 +1529,8 @@
         "name": "Sugar-Glazed Pork Tocino (Pindang)",
         "price": 240,
         "ingredients": "Pork loin slices, raw sugar cane juice, sea salt, garlic",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Sugars and Saturated Fats.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Sugars and Saturated Fats.",
         "nutrition": {
           "calories": 530,
           "protein": 30,
@@ -1567,9 +1555,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 229 5029",
-    "contactEmail": "info@floridablancasugar.gov.ph",
-    "username": "floridablanca_sugar_trail_resto_owner",
-    "password": "password123"
+    "contactEmail": "info@floridablancasugar.gov.ph"
   },
   {
     "id": "candaba-funnside-ningnangan",
@@ -1685,8 +1671,8 @@
       }
     ],
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional",
-      "\ud83d\udc1f Fresh Seafood Grill"
+      "🪵 Wood-Fired Traditional",
+      "🐟 Fresh Seafood Grill"
     ],
     "description": "Open-air native Kapampangan ihaw-ihaw restaurant specializing in fresh grilled seafoods, inihaw na liempo, paco fern salad, cajun seafood buckets, and fried Candaba itik.",
     "occupancy": [
@@ -1713,7 +1699,7 @@
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80"
     ],
-    "address": "Barangay Sto. Ni\u00f1o, Candaba, Pampanga",
+    "address": "Barangay Sto. Niño, Candaba, Pampanga",
     "contactPhone": "+63 919 345 6789",
     "contactEmail": "info@candabafunnsideningnangan.gov.ph",
     "menu": [
@@ -1722,8 +1708,8 @@
         "name": "Inihaw na Liempo (Grilled Pork Belly)",
         "price": 255,
         "ingredients": "Charcoal-grilled thick pork belly marinated in garlic, soy sauce, calamansi, and banana ketchup (85 pesos / 100g)",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork and Soy sauce.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Saturated Fat & Charcoal Grill Proteins.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork and Soy sauce.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fat & Charcoal Grill Proteins.",
         "nutrition": {
           "calories": 650,
           "protein": 32,
@@ -1737,8 +1723,8 @@
         "name": "Paco Enselada (Fresh Fern Salad)",
         "price": 85,
         "ingredients": "Freshly harvested Kapampangan pako wild fern leaves, sliced tomatoes, red onions, salted duck egg, vinegarette dressing",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Duck Eggs.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Cardioprotective, Low Calories, Very High Fiber & Antioxidants.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Duck Eggs.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Cardioprotective, Low Calories, Very High Fiber & Antioxidants.",
         "nutrition": {
           "calories": 140,
           "protein": 7,
@@ -1752,8 +1738,8 @@
         "name": "Fried Candaba Itik (Whole Native Duck)",
         "price": 330,
         "ingredients": "Crispy deep-fried Candaba native duck seasoned with garlic, ginger, and green chilis",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Poultry/Duck Meat.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Iron, High Protein Regional Specialty.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry/Duck Meat.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Iron, High Protein Regional Specialty.",
         "nutrition": {
           "calories": 710,
           "protein": 52,
@@ -1767,8 +1753,8 @@
         "name": "Sizzling Kapampangan Pork Sisig",
         "price": 155,
         "ingredients": "Charcoal-grilled pig cheeks and liver, onions, calamansi, green chilis",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork and Liver.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Saturated Fat and Purines.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork and Liver.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fat and Purines.",
         "nutrition": {
           "calories": 620,
           "protein": 38,
@@ -1782,8 +1768,8 @@
         "name": "Crispy Pork Kare-Kare",
         "price": 329,
         "ingredients": "Crispy lechon kawali pork, rich peanut sauce, eggplant, string beans, pechay, bagoong alamang",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Peanuts, Crustaceans (Bagoong), and Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: Rich Caloric Nut Fats & Fried Pork.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Peanuts, Crustaceans (Bagoong), and Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Rich Caloric Nut Fats & Fried Pork.",
         "nutrition": {
           "calories": 820,
           "protein": 44,
@@ -1797,8 +1783,8 @@
         "name": "Inihaw na Hito (Charcoal Grilled Catfish)",
         "price": 150,
         "ingredients": "Fresh Candaba freshwater catfish grilled over charcoal with soy-garlic glaze (50 pesos / 100g)",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Fish and Soy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Protein, Low Saturated Fat, Healthy Omega Oils.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Fish and Soy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Protein, Low Saturated Fat, Healthy Omega Oils.",
         "nutrition": {
           "calories": 310,
           "protein": 38,
@@ -1812,8 +1798,8 @@
         "name": "Classic Cajun Seafood Bucket (Chili Garlic)",
         "price": 2399,
         "ingredients": "Fresh Candaba crabs, prawns, mussels, sweet corn, sausage, cajun garlic butter chili sauce",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Shellfish/Crustaceans (Crab, Prawns, Mussels) and Dairy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Protein, Seafood Feast.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish/Crustaceans (Crab, Prawns, Mussels) and Dairy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Protein, Seafood Feast.",
         "nutrition": {
           "calories": 1850,
           "protein": 140,
@@ -1841,9 +1827,9 @@
     "lat": 14.9982,
     "lng": 120.6275,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
-    "description": "Guagua\u2019s legendary ancestral recipe vault. Serving thick peanut sauce noodles and traditional shaved ice puddings since 1968.",
+    "description": "Guagua’s legendary ancestral recipe vault. Serving thick peanut sauce noodles and traditional shaved ice puddings since 1968.",
     "occupancy": [
       20,
       30,
@@ -1867,8 +1853,8 @@
         "name": "Pancit Luglug Guagua",
         "price": 160,
         "ingredients": "Thick rice noodles, shrimp heads sauce, egg slices, crushed pork rinds, calamansi",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Seafood (Shrimp) and Pork (Chicharon).",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: Moderate Sodium. High Carbohydrates.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Seafood (Shrimp) and Pork (Chicharon).",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Moderate Sodium. High Carbohydrates.",
         "nutrition": {
           "calories": 480,
           "protein": 22,
@@ -1885,7 +1871,7 @@
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80"
     ],
     "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-    "address": "Barangay Sto. Ni\u00f1o, Guagua, Pampanga",
+    "address": "Barangay Sto. Niño, Guagua, Pampanga",
     "isClaimed": false,
     "reservationsEnabled": true,
     "preOrdersEnabled": true,
@@ -1893,9 +1879,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 230 5030",
-    "contactEmail": "info@guaguamatua.gov.ph",
-    "username": "guagua_kusina_matua_owner",
-    "password": "password123"
+    "contactEmail": "info@guaguamatua.gov.ph"
   },
   {
     "id": "san-fernando-holidayland",
@@ -1907,8 +1891,8 @@
     "lat": 15.036,
     "lng": 120.688,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen",
-      "\ud83c\udf3f Farm-to-Table"
+      "🏛️ Ancestral Kitchen",
+      "🌿 Farm-to-Table"
     ],
     "description": "Historic San Fernando grand buffet venue offering unlimited Kapampangan feast spread including pork sisig, lechon kawali, bringhe, bbq ribs, and halo-halo bar.",
     "occupancy": [
@@ -1935,7 +1919,7 @@
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"
     ],
-    "address": "Barangay Sto. Ni\u00f1o, City of San Fernando, Pampanga",
+    "address": "Barangay Sto. Niño, City of San Fernando, Pampanga",
     "contactPhone": "+63 45 961 2345",
     "contactEmail": "info@sanfernandoholidayland.gov.ph",
     "username": "holidayland",
@@ -1946,8 +1930,8 @@
         "name": "Weekday Walk-in Unli Buffet (Mon-Thu)",
         "price": 328,
         "ingredients": "Unlimited Kapampangan feast spread: pork sisig, lechon kawali, bringhe, chopsuey, BBQ ribs, soup & halo-halo bar",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork, Eggs, Soy, Peanuts, and Dairy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Complete Value Heritage Unli Buffet.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Eggs, Soy, Peanuts, and Dairy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Complete Value Heritage Unli Buffet.",
         "nutrition": {
           "calories": 1150,
           "protein": 58,
@@ -1961,8 +1945,8 @@
         "name": "Weekend & Holiday Unli Buffet (Fri-Sun)",
         "price": 348,
         "ingredients": "Grand weekend unlimited buffet spread featuring roasted meats, seafood specials, bringhe, and dessert station",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork, Seafood, Eggs, Soy, and Dairy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Weekend Celebration Feast Spread.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Seafood, Eggs, Soy, and Dairy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Weekend Celebration Feast Spread.",
         "nutrition": {
           "calories": 1200,
           "protein": 62,
@@ -1990,7 +1974,7 @@
     "lat": 15.037,
     "lng": 120.6835,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
     "description": "Authentic home-style Kapampangan heirloom cooking famous for Begukan Lechon Kawali, Sisig Carbonara, Lagat Pusu banana blossom, Aligue Pasta, and food trays.",
     "occupancy": [
@@ -2027,9 +2011,9 @@
         "id": "in-begukan-liempo",
         "name": "Begukan Lechon Kawali",
         "price": 295,
-        "ingredients": "Crispy fried pork belly saut\u00e9ed in rich fermented shrimp bagoong, eggplant slices, and green chilis",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Crustaceans (Bagoong) and Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Saturated Fat & Sodium Bagoong.",
+        "ingredients": "Crispy fried pork belly sautéed in rich fermented shrimp bagoong, eggplant slices, and green chilis",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Crustaceans (Bagoong) and Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fat & Sodium Bagoong.",
         "nutrition": {
           "calories": 710,
           "protein": 38,
@@ -2043,8 +2027,8 @@
         "name": "Sisig Carbonara",
         "price": 220,
         "ingredients": "Creamy fettuccine pasta topped with crispy sizzled Kapampangan pork sisig and toasted parmesan",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork, Dairy, and Gluten.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Calorie Fusion Pasta.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Dairy, and Gluten.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Calorie Fusion Pasta.",
         "nutrition": {
           "calories": 690,
           "protein": 28,
@@ -2058,8 +2042,8 @@
         "name": "Lagat Pusu (Banana Blossom Stew)",
         "price": 210,
         "ingredients": "Fresh shredded banana blossoms stewed in natural cane vinegar, garlic, onions, and ground pork",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Dietary Fiber & Natural Vinegar Digestion.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Dietary Fiber & Natural Vinegar Digestion.",
         "nutrition": {
           "calories": 280,
           "protein": 14,
@@ -2072,9 +2056,9 @@
         "id": "in-aligue-pasta",
         "name": "Aligue Pasta with Prawns",
         "price": 240,
-        "ingredients": "Spaghetti noodles saut\u00e9ed in fresh crab fat aligue, garlic, butter, and fresh prawns",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Shellfish/Crustaceans (Crab Fat, Prawns), Dairy, and Gluten.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Cholesterol Seafood Pasta.",
+        "ingredients": "Spaghetti noodles sautéed in fresh crab fat aligue, garlic, butter, and fresh prawns",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish/Crustaceans (Crab Fat, Prawns), Dairy, and Gluten.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Cholesterol Seafood Pasta.",
         "nutrition": {
           "calories": 640,
           "protein": 26,
@@ -2102,8 +2086,8 @@
     "lat": 15.148,
     "lng": 120.769,
     "categories": [
-      "\ud83c\udf67 Halo-Halo & Desserts",
-      "\ud83c\udfdb\ufe0f Heritage Institution"
+      "🍧 Halo-Halo & Desserts",
+      "🏛️ Heritage Institution"
     ],
     "description": "Iconic Kapampangan dessert institution famed for creamy halo-halo with carabao milk, pastillas, halo-halo beans, and native halo-halo sweet ingredients.",
     "address": "Barangay Santo Rosario, Arayat, Pampanga",
@@ -2210,7 +2194,7 @@
     "lat": 15.1504,
     "lng": 120.7698,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
     "description": "A rustic garden setting at the foot of Mt. Arayat serving mountain-plucked herbs, wild boar stews, and freshwater catfish.",
     "occupancy": [
@@ -2236,8 +2220,8 @@
         "name": "Ginataang Tilapia sa Laya",
         "price": 290,
         "ingredients": "Freshwater tilapia, coconut cream, ginger root, wild spinach",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Fish and Coconut Milk.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Healthy Fats (Medium-Chain Triglycerides), High Protein.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Fish and Coconut Milk.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Healthy Fats (Medium-Chain Triglycerides), High Protein.",
         "nutrition": {
           "calories": 420,
           "protein": 32,
@@ -2251,8 +2235,8 @@
         "name": "Adobong Babi Matua (Old Style Pork Adobo)",
         "price": 340,
         "ingredients": "Pork belly chunks, garlic, vinegar, rock salt (no soy sauce)",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Saturated Fats.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fats.",
         "nutrition": {
           "calories": 600,
           "protein": 28,
@@ -2277,9 +2261,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 226 5026",
-    "contactEmail": "info@arayatkitchen.gov.ph",
-    "username": "kusina_nang_mt_arayat_owner",
-    "password": "password123"
+    "contactEmail": "info@arayatkitchen.gov.ph"
   },
   {
     "id": "bacolor-tamales",
@@ -2291,7 +2273,7 @@
     "lat": 15.0003,
     "lng": 120.6508,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
     "description": "Located near the historic sunken church of Bacolor. Known for preserving the authentic pre-hispanic Pampanga Tamales recipe.",
     "occupancy": [
@@ -2317,8 +2299,8 @@
         "name": "Bacolor Tamales (Bobotu)",
         "price": 150,
         "ingredients": "Ground rice flour, coconut milk, peanut paste, chicken strips, salted duck egg",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Peanuts, Eggs, and Coconut.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Moderate Fats, Gluten-Free alternative meal.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Peanuts, Eggs, and Coconut.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Moderate Fats, Gluten-Free alternative meal.",
         "nutrition": {
           "calories": 380,
           "protein": 14,
@@ -2332,8 +2314,8 @@
         "name": "Panecillos de San Nicolas",
         "price": 200,
         "ingredients": "Arrowroot starch, egg yolks, coconut milk, sugar, butter",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Eggs, Dairy, and Coconut.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: Simple Sugars. Calorie-dense dessert.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Eggs, Dairy, and Coconut.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Simple Sugars. Calorie-dense dessert.",
         "nutrition": {
           "calories": 280,
           "protein": 4,
@@ -2358,9 +2340,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 227 5027",
-    "contactEmail": "info@bacolortamales.gov.ph",
-    "username": "kusina_san_guillermo_owner",
-    "password": "password123"
+    "contactEmail": "info@bacolortamales.gov.ph"
   },
   {
     "id": "san-fernando-lola-ima",
@@ -2372,7 +2352,7 @@
     "lat": 15.038,
     "lng": 120.6855,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
     "description": "Traditional Kapampangan buffet serving heritage stews, batchoy, ginataang kuhol snails, adobong balot, biringhe sticky rice, and house desserts.",
     "occupancy": [
@@ -2410,8 +2390,8 @@
         "name": "Lola Ima Lunch Buffet Special",
         "price": 315,
         "ingredients": "Unlimited batchoy, corn soup, fish fillet, ginataang kuhol snails, pork kare-kare, pititchan chicharon, kaldereta ribs, rice, desserts & drinks",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork, Snails/Shellfish, Peanuts, and Soy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Authentic Ancestral Kapampangan Buffet.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Snails/Shellfish, Peanuts, and Soy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Authentic Ancestral Kapampangan Buffet.",
         "nutrition": {
           "calories": 1080,
           "protein": 52,
@@ -2425,8 +2405,8 @@
         "name": "Lola Ima Dinner Buffet Special",
         "price": 349,
         "ingredients": "Unlimited pork sisig, biringhe sticky rice, adobong balot, pork lengua, horno baked roast, sampelut, lelut mais, drinks",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork, Duck Eggs, Soy, and Glutinous Rice.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Premium Heritage Dinner Buffet Selection.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Duck Eggs, Soy, and Glutinous Rice.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Premium Heritage Dinner Buffet Selection.",
         "nutrition": {
           "calories": 1180,
           "protein": 58,
@@ -2454,7 +2434,7 @@
     "lat": 15.2212,
     "lng": 120.5794,
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional"
+      "🪵 Wood-Fired Traditional"
     ],
     "description": "Specializes in coal-fired bibingka cake lined with charred banana leaves, offering a smoky, buttery bite.",
     "occupancy": [
@@ -2480,8 +2460,8 @@
         "name": "Mabalacat Claypot Bibingka",
         "price": 180,
         "ingredients": "Rice galapong, carabao cheese, salted egg, butter, grated coconut",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Dairy, Eggs, and Coconut.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Carbohydrates and Sugars.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Dairy, Eggs, and Coconut.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Carbohydrates and Sugars.",
         "nutrition": {
           "calories": 420,
           "protein": 10,
@@ -2506,9 +2486,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 232 5032",
-    "contactEmail": "info@mabalacatbibingka.gov.ph",
-    "username": "mabalacat_native_treats_claypot_owner",
-    "password": "password123"
+    "contactEmail": "info@mabalacatbibingka.gov.ph"
   },
   {
     "id": "macabebe-seafood",
@@ -2520,7 +2498,7 @@
     "lat": 14.9082,
     "lng": 120.7121,
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional"
+      "🪵 Wood-Fired Traditional"
     ],
     "description": "Macabebe sits at the delta of the Pampanga River. This grill cooks fresh catches caught hourly by local fishermen.",
     "occupancy": [
@@ -2546,8 +2524,8 @@
         "name": "Macabebe Blue Crab Cakes",
         "price": 320,
         "ingredients": "Fresh blue crab meat, garlic, native green onion, egg binder, flour breading",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Crustaceans, Gluten, and Eggs.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Rich in Zinc, High Lean Protein.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Crustaceans, Gluten, and Eggs.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Rich in Zinc, High Lean Protein.",
         "nutrition": {
           "calories": 310,
           "protein": 28,
@@ -2572,9 +2550,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 233 5033",
-    "contactEmail": "info@macabebeseafood.gov.ph",
-    "username": "macabebe_delta_seafood_grill_owner",
-    "password": "password123"
+    "contactEmail": "info@macabebeseafood.gov.ph"
   },
   {
     "id": "masantol-crabs",
@@ -2586,7 +2562,7 @@
     "lat": 14.8987,
     "lng": 120.7042,
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional"
+      "🪵 Wood-Fired Traditional"
     ],
     "description": "Located in the coastal mangrove swamps of Masantol. Famous for giant mud crabs stewed in traditional coconut vinegar.",
     "occupancy": [
@@ -2612,8 +2588,8 @@
         "name": "Masantol Buttered Mud Crabs",
         "price": 650,
         "ingredients": "Mangrove mud crabs, garlic butter, local chili, coconut vinegar reduction",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Crustaceans (Crabs) and Dairy.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Sodium. Rich in healthy marine lipids.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Crustaceans (Crabs) and Dairy.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Sodium. Rich in healthy marine lipids.",
         "nutrition": {
           "calories": 520,
           "protein": 42,
@@ -2638,9 +2614,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 235 5035",
-    "contactEmail": "info@masantolcrabs.gov.ph",
-    "username": "masantol_mangrove_crab_house_owner",
-    "password": "password123"
+    "contactEmail": "info@masantolcrabs.gov.ph"
   },
   {
     "id": "minalin-eggs",
@@ -2652,7 +2626,7 @@
     "lat": 14.9812,
     "lng": 120.6903,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
     "description": "Located in the egg capital of Central Luzon. Serves organic breakfasts highlighting local duck eggs and chicken layers.",
     "occupancy": [
@@ -2678,8 +2652,8 @@
         "name": "Triple Salted Egg Omelette",
         "price": 190,
         "ingredients": "Salted duck eggs, fresh chicken eggs, tomatoes, red onions, garlic",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Eggs.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Sodium from salted curing process.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Eggs.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Sodium from salted curing process.",
         "nutrition": {
           "calories": 340,
           "protein": 18,
@@ -2704,9 +2678,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 237 5037",
-    "contactEmail": "info@minalineggs.gov.ph",
-    "username": "minalin_egg_farm_cafe_owner",
-    "password": "password123"
+    "contactEmail": "info@minalineggs.gov.ph"
   },
   {
     "id": "santa-rita-turrones",
@@ -2718,9 +2690,9 @@
     "lat": 15.0012,
     "lng": 120.6125,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
-    "description": "The historic home of Santa Rita\u2019s cashew turrones. The recipe utilizes wafer paper (oblato) wrapping unchanged since 1920.",
+    "description": "The historic home of Santa Rita’s cashew turrones. The recipe utilizes wafer paper (oblato) wrapping unchanged since 1920.",
     "occupancy": [
       15,
       25,
@@ -2744,8 +2716,8 @@
         "name": "Santa Rita Turrones de Casuy",
         "price": 120,
         "ingredients": "Cashew nuts, honey, egg whites, wafer paper wrapping",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Tree Nuts (Cashews) and Egg Whites.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Low Sodium. Natural fructose and healthy nut oils.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Tree Nuts (Cashews) and Egg Whites.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Low Sodium. Natural fructose and healthy nut oils.",
         "nutrition": {
           "calories": 220,
           "protein": 6,
@@ -2770,9 +2742,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 242 5042",
-    "contactEmail": "info@santaritaturrones.gov.ph",
-    "username": "ocampo_lansang_turrones_cafe_owner",
-    "password": "password123"
+    "contactEmail": "info@santaritaturrones.gov.ph"
   },
   {
     "id": "san-fernando-pipanganan",
@@ -2784,8 +2754,8 @@
     "lat": 15.031,
     "lng": 120.682,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen",
-      "\ud83c\udf3f Farm-to-Table"
+      "🏛️ Ancestral Kitchen",
+      "🌿 Farm-to-Table"
     ],
     "description": "Renowned San Fernando catering and dining kitchen specializing in roast beef, pastel de lengua, prawn thermidor, grilled salmon steak, and gourmet party trays.",
     "occupancy": [
@@ -2823,8 +2793,8 @@
         "name": "Slow Roasted Beef Tray (10 pax)",
         "price": 1200,
         "ingredients": "Tender slow-roasted beef brisket, rich brown mushroom gravy, caramelized onions",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Beef and Gluten.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Premium High Protein Catering Special.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef and Gluten.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Premium High Protein Catering Special.",
         "nutrition": {
           "calories": 620,
           "protein": 48,
@@ -2838,8 +2808,8 @@
         "name": "Prawn Thermidor Tray (10 pax)",
         "price": 1300,
         "ingredients": "Fresh prawns baked in rich cream sauce, white wine, garlic, and melted cheese",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Crustaceans (Prawns) and Dairy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Gourmet Seafood Specialty.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Crustaceans (Prawns) and Dairy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Gourmet Seafood Specialty.",
         "nutrition": {
           "calories": 540,
           "protein": 42,
@@ -2853,8 +2823,8 @@
         "name": "Grilled Salmon Steak Tray (10 pax)",
         "price": 1500,
         "ingredients": "Fresh salmon fillets grilled with lemon butter garlic glaze and herbs",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Fish and Dairy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Cardioprotective Omega-3 Fatty Acids.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Fish and Dairy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Cardioprotective Omega-3 Fatty Acids.",
         "nutrition": {
           "calories": 480,
           "protein": 44,
@@ -2882,7 +2852,7 @@
     "lat": 15.0487,
     "lng": 120.5281,
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional"
+      "🪵 Wood-Fired Traditional"
     ],
     "description": "Features ancestral culinary methods of the Aeta highlands. Cooked over open mountain pits using bamboo poles and wild honey.",
     "occupancy": [
@@ -2908,8 +2878,8 @@
         "name": "Wild Honey Glazed Pork Ribs",
         "price": 380,
         "ingredients": "Pork ribs, mountain wild honey, ginger, calamansi glaze",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Sugars and Fat. Low Sodium.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Sugars and Fat. Low Sodium.",
         "nutrition": {
           "calories": 610,
           "protein": 32,
@@ -2926,7 +2896,7 @@
       "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80"
     ],
     "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-    "address": "Barangay Sto. Ni\u00f1o, Porac, Pampanga",
+    "address": "Barangay Sto. Niño, Porac, Pampanga",
     "isClaimed": false,
     "reservationsEnabled": true,
     "preOrdersEnabled": true,
@@ -2934,9 +2904,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 238 5038",
-    "contactEmail": "info@poracmountain.gov.ph",
-    "username": "porac_mountain_grill_indigenous_kitchen_owner",
-    "password": "password123"
+    "contactEmail": "info@poracmountain.gov.ph"
   },
   {
     "id": "san-luis-river",
@@ -2948,7 +2916,7 @@
     "lat": 15.0452,
     "lng": 120.7901,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
     "description": "San Luis is situated along the Pampanga River. This eatery is famous for sour guava broths and claypot river ducks.",
     "occupancy": [
@@ -2974,8 +2942,8 @@
         "name": "Paksiw na Bangus sa Bayabas",
         "price": 210,
         "ingredients": "Fresh milkfish, native guavas, vinegar, ginger, finger chilies",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Fish.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High in Vitamin C, healthy omega-3 fatty acids.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Fish.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High in Vitamin C, healthy omega-3 fatty acids.",
         "nutrition": {
           "calories": 290,
           "protein": 24,
@@ -3000,9 +2968,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 239 5039",
-    "contactEmail": "info@sanluisriver.gov.ph",
-    "username": "san_luis_river_delta_eatery_owner",
-    "password": "password123"
+    "contactEmail": "info@sanluisriver.gov.ph"
   },
   {
     "id": "san-simon-bulalo",
@@ -3014,7 +2980,7 @@
     "lat": 14.9991,
     "lng": 120.7854,
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional"
+      "🪵 Wood-Fired Traditional"
     ],
     "description": "A 24/7 rest-stop diner near the San Simon NLEX exit. Known for hot wood-fire boiled beef shanks served in iron cauldrons.",
     "occupancy": [
@@ -3040,8 +3006,8 @@
         "name": "San Simon Sizzling Bulalo",
         "price": 490,
         "ingredients": "Beef shank, bone marrow, garlic mushroom gravy, green beans",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Beef. Gravy contains Gluten.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Saturated Fat, High Cholesterol.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef. Gravy contains Gluten.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fat, High Cholesterol.",
         "nutrition": {
           "calories": 880,
           "protein": 55,
@@ -3066,9 +3032,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 240 5040",
-    "contactEmail": "info@sansimonbulalo.gov.ph",
-    "username": "san_simon_expressway_diner_owner",
-    "password": "password123"
+    "contactEmail": "info@sansimonbulalo.gov.ph"
   },
   {
     "id": "santa-ana-claypot",
@@ -3080,7 +3044,7 @@
     "lat": 15.0995,
     "lng": 120.7698,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
     "description": "Traditional slow-cooking in clay pot palayoks. Famous for serving turmeric-stained chicken rice on banana leaves.",
     "occupancy": [
@@ -3106,8 +3070,8 @@
         "name": "Santa Ana Claypot Bringhe",
         "price": 280,
         "ingredients": "Glutinous rice, coconut milk, organic chicken, turmeric ginger, raisins",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Coconut. Traces of chicken.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Carbohydrates. Energy dense.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Coconut. Traces of chicken.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Carbohydrates. Energy dense.",
         "nutrition": {
           "calories": 510,
           "protein": 18,
@@ -3132,9 +3096,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 241 5041",
-    "contactEmail": "info@santaanaclaypot.gov.ph",
-    "username": "santa_ana_claypot_grill_owner",
-    "password": "password123"
+    "contactEmail": "info@santaanaclaypot.gov.ph"
   },
   {
     "id": "santo-tomas-lechon",
@@ -3146,7 +3108,7 @@
     "lat": 15.0118,
     "lng": 120.7182,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
     "description": "Santo Tomas is known for pottery and lechon. This kitchen combines both by cooking slow pork stews in native clay pots.",
     "occupancy": [
@@ -3172,8 +3134,8 @@
         "name": "Santo Tomas Lechon Head Sisig",
         "price": 310,
         "ingredients": "Chopped lechon head, onions, calamansi, liver sauce seasoning",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork. Trace of poultry (liver).",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Cholesterol, High Saturated Fats.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork. Trace of poultry (liver).",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Cholesterol, High Saturated Fats.",
         "nutrition": {
           "calories": 790,
           "protein": 40,
@@ -3198,9 +3160,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 243 5043",
-    "contactEmail": "info@santotomaslechon.gov.ph",
-    "username": "santo_tomas_palayok_kitchen_owner",
-    "password": "password123"
+    "contactEmail": "info@santotomaslechon.gov.ph"
   },
   {
     "id": "sasmuan-polvoron",
@@ -3212,7 +3172,7 @@
     "lat": 14.9381,
     "lng": 120.6202,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
     "description": "Located in coastal Sasmuan. Best known for combining fresh garlic butter prawns with classic Sasmuan toasted rice polvoron cakes.",
     "occupancy": [
@@ -3238,8 +3198,8 @@
         "name": "Sasmuan Garlic Butter Shrimp",
         "price": 340,
         "ingredients": "Coastal brackish shrimp, butter, roasted garlic, native lime",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Crustaceans (Shrimp) and Dairy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Protein, Low Carb, healthy minerals.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Crustaceans (Shrimp) and Dairy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Protein, Low Carb, healthy minerals.",
         "nutrition": {
           "calories": 320,
           "protein": 29,
@@ -3264,9 +3224,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 244 5044",
-    "contactEmail": "info@sasmuanpolvoron.gov.ph",
-    "username": "sasmuan_coastal_seafood_cafe_owner",
-    "password": "password123"
+    "contactEmail": "info@sasmuanpolvoron.gov.ph"
   },
   {
     "id": "san-fernando-souq",
@@ -3290,8 +3248,8 @@
     "lat": 15.0355,
     "lng": 120.6895,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen",
-      "\ud83c\udf3f Farm-to-Table"
+      "🏛️ Ancestral Kitchen",
+      "🌿 Farm-to-Table"
     ],
     "description": "Rustic-chic fusion dining destination in San Fernando famous for Pasta sa Taba ng Alimango, Crispy Liempo Kare-Kare, Pizza Negra, and artisanal Buko Pie.",
     "occupancy": [
@@ -3327,8 +3285,8 @@
         "name": "Pasta sa Taba ng Alimango",
         "price": 290,
         "ingredients": "Al dente fettuccine tossed in rich Kapampangan crab fat (taba ng alimango), garlic, calamansi juice, and crispy chicharon",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Crustaceans (Crab Fat), Gluten, and Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Cholesterol Crab Fat. Rich Flavor Profile.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Crustaceans (Crab Fat), Gluten, and Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Cholesterol Crab Fat. Rich Flavor Profile.",
         "nutrition": {
           "calories": 680,
           "protein": 22,
@@ -3342,8 +3300,8 @@
         "name": "Crispy Liempo Kare-Kare",
         "price": 490,
         "ingredients": "Crispy deep-fried pork belly served over creamy roasted peanut sauce, eggplant, string beans, and homemade bagoong",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Peanuts, Pork, and Crustaceans (Bagoong).",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Caloric Nut Fats & Pork Belly.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Peanuts, Pork, and Crustaceans (Bagoong).",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Caloric Nut Fats & Pork Belly.",
         "nutrition": {
           "calories": 880,
           "protein": 46,
@@ -3356,9 +3314,9 @@
         "id": "souq-pizza-negra",
         "name": "Pizza Negra",
         "price": 490,
-        "ingredients": "Artisanal squid-ink black pizza crust, mozzarella cheese, saut\u00e9ed squid, garlic, and olive oil glaze",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Mollusks (Squid Ink), Gluten, and Dairy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Unique Gourmet Seafood Pizza.",
+        "ingredients": "Artisanal squid-ink black pizza crust, mozzarella cheese, sautéed squid, garlic, and olive oil glaze",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Mollusks (Squid Ink), Gluten, and Dairy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Unique Gourmet Seafood Pizza.",
         "nutrition": {
           "calories": 720,
           "protein": 34,
@@ -3372,8 +3330,8 @@
         "name": "Fresh Artisanal Buko Pie (Medium)",
         "price": 190,
         "ingredients": "Flaky baked pastry crust filled with soft young coconut meat and cream custard",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Coconut, Gluten, Dairy, and Eggs.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Traditional Fresh Coconut Dessert.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Coconut, Gluten, Dairy, and Eggs.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Traditional Fresh Coconut Dessert.",
         "nutrition": {
           "calories": 340,
           "protein": 5,
@@ -3401,7 +3359,7 @@
     "lat": 15.0612,
     "lng": 120.7231,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
     "description": "An eclectic dining spot in Mexico town combining industrial interior design with elevated Kapampangan roots.",
     "occupancy": [
@@ -3427,8 +3385,8 @@
         "name": "Pork Belly Chicharon with Pinakurat",
         "price": 290,
         "ingredients": "Double fried pork belly rind, garlic, spiced cane vinegar",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: Critical Saturated Fats & Triglycerides trigger.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Critical Saturated Fats & Triglycerides trigger.",
         "nutrition": {
           "calories": 650,
           "protein": 30,
@@ -3442,8 +3400,8 @@
         "name": "Pako Salad (Local Fern Salad)",
         "price": 240,
         "ingredients": "Fresh river fern, salted eggs, tomatoes, onions, sweet vinaigrette",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Eggs (Salted Duck Egg).",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Rich in Dietary Fiber, Low Fat.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Eggs (Salted Duck Egg).",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Rich in Dietary Fiber, Low Fat.",
         "nutrition": {
           "calories": 140,
           "protein": 6,
@@ -3468,21 +3426,19 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 236 5036",
-    "contactEmail": "info@souqpampangamexico.gov.ph",
-    "username": "souq_pampanga_owner",
-    "password": "password123"
+    "contactEmail": "info@souqpampangamexico.gov.ph"
   },
   {
     "id": "san-fernando-susies-cuisine",
     "name": "Susie's Cuisine",
-    "municipality": "Angeles City",
+    "municipality": "City of San Fernando",
     "corridor": "MacArthur Highway Line",
     "operatingHours": "07:00 AM - 08:00 PM",
     "priceTier": "$",
     "lat": 15.0325,
     "lng": 120.685,
     "categories": [
-      "\ud83c\udfdb\ufe0f Ancestral Kitchen"
+      "🏛️ Ancestral Kitchen"
     ],
     "branches": [
       {
@@ -3530,8 +3486,8 @@
         "name": "Signature Pancit Palabok (Solo)",
         "price": 120,
         "ingredients": "Rice noodles topped with thick yellow garlic shrimp sauce, crushed chicharon, hard-boiled egg, tinapa flakes, calamansi",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Shellfish/Shrimp, Eggs, Pork (Chicharon), and Fish.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Iconic Kapampangan Heritage Noodle.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish/Shrimp, Eggs, Pork (Chicharon), and Fish.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Iconic Kapampangan Heritage Noodle.",
         "nutrition": {
           "calories": 450,
           "protein": 18,
@@ -3545,8 +3501,8 @@
         "name": "Tibok-Tibok (Carabao Milk Pudding)",
         "price": 30,
         "ingredients": "Pure fresh carabao milk, cornstarch, sugar, topped with aromatic toasted latik coconut curds",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pure Carabao Milk (Lactose) and Coconut.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Calcium, Authentic Carabao Milk Sweet.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pure Carabao Milk (Lactose) and Coconut.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Calcium, Authentic Carabao Milk Sweet.",
         "nutrition": {
           "calories": 180,
           "protein": 6,
@@ -3560,8 +3516,8 @@
         "name": "Moche in Coconut Milk (5 pcs)",
         "price": 50,
         "ingredients": "Glutinous rice dumplings filled with sweet mung bean paste, served warm in thick coconut milk sauce",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Coconut and Legumes (Mung Bean).",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Traditional Ancestral Kakanin Dessert.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Coconut and Legumes (Mung Bean).",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Traditional Ancestral Kakanin Dessert.",
         "nutrition": {
           "calories": 240,
           "protein": 5,
@@ -3575,8 +3531,8 @@
         "name": "Special Kapampangan Halo-Halo",
         "price": 110,
         "ingredients": "Fine shaved ice, carabao milk, leche flan, sweet beans, macapuno, ube, sago, pinipig",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Dairy (Milk, Flan) and Coconut.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Famous Refreshing Dessert.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Dairy (Milk, Flan) and Coconut.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Famous Refreshing Dessert.",
         "nutrition": {
           "calories": 360,
           "protein": 8,
@@ -3604,7 +3560,7 @@
     "lat": 15.0901,
     "lng": 120.8245,
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional"
+      "🪵 Wood-Fired Traditional"
     ],
     "description": "An open-air dining lodge overlooking the Candaba wetlands. Specializes in smoked wild duck and wetland fish.",
     "occupancy": [
@@ -3630,8 +3586,8 @@
         "name": "Pinatisang Itik (Stewed Duck)",
         "price": 420,
         "ingredients": "Candaba wild duck, native fish sauce (patis), ginger, green chilis",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Poultry and Fish Sauce (Seafood trace).",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Sodium. Rich lean protein source.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry and Fish Sauce (Seafood trace).",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Sodium. Rich lean protein source.",
         "nutrition": {
           "calories": 580,
           "protein": 45,
@@ -3656,9 +3612,7 @@
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
     "contactNumber": "+63 917 228 5028",
-    "contactEmail": "info@candabaswamp.gov.ph",
-    "username": "swamp_wild_duck_grill_owner",
-    "password": "password123"
+    "contactEmail": "info@candabaswamp.gov.ph"
   },
   {
     "id": "candaba-ver-rea-steak",
@@ -3670,8 +3624,8 @@
     "lat": 15.0945,
     "lng": 120.828,
     "categories": [
-      "\ud83e\udeb5 Wood-Fired Traditional",
-      "\ud83d\udd25 Sizzling Steakhouse"
+      "🪵 Wood-Fired Traditional",
+      "🔥 Sizzling Steakhouse"
     ],
     "description": "Popular Candaba sizzling steakhouse famous for Unlimited Rice & Unlimited Gravy, sizzling T-bone steak, porterhouse, kalderetang itik native duck stew, and fresh buko halo-halo.",
     "occupancy": [
@@ -3707,8 +3661,8 @@
         "name": "S1: Sizzling T-Bone Steak (Unli Rice & Gravy)",
         "price": 179,
         "ingredients": "Sizzling grilled T-bone beef steak, savory house mushroom gravy, garlic corn butter, unlimited steamed rice",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Beef. Gravy contains Gluten and Dairy.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Protein, High Sodium & Saturated Fat.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef. Gravy contains Gluten and Dairy.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Protein, High Sodium & Saturated Fat.",
         "nutrition": {
           "calories": 720,
           "protein": 48,
@@ -3722,8 +3676,8 @@
         "name": "S2: Sizzling Pork Steak (Unli Rice & Gravy)",
         "price": 139,
         "ingredients": "Grilled pork steak chop, savory brown gravy, garlic rice",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork, Gluten, and Soy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Budget High Protein Sizzling Meal.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Gluten, and Soy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Budget High Protein Sizzling Meal.",
         "nutrition": {
           "calories": 640,
           "protein": 42,
@@ -3737,8 +3691,8 @@
         "name": "S3: Porter Steak (Porterhouse Steak Unli Rice)",
         "price": 199,
         "ingredients": "Premium thick porterhouse beef steak, brown garlic butter gravy, unlimited rice",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Beef, Dairy, and Gluten.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Caloric Protein Feast.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef, Dairy, and Gluten.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Caloric Protein Feast.",
         "nutrition": {
           "calories": 810,
           "protein": 55,
@@ -3752,8 +3706,8 @@
         "name": "S4: Ribeye Steak (Unli Rice & Gravy)",
         "price": 249,
         "ingredients": "Thick-cut sizzling ribeye beef steak, house gravy, unlimited steamed rice",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Beef, Dairy, and Gluten.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Saturated Fat & Protein.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef, Dairy, and Gluten.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fat & Protein.",
         "nutrition": {
           "calories": 890,
           "protein": 58,
@@ -3767,8 +3721,8 @@
         "name": "V2: Kalderetang Itik (Candaba Native Duck Stew)",
         "price": 149,
         "ingredients": "Authentic Candaba native duck (itik), liver spread, tomato sauce, bell peppers, green peas, chili peppers",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Duck meat, Liver spread, and Solanaceae (peppers).",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Iron, Rich Regional Heritage Stew.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Duck meat, Liver spread, and Solanaceae (peppers).",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Iron, Rich Regional Heritage Stew.",
         "nutrition": {
           "calories": 520,
           "protein": 38,
@@ -3782,8 +3736,8 @@
         "name": "V3: Sizzling Pork Sisig",
         "price": 139,
         "ingredients": "Chopped grilled pork ears and belly, onions, calamansi, green chili",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Pork and Soy.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Cholesterol and Saturated Fat.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork and Soy.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Cholesterol and Saturated Fat.",
         "nutrition": {
           "calories": 680,
           "protein": 36,
@@ -3797,8 +3751,8 @@
         "name": "V4: Pakalangkang (Braised Candaba Duck)",
         "price": 249,
         "ingredients": "Native Candaba duck stewed in aromatic ginger, garlic, soy sauce, and local spices",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Duck Meat and Soy.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: High Protein, Rich Kapampangan Flavor Profile.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Duck Meat and Soy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Protein, Rich Kapampangan Flavor Profile.",
         "nutrition": {
           "calories": 610,
           "protein": 44,
@@ -3812,8 +3766,8 @@
         "name": "V6: Sizzling Beef Bulalo",
         "price": 249,
         "ingredients": "Beef marrow shank, sweet corn on the cob, cabbage, peppercorns, garlic gravy",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Beef Marrow and Gluten.",
-        "healthIndicators": "\u26a0\ufe0f LIFESTYLE COMPLIANCE: High Cholesterol Marrow & Purines.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef Marrow and Gluten.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Cholesterol Marrow & Purines.",
         "nutrition": {
           "calories": 860,
           "protein": 50,
@@ -3827,8 +3781,8 @@
         "name": "Buko Halo-Halo Special",
         "price": 109,
         "ingredients": "Shaved ice served inside fresh coconut shell, coconut meat, sweet red beans, leche flan, ube halaya, sago, pinipig",
-        "allergens": "\u26a0\ufe0f ALLERGEN WARNING: Contains Dairy (Milk, Leche Flan) and Coconut.",
-        "healthIndicators": "\ud83d\udfe2 LIFESTYLE COMPLIANCE: Cooling Heritage Refreshment.",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Dairy (Milk, Leche Flan) and Coconut.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Cooling Heritage Refreshment.",
         "nutrition": {
           "calories": 380,
           "protein": 8,
@@ -3844,8 +3798,10 @@
     "deliveryEnabled": false,
     "reservationsMode": "dashboard",
     "deliveryMode": "dashboard",
-    "contactNumber": "+63 917 221 5021",
-    "username": "ver_rea_sizzling_steak_house_owner",
-    "password": "password123"
-  }
+    "contactNumber": "+63 917 221 5021"
+  },
+  null,
+  null,
+  null,
+  null
 ]

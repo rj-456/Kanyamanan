@@ -62,7 +62,10 @@ import {
   loginViaDjango,
   registerTouristInDjango,
   fetchDjangoUserItineraries,
-  saveDjangoUserItinerary
+  saveDjangoUserItinerary,
+  fetchDjangoChangeRequests,
+  createDjangoChangeRequest,
+  updateDjangoChangeRequest
 } from './djangoApi';
 
 
@@ -598,12 +601,36 @@ function App() {
   // Sync with Live Django REST API Backend
   useEffect(() => {
     const syncDjangoData = async () => {
-      const liveData = await fetchDjangoRestaurants();
-      if (Array.isArray(liveData) && liveData.length > 0) {
-        setRestaurants(liveData);
-        try {
-          localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(liveData));
-        } catch (e) {}
+      try {
+        const liveData = await fetchDjangoRestaurants();
+        if (Array.isArray(liveData) && liveData.length > 0) {
+          setRestaurants(liveData);
+          try {
+            localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(liveData));
+          } catch (e) {}
+        }
+        const liveRequests = await fetchDjangoChangeRequests();
+        if (Array.isArray(liveRequests) && liveRequests.length > 0) {
+          const mapped = liveRequests.map(r => ({
+            id: r.id || r.request_id,
+            restaurantId: r.restaurantId || r.restaurant_id,
+            restaurantName: r.restaurantName || r.restaurant_name,
+            submittedAt: r.dateSubmitted || 'Recently',
+            status: r.status || 'pending',
+            original: r.details?.original || { profile: 'Original Profile' },
+            changes: r.details?.changes || { profile: 'Requested updates' },
+            fullUpdatedRes: r.details?.fullUpdatedRes || null,
+            adminNote: r.details?.adminNote || '',
+            reviewedAt: r.details?.reviewedAt || '',
+            dismissedByMerchant: Boolean(r.details?.dismissedByMerchant)
+          }));
+          setPendingApprovals(mapped);
+          try {
+            localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(mapped));
+          } catch (e) {}
+        }
+      } catch (err) {
+        console.warn("Initial Django sync warning:", err);
       }
     };
     syncDjangoData();
@@ -4101,6 +4128,17 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           saveChangeRequestToCloud(newApprovalRequest);
         }
 
+        // Sync change request to Django REST API
+        createDjangoChangeRequest({
+          id: newApprovalRequest.id,
+          restaurantId: newApprovalRequest.restaurantId,
+          restaurantName: newApprovalRequest.restaurantName,
+          requestedBy: 'Merchant',
+          status: 'pending',
+          change_type: 'Menu / Info Update',
+          details: newApprovalRequest
+        });
+
         setAdminEditingId(null);
         setAdminForm({
           name: '', municipality: 'City of San Fernando',
@@ -4419,6 +4457,21 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       }
     }
 
+    // Sync approval to Django REST API
+    const approvedRes = updatedRestaurants.find(r => r.id === req.restaurantId || r.name === req.restaurantName) || req.fullUpdatedRes;
+    if (approvedRes) {
+      updateDjangoRestaurant(approvedRes.id, approvedRes);
+    }
+    updateDjangoChangeRequest(req.id, {
+      status: 'approved',
+      details: {
+        ...req,
+        status: 'approved',
+        reviewedAt: nowFormatted,
+        adminNote: adminNote || 'Approved and published live by System Admin.'
+      }
+    });
+
     // Sync selected restaurant drawer & active trip if present
     if (selectedRestaurant) {
       const match = updatedRestaurants.find(r => r.id === selectedRestaurant.id || r.name === selectedRestaurant.name);
@@ -4466,6 +4519,17 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         dismissedByMerchant: false
       });
     }
+
+    // Sync rejection to Django REST API
+    updateDjangoChangeRequest(req.id, {
+      status: 'rejected',
+      details: {
+        ...req,
+        status: 'rejected',
+        reviewedAt: nowFormatted,
+        adminNote: reason
+      }
+    });
     alert(`Dismissed: Changes requested by "${req.restaurantName}" have been rejected. The restaurant owner will be notified in their portal.`);
   };
 

@@ -1,5 +1,9 @@
 // Django REST Framework API Client for Kanyamanan
-const DJANGO_BASE_URL = import.meta.env.VITE_DJANGO_API_URL || 'http://127.0.0.1:8000/api';
+export const DJANGO_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DJANGO_API_URL) || (
+  typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+    ? 'https://kanyamanan-backend.vercel.app/api'
+    : 'http://127.0.0.1:8000/api'
+);
 
 /**
  * Fetch all restaurants from Django REST API
@@ -142,6 +146,58 @@ export const saveDjangoUserItinerary = async (userAccountKey, itineraryObj) => {
     return res.ok;
   } catch (err) {
     console.warn("Django itinerary save warning:", err);
+    return false;
+  }
+};
+
+/**
+ * Fetch Change Requests from Django REST API
+ */
+export const fetchDjangoChangeRequests = async () => {
+  try {
+    const res = await fetch(`${DJANGO_BASE_URL}/change-requests/`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return Array.isArray(data) ? data : (data.results || null);
+  } catch (err) {
+    console.warn("Django change requests fetch warning:", err);
+    return null;
+  }
+};
+
+/**
+ * Submit a Change Request to Django REST API
+ */
+export const createDjangoChangeRequest = async (changeReqData) => {
+  try {
+    const res = await fetch(`${DJANGO_BASE_URL}/change-requests/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(changeReqData)
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn("Django change request create warning:", err);
+    return false;
+  }
+};
+
+/**
+ * Update a Change Request status in Django REST API
+ */
+export const updateDjangoChangeRequest = async (requestId, changeReqData) => {
+  try {
+    const res = await fetch(`${DJANGO_BASE_URL}/change-requests/${requestId}/`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(changeReqData)
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn("Django change request update warning:", err);
     return false;
   }
 };
