@@ -6,7 +6,11 @@ import django
 # Setup Django environment
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'kanyamanan_backend.settings')
-django.setup()
+try:
+    if not django.apps.apps.ready:
+        django.setup()
+except Exception:
+    django.setup()
 
 from django.contrib.auth.models import User
 from api.models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary

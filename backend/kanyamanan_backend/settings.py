@@ -61,14 +61,41 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'kanyamanan_backend.wsgi.application'
 
-# Database configuration (SQLite default for local, PostgreSQL for Vercel/production)
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+IS_VERCEL = bool(os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
+
+# Database configuration (PostgreSQL for Vercel/production via DATABASE_URL, SQLite fallback in /tmp for serverless)
+if os.getenv('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    # On Vercel serverless, the app root is read-only. We use /tmp/db.sqlite3.
+    db_file = '/tmp/db.sqlite3' if IS_VERCEL else str(BASE_DIR / 'db.sqlite3')
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': db_file,
+        }
+    }
+
+# CSRF Trusted Origins for Admin & API access across Vercel & localhost
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+    'https://kanyamanan-backend.vercel.app',
+    'https://kanyamanan-vert.vercel.app',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
+if IS_VERCEL:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
