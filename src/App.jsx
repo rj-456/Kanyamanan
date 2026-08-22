@@ -4748,16 +4748,16 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               type="button"
               onClick={() => setAdminSectionTab('restaurants')}
               className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${adminSectionTab === 'restaurants'
-                  ? 'bg-terracotta text-white shadow-md'
-                  : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                ? 'bg-terracotta text-white shadow-md'
+                : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
                 }`}
             >
               <span className="text-sm">🏪</span>
               <span className="tracking-wide uppercase">Kapampangan Restaurants</span>
               <span
                 className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${adminSectionTab === 'restaurants'
-                    ? 'bg-white/20 text-white'
-                    : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
+                  ? 'bg-white/20 text-white'
+                  : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
                   }`}
               >
                 {restaurants.length}
@@ -4770,8 +4770,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   type="button"
                   onClick={() => setAdminSectionTab('requests')}
                   className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${adminSectionTab === 'requests'
-                      ? 'bg-terracotta text-white shadow-md'
-                      : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                    ? 'bg-terracotta text-white shadow-md'
+                    : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
                     }`}
                 >
                   <span className="text-sm">📋</span>
@@ -4783,8 +4783,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   ) : (
                     <span
                       className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${adminSectionTab === 'requests'
-                          ? 'bg-white/20 text-white'
-                          : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
+                        ? 'bg-white/20 text-white'
+                        : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
                         }`}
                     >
                       {pendingApprovals.length}
@@ -4796,16 +4796,16 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   type="button"
                   onClick={() => setAdminSectionTab('attractions')}
                   className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${adminSectionTab === 'attractions'
-                      ? 'bg-terracotta text-white shadow-md'
-                      : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                    ? 'bg-terracotta text-white shadow-md'
+                    : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
                     }`}
                 >
                   <span className="text-sm">🏛️</span>
                   <span className="tracking-wide uppercase">Tourist Attractions</span>
                   <span
                     className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${adminSectionTab === 'attractions'
-                        ? 'bg-white/20 text-white'
-                        : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
+                      ? 'bg-white/20 text-white'
+                      : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
                       }`}
                   >
                     {attractions.length}
@@ -6720,7 +6720,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       Mekeni, Mangan Tana!
                     </h2>
                     <div className="text-lg sm:text-2xl lg:text-2xl xl:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron whitespace-nowrap tracking-tight">
-                      Explore Pampanga’s Culinary Map
+                      Explore Pampanga’s Culinary Map and more!
                     </div>
                   </div>
 
@@ -6730,82 +6730,101 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </p>
                 </div>
 
-                {/* Right Column: Kapampangan Culture & Food Showcase Visuals (4 Iconic Pillars) */}
+                {/* Right Column: Kapampangan Culture & Food Showcase Visuals (5 Iconic Pillars) */}
                 <div className="lg:col-span-5 flex items-center justify-center lg:justify-end">
-                  <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-2 sm:gap-2.5 pt-2">
+                  <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-1.5 sm:gap-2 pt-2">
                     {/* Card 1: Real Mount Arayat (Bunduk Alaya) */}
-                    <div className="w-26 sm:w-28 xl:w-32 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
-                      <div className="h-20 sm:h-22 xl:h-24 rounded-xl overflow-hidden relative shadow-xs">
+                    <div className="w-22 sm:w-24 xl:w-26 bg-white p-1.5 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
+                      <div className="h-18 sm:h-20 xl:h-22 rounded-xl overflow-hidden relative shadow-xs">
                         <img
                           src="/attractions/real_mt_arayat.png"
                           alt="Mount Arayat (Bunduk Alaya) Pampanga"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "/attractions/mt_arayat_park.jpg"; }}
                         />
-                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[7px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                           ⛰️ Mt. Arayat
                         </span>
                       </div>
                       <div className="pt-1 text-center">
-                        <span className="font-extrabold text-[10px] text-charcoal block leading-tight truncate">Bunduk Alaya</span>
-                        <span className="text-[8.5px] font-black text-bananaleaf block mt-0.5">Sacred Peak</span>
+                        <span className="font-extrabold text-[9.5px] text-charcoal block leading-tight truncate">Bunduk Alaya</span>
+                        <span className="text-[8px] font-black text-bananaleaf block mt-0.5">Natures</span>
                       </div>
                     </div>
 
                     {/* Card 2: Famous Heritage Church - Betis Church */}
-                    <div className="w-26 sm:w-28 xl:w-32 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
-                      <div className="h-20 sm:h-22 xl:h-24 rounded-xl overflow-hidden relative shadow-xs">
+                    <div className="w-22 sm:w-24 xl:w-26 bg-white p-1.5 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
+                      <div className="h-18 sm:h-20 xl:h-22 rounded-xl overflow-hidden relative shadow-xs">
                         <img
                           src="/attractions/betis_church_guagua.png"
                           alt="Betis Heritage Church Guagua Pampanga"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "/attractions/betis_church_guagua.jpg"; }}
                         />
-                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[7px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                           🏛️ Betis Church
                         </span>
                       </div>
                       <div className="pt-1 text-center">
-                        <span className="font-extrabold text-[10px] text-charcoal block leading-tight truncate">Betis Church</span>
-                        <span className="text-[8.5px] font-black text-[#2C5E3B] block mt-0.5 uppercase tracking-wide">Heritage</span>
+                        <span className="font-extrabold text-[9.5px] text-charcoal block leading-tight truncate">Betis Church</span>
+                        <span className="text-[8px] font-black text-[#2C5E3B] block mt-0.5 uppercase tracking-wide">Heritage</span>
                       </div>
                     </div>
 
                     {/* Card 3: Centerpiece Feature - Big Authentic Sizzling Sisig */}
-                    <div className="w-36 sm:w-40 xl:w-44 bg-white p-2.5 rounded-2xl border-2 border-terracotta shadow-2xl ring-4 ring-terracotta/20 hover:shadow-2xl transition-all duration-300 transform sm:scale-110 sm:-translate-y-2 z-10 text-center shrink-0">
-                      <div className="h-26 sm:h-30 xl:h-32 rounded-xl overflow-hidden relative shadow-xs">
+                    <div className="w-32 sm:w-36 xl:w-40 bg-white p-2 rounded-2xl border-2 border-terracotta shadow-2xl ring-4 ring-terracotta/20 hover:shadow-2xl transition-all duration-300 transform sm:scale-110 sm:-translate-y-2 z-10 text-center shrink-0">
+                      <div className="h-24 sm:h-28 xl:h-30 rounded-xl overflow-hidden relative shadow-xs">
                         <img
                           src="/restaurants/authentic_sisig.jpg"
                           alt="Authentic Kapampangan Sizzling Sisig"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"; }}
                         />
-                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[8.5px] font-black px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap border border-white/20">
+                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-md whitespace-nowrap border border-white/20">
                           🔥 Sizzling Sisig
                         </span>
                       </div>
                       <div className="pt-1.5 text-center">
-                        <span className="font-black text-xs text-charcoal block leading-tight">Culinary Capital</span>
-                        <span className="text-[9px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Authentic Food</span>
+                        <span className="font-black text-[11px] sm:text-xs text-charcoal block leading-tight">Culinary Capital</span>
+                        <span className="text-[8.5px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Authentic Food</span>
                       </div>
                     </div>
 
                     {/* Card 4: Giant Lantern (Parul Sampernandu) */}
-                    <div className="w-26 sm:w-28 xl:w-32 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
-                      <div className="h-20 sm:h-22 xl:h-24 rounded-xl overflow-hidden relative shadow-xs">
+                    <div className="w-22 sm:w-24 xl:w-26 bg-white p-1.5 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
+                      <div className="h-18 sm:h-20 xl:h-22 rounded-xl overflow-hidden relative shadow-xs">
                         <img
                           src="/attractions/giant_lantern_san_fernando.jpg"
                           alt="Parul Sampernandu Giant Lantern"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "/attractions/giant_lantern_san_fernando.png"; }}
                         />
-                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-saffron text-charcoal text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-charcoal/10 whitespace-nowrap shadow-xs">
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-saffron text-charcoal text-[7px] font-black px-1.5 py-0.5 rounded-full border border-charcoal/10 whitespace-nowrap shadow-xs">
                           ✨ Parul
                         </span>
                       </div>
                       <div className="pt-1 text-center">
-                        <span className="font-extrabold text-[10px] text-charcoal block leading-tight truncate">Giant Lantern</span>
-                        <span className="text-[8.5px] font-black text-[#D97706] block mt-0.5 uppercase tracking-wide">Festival</span>
+                        <span className="font-extrabold text-[9.5px] text-charcoal block leading-tight truncate">Giant Lantern</span>
+                        <span className="text-[8px] font-black text-[#D97706] block mt-0.5 uppercase tracking-wide">Festival</span>
+                      </div>
+                    </div>
+
+                    {/* Card 5: Majigangga Festival Santa Rita */}
+                    <div className="w-22 sm:w-24 xl:w-26 bg-white p-1.5 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
+                      <div className="h-18 sm:h-20 xl:h-22 rounded-xl overflow-hidden relative shadow-xs">
+                        <img
+                          src="/attractions/majigangga_festival.jpg"
+                          alt="Majigangga Festival Santa Rita Pampanga"
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=500&q=80"; }}
+                        />
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-[#C84B31] text-white text-[7px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                          🎭 Majigangga
+                        </span>
+                      </div>
+                      <div className="pt-1 text-center">
+                        <span className="font-extrabold text-[9.5px] text-charcoal block leading-tight truncate">Majigangga</span>
+                        <span className="text-[7.5px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Cultural Celebrations</span>
                       </div>
                     </div>
                   </div>
@@ -7303,10 +7322,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <div
                                   key={stop.id}
                                   className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 shrink-0 transition-all ${isVisited
-                                      ? 'bg-bananaleaf/10 border-bananaleaf text-bananaleaf font-bold'
-                                      : isCurrentTarget
-                                        ? 'bg-terracotta text-white border-terracotta font-black shadow-xs animate-pulse'
-                                        : 'bg-[#FAF8F5] border-[#E9E5DE] text-charcoal-light font-semibold'
+                                    ? 'bg-bananaleaf/10 border-bananaleaf text-bananaleaf font-bold'
+                                    : isCurrentTarget
+                                      ? 'bg-terracotta text-white border-terracotta font-black shadow-xs animate-pulse'
+                                      : 'bg-[#FAF8F5] border-[#E9E5DE] text-charcoal-light font-semibold'
                                     }`}
                                 >
                                   <span>{isVisited ? '✓' : isCurrentTarget ? '🎯' : idx + 1}</span>
@@ -7929,8 +7948,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           key={itin.id}
                           onClick={() => handleLoadSavedItinerary(itin)}
                           className={`p-4 border rounded-xl text-left space-y-3 transition-all cursor-pointer group/itin relative shadow-sm hover:shadow-md ${itin.isFinished
-                              ? 'bg-[#FAF8F5]/60 border-[#E9E5DE] opacity-80 hover:border-terracotta/40'
-                              : 'bg-[#FAF8F5] border-[#E9E5DE] hover:border-terracotta hover:bg-white'
+                            ? 'bg-[#FAF8F5]/60 border-[#E9E5DE] opacity-80 hover:border-terracotta/40'
+                            : 'bg-[#FAF8F5] border-[#E9E5DE] hover:border-terracotta hover:bg-white'
                             }`}
                           title="Click to load and execute this plan"
                         >
@@ -8004,8 +8023,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   type="button"
                                   onClick={(e) => handleToggleFinishItinerary(itin.id, e)}
                                   className={`p-1.5 rounded-lg transition-colors ${itin.isFinished
-                                      ? 'text-bananaleaf hover:bg-bananaleaf/10'
-                                      : 'text-charcoal-light hover:text-bananaleaf hover:bg-bananaleaf/5'
+                                    ? 'text-bananaleaf hover:bg-bananaleaf/10'
+                                    : 'text-charcoal-light hover:text-bananaleaf hover:bg-bananaleaf/5'
                                     }`}
                                   title={itin.isFinished ? "Mark as Active" : "Mark as Finished"}
                                 >
@@ -8033,8 +8052,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <span
                                   key={idx}
                                   className={`text-[10px] px-2.5 py-1 rounded-md border font-semibold transition-all ${itin.isFinished
-                                      ? 'bg-white/50 text-gray-400 border-gray-200'
-                                      : 'bg-white text-charcoal border-[#E9E5DE] group-hover/itin:border-terracotta/30'
+                                    ? 'bg-white/50 text-gray-400 border-gray-200'
+                                    : 'bg-white text-charcoal border-[#E9E5DE] group-hover/itin:border-terracotta/30'
                                     }`}
                                 >
                                   {displayName}
@@ -8819,8 +8838,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         >
                           {/* Kapampangan Festive Washi Tape */}
                           <div className={`absolute -top-2.5 left-1/2 -translate-x-1/2 w-20 h-5 border shadow-2xs z-10 flex items-center justify-center text-[8px] font-black uppercase tracking-wider ${pIdx % 2 === 0
-                              ? 'bg-amber-100/90 text-amber-900 border-amber-300 -rotate-1'
-                              : 'bg-orange-100/90 text-orange-900 border-orange-300 rotate-1'
+                            ? 'bg-amber-100/90 text-amber-900 border-amber-300 -rotate-1'
+                            : 'bg-orange-100/90 text-orange-900 border-orange-300 rotate-1'
                             }`}>
                             Pampanga #{pIdx + 1}
                           </div>
