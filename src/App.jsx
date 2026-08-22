@@ -6558,10 +6558,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
   // CONSUMER / PUBLIC Aggregator PORTAL VIEW
   // =========================================================================
   return (
-    <div className="min-h-screen bg-ivory text-charcoal flex flex-col font-sans relative pb-20 sm:pb-0">
+    <div className="min-h-screen bg-ivory dark:bg-[#121110] text-charcoal dark:text-[#F7F5F0] flex flex-col font-sans relative pb-20 sm:pb-0 transition-colors duration-200">
 
       {/* 1. Global Navigation Header */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#E9E5DE] shadow-sm">
+      <header className="sticky top-0 z-40 bg-white dark:bg-[#1A1714] border-b border-[#E9E5DE] dark:border-[#2E2A24] shadow-sm transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
 
           {/* Logo Brand Typography */}
@@ -6569,13 +6569,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             <img
               src="/kanyamanan-logo.png"
               alt="Kanyamanan Logo"
-              className="w-10 h-10 object-contain rounded-xl shadow-md border border-[#E9E5DE] shrink-0 bg-white p-0.5"
+              className="w-10 h-10 object-contain rounded-xl shadow-md border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 bg-white dark:bg-[#1E1B18] p-0.5"
             />
             <div>
-              <h1 className="text-xl font-extrabold tracking-tight text-charcoal m-0 flex items-center gap-1.5 leading-none">
+              <h1 className="text-xl font-extrabold tracking-tight text-charcoal dark:text-white m-0 flex items-center gap-1.5 leading-none">
                 Kanyamanan
               </h1>
-              <p className="text-[10px] text-charcoal-light font-medium tracking-wide mt-0.5">
+              <p className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium tracking-wide mt-0.5">
                 PAMPANGA HEALTH INFORMATICS & CULINARY RESTAURANT AGGREGATOR
               </p>
             </div>
@@ -6584,19 +6584,19 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           {/* Centralized Search Input */}
           <div className="hidden md:flex flex-1 max-w-md relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-charcoal-light" />
+              <Search className="h-4 w-4 text-charcoal-light dark:text-gray-400" />
             </div>
             <input
               type="text"
               placeholder="Search dishes, Kapampangan Restaurants, or ingredients..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-sm placeholder-charcoal-light focus:outline-none focus:ring-1 focus:ring-terracotta focus:border-terracotta focus:bg-white transition-colors"
+              className="block w-full pl-10 pr-3 py-2 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] text-sm text-charcoal dark:text-white placeholder-charcoal-light dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-terracotta focus:border-terracotta focus:bg-white dark:focus:bg-[#1A1715] transition-colors"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-charcoal-light hover:text-charcoal"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -6607,7 +6607,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           <nav className="flex items-center gap-2 sm:gap-4">
             <button
               onClick={() => setActiveView('homepage')}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-colors ${activeView === 'homepage' ? 'text-terracotta bg-terracotta/5' : 'text-charcoal-light hover:text-charcoal'}`}
+              className={`px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-colors ${activeView === 'homepage' ? 'text-terracotta bg-terracotta/10 dark:bg-terracotta/20 font-bold' : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white'}`}
             >
               Explore Feed
             </button>
@@ -6616,16 +6616,16 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               <>
                 <button
                   onClick={() => setActiveView('dashboard')}
-                  className={`px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-colors ${activeView === 'dashboard' ? 'text-terracotta bg-terracotta/5' : 'text-charcoal-light hover:text-charcoal'}`}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-colors ${activeView === 'dashboard' ? 'text-terracotta bg-terracotta/10 dark:bg-terracotta/20 font-bold' : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white'}`}
                 >
                   🗺️ My Food Trip Planner
                 </button>
-                <div className="h-6 w-px bg-[#E9E5DE] hidden sm:block"></div>
-                <div className="flex items-center gap-2 pl-1 bg-white border border-[#E9E5DE] rounded-full p-0.5">
+                <div className="h-6 w-px bg-[#E9E5DE] dark:bg-[#2E2A24] hidden sm:block"></div>
+                <div className="flex items-center gap-2 pl-1 bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-full p-0.5">
                   <div className="w-8 h-8 rounded-full bg-bananaleaf flex items-center justify-center text-white text-xs font-bold shadow-inner">
                     {userProfile.username.substring(0, 2).toUpperCase()}
                   </div>
-                  <span className="text-xs font-bold text-charcoal hidden sm:inline-block pr-3">
+                  <span className="text-xs font-bold text-charcoal dark:text-white hidden sm:inline-block pr-3">
                     Mangan, {userProfile.username}!
                   </span>
                   <button
@@ -6641,7 +6641,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       setActiveTrip([]);
                     }}
                     title="Sign Out"
-                    className="p-2 text-charcoal-light hover:text-terracotta rounded-full hover:bg-terracotta/5 transition-colors"
+                    className="p-2 text-charcoal-light dark:text-gray-400 hover:text-terracotta rounded-full hover:bg-terracotta/5 transition-colors"
                   >
                     <LogOut className="h-4 w-4" />
                   </button>
@@ -6651,7 +6651,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               <>
                 <button
                   onClick={() => setActiveView('dashboard')}
-                  className={`px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-colors ${activeView === 'dashboard' ? 'text-terracotta bg-terracotta/5' : 'text-charcoal-light hover:text-charcoal'}`}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-colors ${activeView === 'dashboard' ? 'text-terracotta bg-terracotta/10 dark:bg-terracotta/20 font-bold' : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white'}`}
                 >
                   🗺️ Trip Planner (Guest)
                 </button>
@@ -6668,7 +6668,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     setActiveTrip([]);
                   }}
                   title="Exit Guest Mode"
-                  className="p-2 text-charcoal-light hover:text-terracotta rounded-full hover:bg-terracotta/5 transition-colors"
+                  className="p-2 text-charcoal-light dark:text-gray-400 hover:text-terracotta rounded-full hover:bg-terracotta/5 transition-colors"
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
@@ -6681,7 +6681,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     setActiveView('dashboard');
                     setDashboardTab('planner');
                   }}
-                  className="px-3 py-2 rounded-xl text-xs font-semibold tracking-wide text-charcoal-light hover:text-charcoal transition-colors"
+                  className="px-3 py-2 rounded-xl text-xs font-semibold tracking-wide text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors"
                 >
                   🗺️ Plan Trip (Guest Mode)
                 </button>
@@ -6699,7 +6699,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             <button
               type="button"
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A25] bg-[#FAF8F5] dark:bg-[#1E1B18] text-charcoal hover:text-terracotta transition-all shadow-2xs flex items-center justify-center cursor-pointer active:scale-95 shrink-0"
+              className="p-2 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A25] bg-[#FAF8F5] dark:bg-[#1E1B18] text-charcoal dark:text-white hover:text-terracotta transition-all shadow-2xs flex items-center justify-center cursor-pointer active:scale-95 shrink-0"
               title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
               aria-label="Toggle Theme"
             >
@@ -6713,7 +6713,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         </div>
       </header>
 
-      {/* Loading Toast (Stirring the palayok... Optimizing your routes.) */}
+      {/* Loading Toast */}
       {showToast && (
         <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 bg-charcoal text-white px-5 py-3 rounded-full flex items-center gap-2.5 shadow-2xl border border-charcoal-light animate-bounce">
           <Coffee className="h-4 w-4 text-saffron animate-spin shrink-0" />
@@ -6727,14 +6727,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         {/* Mobile Search input */}
         <div className="md:hidden w-full mb-6 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-charcoal-light" />
+            <Search className="h-4 w-4 text-charcoal-light dark:text-gray-400" />
           </div>
           <input
             type="text"
             placeholder="Search kitchens, dishes, municipalities..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2.5 border border-[#E9E5DE] rounded-xl bg-white text-sm placeholder-charcoal-light focus:outline-none focus:ring-1 focus:ring-terracotta"
+            className="block w-full pl-10 pr-3 py-2.5 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-white dark:bg-[#161412] text-sm text-charcoal dark:text-white placeholder-charcoal-light dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-terracotta"
           />
         </div>
 
@@ -6745,9 +6745,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           <div className="space-y-6">
 
             {/* Hero Section with Kapampangan Cultural & Food Imagery */}
-            <div className="bento-card relative overflow-hidden p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFEB] border border-[#E9E5DE] rounded-3xl shadow-sm">
+            <div className="bento-card relative overflow-hidden p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFEB] dark:from-[#1E1B18] dark:via-[#171513] dark:to-[#12100E] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl shadow-sm">
               {/* Background Parul Sampernandu (Giant Lantern) & Mount Arayat Outline Watermark */}
-              <div className="absolute right-0 bottom-0 w-72 h-72 sm:w-96 sm:h-96 text-terracotta/10 opacity-25 pointer-events-none z-0">
+              <div className="absolute right-0 bottom-0 w-72 h-72 sm:w-96 sm:h-96 text-terracotta/10 dark:text-terracotta/5 opacity-25 pointer-events-none z-0">
                 <svg viewBox="0 0 100 100" className="w-full h-full stroke-current fill-none" strokeWidth="0.8">
                   <polygon points="50,15 57,38 80,38 61,52 69,75 50,60 31,75 39,52 20,38 43,38" />
                   <circle cx="50" cy="50" r="30" />
@@ -6763,11 +6763,11 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 {/* Left Column: Rich Editorial Typography & Narrative */}
                 <div className="lg:col-span-6 space-y-4 text-left">
                   {/* Top Cultural Badge */}
-                  <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-terracotta/10 via-[#FFF8F3] to-saffron/15 border border-terracotta/30 text-terracotta shadow-2xs whitespace-nowrap">
+                  <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-terracotta/10 via-[#FFF8F3] to-saffron/15 dark:from-terracotta/20 dark:via-[#26211C] dark:to-saffron/20 border border-terracotta/30 dark:border-terracotta/40 text-terracotta shadow-2xs whitespace-nowrap">
                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-terracotta text-white text-[10px] shadow-xs">
                       ✨
                     </span>
-                    <span className="text-[11px] sm:text-xs font-black tracking-wider uppercase text-charcoal">
+                    <span className="text-[11px] sm:text-xs font-black tracking-wider uppercase text-charcoal dark:text-[#F7F5F0]">
                       Manyaman a Kayamanan
                     </span>
                     <span className="w-1.5 h-1.5 rounded-full bg-terracotta/40"></span>
@@ -6778,7 +6778,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
                   {/* Main Headline */}
                   <div className="space-y-1.5">
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1E1915] tracking-tight leading-tight m-0 drop-shadow-xs">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1E1915] dark:text-white tracking-tight leading-tight m-0 drop-shadow-xs">
                       Mekeni, Mangan Tana!
                     </h2>
                     <div className="text-base sm:text-xl lg:text-2xl xl:text-[26px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron tracking-tight whitespace-nowrap pr-4">
@@ -6787,19 +6787,19 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </div>
 
                   {/* Rich Narrative Description with Highlighted Feature Anchors */}
-                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-medium m-0">
-                    Welcome to <strong className="text-charcoal font-black bg-terracotta/10 px-1.5 py-0.5 rounded-md text-terracotta">Kanyamanan</strong>, the provincial culinary guide and health informatics portal for Pampanga. Discover ancestral heirloom recipes with verified <strong className="text-[#1E1915] font-bold">nutritional &amp; allergen insights</strong>, explore certified Kapampangan kitchens across all <strong className="text-[#1E1915] font-bold">22 municipalities &amp; cities</strong>, craft <strong className="text-[#1E1915] font-bold">AI-guided food trails</strong>, and navigate travel corridors in real time.
+                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed font-medium m-0">
+                    Welcome to <strong className="text-charcoal dark:text-white font-black bg-terracotta/10 dark:bg-terracotta/20 px-1.5 py-0.5 rounded-md text-terracotta">Kanyamanan</strong>, the provincial culinary guide and health informatics portal for Pampanga. Discover ancestral heirloom recipes with verified <strong className="text-[#1E1915] dark:text-white font-bold">nutritional &amp; allergen insights</strong>, explore certified Kapampangan kitchens across all <strong className="text-[#1E1915] dark:text-white font-bold">22 municipalities &amp; cities</strong>, craft <strong className="text-[#1E1915] dark:text-white font-bold">AI-guided food trails</strong>, and navigate travel corridors in real time.
                   </p>
                 </div>
 
-                {/* Right Column: Kapampangan Culture & Food Showcase (Dynamic Organic Collage) */}
+                {/* Right Column: Kapampangan Culture & Food Showcase */}
                 <div className="lg:col-span-6 flex items-center justify-center lg:justify-end">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-center w-full max-w-lg">
 
-                    {/* Left Flank: Nature & Heritage (Dynamic Angled & Staggered Cards) */}
+                    {/* Left Flank: Nature & Heritage */}
                     <div className="flex flex-row sm:flex-col gap-3">
-                      {/* Card 1: Real Mount Arayat (Bunduk Alaya) */}
-                      <div className="flex-1 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-3 hover:rotate-0 hover:-translate-y-1 text-center group">
+                      {/* Card 1: Real Mount Arayat */}
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-3 hover:rotate-0 hover:-translate-y-1 text-center group">
                         <div className="h-20 rounded-xl overflow-hidden relative shadow-xs">
                           <img
                             src="/attractions/real_mt_arayat.png"
@@ -6812,13 +6812,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           </span>
                         </div>
                         <div className="pt-1.5 text-center">
-                          <span className="font-extrabold text-xs text-charcoal block leading-tight truncate">Bunduk Alaya</span>
+                          <span className="font-extrabold text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Bunduk Alaya</span>
                           <span className="text-[9px] font-black text-bananaleaf block mt-0.5 uppercase tracking-wide">Natures</span>
                         </div>
                       </div>
 
-                      {/* Card 2: Historical Churches (User Uploaded Photo) */}
-                      <div className="flex-1 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center group">
+                      {/* Card 2: Historical Churches */}
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center group">
                         <div className="h-20 rounded-xl overflow-hidden relative shadow-xs">
                           <img
                             src="/attractions/real_betis_church.jpg"
@@ -6831,14 +6831,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           </span>
                         </div>
                         <div className="pt-1.5 text-center">
-                          <span className="font-extrabold text-xs text-charcoal block leading-tight truncate">Historical Churches</span>
+                          <span className="font-extrabold text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Historical Churches</span>
                           <span className="text-[9px] font-black text-[#2C5E3B] block mt-0.5 uppercase tracking-wide">Heritage</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Center Column: Prominent Large Sisig Focal Piece */}
-                    <div className="bg-white p-3 rounded-2xl border-2 border-terracotta shadow-2xl ring-4 ring-terracotta/25 hover:shadow-2xl transition-all duration-300 transform sm:scale-110 z-20 text-center flex flex-col justify-between group">
+                    <div className="bg-white dark:bg-[#1E1B18] p-3 rounded-2xl border-2 border-terracotta shadow-2xl ring-4 ring-terracotta/25 hover:shadow-2xl transition-all duration-300 transform sm:scale-110 z-20 text-center flex flex-col justify-between group">
                       <div className="h-44 sm:h-48 rounded-xl overflow-hidden relative shadow-xs">
                         <img
                           src="/restaurants/authentic_sisig.jpg"
@@ -6851,15 +6851,15 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         </span>
                       </div>
                       <div className="pt-2 text-center">
-                        <span className="font-black text-sm text-charcoal block leading-tight">Culinary Capital</span>
+                        <span className="font-black text-sm text-charcoal dark:text-[#F7F5F0] block leading-tight">Culinary Capital</span>
                         <span className="text-[10px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Authentic Food</span>
                       </div>
                     </div>
 
-                    {/* Right Flank: Festivals & Celebrations (Dynamic Angled & Staggered Cards) */}
+                    {/* Right Flank: Festivals & Celebrations */}
                     <div className="flex flex-row sm:flex-col gap-3">
-                      {/* Card 4: Giant Lantern (Parul Sampernandu) */}
-                      <div className="flex-1 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-3 hover:rotate-0 hover:-translate-y-1 text-center group">
+                      {/* Card 4: Giant Lantern */}
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-3 hover:rotate-0 hover:-translate-y-1 text-center group">
                         <div className="h-20 rounded-xl overflow-hidden relative shadow-xs">
                           <img
                             src="/attractions/giant_lantern_san_fernando.jpg"
@@ -6872,13 +6872,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           </span>
                         </div>
                         <div className="pt-1.5 text-center">
-                          <span className="font-extrabold text-xs text-charcoal block leading-tight truncate">Giant Lantern</span>
+                          <span className="font-extrabold text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Giant Lantern</span>
                           <span className="text-[9px] font-black text-[#D97706] block mt-0.5 uppercase tracking-wide">Christmas Capital</span>
                         </div>
                       </div>
 
-                      {/* Card 5: Majigangga Festival Santa Rita (User Uploaded Photo) */}
-                      <div className="flex-1 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center group">
+                      {/* Card 5: Majigangga Festival */}
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center group">
                         <div className="h-20 rounded-xl overflow-hidden relative shadow-xs">
                           <img
                             src="/attractions/real_majigangga.png"
@@ -6891,7 +6891,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           </span>
                         </div>
                         <div className="pt-1.5 text-center">
-                          <span className="font-extrabold text-xs text-charcoal block leading-tight truncate">Local Festivals</span>
+                          <span className="font-extrabold text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Local Festivals</span>
                           <span className="text-[8.5px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Cultural Celebrations</span>
                         </div>
                       </div>

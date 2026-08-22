@@ -8,8 +8,8 @@
   }
   
   html.dark body {
-    background-color: #141210;
-    color: #F7F5F0;
+    background-color: #141210 !important;
+    color: #F7F5F0 !important;
   }
 }
 
@@ -78,33 +78,66 @@ html.dark ::-webkit-scrollbar-thumb {
   box-shadow: 0 0 15px rgba(217, 93, 57, 0.15);
 }
 
-/* Dark mode utility overrides for high fidelity */
+/* Dark mode utility overrides for high visual fidelity */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark .bg-ivory {
+  background-color: #141210 !important;
+}
+
 html.dark .bg-white {
   background-color: #1E1B18 !important;
 }
+
 html.dark .bg-\[\#FAF8F5\] {
   background-color: #161412 !important;
 }
+
 html.dark .bg-\[\#FAF6F0\] {
   background-color: #1A1715 !important;
 }
+
+html.dark .bg-\[\#F5EFEB\],
+html.dark .bg-\[\#F5EFE6\],
+html.dark .bg-\[\#E9E5DE\] {
+  background-color: #24201C !important;
+}
+
 html.dark .border-\[\#E9E5DE\] {
   border-color: #2E2A25 !important;
 }
-html.dark .text-charcoal {
+
+html.dark .text-charcoal,
+html.dark .text-\[\#1E1915\] {
   color: #F7F5F0 !important;
 }
-html.dark .text-charcoal-light {
-  color: #A8A29E !important;
+
+html.dark .text-charcoal-light,
+html.dark .text-gray-700,
+html.dark .text-gray-600 {
+  color: #D6D3D1 !important;
 }
+
 html.dark input, 
 html.dark select, 
 html.dark textarea {
-  background-color: #161412;
-  color: #F7F5F0;
-  border-color: #2E2A25;
+  background-color: #161412 !important;
+  color: #F7F5F0 !important;
+  border-color: #2E2A25 !important;
 }
+
 html.dark input::placeholder, 
 html.dark textarea::placeholder {
-  color: #78716C;
+  color: #8C847D !important;
+}
+
+/* Dark mode overrides for background gradients that used hardcoded light colors */
+html.dark .bg-gradient-to-br.from-white {
+  background-image: linear-gradient(to bottom right, #1E1B18, #171513, #12100E) !important;
+}
+
+html.dark [class*="via-\[\#FFF8F3\]"] {
+  background-image: linear-gradient(to right, rgba(217, 93, 57, 0.2), #26211C, rgba(242, 184, 36, 0.2)) !important;
 }
