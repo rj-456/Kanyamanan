@@ -7454,15 +7454,15 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
                   {/* Live Trip Departure & ETA Navigation Banner */}
                   {computedRoutePath.length > 0 && (
-                    <div className="bg-gradient-to-br from-[#FAF6F0] via-white to-[#F5EFE6] border border-[#2C5E3B]/20 rounded-2xl p-4.5 space-y-3.5 shadow-sm">
-                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E9E5DE] pb-3">
+                    <div className="bg-gradient-to-br from-[#FAF6F0] via-white to-[#F5EFE6] dark:from-[#1E1B18] dark:via-[#171513] dark:to-[#12100E] border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 rounded-2xl p-4.5 space-y-3.5 shadow-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-terracotta/10 border border-terracotta/20 flex items-center justify-center text-xl shrink-0 shadow-2xs">
+                          <div className="w-10 h-10 rounded-2xl bg-terracotta/10 dark:bg-terracotta/20 border border-terracotta/20 dark:border-terracotta/30 flex items-center justify-center text-xl shrink-0 shadow-2xs">
                             🚗
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <h4 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">Live Trip ETA</h4>
+                              <h4 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">Live Trip ETA</h4>
                               <button
                                 type="button"
                                 onClick={() => setIsCompletionModalOpen(true)}
@@ -7471,34 +7471,34 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <span>🎉</span> Finish Trip
                               </button>
                             </div>
-                            <span className="text-[11px] text-charcoal-light font-semibold block mt-0.5">
+                            <span className="text-[11px] text-charcoal-light dark:text-gray-300 font-semibold block mt-0.5">
                               {isSimulating ? '⚡ Live Route Simulation Active' : '📍 Start: ' + userLocation.name}
                             </span>
                           </div>
                         </div>
 
-                        <div className="bg-white border border-[#2C5E3B]/25 px-4 py-2 rounded-2xl shadow-2xs text-right">
-                          <span className="text-[9px] font-black text-charcoal-light uppercase tracking-wider block">Estimated Arrival</span>
-                          <strong className="text-sm font-black text-[#2C5E3B] flex items-center gap-1 justify-end mt-0.5">
+                        <div className="bg-white dark:bg-[#161412] border border-[#2C5E3B]/25 dark:border-[#2C5E3B]/40 px-4 py-2 rounded-2xl shadow-2xs text-right">
+                          <span className="text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider block">Estimated Arrival</span>
+                          <strong className="text-sm font-black text-[#2C5E3B] dark:text-emerald-400 flex items-center gap-1 justify-end mt-0.5">
                             <span>⏰</span> {calculateETA(routeDurationMin)}
                           </strong>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-3 gap-2.5 text-center">
-                        <div className="bg-white p-2.5 rounded-xl border border-[#E9E5DE] shadow-2xs">
-                          <span className="block text-[9px] font-black text-charcoal-light uppercase tracking-wider">Total Distance</span>
-                          <strong className="text-xs font-black text-charcoal block mt-0.5">{routeDistanceKm > 0 ? `${routeDistanceKm} km` : '~12.5 km'}</strong>
+                        <div className="bg-white dark:bg-[#161412] p-2.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs">
+                          <span className="block text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Total Distance</span>
+                          <strong className="text-xs font-black text-charcoal dark:text-white block mt-0.5">{routeDistanceKm > 0 ? `${routeDistanceKm} km` : '~12.5 km'}</strong>
                         </div>
-                        <div className="bg-white p-2.5 rounded-xl border border-[#E9E5DE] shadow-2xs">
-                          <span className="block text-[9px] font-black text-charcoal-light uppercase tracking-wider">Drive Duration</span>
+                        <div className="bg-white dark:bg-[#161412] p-2.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs">
+                          <span className="block text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Drive Duration</span>
                           <strong className="text-xs font-black text-terracotta block mt-0.5">
                             {routeDurationMin > 0 ? `${isTrafficCongested ? Math.round(routeDurationMin * 1.35) : routeDurationMin} mins` : '~25 mins'}
                           </strong>
                         </div>
-                        <div className="bg-white p-2.5 rounded-xl border border-[#E9E5DE] shadow-2xs">
-                          <span className="block text-[9px] font-black text-charcoal-light uppercase tracking-wider">Traffic Status</span>
-                          <strong className={`text-xs font-black block mt-0.5 ${isTrafficCongested ? 'text-red-600' : 'text-bananaleaf'}`}>
+                        <div className="bg-white dark:bg-[#161412] p-2.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs">
+                          <span className="block text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Traffic Status</span>
+                          <strong className={`text-xs font-black block mt-0.5 ${isTrafficCongested ? 'text-red-500 dark:text-red-400' : 'text-bananaleaf dark:text-emerald-400'}`}>
                             {isTrafficCongested ? '⚠️ Congested' : '🟢 Smooth Flow'}
                           </strong>
                         </div>
@@ -7507,19 +7507,19 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   )}
 
                   {/* Card 4: Active Route Nodes List */}
-                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-3.5 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 pb-2.5">
-                      <h4 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
+                  <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-3.5 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 dark:border-[#2E2A24] pb-2.5">
+                      <h4 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">
                         Active Route Nodes ({activeTrip.length} Stops)
                       </h4>
-                      <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 px-2.5 py-1 rounded-full border border-terracotta/15">
+                      <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 dark:bg-terracotta/15 px-2.5 py-1 rounded-full border border-terracotta/15 dark:border-terracotta/30">
                         🖐️ Drag cards or use ▲ ▼ to reorder
                       </span>
                     </div>
 
                     {activeTrip.length === 0 ? (
-                      <div className="bg-[#FAF8F5] border border-dashed border-[#E9E5DE] p-6 rounded-xl text-center space-y-2">
-                        <p className="text-xs text-charcoal-light font-medium m-0">No destinations or restaurants added yet.</p>
+                      <div className="bg-[#FAF8F5] dark:bg-[#161412] border border-dashed border-[#E9E5DE] dark:border-[#2E2A24] p-6 rounded-xl text-center space-y-2">
+                        <p className="text-xs text-charcoal-light dark:text-gray-400 font-medium m-0">No destinations or restaurants added yet.</p>
                         <button
                           onClick={() => setActiveView('homepage')}
                           className="px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
@@ -7543,19 +7543,19 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   setDraggedIndex(null);
                                 }
                               }}
-                              className={`bg-[#FAF8F5] p-3 rounded-xl border transition-all flex items-center justify-between gap-3 shadow-2xs group cursor-grab active:cursor-grabbing ${draggedIndex === index ? 'border-terracotta bg-terracotta/5 opacity-50 scale-[0.98]' : 'border-[#E9E5DE] hover:border-terracotta/40 hover:bg-white'
+                              className={`bg-[#FAF8F5] dark:bg-[#161412] p-3 rounded-xl border transition-all flex items-center justify-between gap-3 shadow-2xs group cursor-grab active:cursor-grabbing ${draggedIndex === index ? 'border-terracotta bg-terracotta/5 opacity-50 scale-[0.98]' : 'border-[#E9E5DE] dark:border-[#2A2621] hover:border-terracotta/40 dark:hover:border-terracotta/40 hover:bg-white dark:hover:bg-[#1F1C18]'
                                 }`}
                             >
                               <div className="flex items-center gap-3 min-w-0">
-                                <span className="text-charcoal-light/60 group-hover:text-terracotta font-bold text-sm select-none shrink-0" title="Drag to reorder">
+                                <span className="text-charcoal-light/60 dark:text-gray-500 group-hover:text-terracotta font-bold text-sm select-none shrink-0" title="Drag to reorder">
                                   ⋮⋮
                                 </span>
                                 <span className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#2C5E3B] to-bananaleaf text-white text-xs font-black flex items-center justify-center shrink-0 shadow-xs">
                                   {index + 1}
                                 </span>
                                 <div className="min-w-0">
-                                  <span className="block text-xs font-black text-charcoal truncate group-hover:text-terracotta transition-colors">{res.name}</span>
-                                  <span className="block text-[10px] text-charcoal-light font-medium truncate">
+                                  <span className="block text-xs font-black text-charcoal dark:text-white truncate group-hover:text-terracotta transition-colors">{res.name}</span>
+                                  <span className="block text-[10px] text-charcoal-light dark:text-gray-400 font-medium truncate">
                                     📍 {res.municipality} • {res.address}
                                   </span>
                                 </div>
@@ -7566,7 +7566,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   type="button"
                                   disabled={index === 0}
                                   onClick={() => moveItineraryItem(index, index - 1)}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#E9E5DE] bg-white text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5] text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24] bg-white dark:bg-[#221F1C] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#2D2924] text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                   title="Move Up"
                                 >
                                   ▲
@@ -7575,7 +7575,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   type="button"
                                   disabled={index === computedRoutePath.length - 1}
                                   onClick={() => moveItineraryItem(index, index + 1)}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#E9E5DE] bg-white text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5] text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24] bg-white dark:bg-[#221F1C] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#2D2924] text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                   title="Move Down"
                                 >
                                   ▼
@@ -7583,7 +7583,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveFromItinerary(res.id)}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 transition-colors ml-0.5"
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors ml-0.5"
                                   title="Remove stop"
                                 >
                                   ✕
@@ -7595,11 +7595,11 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
                         {/* Save & Manage Plan Form */}
                         {loadedItineraryId ? (
-                          <div className="pt-3 border-t border-[#E9E5DE] space-y-2.5">
-                            <div className="p-3.5 bg-[#2C5E3B]/5 border border-[#2C5E3B]/20 rounded-2xl space-y-2">
+                          <div className="pt-3 border-t border-[#E9E5DE] dark:border-[#2E2A24] space-y-2.5">
+                            <div className="p-3.5 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/20 border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 rounded-2xl space-y-2">
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black text-[#2C5E3B] uppercase tracking-wider flex items-center gap-1.5">
-                                  <span>📂</span> Currently Editing: <strong className="text-charcoal underline">{loadedItineraryName}</strong>
+                                <span className="text-[10px] font-black text-[#2C5E3B] dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                                  <span>📂</span> Currently Editing: <strong className="text-charcoal dark:text-white underline">{loadedItineraryName}</strong>
                                 </span>
                                 <button
                                   type="button"
@@ -7608,7 +7608,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                     setLoadedItineraryName('');
                                     setNewItineraryName('');
                                   }}
-                                  className="text-[10px] font-bold text-terracotta hover:underline cursor-pointer"
+                                  className="text-[10px] font-bold text-terracotta dark:text-orange-400 hover:underline cursor-pointer"
                                 >
                                   + Save as New Instead
                                 </button>
@@ -7618,7 +7618,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 value={newItineraryName}
                                 onChange={(e) => setNewItineraryName(e.target.value)}
                                 placeholder="Itinerary Name"
-                                className="px-3.5 py-2 text-xs font-bold text-charcoal border border-[#2C5E3B]/30 rounded-xl bg-white w-full focus:outline-none focus:ring-1 focus:ring-[#2C5E3B]"
+                                className="px-3.5 py-2 text-xs font-bold text-charcoal dark:text-white border border-[#2C5E3B]/30 dark:border-[#2C5E3B]/50 rounded-xl bg-white dark:bg-[#161412] w-full focus:outline-none focus:ring-1 focus:ring-[#2C5E3B]"
                               />
                             </div>
 
@@ -7640,8 +7640,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                             </div>
                           </div>
                         ) : (
-                          <form onSubmit={handleSaveActiveTrip} className="pt-3 border-t border-[#E9E5DE] space-y-2">
-                            <label className="block text-[10px] font-black text-charcoal-light uppercase tracking-wider">
+                          <form onSubmit={handleSaveActiveTrip} className="pt-3 border-t border-[#E9E5DE] dark:border-[#2E2A24] space-y-2">
+                            <label className="block text-[10px] font-black text-charcoal-light dark:text-gray-300 uppercase tracking-wider">
                               Name and Store Your Plan
                             </label>
                             <div className="flex gap-2">
@@ -7651,7 +7651,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 placeholder="e.g. My Heritage Weekend Crawl"
                                 value={newItineraryName}
                                 onChange={(e) => setNewItineraryName(e.target.value)}
-                                className="flex-1 px-3.5 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs font-semibold focus:outline-none focus:bg-white focus:ring-1 focus:ring-terracotta"
+                                className="flex-1 px-3.5 py-2 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] text-xs font-semibold text-charcoal dark:text-white focus:outline-none focus:bg-white dark:focus:bg-[#1A1815] focus:ring-1 focus:ring-terracotta"
                               />
                               <button
                                 type="submit"
