@@ -6708,10 +6708,17 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 {/* Left Column: Rich Editorial Typography & Narrative */}
                 <div className="lg:col-span-5 space-y-4 text-left">
                   {/* Top Cultural Badge */}
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black tracking-wider uppercase bg-terracotta/10 text-terracotta border border-terracotta/25 shadow-xs">
-                    <span>✨ Manyaman a Kayamanan</span>
-                    <span className="text-terracotta/40">•</span>
-                    <span>Culinary Heritage of Pampanga</span>
+                  <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-terracotta/10 via-[#FFF8F3] to-saffron/15 border border-terracotta/30 text-terracotta shadow-2xs whitespace-nowrap">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-terracotta text-white text-[10px] shadow-xs">
+                      ✨
+                    </span>
+                    <span className="text-[11px] sm:text-xs font-black tracking-wider uppercase text-charcoal">
+                      Manyaman a Kayamanan
+                    </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-terracotta/40"></span>
+                    <span className="text-[10px] sm:text-[11px] font-extrabold tracking-wide uppercase text-terracotta">
+                      Culinary Heritage of Pampanga
+                    </span>
                   </div>
 
                   {/* Main Headline */}
@@ -6733,7 +6740,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 {/* Right Column: Kapampangan Culture & Food Showcase (Centerpiece Sisig surrounded by 4 Heritage Pillars) */}
                 <div className="lg:col-span-7 flex items-center justify-center lg:justify-end">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center w-full max-w-xl">
-                    
+
                     {/* Left Flank: Nature & Heritage (Stacked 2 Cards) */}
                     <div className="flex flex-row sm:flex-col gap-2.5">
                       {/* Card 1: Real Mount Arayat (Bunduk Alaya) */}
@@ -6811,7 +6818,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         </div>
                         <div className="pt-1.5 text-center">
                           <span className="font-extrabold text-xs text-charcoal block leading-tight truncate">Giant Lantern</span>
-                          <span className="text-[9px] font-black text-[#D97706] block mt-0.5 uppercase tracking-wide">Festival</span>
+                          <span className="text-[9px] font-black text-[#D97706] block mt-0.5 uppercase tracking-wide">Christmas Capital</span>
                         </div>
                       </div>
 
@@ -6829,7 +6836,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           </span>
                         </div>
                         <div className="pt-1.5 text-center">
-                          <span className="font-extrabold text-xs text-charcoal block leading-tight truncate">Majigangga</span>
+                          <span className="font-extrabold text-xs text-charcoal block leading-tight truncate">Local Festivals</span>
                           <span className="text-[8.5px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Cultural Celebrations</span>
                         </div>
                       </div>
