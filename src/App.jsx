@@ -7234,27 +7234,27 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 <div className="lg:col-span-5 space-y-5">
 
                   {/* Card 1: Itinerary Config & Starting Location */}
-                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-4 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 pb-3">
+                  <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 dark:border-[#2E2A24] pb-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-xl bg-terracotta/10 flex items-center justify-center text-terracotta">
+                        <div className="w-8 h-8 rounded-xl bg-terracotta/10 dark:bg-terracotta/20 flex items-center justify-center text-terracotta">
                           <Sliders className="h-4 w-4" />
                         </div>
                         <div>
-                          <h3 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
+                          <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">
                             Itinerary Setup
                           </h3>
-                          <span className="text-[10px] text-charcoal-light font-medium">Starting point &amp; routing base</span>
+                          <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">Starting point &amp; routing base</span>
                         </div>
                       </div>
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-terracotta bg-terracotta/10 px-2 py-0.5 rounded-full border border-terracotta/20">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-terracotta bg-terracotta/10 dark:bg-terracotta/20 px-2 py-0.5 rounded-full border border-terracotta/20 dark:border-terracotta/30">
                         GPS Active
                       </span>
                     </div>
 
                     {/* Geolocation Starting Point */}
                     <div className="space-y-1.5">
-                      <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
+                      <label className="block text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider">
                         Starting Location Point
                       </label>
                       <div className="flex gap-2">
@@ -7263,7 +7263,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                             type="text"
                             readOnly
                             value={userLocation.name === "Your Detected Location" ? `📍 Detected (${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)})` : userLocation.name}
-                            className="w-full pl-3 pr-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs font-bold text-charcoal focus:outline-none"
+                            className="w-full pl-3 pr-3 py-2 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] text-xs font-bold text-charcoal dark:text-white focus:outline-none"
                           />
                         </div>
                         <button
@@ -7275,40 +7275,40 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           <span>{isDetectingLocation ? "Locating..." : "Locate Me"}</span>
                         </button>
                       </div>
-                      <p className="text-[10px] text-charcoal-light m-0 font-medium">
+                      <p className="text-[10px] text-charcoal-light dark:text-gray-400 m-0 font-medium">
                         Calibrates starting coordinates point via browser GPS.
                       </p>
                     </div>
                   </div>
 
                   {/* Card 2: Tourist Destinations Picker per Municipality */}
-                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-4 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 pb-3">
+                  <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 dark:border-[#2E2A24] pb-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-xl bg-[#2C5E3B]/10 flex items-center justify-center text-lg">
+                        <div className="w-8 h-8 rounded-xl bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 flex items-center justify-center text-lg">
                           🏛️
                         </div>
                         <div>
-                          <h3 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
+                          <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">
                             Tourist Destinations
                           </h3>
-                          <span className="text-[10px] text-charcoal-light font-medium">Add heritage sights &amp; landmarks to trip</span>
+                          <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">Add heritage sights &amp; landmarks to trip</span>
                         </div>
                       </div>
-                      <span className="text-[10px] font-black text-[#2C5E3B] bg-[#2C5E3B]/10 px-2.5 py-0.5 rounded-full border border-[#2C5E3B]/20">
+                      <span className="text-[10px] font-black text-[#2C5E3B] dark:text-emerald-400 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/25 px-2.5 py-0.5 rounded-full border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40">
                         {attractions.filter(a => attractionMunFilter === 'All' || a.municipality === attractionMunFilter).length} Places
                       </span>
                     </div>
 
                     {/* Select Municipality/City Filter */}
                     <div className="space-y-1.5">
-                      <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
+                      <label className="block text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider">
                         Filter By Municipality / City
                       </label>
                       <select
                         value={attractionMunFilter}
                         onChange={(e) => setAttractionMunFilter(e.target.value)}
-                        className="w-full px-3 py-2 text-xs border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] font-bold text-charcoal focus:outline-none focus:bg-white focus:ring-1 focus:ring-terracotta"
+                        className="w-full px-3 py-2 text-xs border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] font-bold text-charcoal dark:text-white focus:outline-none focus:bg-white dark:focus:bg-[#1E1B18] focus:ring-1 focus:ring-terracotta"
                       >
                         <option value="All">All Municipalities &amp; Cities ({attractions.length} Heritage Sites)</option>
                         {MUNICIPALITIES.map(mun => (
@@ -7323,15 +7323,15 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         const isAdded = activeTrip.some(item => item.id === attr.id);
 
                         return (
-                          <div key={attr.id} className="p-2.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl flex items-center justify-between gap-3 hover:border-terracotta/40 hover:bg-white transition-all shadow-2xs">
+                          <div key={attr.id} className="p-2.5 bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl flex items-center justify-between gap-3 hover:border-terracotta/40 dark:hover:border-terracotta/40 hover:bg-white dark:hover:bg-[#1F1C18] transition-all shadow-2xs">
                             <div className="flex items-start gap-2.5 min-w-0">
                               {attr.image && (
-                                <img src={attr.image} alt={attr.name} className="w-11 h-11 rounded-lg object-cover border border-[#E9E5DE] shrink-0 shadow-2xs" />
+                                <img src={attr.image} alt={attr.name} className="w-11 h-11 rounded-lg object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 shadow-2xs" />
                               )}
                               <div className="min-w-0">
-                                <strong className="text-xs font-black text-charcoal block truncate">{attr.name}</strong>
-                                <span className="text-[10px] font-bold text-terracotta block">📍 {attr.municipality}</span>
-                                <span className="text-[9px] text-charcoal-light font-medium block truncate">{attr.type}</span>
+                                <strong className="text-xs font-black text-charcoal dark:text-white block truncate">{attr.name}</strong>
+                                <span className="text-[10px] font-bold text-terracotta dark:text-orange-400 block">📍 {attr.municipality}</span>
+                                <span className="text-[9px] text-charcoal-light dark:text-gray-400 font-medium block truncate">{attr.type}</span>
                               </div>
                             </div>
 
@@ -7339,7 +7339,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                               <button
                                 type="button"
                                 onClick={() => setSelectedAttraction(attr)}
-                                className="p-1.5 text-charcoal hover:text-terracotta text-xs font-bold rounded-lg bg-white border border-[#E9E5DE] shadow-2xs hover:bg-[#FAF8F5] transition-colors"
+                                className="p-1.5 text-charcoal dark:text-gray-300 hover:text-terracotta text-xs font-bold rounded-lg bg-white dark:bg-[#221F1C] border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:bg-[#FAF8F5] dark:hover:bg-[#2D2924] transition-colors"
                                 title="View Details"
                               >
                                 ℹ️
@@ -7352,7 +7352,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   alert(`✓ Added "${attr.name}" (${attr.municipality}) to your trip itinerary!`);
                                 }}
                                 className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black transition-all ${isAdded
-                                  ? 'bg-bananaleaf/10 text-bananaleaf border border-bananaleaf/20'
+                                  ? 'bg-bananaleaf/10 text-bananaleaf dark:text-emerald-400 border border-bananaleaf/20'
                                   : 'bg-[#2C5E3B] hover:bg-[#20452B] text-white cursor-pointer shadow-xs active:scale-95'
                                   }`}
                               >
@@ -7366,16 +7366,16 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </div>
 
                   {/* Card 3: Live Trip Navigation & Route Controls */}
-                  <div className="bg-white border border-[#2C5E3B]/25 rounded-2xl p-5 space-y-4 shadow-sm">
+                  <div className="bg-white dark:bg-[#1E1B18] border border-[#2C5E3B]/25 dark:border-[#2C5E3B]/40 rounded-2xl p-5 space-y-4 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <span className="text-[9px] font-black text-terracotta uppercase tracking-wider block">
+                        <span className="text-[9px] font-black text-terracotta dark:text-orange-400 uppercase tracking-wider block">
                           🚀 Multi-Stop Navigation Engine
                         </span>
-                        <h4 className="text-sm font-black text-charcoal m-0 flex items-center gap-2 mt-0.5">
+                        <h4 className="text-sm font-black text-charcoal dark:text-white m-0 flex items-center gap-2 mt-0.5">
                           {isTripActive ? (
-                            <span className="flex items-center gap-1.5 text-bananaleaf">
-                              <span className="w-2.5 h-2.5 rounded-full bg-bananaleaf animate-ping inline-block"></span>
+                            <span className="flex items-center gap-1.5 text-bananaleaf dark:text-emerald-400">
+                              <span className="w-2.5 h-2.5 rounded-full bg-bananaleaf dark:bg-emerald-400 animate-ping inline-block"></span>
                               Live Navigation Active
                             </span>
                           ) : (
@@ -7416,11 +7416,11 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
                     {/* Multi-Stop Progress Track */}
                     {computedRoutePath.length > 0 && (
-                      <div className="pt-3 border-t border-[#E9E5DE] space-y-2">
-                        <div className="flex items-center justify-between text-[10px] font-black uppercase text-charcoal-light">
+                      <div className="pt-3 border-t border-[#E9E5DE] dark:border-[#2E2A24] space-y-2">
+                        <div className="flex items-center justify-between text-[10px] font-black uppercase text-charcoal-light dark:text-gray-400">
                           <span>Itinerary Progress: {visitedStops.length} of {computedRoutePath.length} Visited</span>
                           {isTripActive && computedRoutePath[currentStopIndex] && (
-                            <span className="text-terracotta font-black">
+                            <span className="text-terracotta dark:text-orange-400 font-black">
                               Target: {computedRoutePath[currentStopIndex].name} ({distanceToTargetKm ? `${distanceToTargetKm} km` : 'Navigating'})
                             </span>
                           )}
@@ -7436,10 +7436,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                               <div
                                 key={stop.id}
                                 className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 shrink-0 transition-all ${isVisited
-                                  ? 'bg-bananaleaf/10 border-bananaleaf text-bananaleaf font-bold'
+                                  ? 'bg-bananaleaf/10 text-bananaleaf dark:text-emerald-400 border-bananaleaf/30 font-bold'
                                   : isCurrentTarget
                                     ? 'bg-terracotta text-white border-terracotta font-black shadow-xs animate-pulse'
-                                    : 'bg-[#FAF8F5] border-[#E9E5DE] text-charcoal-light font-semibold'
+                                    : 'bg-[#FAF8F5] dark:bg-[#161412] border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal-light dark:text-gray-300 font-semibold'
                                   }`}
                               >
                                 <span>{isVisited ? '✓' : isCurrentTarget ? '🎯' : idx + 1}</span>
@@ -7454,7 +7454,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
                   {/* Live Trip Departure & ETA Navigation Banner */}
                   {computedRoutePath.length > 0 && (
-                    <div className="bg-gradient-to-br from-[#FAF6F0] via-white to-[#F5EFE6] dark:from-[#1E1B18] dark:via-[#171513] dark:to-[#12100E] border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 rounded-2xl p-4.5 space-y-3.5 shadow-sm">
+                    <div className="bg-gradient-to-br from-[#FAF6F0] via-white to-[#F5EFE6] dark:from-[#1E1B18] dark:via-[#161412] dark:to-[#12100E] border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 rounded-2xl p-4.5 space-y-3.5 shadow-sm">
                       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-2xl bg-terracotta/10 dark:bg-terracotta/20 border border-terracotta/20 dark:border-terracotta/30 flex items-center justify-center text-xl shrink-0 shadow-2xs">

@@ -141,8 +141,14 @@ html.dark textarea::placeholder {
 }
 
 /* Dark mode overrides for background gradients that used hardcoded light colors */
-html.dark .bg-gradient-to-br.from-white {
-  background-image: linear-gradient(to bottom right, #1E1B18, #171513, #12100E) !important;
+html.dark .bg-gradient-to-br,
+html.dark [class*="from-[#FAF6F0]"],
+html.dark [class*="from-white"],
+html.dark [class*="via-white"],
+html.dark [class*="to-[#F5EFE6]"],
+html.dark [class*="to-[#F5EFEB]"] {
+  background-image: linear-gradient(to bottom right, #1E1B18, #161412, #12100E) !important;
+  background-color: #1E1B18 !important;
 }
 
 html.dark [class*="via-\[\#FFF8F3\]"] {
