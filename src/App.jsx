@@ -258,7 +258,7 @@ const getSavedItinerariesForUser = (profile) => {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // Initial starter templates for new accounts
@@ -395,7 +395,7 @@ function App() {
   // Consumer Views: 'homepage', 'auth', 'dashboard'
   const [activeView, setActiveView] = useState('homepage');
   const [branchSelectTarget, setBranchSelectTarget] = useState(null);
-  
+
   // Persistent Authenticated User Session
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
@@ -406,8 +406,8 @@ function App() {
           return true;
         }
       }
-    } catch (e) {}
-    try { localStorage.removeItem('kanyamanan_active_user'); } catch (e) {}
+    } catch (e) { }
+    try { localStorage.removeItem('kanyamanan_active_user'); } catch (e) { }
     return false; // Default to logged out / guest mode when no active session exists
   });
 
@@ -429,8 +429,8 @@ function App() {
           return parsed;
         }
       }
-    } catch (e) {}
-    try { localStorage.removeItem('kanyamanan_active_user'); } catch (e) {}
+    } catch (e) { }
+    try { localStorage.removeItem('kanyamanan_active_user'); } catch (e) { }
     return {
       username: 'Guest',
       email: '',
@@ -453,7 +453,7 @@ function App() {
         }
       }
     } catch (e) {
-      try { localStorage.removeItem('kanyamanan_active_user'); } catch (err) {}
+      try { localStorage.removeItem('kanyamanan_active_user'); } catch (err) { }
     }
   }, []);
 
@@ -553,7 +553,7 @@ function App() {
       }
     } catch (e) {
       console.error("LocalStorage attractions load error:", e);
-      try { localStorage.removeItem('kanyamanan_attractions_db'); } catch (err) {}
+      try { localStorage.removeItem('kanyamanan_attractions_db'); } catch (err) { }
     }
     return PRESEEDED_ATTRACTIONS;
   });
@@ -607,7 +607,7 @@ function App() {
           setRestaurants(liveData);
           try {
             localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(liveData));
-          } catch (e) {}
+          } catch (e) { }
         }
         const liveRequests = await fetchDjangoChangeRequests();
         if (Array.isArray(liveRequests) && liveRequests.length > 0) {
@@ -627,7 +627,7 @@ function App() {
           setPendingApprovals(mapped);
           try {
             localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(mapped));
-          } catch (e) {}
+          } catch (e) { }
         }
       } catch (err) {
         console.warn("Initial Django sync warning:", err);
@@ -649,7 +649,7 @@ function App() {
   // Trip routing pipeline State
   const [activeTrip, setActiveTrip] = useState([]);
   const [draggedIndex, setDraggedIndex] = useState(null);
-  
+
   // Per-Account Saved Itineraries (Dual Persistence: LocalStorage + Firebase Firestore)
   const [savedItineraries, setSavedItineraries] = useState(() => {
     try {
@@ -696,7 +696,7 @@ function App() {
       if (userProfile?.email) {
         localStorage.setItem(`kanyamanan_itineraries_${String(userProfile.email).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`, JSON.stringify(updatedList));
       }
-    } catch (e) {}
+    } catch (e) { }
     saveUserItinerariesToCloud(userKey, updatedList);
     if (userProfile?.username) {
       saveUserItinerariesToCloud(String(userProfile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_'), updatedList);
@@ -712,7 +712,7 @@ function App() {
   // Sync Saved Itineraries per account from LocalStorage and Realtime Firestore (Non-Destructive)
   useEffect(() => {
     const userKey = getUserAccountKey(userProfile);
-    
+
     // 1. Instant pull from localStorage or auto-recovery
     const localRecovered = getSavedItinerariesForUser(userProfile);
     if (Array.isArray(localRecovered) && localRecovered.length > 0) {
@@ -726,7 +726,7 @@ function App() {
         try {
           localStorage.setItem(`kanyamanan_itineraries_${userKey}`, JSON.stringify(cloudItins));
           localStorage.setItem('kanyamanan_master_itineraries', JSON.stringify(cloudItins));
-        } catch (e) {}
+        } catch (e) { }
       } else {
         // If cloud document is new/empty, safely upload local custom itineraries to cloud
         const currentLocal = getSavedItinerariesForUser(userProfile);
@@ -866,7 +866,7 @@ function App() {
           setPendingApprovals(cloudRequests);
           try {
             localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(cloudRequests));
-          } catch (e) {}
+          } catch (e) { }
         }
       });
       return () => unsub();
@@ -891,7 +891,7 @@ function App() {
             });
             try {
               localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(merged));
-            } catch (e) {}
+            } catch (e) { }
             return merged;
           });
         }
@@ -1358,7 +1358,7 @@ function App() {
       if (logoImg) {
         try {
           ctx.drawImage(logoImg, canvas.width / 2 - 40, 68, 80, 80);
-        } catch (e) {}
+        } catch (e) { }
       }
 
       // Festive Header Tagline
@@ -1765,7 +1765,7 @@ function App() {
       });
   }, [userLocation, computedRoutePath]);
 
-  
+
   // Live Location & Proximity Tracker for Multi-Stop Trip Progression
   useEffect(() => {
     if (!isTripActive || computedRoutePath.length === 0) return;
@@ -1869,19 +1869,19 @@ function App() {
         clearInterval(simIntervalRef.current);
         simIntervalRef.current = null;
       }
-      
+
       setIsTrackingGPS(true);
       watchIdRef.current = navigator.geolocation.watchPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           const newCoords = [latitude, longitude];
-          
+
           setUserLocation({
             lat: latitude,
             lng: longitude,
             name: `GPS Tracked Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`
           });
-          
+
           if (userMarkerRef.current) {
             userMarkerRef.current.setLatLng(newCoords);
           }
@@ -1902,7 +1902,7 @@ function App() {
   // Route Simulation Logic
   const startRouteSimulation = () => {
     if (roadRouteCoords.length === 0) return;
-    
+
     if (isTrackingGPS) {
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
@@ -1910,14 +1910,14 @@ function App() {
       }
       setIsTrackingGPS(false);
     }
-    
+
     if (simIntervalRef.current) {
       clearInterval(simIntervalRef.current);
     }
-    
+
     setIsSimulating(true);
     let currentStep = 0;
-    
+
     simIntervalRef.current = setInterval(() => {
       if (currentStep >= roadRouteCoords.length) {
         clearInterval(simIntervalRef.current);
@@ -1926,16 +1926,16 @@ function App() {
         alert("Destination reached!");
         return;
       }
-      
+
       const newCoords = roadRouteCoords[currentStep];
-      
+
       if (userMarkerRef.current) {
         userMarkerRef.current.setLatLng(newCoords);
       }
       if (mapRef.current) {
         mapRef.current.setView(newCoords, 15);
       }
-      
+
       currentStep++;
     }, 150);
   };
@@ -1987,7 +1987,7 @@ function App() {
         .addTo(map)
         .bindPopup(`<b>Start Point:</b> ${userLocation.name}`)
         .openPopup();
-      
+
       userMarkerRef.current = userMarker;
       markers.push([userLocation.lat, userLocation.lng]);
     }
@@ -2010,7 +2010,7 @@ function App() {
         weight: 5,
         opacity: 0.8
       }).addTo(map);
-      
+
       if (!isSimulating) {
         map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
       }
@@ -2037,7 +2037,7 @@ function App() {
   const municipalityCounts = useMemo(() => {
     const counts = {};
     MUNICIPALITIES.forEach(m => {
-      counts[m] = (restaurants || []).filter(r => 
+      counts[m] = (restaurants || []).filter(r =>
         r && (r.municipality === m || (Array.isArray(r.branches) && r.branches.some(b => b && (typeof b === 'string' ? b === m : b.municipality === m))))
       ).length;
     });
@@ -2046,7 +2046,7 @@ function App() {
 
   // Alphabetically Sorted Restaurants Helper (A to Z)
   const sortedRestaurants = useMemo(() => {
-    return [...(restaurants || [])].sort((a, b) => 
+    return [...(restaurants || [])].sort((a, b) =>
       (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
     );
   }, [restaurants]);
@@ -2059,13 +2059,13 @@ function App() {
 
       const resName = (res.name || '').toLowerCase();
       const resDesc = (res.description || '').toLowerCase();
-      const matchesMenu = Array.isArray(res.menu) && res.menu.some(dish => 
+      const matchesMenu = Array.isArray(res.menu) && res.menu.some(dish =>
         dish && (dish.name || '').toLowerCase().includes(q)
       );
 
       const matchesSearch = !q || resName.includes(q) || resDesc.includes(q) || matchesMenu;
       const matchesCorridor = selectedCorridor === 'All' || res.corridor === selectedCorridor;
-      const matchesMunicipality = selectedMunicipality === 'All' || 
+      const matchesMunicipality = selectedMunicipality === 'All' ||
         res.municipality === selectedMunicipality ||
         (Array.isArray(res.branches) && res.branches.some(b => b && (typeof b === 'string' ? b === selectedMunicipality : b.municipality === selectedMunicipality)));
 
@@ -2281,13 +2281,13 @@ function App() {
         typeof b === 'string'
           ? b
           : {
-              branchName: b?.branchName,
-              municipality: b?.municipality,
-              address: b?.address,
-              operatingHours: b?.operatingHours,
-              lat: b?.lat,
-              lng: b?.lng
-            }
+            branchName: b?.branchName,
+            municipality: b?.municipality,
+            address: b?.address,
+            operatingHours: b?.operatingHours,
+            lat: b?.lat,
+            lng: b?.lng
+          }
       ),
       menu: safeArray(r?.menu).slice(0, 15).map(compactDish)
     });
@@ -2411,7 +2411,7 @@ function App() {
     const attractionScore = (a) => {
       let score = overlapScore(getAttractionText(a), queryTokens) * 2;
       if (localConstraints.location &&
-          normalize(a?.municipality) === normalize(localConstraints.location)) {
+        normalize(a?.municipality) === normalize(localConstraints.location)) {
         score += 30;
       }
       return score;
@@ -2626,7 +2626,7 @@ ${JSON.stringify(plannerContext)}
           if (first >= 0 && last > first) {
             try {
               return JSON.parse(fenced.slice(first, last + 1));
-            } catch (_) {}
+            } catch (_) { }
           }
         }
       }
@@ -2672,8 +2672,8 @@ ${JSON.stringify(plannerContext)}
       actions: [{ type: 'none', targetNames: [] }],
       answerMode:
         localConstraints.asksCurrentTrip ? 'current_status' :
-        localConstraints.asksRoute ? 'itinerary' :
-        'direct',
+          localConstraints.asksRoute ? 'itinerary' :
+            'direct',
       mustMention: [],
       confidence: 0.55
     };
@@ -3104,11 +3104,11 @@ ${JSON.stringify(toolResults)}
 
 LIVE USER PROFILE:
 ${JSON.stringify({
-  username: userProfile?.username || 'Guest',
-  calorieLimit: toNumber(userProfile?.calorieLimit, 2200),
-  budgetLimit: toNumber(userProfile?.budgetLimit, 1500),
-  numberOfPersons: toNumber(numPersons, 1)
-})}
+      username: userProfile?.username || 'Guest',
+      calorieLimit: toNumber(userProfile?.calorieLimit, 2200),
+      budgetLimit: toNumber(userProfile?.budgetLimit, 1500),
+      numberOfPersons: toNumber(numPersons, 1)
+    })}
 
 CURRENT TRIP:
 ${JSON.stringify(currentTrip)}
@@ -3207,20 +3207,20 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       if (plan.primaryIntent === 'planning' || localConstraints.asksRoute || plan.stopCount) {
         const summary = selectedPlanStops.length
           ? selectedPlanStops.map((x, i) => {
-              const r = x.restaurant;
-              const dish = x.dish;
-              const dishLine = dish
-                ? `• ${dish.name} • ₱${toNumber(dish.price)} • ${toNumber(dish.nutrition?.calories)} kcal`
-                : '• Menu details are not currently registered; choose from the available menu on arrival.';
-              const branchLine = r.selectedBranchName &&
-                normalize(r.selectedBranchName) !== normalize(r.municipality)
-                ? `\n• Branch: ${r.selectedBranchName}`
-                : '';
-              return `**Stop ${i + 1}: ${r.name}** — ${r.municipality}${branchLine}\n` +
-                `• 📍 ${r.address || 'Address not registered'}\n` +
-                `• 🕐 ${r.operatingHours || 'Hours not registered'}\n` +
-                dishLine;
-            }).join('\n\n')
+            const r = x.restaurant;
+            const dish = x.dish;
+            const dishLine = dish
+              ? `• ${dish.name} • ₱${toNumber(dish.price)} • ${toNumber(dish.nutrition?.calories)} kcal`
+              : '• Menu details are not currently registered; choose from the available menu on arrival.';
+            const branchLine = r.selectedBranchName &&
+              normalize(r.selectedBranchName) !== normalize(r.municipality)
+              ? `\n• Branch: ${r.selectedBranchName}`
+              : '';
+            return `**Stop ${i + 1}: ${r.name}** — ${r.municipality}${branchLine}\n` +
+              `• 📍 ${r.address || 'Address not registered'}\n` +
+              `• 🕐 ${r.operatingHours || 'Hours not registered'}\n` +
+              dishLine;
+          }).join('\n\n')
           : `No registered restaurant/branch matches the requested area${targetLocation ? ` (${targetLocation})` : ''}.`;
 
         const unknownText = (unknownNutritionStops || unknownPriceStops)
@@ -3314,24 +3314,24 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         const normalizedResponse = normalize(botResponse);
 
         if (localConstraints.location &&
-            !normalizedResponse.includes(normalize(localConstraints.location).replace(' city', ''))) {
+          !normalizedResponse.includes(normalize(localConstraints.location).replace(' city', ''))) {
           botResponse = null;
         }
 
         if (localConstraints.excludesBagoong &&
-            /bagoong.*recommended|recommend.*bagoong|try.*bagoong/i.test(normalizedResponse)) {
+          /bagoong.*recommended|recommend.*bagoong|try.*bagoong/i.test(normalizedResponse)) {
           botResponse = null;
         }
 
         if (localConstraints.calorieLimit !== null &&
-            (localConstraints.asksRoute || localConstraints.asksDishList) &&
-            !normalizedResponse.includes(String(localConstraints.calorieLimit))) {
+          (localConstraints.asksRoute || localConstraints.asksDishList) &&
+          !normalizedResponse.includes(String(localConstraints.calorieLimit))) {
           botResponse = null;
         }
 
         if (localConstraints.budgetLimit !== null &&
-            (localConstraints.asksRoute || localConstraints.asksRestaurantList) &&
-            !normalizedResponse.includes(String(localConstraints.budgetLimit))) {
+          (localConstraints.asksRoute || localConstraints.asksRestaurantList) &&
+          !normalizedResponse.includes(String(localConstraints.budgetLimit))) {
           botResponse = null;
         }
 
@@ -3392,7 +3392,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     setActiveTrip([...activeTrip, res]);
   };
 
-  
+
   // Helper to reorder itinerary stops (Drag & Drop / Move Up / Move Down)
   const moveItineraryItem = (fromIndex, toIndex) => {
     if (toIndex < 0 || toIndex >= activeTrip.length) return;
@@ -3537,7 +3537,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
       // Match restaurant
       let match = (restaurants || []).find(r => r && (
-        r.name === stopNameStr || 
+        r.name === stopNameStr ||
         r.id === stopNameStr ||
         normalize(r.name) === normalize(stopNameStr) ||
         stopNameStr.toLowerCase().includes(r.name.toLowerCase())
@@ -3563,7 +3563,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
       // Match attraction
       let attrMatch = (attractions || []).find(a => a && (
-        a.name === stopNameStr || 
+        a.name === stopNameStr ||
         a.id === stopNameStr ||
         normalize(a.name) === normalize(stopNameStr) ||
         stopNameStr.toLowerCase().includes(a.name.toLowerCase())
@@ -3696,7 +3696,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     setUserProfile(newProfile);
     try {
       localStorage.setItem('kanyamanan_active_user', JSON.stringify(newProfile));
-    } catch (err) {}
+    } catch (err) { }
     saveUserProfileToCloud(newProfile);
     registerTouristInDjango(regForm.username, regForm.email, regForm.password);
     setIsAuthenticated(true);
@@ -3726,7 +3726,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     setUserProfile(newProfile);
     try {
       localStorage.setItem('kanyamanan_active_user', JSON.stringify(newProfile));
-    } catch (err) {}
+    } catch (err) { }
     saveUserProfileToCloud(newProfile);
     setIsAuthenticated(true);
     setIsGuest(false);
@@ -3748,7 +3748,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       }
     } else {
       // Authenticate Restaurant Owner using assigned username & password
-      const matchedRes = restaurants.find(r => 
+      const matchedRes = restaurants.find(r =>
         (r.username || 'owner').trim().toLowerCase() === adminLoginUser.trim().toLowerCase() &&
         (r.password || 'password123') === adminLoginPass
       );
@@ -3837,18 +3837,18 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     setAdminDishes(
       res.menu.length > 0
         ? res.menu.map(m => ({
-            name: m.name || '',
-            price: m.price || '',
-            ingredients: m.ingredients || '',
-            allergens: m.allergens || '',
-            calories: m.nutrition?.calories || '',
-            image: m.image || ''
-          }))
+          name: m.name || '',
+          price: m.price || '',
+          ingredients: m.ingredients || '',
+          allergens: m.allergens || '',
+          calories: m.nutrition?.calories || '',
+          image: m.image || ''
+        }))
         : [{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]
     );
   };
 
-  
+
   // Free AI Menu OCR & Intelligent Text Organizer Engine
   const handleAiAnalyzeMenu = () => {
     if (!aiRawMenuText.trim() && !aiMenuImage) {
@@ -3860,7 +3860,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
     setTimeout(() => {
       let rawText = aiRawMenuText.trim();
-      
+
       // Default fallback simulated text if user uploaded an image without typing text
       if (!rawText && aiMenuImage) {
         rawText = `Special Pork Sisig ₱280 - Pork mask, calamansi, chili, onion
@@ -3951,8 +3951,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     const passwordToSave = adminForm.password || 'password123';
 
     // Strict Unique Username Validation Check
-    const duplicateUser = restaurants.find(r => 
-      r.id !== adminEditingId && 
+    const duplicateUser = restaurants.find(r =>
+      r.id !== adminEditingId &&
       (r.username || '').trim().toLowerCase() === usernameToSave
     );
 
@@ -4064,8 +4064,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
         // 6. Branch Locations (Added / Removed / Modified Hours or Locations)
         const origBranches = Array.isArray(originalRes?.branches) ? originalRes.branches : [];
-        const origBranchSummary = origBranches.map((b, i) => `${b.branchName || `Branch #${i+1}`}: ${b.municipality || ''} (${b.operatingHours || ''})`).join(' | ');
-        const newBranchSummary = updatedBranches.map((b, i) => `${b.branchName || `Branch #${i+1}`}: ${b.municipality || ''} (${b.operatingHours || ''})`).join(' | ');
+        const origBranchSummary = origBranches.map((b, i) => `${b.branchName || `Branch #${i + 1}`}: ${b.municipality || ''} (${b.operatingHours || ''})`).join(' | ');
+        const newBranchSummary = updatedBranches.map((b, i) => `${b.branchName || `Branch #${i + 1}`}: ${b.municipality || ''} (${b.operatingHours || ''})`).join(' | ');
 
         if (origBranchSummary !== newBranchSummary) {
           if (updatedBranches.length !== origBranches.length) {
@@ -4160,7 +4160,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         const next = prev.map(res => res.id === adminEditingId ? updatedResObj : res);
         try {
           localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
         return next;
       });
       setAdminSearchQuery('');
@@ -4244,7 +4244,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         const next = [newRes, ...prev];
         try {
           localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
         return next;
       });
 
@@ -4266,7 +4266,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
   };
 
-  
+
   // Start editing a Tourist Attraction in Admin portal
   const startAdminAttractionEdit = (attr) => {
     if (!attr) return;
@@ -4370,7 +4370,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         const next = prev.filter(r => r.id !== id);
         try {
           localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
         return next;
       });
       setActiveTrip(prev => prev.filter(r => r.id !== id));
@@ -4508,7 +4508,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     setPendingApprovals(updatedPending);
     try {
       localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(updatedPending));
-    } catch (e) {}
+    } catch (e) { }
 
     // Sync rejection status to Firebase Firestore Cloud
     if (isFirebaseConfigured()) {
@@ -4543,7 +4543,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     setPendingApprovals(updatedPending);
     try {
       localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(updatedPending));
-    } catch (e) {}
+    } catch (e) { }
 
     // Sync dismissal to Firebase Firestore Cloud
     if (isFirebaseConfigured()) {
@@ -4561,7 +4561,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       return (
         <div className="min-h-screen bg-charcoal text-white flex flex-col justify-center items-center p-6 font-sans">
           <div className="max-w-md w-full bg-charcoal-light border border-charcoal-dark p-8 rounded-2xl shadow-2xl space-y-6 relative animate-slide-up">
-            
+
             <div className="text-center space-y-2">
               <div className="w-12 h-12 bg-terracotta rounded-2xl flex items-center justify-center mx-auto shadow-lg">
                 <Database className="h-6 w-6 text-white" />
@@ -4736,31 +4736,29 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           </div>
         </header>
 
-      
+
 
 
         {/* Admin main work grid */}
-        
+
         {/* Admin Section Navigation Tabs (Super Admin / Merchant) */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
           <div className="bg-white border border-[#E9E5DE] rounded-2xl p-1.5 shadow-sm flex flex-col sm:flex-row items-stretch gap-1.5">
             <button
               type="button"
               onClick={() => setAdminSectionTab('restaurants')}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                adminSectionTab === 'restaurants'
+              className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${adminSectionTab === 'restaurants'
                   ? 'bg-terracotta text-white shadow-md'
                   : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
-              }`}
+                }`}
             >
               <span className="text-sm">🏪</span>
               <span className="tracking-wide uppercase">Kapampangan Restaurants</span>
               <span
-                className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${
-                  adminSectionTab === 'restaurants'
+                className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${adminSectionTab === 'restaurants'
                     ? 'bg-white/20 text-white'
                     : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
-                }`}
+                  }`}
               >
                 {restaurants.length}
               </span>
@@ -4771,11 +4769,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 <button
                   type="button"
                   onClick={() => setAdminSectionTab('requests')}
-                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    adminSectionTab === 'requests'
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${adminSectionTab === 'requests'
                       ? 'bg-terracotta text-white shadow-md'
                       : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
-                  }`}
+                    }`}
                 >
                   <span className="text-sm">📋</span>
                   <span className="tracking-wide uppercase">Change Requests</span>
@@ -4785,11 +4782,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     </span>
                   ) : (
                     <span
-                      className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${
-                        adminSectionTab === 'requests'
+                      className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${adminSectionTab === 'requests'
                           ? 'bg-white/20 text-white'
                           : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
-                      }`}
+                        }`}
                     >
                       {pendingApprovals.length}
                     </span>
@@ -4799,20 +4795,18 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 <button
                   type="button"
                   onClick={() => setAdminSectionTab('attractions')}
-                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                    adminSectionTab === 'attractions'
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${adminSectionTab === 'attractions'
                       ? 'bg-terracotta text-white shadow-md'
                       : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
-                  }`}
+                    }`}
                 >
                   <span className="text-sm">🏛️</span>
                   <span className="tracking-wide uppercase">Tourist Attractions</span>
                   <span
-                    className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${
-                      adminSectionTab === 'attractions'
+                    className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${adminSectionTab === 'attractions'
                         ? 'bg-white/20 text-white'
                         : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
-                    }`}
+                      }`}
                   >
                     {attractions.length}
                   </span>
@@ -5134,8 +5128,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       )}
                     </div>
 
-                    
-                    
+
+
                     {/* Prominent Multi-Branch Location Manager inside Main Form Card */}
                     <div className="bg-[#FAF8F5] border border-[#2C5E3B]/25 p-4 rounded-xl space-y-3">
                       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E9E5DE] pb-2">
@@ -5382,230 +5376,230 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       />
                     </div>
 
-                  
-                  {/* AI Menu OCR & Text Scanner Component */}
-                  <div className="bg-gradient-to-r from-terracotta/10 via-saffron/10 to-[#2C5E3B]/10 border border-terracotta/30 p-4 rounded-xl space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">🤖</span>
+
+                    {/* AI Menu OCR & Text Scanner Component */}
+                    <div className="bg-gradient-to-r from-terracotta/10 via-saffron/10 to-[#2C5E3B]/10 border border-terracotta/30 p-4 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">🤖</span>
+                          <div>
+                            <h4 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
+                              AI Menu OCR & Automatic Dish Cataloger
+                            </h4>
+                            <span className="text-[10px] text-charcoal-light font-medium block">
+                              Upload a menu photo or paste raw menu text to auto-generate dishes, prices, ingredients & allergen warnings
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-black text-bananaleaf bg-white px-2.5 py-1 rounded-full border border-bananaleaf/30 shadow-2xs">
+                          ⚡ AI Engine
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <h4 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
-                            AI Menu OCR & Automatic Dish Cataloger
-                          </h4>
-                          <span className="text-[10px] text-charcoal-light font-medium block">
-                            Upload a menu photo or paste raw menu text to auto-generate dishes, prices, ingredients & allergen warnings
-                          </span>
+                          <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">
+                            📷 Option 1: Upload Menu Board Photo / Flyer
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => setAiMenuImage(reader.result);
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                            className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">
+                            📝 Option 2: Paste Raw Menu Text / Price List
+                          </label>
+                          <textarea
+                            rows={2}
+                            placeholder="e.g. SOUQ Pork Sisig ₱280, Crispy Kare-Kare ₱390, Bringhe ₱220..."
+                            value={aiRawMenuText}
+                            onChange={(e) => setAiRawMenuText(e.target.value)}
+                            className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white"
+                          />
                         </div>
                       </div>
-                      <span className="text-[10px] font-black text-bananaleaf bg-white px-2.5 py-1 rounded-full border border-bananaleaf/30 shadow-2xs">
-                        ⚡ AI Engine
-                      </span>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">
-                          📷 Option 1: Upload Menu Board Photo / Flyer
-                        </label>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files[0];
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onloadend = () => setAiMenuImage(reader.result);
-                              reader.readAsDataURL(file);
-                            }
-                          }}
-                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">
-                          📝 Option 2: Paste Raw Menu Text / Price List
-                        </label>
-                        <textarea
-                          rows={2}
-                          placeholder="e.g. SOUQ Pork Sisig ₱280, Crispy Kare-Kare ₱390, Bringhe ₱220..."
-                          value={aiRawMenuText}
-                          onChange={(e) => setAiRawMenuText(e.target.value)}
-                          className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white"
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      disabled={isAiScanning}
-                      onClick={handleAiAnalyzeMenu}
-                      className="w-full py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
-                    >
-                      {isAiScanning ? "🤖 AI Scanning & Organizing Menu Items..." : "✨ Analyze & Auto-Organize Menu with AI"}
-                    </button>
-                  </div>
-
-
-                  {/* Dynamic Dishes Input */}
-                  <div className="border border-[#E9E5DE] rounded-xl p-4 bg-[#FAF8F5] space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-[10px] font-extrabold text-charcoal-light uppercase tracking-wider flex items-center gap-1">
-                        <Coffee className="h-3.5 w-3.5" /> Signature Dishes ({adminDishes.length})
-                      </h4>
                       <button
                         type="button"
-                        onClick={() => setAdminDishes([...adminDishes, { name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }])}
-                        className="px-2.5 py-1 bg-terracotta text-white text-[10px] font-black rounded-lg hover:bg-terracotta-dark transition-colors flex items-center gap-1"
+                        disabled={isAiScanning}
+                        onClick={handleAiAnalyzeMenu}
+                        className="w-full py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
                       >
-                        <Plus className="h-3 w-3" /> Add Dish
+                        {isAiScanning ? "🤖 AI Scanning & Organizing Menu Items..." : "✨ Analyze & Auto-Organize Menu with AI"}
                       </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {adminDishes.map((dish, idx) => (
-                        <div key={idx} className="p-3 bg-white rounded-lg border border-[#E9E5DE] space-y-2 relative">
-                          <div className="flex items-center justify-between">
-                            <span className="block text-[10px] font-black text-terracotta">DISH {String.fromCharCode(65 + idx)}</span>
-                            {adminDishes.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => setAdminDishes(adminDishes.filter((_, i) => i !== idx))}
-                                className="text-[9px] text-terracotta hover:text-red-600 font-bold px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors"
-                              >
-                                ✕ Remove
-                              </button>
-                            )}
-                          </div>
-                          <div className="grid grid-cols-3 gap-2">
+
+                    {/* Dynamic Dishes Input */}
+                    <div className="border border-[#E9E5DE] rounded-xl p-4 bg-[#FAF8F5] space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-[10px] font-extrabold text-charcoal-light uppercase tracking-wider flex items-center gap-1">
+                          <Coffee className="h-3.5 w-3.5" /> Signature Dishes ({adminDishes.length})
+                        </h4>
+                        <button
+                          type="button"
+                          onClick={() => setAdminDishes([...adminDishes, { name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }])}
+                          className="px-2.5 py-1 bg-terracotta text-white text-[10px] font-black rounded-lg hover:bg-terracotta-dark transition-colors flex items-center gap-1"
+                        >
+                          <Plus className="h-3 w-3" /> Add Dish
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {adminDishes.map((dish, idx) => (
+                          <div key={idx} className="p-3 bg-white rounded-lg border border-[#E9E5DE] space-y-2 relative">
+                            <div className="flex items-center justify-between">
+                              <span className="block text-[10px] font-black text-terracotta">DISH {String.fromCharCode(65 + idx)}</span>
+                              {adminDishes.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setAdminDishes(adminDishes.filter((_, i) => i !== idx))}
+                                  className="text-[9px] text-terracotta hover:text-red-600 font-bold px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors"
+                                >
+                                  ✕ Remove
+                                </button>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              <input
+                                type="text"
+                                placeholder="Dish name"
+                                value={dish.name}
+                                onChange={(e) => {
+                                  const updated = [...adminDishes];
+                                  updated[idx] = { ...updated[idx], name: e.target.value };
+                                  setAdminDishes(updated);
+                                }}
+                                className="col-span-2 px-2 py-1 text-[11px] border border-[#E9E5DE] rounded bg-white"
+                              />
+                              <input
+                                type="number"
+                                placeholder="Price (₱)"
+                                value={dish.price}
+                                onChange={(e) => {
+                                  const updated = [...adminDishes];
+                                  updated[idx] = { ...updated[idx], price: e.target.value };
+                                  setAdminDishes(updated);
+                                }}
+                                className="px-2 py-1 text-[11px] border border-[#E9E5DE] rounded bg-white"
+                              />
+                            </div>
                             <input
                               type="text"
-                              placeholder="Dish name"
-                              value={dish.name}
+                              placeholder="Ingredients list"
+                              value={dish.ingredients}
                               onChange={(e) => {
                                 const updated = [...adminDishes];
-                                updated[idx] = { ...updated[idx], name: e.target.value };
+                                updated[idx] = { ...updated[idx], ingredients: e.target.value };
                                 setAdminDishes(updated);
                               }}
-                              className="col-span-2 px-2 py-1 text-[11px] border border-[#E9E5DE] rounded bg-white"
+                              className="w-full px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
                             />
-                            <input
-                              type="number"
-                              placeholder="Price (₱)"
-                              value={dish.price}
-                              onChange={(e) => {
-                                const updated = [...adminDishes];
-                                updated[idx] = { ...updated[idx], price: e.target.value };
-                                setAdminDishes(updated);
-                              }}
-                              className="px-2 py-1 text-[11px] border border-[#E9E5DE] rounded bg-white"
-                            />
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                type="text"
+                                placeholder="Allergen tags"
+                                value={dish.allergens}
+                                onChange={(e) => {
+                                  const updated = [...adminDishes];
+                                  updated[idx] = { ...updated[idx], allergens: e.target.value };
+                                  setAdminDishes(updated);
+                                }}
+                                className="px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
+                              />
+                              <input
+                                type="number"
+                                placeholder="Calories (kcal)"
+                                value={dish.calories}
+                                onChange={(e) => {
+                                  const updated = [...adminDishes];
+                                  updated[idx] = { ...updated[idx], calories: e.target.value };
+                                  setAdminDishes(updated);
+                                }}
+                                className="px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="block text-[9px] font-bold text-charcoal-light uppercase tracking-wider">
+                                Upload Dish Photo (Required)
+                              </label>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      const updated = [...adminDishes];
+                                      updated[idx] = { ...updated[idx], image: reader.result };
+                                      setAdminDishes(updated);
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                                className="block w-full px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white text-charcoal focus:outline-none focus:ring-1 focus:ring-terracotta"
+                              />
+                              {dish.image && (
+                                <div className="flex items-center gap-1.5 mt-1">
+                                  <img src={dish.image} className="w-6 h-6 rounded object-cover border border-[#E9E5DE]" alt="Preview" />
+                                  <span className="text-[8px] text-bananaleaf font-black">✓ Photo Uploaded</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <input
-                            type="text"
-                            placeholder="Ingredients list"
-                            value={dish.ingredients}
-                            onChange={(e) => {
-                              const updated = [...adminDishes];
-                              updated[idx] = { ...updated[idx], ingredients: e.target.value };
-                              setAdminDishes(updated);
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 justify-end pt-3 border-t border-[#E9E5DE]">
+                      {adminEditingId ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAdminEditingId(null);
+                              setAdminForm({
+                                name: '', municipality: 'City of San Fernando',
+                                operatingHours: '09:00 AM - 09:00 PM', priceTier: '$$',
+                                address: '', image: '', images: [], description: ''
+                              });
+                              setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
                             }}
-                            className="w-full px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
-                          />
-                          <div className="grid grid-cols-2 gap-2">
-                            <input
-                              type="text"
-                              placeholder="Allergen tags"
-                              value={dish.allergens}
-                              onChange={(e) => {
-                                const updated = [...adminDishes];
-                                updated[idx] = { ...updated[idx], allergens: e.target.value };
-                                setAdminDishes(updated);
-                              }}
-                              className="px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
-                            />
-                            <input
-                              type="number"
-                              placeholder="Calories (kcal)"
-                              value={dish.calories}
-                              onChange={(e) => {
-                                const updated = [...adminDishes];
-                                updated[idx] = { ...updated[idx], calories: e.target.value };
-                                setAdminDishes(updated);
-                              }}
-                              className="px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <label className="block text-[9px] font-bold text-charcoal-light uppercase tracking-wider">
-                              Upload Dish Photo (Required)
-                            </label>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => {
-                                    const updated = [...adminDishes];
-                                    updated[idx] = { ...updated[idx], image: reader.result };
-                                    setAdminDishes(updated);
-                                  };
-                                  reader.readAsDataURL(file);
-                                }
-                              }}
-                              className="block w-full px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white text-charcoal focus:outline-none focus:ring-1 focus:ring-terracotta"
-                            />
-                            {dish.image && (
-                              <div className="flex items-center gap-1.5 mt-1">
-                                <img src={dish.image} className="w-6 h-6 rounded object-cover border border-[#E9E5DE]" alt="Preview" />
-                                <span className="text-[8px] text-bananaleaf font-black">✓ Photo Uploaded</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                            className="px-4 py-2 border border-[#E9E5DE] rounded-xl text-xs font-bold text-charcoal hover:bg-[#FAF8F5] cursor-pointer"
+                          >
+                            Cancel Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleSaveAdminListing}
+                            className="px-6 py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-98"
+                          >
+                            💾 Save Changes
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="submit"
+                          className="px-6 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-black shadow-md transition-all cursor-pointer"
+                        >
+                          Register Kapampangan Restaurant
+                        </button>
+                      )}
                     </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 justify-end pt-3 border-t border-[#E9E5DE]">
-                    {adminEditingId ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAdminEditingId(null);
-                            setAdminForm({
-                              name: '', municipality: 'City of San Fernando',
-                              operatingHours: '09:00 AM - 09:00 PM', priceTier: '$$',
-                              address: '', image: '', images: [], description: ''
-                            });
-                            setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
-                          }}
-                          className="px-4 py-2 border border-[#E9E5DE] rounded-xl text-xs font-bold text-charcoal hover:bg-[#FAF8F5] cursor-pointer"
-                        >
-                          Cancel Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleSaveAdminListing}
-                          className="px-6 py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-98"
-                        >
-                          💾 Save Changes
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        type="submit"
-                        className="px-6 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-black shadow-md transition-all cursor-pointer"
-                      >
-                        Register Kapampangan Restaurant
-                      </button>
-                    )}
-                  </div>
-                </form>
-              </div>
+                  </form>
+                </div>
               )}
 
               {/* Top Alert Banner for System Admin if Pending Requests exist */}
@@ -5647,7 +5641,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           <span className="font-extrabold text-charcoal text-sm">🏪 {req.restaurantName}</span>
                           <span className="text-[10px] text-charcoal-light font-medium uppercase tracking-wider">{req.submittedAt}</span>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <span className="block text-[9px] font-black text-charcoal-light uppercase mb-1">Current Published Profile</span>
@@ -6074,7 +6068,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             </div>
           )}
 
-          
+
           {/* ========================================================================= */}
           {/* TOURIST ATTRACTIONS & HERITAGE SITES ADMIN MANAGEMENT VIEW */}
           {/* ========================================================================= */}
@@ -6463,7 +6457,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         {/* Admin page footer with GROUP JECCAN! Project Creators & Developers */}
         <footer className="bg-charcoal text-white py-8 mt-12 border-t border-charcoal-dark font-sans">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-            
+
             {/* GROUP JECCAN! Section */}
             <div className="bg-[#1A1A1A] border border-[#333333] rounded-2xl p-5 space-y-3 shadow-md border-l-4 border-l-terracotta">
               <div className="flex flex-wrap items-center gap-2">
@@ -6532,10 +6526,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
           {/* Logo Brand Typography */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setActiveView('homepage'); setSelectedMunicipality('All'); setSelectedCorridor('All'); }}>
-            <img 
-              src="/kanyamanan-logo.png" 
-              alt="Kanyamanan Logo" 
-              className="w-10 h-10 object-contain rounded-xl shadow-md border border-[#E9E5DE] shrink-0 bg-white p-0.5" 
+            <img
+              src="/kanyamanan-logo.png"
+              alt="Kanyamanan Logo"
+              className="w-10 h-10 object-contain rounded-xl shadow-md border border-[#E9E5DE] shrink-0 bg-white p-0.5"
             />
             <div>
               <h1 className="text-xl font-extrabold tracking-tight text-charcoal m-0 flex items-center gap-1.5 leading-none">
@@ -6599,7 +6593,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       try {
                         localStorage.removeItem('kanyamanan_active_user');
                         localStorage.removeItem('kanyamanan_user_profile');
-                      } catch (e) {}
+                      } catch (e) { }
                       setIsAuthenticated(false);
                       setIsGuest(false);
                       setUserProfile({ username: 'Guest', email: '', calorieLimit: 2200, budgetLimit: 1500 });
@@ -6710,60 +6704,60 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 </svg>
               </div>
 
-              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
                 {/* Left Column: Rich Editorial Typography & Narrative */}
-                <div className="lg:col-span-6 space-y-4 text-left">
+                <div className="lg:col-span-7 space-y-4 text-left">
                   {/* Top Cultural Badge */}
                   <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black tracking-wider uppercase bg-terracotta/10 text-terracotta border border-terracotta/25 shadow-xs">
                     <span>✨ Manyaman a Kayamanan</span>
                     <span className="text-terracotta/40">•</span>
                     <span>Culinary Heritage of Pampanga</span>
                   </div>
-                  
-                  {/* Main Headline */}
-                  <div>
+
+                  {/* Main Headline (Guaranteed single line on all screen sizes) */}
+                  <div className="space-y-1">
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1E1915] tracking-tight leading-tight m-0 drop-shadow-xs">
                       Mekeni, Mangan Tana!
                     </h2>
-                    <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron mt-1">
+                    <div className="text-lg sm:text-2xl lg:text-2xl xl:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron whitespace-nowrap tracking-tight">
                       Explore Pampanga’s Culinary Map
                     </div>
                   </div>
-                  
+
                   {/* Rich Narrative Description with Highlighted Feature Anchors */}
-                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-medium m-0">
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-medium m-0 max-w-xl">
                     Welcome to <strong className="text-charcoal font-black bg-terracotta/10 px-1.5 py-0.5 rounded-md text-terracotta">Kanyamanan</strong>, the provincial culinary guide and health informatics portal for Pampanga. Discover ancestral heirloom recipes with verified <strong className="text-[#1E1915] font-bold">nutritional &amp; allergen insights</strong>, explore certified Kapampangan kitchens across all <strong className="text-[#1E1915] font-bold">22 municipalities &amp; cities</strong>, craft <strong className="text-[#1E1915] font-bold">AI-guided food trails</strong>, and navigate travel corridors in real time.
                   </p>
                 </div>
 
                 {/* Right Column: Kapampangan Culture & Food Showcase Visuals */}
-                <div className="lg:col-span-6 flex items-center justify-center lg:justify-end">
-                  <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-3 sm:gap-4">
+                <div className="lg:col-span-5 flex items-center justify-center lg:justify-end">
+                  <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-2.5 sm:gap-3.5 pt-2">
                     {/* Card 1: Real Mount Arayat (Bunduk Alaya) */}
-                    <div className="w-32 sm:w-36 lg:w-40 bg-white p-2.5 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center">
-                      <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative shadow-xs">
-                        <img 
-                          src="/attractions/real_mt_arayat.png" 
-                          alt="Mount Arayat (Bunduk Alaya) Pampanga" 
+                    <div className="w-28 sm:w-32 lg:w-36 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
+                      <div className="h-22 sm:h-24 lg:h-26 rounded-xl overflow-hidden relative shadow-xs">
+                        <img
+                          src="/attractions/real_mt_arayat.png"
+                          alt="Mount Arayat (Bunduk Alaya) Pampanga"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "/attractions/mt_arayat_park.jpg"; }}
                         />
-                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[9px] font-black px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                           ⛰️ Mt. Arayat
                         </span>
                       </div>
-                      <div className="pt-2 text-center">
-                        <span className="font-extrabold text-xs text-charcoal block leading-tight">Bunduk Alaya</span>
-                        <span className="text-[10px] font-black text-bananaleaf block mt-0.5">Sacred Peak</span>
+                      <div className="pt-1.5 text-center">
+                        <span className="font-extrabold text-[11px] text-charcoal block leading-tight truncate">Bunduk Alaya</span>
+                        <span className="text-[9px] font-black text-bananaleaf block mt-0.5">Sacred Peak</span>
                       </div>
                     </div>
 
-                    {/* Card 2: Center Feature - Authentic Sizzling Sisig */}
-                    <div className="w-36 sm:w-40 lg:w-44 bg-white p-2.5 rounded-2xl border-2 border-terracotta/40 shadow-xl ring-4 ring-terracotta/10 hover:shadow-2xl transition-all duration-300 transform sm:scale-105 sm:-translate-y-2 z-10 text-center">
-                      <div className="h-28 sm:h-32 rounded-xl overflow-hidden relative shadow-xs">
-                        <img 
-                          src="/restaurants/authentic_sisig.jpg" 
-                          alt="Authentic Kapampangan Sizzling Sisig" 
+                    {/* Card 2: Centerpiece Feature - Big Authentic Sizzling Sisig */}
+                    <div className="w-36 sm:w-42 lg:w-46 bg-white p-2.5 rounded-2xl border-2 border-terracotta shadow-2xl ring-4 ring-terracotta/20 hover:shadow-2xl transition-all duration-300 transform sm:scale-110 sm:-translate-y-2 z-10 text-center shrink-0">
+                      <div className="h-28 sm:h-32 lg:h-34 rounded-xl overflow-hidden relative shadow-xs">
+                        <img
+                          src="/restaurants/authentic_sisig.jpg"
+                          alt="Authentic Kapampangan Sizzling Sisig"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"; }}
                         />
@@ -6771,28 +6765,28 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           🔥 Sizzling Sisig
                         </span>
                       </div>
-                      <div className="pt-2 text-center">
+                      <div className="pt-1.5 text-center">
                         <span className="font-black text-xs text-charcoal block leading-tight">Culinary Capital</span>
-                        <span className="text-[10px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Authentic Food</span>
+                        <span className="text-[9px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Authentic Food</span>
                       </div>
                     </div>
 
-                    {/* Card 3: Giant Lantern (Parul Sampernandu) */}
-                    <div className="w-32 sm:w-36 lg:w-40 bg-white p-2.5 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center">
-                      <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative shadow-xs">
-                        <img 
-                          src="/attractions/giant_lantern_san_fernando.jpg" 
-                          alt="Parul Sampernandu Giant Lantern" 
+                    {/* Card 3: Famous Pampanga Heritage Church - Betis Church */}
+                    <div className="w-28 sm:w-32 lg:w-36 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
+                      <div className="h-22 sm:h-24 lg:h-26 rounded-xl overflow-hidden relative shadow-xs">
+                        <img
+                          src="/attractions/betis_church_guagua.png"
+                          alt="Betis Heritage Church Guagua Pampanga"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                          onError={(e) => { e.target.src = "/attractions/giant_lantern_san_fernando.png"; }}
+                          onError={(e) => { e.target.src = "/attractions/betis_church_guagua.jpg"; }}
                         />
-                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-saffron text-charcoal text-[9px] font-black px-2 py-0.5 rounded-full border border-charcoal/10 whitespace-nowrap shadow-xs">
-                          ✨ Parul
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                          🏛️ Betis Church
                         </span>
                       </div>
-                      <div className="pt-2 text-center">
-                        <span className="font-extrabold text-xs text-charcoal block leading-tight">Giant Lantern</span>
-                        <span className="text-[10px] font-black text-[#D97706] block mt-0.5 uppercase tracking-wide">Festival</span>
+                      <div className="pt-1.5 text-center">
+                        <span className="font-extrabold text-[11px] text-charcoal block leading-tight truncate">Betis Church</span>
+                        <span className="text-[9px] font-black text-[#D97706] block mt-0.5 uppercase tracking-wide">Heritage Site</span>
                       </div>
                     </div>
                   </div>
@@ -6851,7 +6845,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 {/* Filter indicators */}
                 <div className="flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-[#E9E5DE]">
                   <span className="text-xs text-charcoal-light font-medium">
-                    Showing <strong className="text-charcoal">{filteredRestaurants.length}</strong> culinary heritage establishments
+                    Showing <strong className="text-charcoal">{filteredRestaurants.length}</strong> Kapampangan Restaurants
                   </span>
                   <span className="text-[10px] font-semibold text-charcoal-light uppercase bg-[#FAF8F5] px-2.5 py-1 rounded border border-[#E9E5DE] truncate max-w-xs">
                     {selectedMunicipality === 'All' ? 'All Municipalities/Cities' : selectedMunicipality}
@@ -7135,7 +7129,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
                     <div className="h-px bg-[#E9E5DE]"></div >
 
-                    
+
                     {/* Tourist Destinations Picker per Municipality in Planner */}
                     <div className="bento-card p-5 bg-white space-y-4 border-[#E9E5DE]">
                       <div className="flex items-center justify-between border-b border-[#E9E5DE] pb-2.5">
@@ -7203,9 +7197,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                     handleAddToItinerary(attr);
                                     alert(`✓ Added "${attr.name}" (${attr.municipality}) to your trip itinerary!`);
                                   }}
-                                  className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black transition-colors ${
-                                    isAdded ? 'bg-bananaleaf/10 text-bananaleaf border border-bananaleaf/20' : 'bg-[#2C5E3B] hover:bg-[#20452B] text-white cursor-pointer shadow-2xs'
-                                  }`}
+                                  className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black transition-colors ${isAdded ? 'bg-bananaleaf/10 text-bananaleaf border border-bananaleaf/20' : 'bg-[#2C5E3B] hover:bg-[#20452B] text-white cursor-pointer shadow-2xs'
+                                    }`}
                                 >
                                   {isAdded ? '✓ Added' : '+ Add Place'}
                                 </button>
@@ -7218,8 +7211,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
                     <div className="h-px bg-[#E9E5DE]"></div>
 
-                    
-                    
+
+
                     {/* Live Trip Start & Navigation Control Panel */}
                     <div className="bg-white border border-[#2C5E3B]/25 rounded-2xl p-4 space-y-3 shadow-sm">
                       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -7290,13 +7283,12 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                               return (
                                 <div
                                   key={stop.id}
-                                  className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 shrink-0 transition-all ${
-                                    isVisited
+                                  className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 shrink-0 transition-all ${isVisited
                                       ? 'bg-bananaleaf/10 border-bananaleaf text-bananaleaf font-bold'
                                       : isCurrentTarget
-                                      ? 'bg-terracotta text-white border-terracotta font-black shadow-xs animate-pulse'
-                                      : 'bg-[#FAF8F5] border-[#E9E5DE] text-charcoal-light font-semibold'
-                                  }`}
+                                        ? 'bg-terracotta text-white border-terracotta font-black shadow-xs animate-pulse'
+                                        : 'bg-[#FAF8F5] border-[#E9E5DE] text-charcoal-light font-semibold'
+                                    }`}
                                 >
                                   <span>{isVisited ? '✓' : isCurrentTarget ? '🎯' : idx + 1}</span>
                                   <span className="truncate max-w-[120px]">{stop.name}</span>
@@ -7331,7 +7323,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                               </span>
                             </div>
                           </div>
-                          
+
                           <div className="bg-white border border-[#2C5E3B]/30 px-3.5 py-1.5 rounded-xl shadow-xs text-right">
                             <span className="text-[9px] font-black text-charcoal-light uppercase tracking-wider block">Estimated Arrival (ETA)</span>
                             <strong className="text-sm font-black text-[#2C5E3B]">
@@ -7366,13 +7358,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center justify-between mb-2">
-                        <h4 className="text-[10px] font-black text-charcoal-light uppercase tracking-wider">
-                          Active Route Nodes ({activeTrip.length} Stops)
-                        </h4>
-                        <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 px-2 py-0.5 rounded border border-terracotta/10">
-                          🖐️ Drag cards or use ▲ ▼ to reorder stop numbers
-                        </span>
-                      </div>
+                          <h4 className="text-[10px] font-black text-charcoal-light uppercase tracking-wider">
+                            Active Route Nodes ({activeTrip.length} Stops)
+                          </h4>
+                          <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 px-2 py-0.5 rounded border border-terracotta/10">
+                            🖐️ Drag cards or use ▲ ▼ to reorder stop numbers
+                          </span>
+                        </div>
                         <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 px-2 py-0.5 rounded border border-terracotta/10">
                           🖐️ Drag cards or use ▲ ▼ to reorder stop numbers
                         </span>
@@ -7404,9 +7396,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                     setDraggedIndex(null);
                                   }
                                 }}
-                                className={`bg-[#FAF8F5] p-3 rounded-xl border transition-all flex items-center justify-between gap-3 shadow-2xs group cursor-grab active:cursor-grabbing ${
-                                  draggedIndex === index ? 'border-terracotta bg-terracotta/5 opacity-50 scale-[0.98]' : 'border-[#E9E5DE] hover:border-terracotta/40 hover:bg-white'
-                                }`}
+                                className={`bg-[#FAF8F5] p-3 rounded-xl border transition-all flex items-center justify-between gap-3 shadow-2xs group cursor-grab active:cursor-grabbing ${draggedIndex === index ? 'border-terracotta bg-terracotta/5 opacity-50 scale-[0.98]' : 'border-[#E9E5DE] hover:border-terracotta/40 hover:bg-white'
+                                  }`}
                               >
                                 <div className="flex items-center gap-2.5 min-w-0">
                                   {/* Drag Handle & Numbering */}
@@ -7622,7 +7613,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       <h3 className="text-xs font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5">
                         <MapIcon className="h-4.5 w-4.5 text-terracotta" /> Provincial Route Mapping Engine
                       </h3>
-                      
+
                       {/* Nav Controls */}
                       <div className="flex flex-wrap gap-2">
                         <button
@@ -7907,151 +7898,148 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </div>
                 ) : (
                   <div className="space-y-3.5">
-                  {savedItineraries.length === 0 ? (
-                    <div className="p-8 text-center bg-[#FAF8F5] rounded-xl border border-dashed border-[#E9E5DE] space-y-2">
-                      <span className="text-2xl block">🗺️</span>
-                      <p className="text-xs font-bold text-charcoal m-0">No saved itineraries found for this account.</p>
-                      <p className="text-[11px] text-charcoal-light m-0">Create your custom trip route in the Food Trip Planner and click "Save Route to Travel History".</p>
-                    </div>
-                  ) : (
-                    savedItineraries.map(itin => (
-                      <div
-                        key={itin.id}
-                        onClick={() => handleLoadSavedItinerary(itin)}
-                        className={`p-4 border rounded-xl text-left space-y-3 transition-all cursor-pointer group/itin relative shadow-sm hover:shadow-md ${
-                          itin.isFinished 
-                            ? 'bg-[#FAF8F5]/60 border-[#E9E5DE] opacity-80 hover:border-terracotta/40' 
-                            : 'bg-[#FAF8F5] border-[#E9E5DE] hover:border-terracotta hover:bg-white'
-                        }`}
-                        title="Click to load and execute this plan"
-                      >
-                        {editingItinId === itin.id ? (
-                          <div className="p-3 bg-white rounded-xl border border-terracotta/30 space-y-2" onClick={(e) => e.stopPropagation()}>
-                            <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
-                              ✏️ Edit Itinerary Name:
-                            </label>
-                            <div className="flex gap-1.5">
-                              <input
-                                type="text"
-                                value={editingItinName}
-                                onChange={(e) => setEditingItinName(e.target.value)}
-                                className="flex-1 px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-ivory font-bold focus:outline-none focus:ring-1 focus:ring-terracotta"
-                              />
-                              <button
-                                type="button"
-                                onClick={(e) => handleSaveEditedItinerary(itin.id, e)}
-                                className="px-3 py-1.5 bg-[#2C5E3B] text-white text-xs font-bold rounded-lg shadow-2xs cursor-pointer hover:bg-[#20452B]"
-                              >
-                                Save
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setEditingItinId(null)}
-                                className="px-2.5 py-1.5 border border-[#E9E5DE] text-xs font-semibold rounded-lg hover:bg-ivory"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-
-                            <div className="pt-1.5 border-t border-[#E9E5DE] flex justify-between items-center">
-                              <span className="text-[10px] text-charcoal-light">Want to update the stops too?</span>
-                              <button
-                                type="button"
-                                onClick={(e) => handleOverwriteItineraryStopsWithActive(itin.id, e)}
-                                className="text-[10px] font-bold text-terracotta hover:underline cursor-pointer"
-                              >
-                                🔄 Replace with Active Plan ({activeTrip.length} stops)
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex justify-between items-start gap-2">
-                            <div className="flex-1 min-w-0">
-                              <span className={`text-sm font-black block truncate ${itin.isFinished ? 'text-charcoal-light line-through' : 'text-charcoal group-hover/itin:text-terracotta transition-colors'}`}>
-                                {itin.name}
-                              </span>
-                              {itin.isFinished ? (
-                                <span className="inline-flex items-center gap-1 mt-0.5 text-[10px] font-extrabold text-bananaleaf animate-fade-in">
-                                  ✓ Finished Trip
-                                </span>
-                              ) : (
-                                <span className="text-[10px] text-charcoal-light font-bold">
-                                  Active Plan • {itin.stops?.length || 0} Stops
-                                </span>
-                              )}
-                            </div>
-                            
-                            <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
-                              <button
-                                type="button"
-                                onClick={(e) => startEditingItinerary(itin, e)}
-                                className="p-1.5 rounded-lg text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 transition-colors"
-                                title="Edit Itinerary Name / Update Stops"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={(e) => handleToggleFinishItinerary(itin.id, e)}
-                                className={`p-1.5 rounded-lg transition-colors ${
-                                  itin.isFinished 
-                                    ? 'text-bananaleaf hover:bg-bananaleaf/10' 
-                                    : 'text-charcoal-light hover:text-bananaleaf hover:bg-bananaleaf/5'
-                                }`}
-                                title={itin.isFinished ? "Mark as Active" : "Mark as Finished"}
-                              >
-                                <CheckCircle className={`h-4.5 w-4.5 ${itin.isFinished ? 'fill-bananaleaf/10' : ''}`} />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={(e) => handleDeleteItinerary(itin.id, e)}
-                                className="p-1.5 rounded-lg text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 transition-colors"
-                                title="Delete Route"
-                              >
-                                <Trash2 className="h-4.5 w-4.5" />
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="flex flex-wrap gap-1.5 pt-0.5">
-                          {itin.stops.map((stop, idx) => {
-                            const stopName = typeof stop === 'object' ? stop.name : String(stop);
-                            const stopMun = typeof stop === 'object' ? stop.municipality : null;
-                            const displayName = stopMun && !stopName.includes(stopMun) ? `${stopName} (${stopMun})` : stopName;
-                            return (
-                              <span 
-                                key={idx} 
-                                className={`text-[10px] px-2.5 py-1 rounded-md border font-semibold transition-all ${
-                                  itin.isFinished 
-                                    ? 'bg-white/50 text-gray-400 border-gray-200' 
-                                    : 'bg-white text-charcoal border-[#E9E5DE] group-hover/itin:border-terracotta/30'
-                                }`}
-                              >
-                                {displayName}
-                              </span>
-                            );
-                          })}
-                        </div>
-
-                        <div className="pt-1 flex justify-end">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleLoadSavedItinerary(itin);
-                            }}
-                            className="px-3.5 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 group-hover/itin:bg-terracotta-dark"
-                          >
-                            <Compass className="h-3.5 w-3.5" /> Load & Execute Plan →
-                          </button>
-                        </div>
+                    {savedItineraries.length === 0 ? (
+                      <div className="p-8 text-center bg-[#FAF8F5] rounded-xl border border-dashed border-[#E9E5DE] space-y-2">
+                        <span className="text-2xl block">🗺️</span>
+                        <p className="text-xs font-bold text-charcoal m-0">No saved itineraries found for this account.</p>
+                        <p className="text-[11px] text-charcoal-light m-0">Create your custom trip route in the Food Trip Planner and click "Save Route to Travel History".</p>
                       </div>
-                    ))
-                  )}
-                </div>
+                    ) : (
+                      savedItineraries.map(itin => (
+                        <div
+                          key={itin.id}
+                          onClick={() => handleLoadSavedItinerary(itin)}
+                          className={`p-4 border rounded-xl text-left space-y-3 transition-all cursor-pointer group/itin relative shadow-sm hover:shadow-md ${itin.isFinished
+                              ? 'bg-[#FAF8F5]/60 border-[#E9E5DE] opacity-80 hover:border-terracotta/40'
+                              : 'bg-[#FAF8F5] border-[#E9E5DE] hover:border-terracotta hover:bg-white'
+                            }`}
+                          title="Click to load and execute this plan"
+                        >
+                          {editingItinId === itin.id ? (
+                            <div className="p-3 bg-white rounded-xl border border-terracotta/30 space-y-2" onClick={(e) => e.stopPropagation()}>
+                              <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
+                                ✏️ Edit Itinerary Name:
+                              </label>
+                              <div className="flex gap-1.5">
+                                <input
+                                  type="text"
+                                  value={editingItinName}
+                                  onChange={(e) => setEditingItinName(e.target.value)}
+                                  className="flex-1 px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-ivory font-bold focus:outline-none focus:ring-1 focus:ring-terracotta"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleSaveEditedItinerary(itin.id, e)}
+                                  className="px-3 py-1.5 bg-[#2C5E3B] text-white text-xs font-bold rounded-lg shadow-2xs cursor-pointer hover:bg-[#20452B]"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingItinId(null)}
+                                  className="px-2.5 py-1.5 border border-[#E9E5DE] text-xs font-semibold rounded-lg hover:bg-ivory"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+
+                              <div className="pt-1.5 border-t border-[#E9E5DE] flex justify-between items-center">
+                                <span className="text-[10px] text-charcoal-light">Want to update the stops too?</span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleOverwriteItineraryStopsWithActive(itin.id, e)}
+                                  className="text-[10px] font-bold text-terracotta hover:underline cursor-pointer"
+                                >
+                                  🔄 Replace with Active Plan ({activeTrip.length} stops)
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex justify-between items-start gap-2">
+                              <div className="flex-1 min-w-0">
+                                <span className={`text-sm font-black block truncate ${itin.isFinished ? 'text-charcoal-light line-through' : 'text-charcoal group-hover/itin:text-terracotta transition-colors'}`}>
+                                  {itin.name}
+                                </span>
+                                {itin.isFinished ? (
+                                  <span className="inline-flex items-center gap-1 mt-0.5 text-[10px] font-extrabold text-bananaleaf animate-fade-in">
+                                    ✓ Finished Trip
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] text-charcoal-light font-bold">
+                                    Active Plan • {itin.stops?.length || 0} Stops
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                <button
+                                  type="button"
+                                  onClick={(e) => startEditingItinerary(itin, e)}
+                                  className="p-1.5 rounded-lg text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 transition-colors"
+                                  title="Edit Itinerary Name / Update Stops"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleToggleFinishItinerary(itin.id, e)}
+                                  className={`p-1.5 rounded-lg transition-colors ${itin.isFinished
+                                      ? 'text-bananaleaf hover:bg-bananaleaf/10'
+                                      : 'text-charcoal-light hover:text-bananaleaf hover:bg-bananaleaf/5'
+                                    }`}
+                                  title={itin.isFinished ? "Mark as Active" : "Mark as Finished"}
+                                >
+                                  <CheckCircle className={`h-4.5 w-4.5 ${itin.isFinished ? 'fill-bananaleaf/10' : ''}`} />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleDeleteItinerary(itin.id, e)}
+                                  className="p-1.5 rounded-lg text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 transition-colors"
+                                  title="Delete Route"
+                                >
+                                  <Trash2 className="h-4.5 w-4.5" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="flex flex-wrap gap-1.5 pt-0.5">
+                            {itin.stops.map((stop, idx) => {
+                              const stopName = typeof stop === 'object' ? stop.name : String(stop);
+                              const stopMun = typeof stop === 'object' ? stop.municipality : null;
+                              const displayName = stopMun && !stopName.includes(stopMun) ? `${stopName} (${stopMun})` : stopName;
+                              return (
+                                <span
+                                  key={idx}
+                                  className={`text-[10px] px-2.5 py-1 rounded-md border font-semibold transition-all ${itin.isFinished
+                                      ? 'bg-white/50 text-gray-400 border-gray-200'
+                                      : 'bg-white text-charcoal border-[#E9E5DE] group-hover/itin:border-terracotta/30'
+                                    }`}
+                                >
+                                  {displayName}
+                                </span>
+                              );
+                            })}
+                          </div>
+
+                          <div className="pt-1 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleLoadSavedItinerary(itin);
+                              }}
+                              className="px-3.5 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95 group-hover/itin:bg-terracotta-dark"
+                            >
+                              <Compass className="h-3.5 w-3.5" /> Load & Execute Plan →
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -8155,14 +8143,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       <footer className="bg-charcoal text-white border-t border-charcoal-dark py-10 mt-16 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
+
             {/* Brand Column */}
             <div className="lg:col-span-4 text-center lg:text-left space-y-2.5">
               <div className="flex items-center justify-center lg:justify-start gap-2.5">
-                <img 
-                  src="/kanyamanan-logo.png" 
-                  alt="Kanyamanan Logo" 
-                  className="w-8 h-8 rounded-lg object-contain shadow-xs bg-white/5 p-0.5 border border-white/10" 
+                <img
+                  src="/kanyamanan-logo.png"
+                  alt="Kanyamanan Logo"
+                  className="w-8 h-8 rounded-lg object-contain shadow-xs bg-white/5 p-0.5 border border-white/10"
                 />
                 <span className="text-lg font-black text-white tracking-tight">Kanyamanan</span>
                 <span className="px-2 py-0.5 bg-white/10 text-saffron text-[10px] font-black rounded-full border border-white/10">
@@ -8306,7 +8294,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     alt={`${selectedRestaurant.name} - view ${activeImgIdx + 1}`}
                     className="w-full h-full object-cover transition-all duration-300"
                   />
-                  
+
                   {/* Prev Button */}
                   <button
                     type="button"
@@ -8377,7 +8365,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 </div>
               </div>
 
-              
+
 
               {/* Live Occupancy Forecaster chart */}
               <div className="space-y-3">
@@ -8427,7 +8415,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       className={`p-3 rounded-xl border transition-all text-left cursor-pointer flex gap-3 items-center ${activeDish?.id === dish.id ? 'bg-terracotta/5 border-terracotta shadow-sm' : 'bg-white border-[#E9E5DE]'}`}
                     >
                       {dish.image && (
-                        <div 
+                        <div
                           onClick={(e) => {
                             e.stopPropagation();
                             setZoomedDishImg(dish.image);
@@ -8559,7 +8547,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
 
       {/* ── Multi-Branch Location Choice Modal ── */}
-      
+
       {/* Tourist Attraction Detail Modal */}
       {selectedAttraction && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-charcoal/70 backdrop-blur-xs p-4 animate-fade-in font-sans">
@@ -8593,7 +8581,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
             <div className="space-y-3 text-xs leading-relaxed">
               <p className="text-charcoal font-medium leading-relaxed m-0">{selectedAttraction.description}</p>
-              
+
               {selectedAttraction.details && selectedAttraction.details !== selectedAttraction.description && (
                 <div className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-xs space-y-1 shadow-2xs">
                   <strong className="text-[10px] uppercase font-black text-terracotta tracking-wider flex items-center gap-1">
@@ -8711,14 +8699,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         </div>
       )}
 
-    
-{/* ========================================================================= */}
+
+      {/* ========================================================================= */}
       {/* TRIP COMPLETION & CELEBRATION EXPERIENCE MODAL (POLAROID ALBUM & CERTIFICATE) */}
       {/* ========================================================================= */}
       {isCompletionModalOpen && (
         <div className="fixed inset-0 z-50 bg-charcoal/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-5 shadow-2xl border border-[#E9E5DE] max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-[#E9E5DE] pb-4">
               <div className="flex items-center gap-3">
@@ -8792,11 +8780,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       type="button"
                       disabled={isGeneratingAlbum}
                       onClick={downloadRealPolaroidAlbum}
-                      className={`px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer ${
-                        isGeneratingAlbum ? 'opacity-70 cursor-not-allowed' : 'active:scale-95'
-                      }`}
+                      className={`px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black transition-all shadow-sm flex items-center gap-1.5 cursor-pointer ${isGeneratingAlbum ? 'opacity-70 cursor-not-allowed' : 'active:scale-95'
+                        }`}
                     >
-                      <span>{isGeneratingAlbum ? '⏳' : '📥'}</span> 
+                      <span>{isGeneratingAlbum ? '⏳' : '📥'}</span>
                       {isGeneratingAlbum ? 'Generating Full Album...' : 'Save Full Album (PNG)'}
                     </button>
                   </div>
@@ -8806,21 +8793,19 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       const currentSlotImg = slotPhotos[pIdx] !== undefined ? slotPhotos[pIdx] : (completionPhotos[pIdx] || stop.image);
 
                       return (
-                        <div 
-                          key={pIdx} 
-                          className={`bg-white p-3.5 pt-5 pb-4 rounded-xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all relative group/card flex flex-col justify-between ${
-                            pIdx % 2 === 0 ? 'hover:-rotate-0.5' : 'hover:rotate-0.5'
-                          }`}
+                        <div
+                          key={pIdx}
+                          className={`bg-white p-3.5 pt-5 pb-4 rounded-xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all relative group/card flex flex-col justify-between ${pIdx % 2 === 0 ? 'hover:-rotate-0.5' : 'hover:rotate-0.5'
+                            }`}
                         >
                           {/* Kapampangan Festive Washi Tape */}
-                          <div className={`absolute -top-2.5 left-1/2 -translate-x-1/2 w-20 h-5 border shadow-2xs z-10 flex items-center justify-center text-[8px] font-black uppercase tracking-wider ${
-                            pIdx % 2 === 0 
-                              ? 'bg-amber-100/90 text-amber-900 border-amber-300 -rotate-1' 
+                          <div className={`absolute -top-2.5 left-1/2 -translate-x-1/2 w-20 h-5 border shadow-2xs z-10 flex items-center justify-center text-[8px] font-black uppercase tracking-wider ${pIdx % 2 === 0
+                              ? 'bg-amber-100/90 text-amber-900 border-amber-300 -rotate-1'
                               : 'bg-orange-100/90 text-orange-900 border-orange-300 rotate-1'
-                          }`}>
+                            }`}>
                             Pampanga #{pIdx + 1}
                           </div>
-                          
+
                           <div className="aspect-4/3 rounded-lg overflow-hidden border border-[#E9E5DE] bg-[#FAF8F5] relative shadow-inner">
                             {currentSlotImg ? (
                               <img src={currentSlotImg} className="w-full h-full object-cover" alt={stop.name} />
@@ -8900,9 +8885,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 type="button"
                                 disabled={generatingSingleIdx === pIdx}
                                 onClick={() => downloadSinglePolaroid(stop, pIdx)}
-                                className={`px-3 py-1 bg-ivory hover:bg-[#E9E5DE] border border-[#E9E5DE] rounded-lg text-[10px] font-bold text-charcoal hover:text-terracotta transition-colors cursor-pointer flex items-center gap-1 ${
-                                  generatingSingleIdx === pIdx ? 'opacity-70 cursor-not-allowed' : ''
-                                }`}
+                                className={`px-3 py-1 bg-ivory hover:bg-[#E9E5DE] border border-[#E9E5DE] rounded-lg text-[10px] font-bold text-charcoal hover:text-terracotta transition-colors cursor-pointer flex items-center gap-1 ${generatingSingleIdx === pIdx ? 'opacity-70 cursor-not-allowed' : ''
+                                  }`}
                               >
                                 <span>{generatingSingleIdx === pIdx ? '⏳' : '📥'}</span>
                                 {generatingSingleIdx === pIdx ? 'Generating...' : 'Download This Polaroid'}
@@ -8923,12 +8907,12 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 <div className="p-6 sm:p-8 bg-gradient-to-b from-[#FFFDF9] via-[#FDF6EC] to-[#FBF0DF] border-4 border-[#2C5E3B] rounded-3xl relative shadow-xl text-center space-y-4 font-serif">
                   {/* Decorative Double Gold & Terracotta Inner Border */}
                   <div className="border-2 border-[#E5A93C] p-5 sm:p-7 rounded-2xl space-y-4 relative bg-white/80 backdrop-blur-xs shadow-2xs">
-                    
+
                     {/* Top Logo & Tagline */}
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <img 
-                        src="/kanyamanan-logo.png" 
-                        alt="Kanyamanan Logo" 
+                      <img
+                        src="/kanyamanan-logo.png"
+                        alt="Kanyamanan Logo"
                         className="h-16 w-16 object-contain drop-shadow-xs"
                       />
                       <span className="block text-[9px] sm:text-[10px] font-black text-[#2C5E3B] uppercase tracking-widest font-sans">
@@ -9012,7 +8996,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           </div>
         </div>
       )}
-</div>
+    </div>
   );
 }
 
