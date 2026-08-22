@@ -8698,16 +8698,16 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       {/* Tourist Attraction Detail Modal */}
       {selectedAttraction && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-charcoal/70 backdrop-blur-xs p-4 animate-fade-in font-sans">
-          <div className="bg-white border border-[#E9E5DE] rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative animate-scale-up">
+          <div className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl relative animate-scale-up">
             <button
               type="button"
               onClick={() => setSelectedAttraction(null)}
-              className="absolute top-4 right-4 text-charcoal-light hover:text-charcoal w-7 h-7 rounded-full bg-ivory flex items-center justify-center text-xs font-bold border border-[#E9E5DE] cursor-pointer"
+              className="absolute top-4 right-4 text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white w-7 h-7 rounded-full bg-ivory dark:bg-[#161412] flex items-center justify-center text-xs font-bold border border-[#E9E5DE] dark:border-[#2E2A24] cursor-pointer"
             >
               ✕
             </button>
 
-            <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-[#E9E5DE]">
+            <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-[#E9E5DE] dark:border-[#2E2A24]">
               <img src={selectedAttraction.image} alt={selectedAttraction.name} className="w-full h-full object-cover" />
               <div className="absolute top-2 left-2 bg-charcoal/80 text-white text-[10px] font-bold px-2.5 py-1 rounded-md">
                 {selectedAttraction.type}
@@ -8715,35 +8715,35 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-base font-extrabold text-charcoal m-0">{selectedAttraction.name}</h3>
+              <h3 className="text-base font-extrabold text-charcoal dark:text-white m-0">{selectedAttraction.name}</h3>
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-xs font-bold text-terracotta flex items-center gap-1">
+                <span className="text-xs font-bold text-terracotta dark:text-orange-400 flex items-center gap-1">
                   📍 {selectedAttraction.address || `${selectedAttraction.municipality}, Pampanga`}
                 </span>
-                <span className="text-[10px] font-mono font-bold text-charcoal-light bg-ivory px-2 py-0.5 rounded border border-[#E9E5DE]">
+                <span className="text-[10px] font-mono font-bold text-charcoal-light dark:text-gray-300 bg-ivory dark:bg-[#161412] px-2 py-0.5 rounded border border-[#E9E5DE] dark:border-[#2E2A24]">
                   GPS: {(Number(selectedAttraction.lat) || 15.0300).toFixed(4)}°, {(Number(selectedAttraction.lng) || 120.6800).toFixed(4)}°
                 </span>
               </div>
             </div>
 
             <div className="space-y-3 text-xs leading-relaxed">
-              <p className="text-charcoal font-medium leading-relaxed m-0">{selectedAttraction.description}</p>
+              <p className="text-charcoal dark:text-gray-200 font-medium leading-relaxed m-0">{selectedAttraction.description}</p>
 
               {selectedAttraction.details && selectedAttraction.details !== selectedAttraction.description && (
-                <div className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-xs space-y-1 shadow-2xs">
-                  <strong className="text-[10px] uppercase font-black text-terracotta tracking-wider flex items-center gap-1">
+                <div className="p-3.5 bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-xs space-y-1 shadow-2xs">
+                  <strong className="text-[10px] uppercase font-black text-terracotta dark:text-orange-400 tracking-wider flex items-center gap-1">
                     🏛️ Heritage & Cultural Context
                   </strong>
-                  <p className="text-charcoal-light leading-relaxed m-0">{selectedAttraction.details}</p>
+                  <p className="text-charcoal-light dark:text-gray-300 leading-relaxed m-0">{selectedAttraction.details}</p>
                 </div>
               )}
             </div>
 
-            <div className="pt-3 border-t border-[#E9E5DE] flex gap-2 justify-end">
+            <div className="pt-3 border-t border-[#E9E5DE] dark:border-[#2E2A24] flex gap-2 justify-end">
               <button
                 type="button"
                 onClick={() => setSelectedAttraction(null)}
-                className="px-4 py-2 border border-[#E9E5DE] rounded-xl text-xs font-semibold text-charcoal hover:bg-ivory"
+                className="px-4 py-2 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-xs font-semibold text-charcoal dark:text-gray-300 hover:bg-ivory dark:hover:bg-[#25221E]"
               >
                 Close
               </button>
@@ -8766,22 +8766,22 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
       {branchSelectTarget && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-charcoal/70 backdrop-blur-xs p-4 animate-fade-in font-sans">
-          <div className="bg-white border border-[#E9E5DE] rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative animate-scale-up">
+          <div className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative animate-scale-up">
             <button
               type="button"
               onClick={() => setBranchSelectTarget(null)}
-              className="absolute top-4 right-4 text-charcoal-light hover:text-charcoal w-7 h-7 rounded-full bg-ivory flex items-center justify-center text-xs font-bold border border-[#E9E5DE] cursor-pointer"
+              className="absolute top-4 right-4 text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white w-7 h-7 rounded-full bg-ivory dark:bg-[#161412] flex items-center justify-center text-xs font-bold border border-[#E9E5DE] dark:border-[#2E2A24] cursor-pointer"
             >
               ✕
             </button>
 
             <div className="space-y-1">
-              <span className="text-[10px] font-black text-terracotta uppercase tracking-wider bg-terracotta/10 px-2.5 py-0.5 rounded border border-terracotta/20 inline-block">
+              <span className="text-[10px] font-black text-terracotta dark:text-orange-400 uppercase tracking-wider bg-terracotta/10 dark:bg-terracotta/20 px-2.5 py-0.5 rounded border border-terracotta/20 dark:border-terracotta/30 inline-block">
                 🏪 Multi-Branch Location Selector
               </span>
-              <h3 className="text-lg font-black text-charcoal m-0">Select Branch Location</h3>
-              <p className="text-xs text-charcoal-light m-0">
-                Which location of <strong>"{branchSelectTarget.name}"</strong> would you like to visit on your trip?
+              <h3 className="text-lg font-black text-charcoal dark:text-white m-0">Select Branch Location</h3>
+              <p className="text-xs text-charcoal-light dark:text-gray-300 m-0">
+                Which location of <strong className="text-charcoal dark:text-white">"{branchSelectTarget.name}"</strong> would you like to visit on your trip?
               </p>
             </div>
 
@@ -8809,23 +8809,23 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       setBranchSelectTarget(null);
                       alert(`✓ Added "${branchSelectTarget.name}" (${mun} Branch) to your active trip itinerary!`);
                     }}
-                    className="w-full text-left p-3.5 rounded-xl border border-[#E9E5DE] bg-ivory/50 hover:bg-terracotta/5 hover:border-terracotta transition-all cursor-pointer group flex items-start gap-3"
+                    className="w-full text-left p-3.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] bg-ivory/50 dark:bg-[#161412] hover:bg-terracotta/5 dark:hover:bg-terracotta/15 hover:border-terracotta dark:hover:border-terracotta transition-all cursor-pointer group flex items-start gap-3"
                   >
-                    <span className="w-8 h-8 rounded-full bg-terracotta/10 text-terracotta font-black text-xs flex items-center justify-center shrink-0 group-hover:bg-terracotta group-hover:text-white transition-colors">
+                    <span className="w-8 h-8 rounded-full bg-terracotta/10 dark:bg-terracotta/20 text-terracotta dark:text-orange-400 font-black text-xs flex items-center justify-center shrink-0 group-hover:bg-terracotta group-hover:text-white transition-colors">
                       📍
                     </span>
                     <div className="min-w-0 flex-1">
-                      <strong className="block text-xs font-extrabold text-charcoal group-hover:text-terracotta transition-colors">
+                      <strong className="block text-xs font-extrabold text-charcoal dark:text-white group-hover:text-terracotta transition-colors">
                         {mun} Branch
                       </strong>
-                      <span className="block text-[11px] text-charcoal-light font-medium truncate mt-0.5">
+                      <span className="block text-[11px] text-charcoal-light dark:text-gray-400 font-medium truncate mt-0.5">
                         {address}
                       </span>
-                      <span className="inline-block mt-1 text-[9px] font-mono font-bold text-charcoal-light bg-white px-2 py-0.5 rounded border border-[#E9E5DE]">
+                      <span className="inline-block mt-1 text-[9px] font-mono font-bold text-charcoal-light dark:text-gray-400 bg-white dark:bg-[#1A1715] px-2 py-0.5 rounded border border-[#E9E5DE] dark:border-[#2E2A24]">
                         📍 GPS: {lat.toFixed(4)}° N, {lng.toFixed(4)}° E
                       </span>
                     </div>
-                    <span className="text-xs font-extrabold text-terracotta self-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-xs font-extrabold text-terracotta dark:text-orange-400 self-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                       Select →
                     </span>
                   </button>
@@ -8833,11 +8833,11 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               })}
             </div>
 
-            <div className="pt-3 border-t border-[#E9E5DE] text-right">
+            <div className="pt-3 border-t border-[#E9E5DE] dark:border-[#2E2A24] text-right">
               <button
                 type="button"
                 onClick={() => setBranchSelectTarget(null)}
-                className="px-4 py-2 bg-ivory hover:bg-[#E9E5DE] border border-[#E9E5DE] rounded-xl text-xs font-bold text-charcoal transition-colors cursor-pointer"
+                className="px-4 py-2 bg-ivory dark:bg-[#161412] hover:bg-[#E9E5DE] dark:hover:bg-[#25221E] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-xs font-bold text-charcoal dark:text-gray-300 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -8852,17 +8852,17 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       {/* ========================================================================= */}
       {isCompletionModalOpen && (
         <div className="fixed inset-0 z-50 bg-charcoal/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 space-y-5 shadow-2xl border border-[#E9E5DE] max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95">
+          <div className="bg-white dark:bg-[#1E1B18] rounded-3xl max-w-2xl w-full p-6 space-y-5 shadow-2xl border border-[#E9E5DE] dark:border-[#2E2A24] max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95">
 
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-[#E9E5DE] pb-4">
+            <div className="flex items-center justify-between border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-4">
               <div className="flex items-center gap-3">
                 <span className="text-3xl">🎉</span>
                 <div>
-                  <h3 className="text-lg font-black text-charcoal tracking-tight m-0">
+                  <h3 className="text-lg font-black text-charcoal dark:text-white tracking-tight m-0">
                     Congratulations! Trip Completed
                   </h3>
-                  <p className="text-xs text-charcoal-light font-medium m-0">
+                  <p className="text-xs text-charcoal-light dark:text-gray-300 font-medium m-0">
                     You successfully finished your Kapampangan Food & Heritage Crawl!
                   </p>
                 </div>
@@ -8870,16 +8870,16 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               <button
                 type="button"
                 onClick={() => setIsCompletionModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-ivory hover:bg-[#E9E5DE] text-charcoal font-bold flex items-center justify-center cursor-pointer transition-colors"
+                className="w-8 h-8 rounded-full bg-ivory dark:bg-[#161412] hover:bg-[#E9E5DE] dark:hover:bg-[#25221E] text-charcoal dark:text-white font-bold flex items-center justify-center cursor-pointer transition-colors border border-[#E9E5DE] dark:border-[#2E2A24]"
               >
                 ✕
               </button>
             </div>
 
             {/* Step 1: Optional Group Info & Photo Uploader */}
-            <div className="bg-[#FAF8F5] border border-[#E9E5DE] p-4 rounded-2xl">
+            <div className="bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] p-4 rounded-2xl">
               <div>
-                <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
+                <label className="block text-[10px] font-bold text-charcoal dark:text-gray-300 uppercase tracking-wider mb-1">
                   Group / Traveler Name(s)
                 </label>
                 <input
@@ -8887,24 +8887,24 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   placeholder="e.g. Santos Family & Friends"
                   value={completionGroupName}
                   onChange={(e) => setCompletionGroupName(e.target.value)}
-                  className="block w-full px-3.5 py-2 text-xs border border-[#E9E5DE] rounded-xl bg-white font-extrabold text-charcoal focus:outline-none focus:ring-1 focus:ring-terracotta"
+                  className="block w-full px-3.5 py-2 text-xs border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-white dark:bg-[#1E1B18] font-extrabold text-charcoal dark:text-white focus:outline-none focus:ring-1 focus:ring-terracotta"
                 />
               </div>
             </div>
 
             {/* Tabs Selector: Polaroid Scrapbook vs Certificate */}
-            <div className="flex border-b border-[#E9E5DE] bg-ivory rounded-xl p-1">
+            <div className="flex border border-[#E9E5DE] dark:border-[#2E2A24] bg-ivory dark:bg-[#161412] rounded-xl p-1">
               <button
                 type="button"
                 onClick={() => setCompletionActiveTab('polaroid')}
-                className={`flex-1 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 ${completionActiveTab === 'polaroid' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
+                className={`flex-1 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 ${completionActiveTab === 'polaroid' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white cursor-pointer'}`}
               >
                 <span>📸</span> Polaroid Album
               </button>
               <button
                 type="button"
                 onClick={() => setCompletionActiveTab('certificate')}
-                className={`flex-1 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 ${completionActiveTab === 'certificate' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light hover:text-charcoal cursor-pointer'}`}
+                className={`flex-1 py-2 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5 ${completionActiveTab === 'certificate' ? 'bg-terracotta text-white shadow-xs' : 'text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white cursor-pointer'}`}
               >
                 <span>📜</span> Official Certificate
               </button>
@@ -8913,13 +8913,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             {/* TAB 1: POLAROID ALBUM GALLERY */}
             {completionActiveTab === 'polaroid' && (
               <div className="space-y-4">
-                <div className="p-4 sm:p-6 bg-gradient-to-b from-[#FFFDF9] via-[#FDF6EC] to-[#FBF0DF] border-2 border-[#E5A93C]/50 rounded-2xl shadow-inner space-y-4">
+                <div className="p-4 sm:p-6 bg-gradient-to-b from-[#FFFDF9] via-[#FDF6EC] to-[#FBF0DF] dark:from-[#1E1B18] dark:via-[#161412] dark:to-[#12100E] border-2 border-[#E5A93C]/50 dark:border-[#E5A93C]/30 rounded-2xl shadow-inner space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#E5A93C]/30">
                     <div>
-                      <span className="text-[10px] font-black text-terracotta uppercase tracking-wider block">
+                      <span className="text-[10px] font-black text-terracotta dark:text-orange-400 uppercase tracking-wider block">
                         ✨ Mamasyal Ta Pampanga! Memory Album
                       </span>
-                      <h4 className="text-sm font-black text-charcoal m-0 flex items-center gap-1.5">
+                      <h4 className="text-sm font-black text-charcoal dark:text-white m-0 flex items-center gap-1.5">
                         <span>📸</span> Authentic Food Crawl Polaroids ({computedRoutePath.length} Destinations)
                       </h4>
                     </div>
@@ -8942,29 +8942,29 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       return (
                         <div
                           key={pIdx}
-                          className={`bg-white p-3.5 pt-5 pb-4 rounded-xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all relative group/card flex flex-col justify-between ${pIdx % 2 === 0 ? 'hover:-rotate-0.5' : 'hover:rotate-0.5'
+                          className={`bg-white dark:bg-[#1A1715] p-3.5 pt-5 pb-4 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all relative group/card flex flex-col justify-between ${pIdx % 2 === 0 ? 'hover:-rotate-0.5' : 'hover:rotate-0.5'
                             }`}
                         >
                           {/* Kapampangan Festive Washi Tape */}
                           <div className={`absolute -top-2.5 left-1/2 -translate-x-1/2 w-20 h-5 border shadow-2xs z-10 flex items-center justify-center text-[8px] font-black uppercase tracking-wider ${pIdx % 2 === 0
-                            ? 'bg-amber-100/90 text-amber-900 border-amber-300 -rotate-1'
-                            : 'bg-orange-100/90 text-orange-900 border-orange-300 rotate-1'
+                            ? 'bg-amber-100/90 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-700 -rotate-1'
+                            : 'bg-orange-100/90 dark:bg-orange-950/80 text-orange-900 dark:text-orange-200 border-orange-300 dark:border-orange-700 rotate-1'
                             }`}>
                             Pampanga #{pIdx + 1}
                           </div>
 
-                          <div className="aspect-4/3 rounded-lg overflow-hidden border border-[#E9E5DE] bg-[#FAF8F5] relative shadow-inner">
+                          <div className="aspect-4/3 rounded-lg overflow-hidden border border-[#E9E5DE] dark:border-[#2E2A24] bg-[#FAF8F5] dark:bg-[#12100E] relative shadow-inner">
                             {currentSlotImg ? (
                               <img src={currentSlotImg} className="w-full h-full object-cover" alt={stop.name} />
                             ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center text-charcoal-light space-y-1">
+                              <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center text-charcoal-light dark:text-gray-400 space-y-1">
                                 <span className="text-2xl">📷</span>
                                 <span className="text-[10px] font-bold">No Photo Assigned</span>
                               </div>
                             )}
 
                             {/* Clean Location Stamp overlay on photo */}
-                            <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded border-2 border-[#C85A32] text-[#C85A32] shadow-xs rotate-[-3deg] pointer-events-none select-none">
+                            <div className="absolute bottom-2 right-2 bg-white/90 dark:bg-black/80 backdrop-blur-xs px-2.5 py-1 rounded border-2 border-[#C85A32] text-[#C85A32] dark:text-orange-300 shadow-xs rotate-[-3deg] pointer-events-none select-none">
                               <strong className="block text-[9px] font-black uppercase leading-tight">📍 {stop.municipality || 'Pampanga'}</strong>
                             </div>
 
@@ -9016,23 +9016,23 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           </div>
 
                           <div className="mt-3 text-center space-y-1">
-                            <strong className="block text-sm font-black text-charcoal font-serif">
+                            <strong className="block text-sm font-black text-charcoal dark:text-white font-serif">
                               {stop.name}
                             </strong>
-                            <span className="block text-[10px] font-bold text-[#2C5E3B] font-sans">
+                            <span className="block text-[10px] font-bold text-[#2C5E3B] dark:text-emerald-400 font-sans">
                               ✨ {getPraiseText(stop)} • {stop.municipality || 'Pampanga'} • Stop #{pIdx + 1}
                             </span>
-                            <span className="block text-[9px] text-charcoal-light font-mono uppercase">
+                            <span className="block text-[9px] text-charcoal-light dark:text-gray-400 font-mono uppercase">
                               🗓️ {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </span>
 
                             {/* Download Single Polaroid Button */}
-                            <div className="pt-2 border-t border-[#E9E5DE]/60 flex justify-center">
+                            <div className="pt-2 border-t border-[#E9E5DE]/60 dark:border-[#2E2A24] flex justify-center">
                               <button
                                 type="button"
                                 disabled={generatingSingleIdx === pIdx}
                                 onClick={() => downloadSinglePolaroid(stop, pIdx)}
-                                className={`px-3 py-1 bg-ivory hover:bg-[#E9E5DE] border border-[#E9E5DE] rounded-lg text-[10px] font-bold text-charcoal hover:text-terracotta transition-colors cursor-pointer flex items-center gap-1 ${generatingSingleIdx === pIdx ? 'opacity-70 cursor-not-allowed' : ''
+                                className={`px-3 py-1 bg-ivory dark:bg-[#25221E] hover:bg-[#E9E5DE] dark:hover:bg-[#2E2A24] border border-[#E9E5DE] dark:border-[#38332D] rounded-lg text-[10px] font-bold text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-orange-400 transition-colors cursor-pointer flex items-center gap-1 ${generatingSingleIdx === pIdx ? 'opacity-70 cursor-not-allowed' : ''
                                   }`}
                               >
                                 <span>{generatingSingleIdx === pIdx ? '⏳' : '📥'}</span>
@@ -9051,9 +9051,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             {/* TAB 2: OFFICIAL CERTIFICATE OF COMPLETION */}
             {completionActiveTab === 'certificate' && (
               <div className="space-y-4">
-                <div className="p-6 sm:p-8 bg-gradient-to-b from-[#FFFDF9] via-[#FDF6EC] to-[#FBF0DF] border-4 border-[#2C5E3B] rounded-3xl relative shadow-xl text-center space-y-4 font-serif">
+                <div className="p-6 sm:p-8 bg-gradient-to-b from-[#FFFDF9] via-[#FDF6EC] to-[#FBF0DF] dark:from-[#1E1B18] dark:via-[#161412] dark:to-[#12100E] border-4 border-[#2C5E3B] dark:border-emerald-600 rounded-3xl relative shadow-xl text-center space-y-4 font-serif">
                   {/* Decorative Double Gold & Terracotta Inner Border */}
-                  <div className="border-2 border-[#E5A93C] p-5 sm:p-7 rounded-2xl space-y-4 relative bg-white/80 backdrop-blur-xs shadow-2xs">
+                  <div className="border-2 border-[#E5A93C] dark:border-[#E5A93C]/50 p-5 sm:p-7 rounded-2xl space-y-4 relative bg-white/80 dark:bg-[#1A1715]/90 backdrop-blur-xs shadow-2xs">
 
                     {/* Top Logo & Tagline */}
                     <div className="flex flex-col items-center justify-center space-y-2">
@@ -9062,67 +9062,67 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         alt="Kanyamanan Logo"
                         className="h-16 w-16 object-contain drop-shadow-xs"
                       />
-                      <span className="block text-[9px] sm:text-[10px] font-black text-[#2C5E3B] uppercase tracking-widest font-sans">
+                      <span className="block text-[9px] sm:text-[10px] font-black text-[#2C5E3B] dark:text-emerald-400 uppercase tracking-widest font-sans">
                         ✨ MANYAMAN KENI! • PROVINCE OF PAMPANGA • CULINARY CAPITAL OF THE PH ✨
                       </span>
                     </div>
 
                     {/* Certificate Title */}
                     <div className="space-y-1">
-                      <h2 className="text-lg sm:text-2xl font-black text-terracotta tracking-wide m-0">
+                      <h2 className="text-lg sm:text-2xl font-black text-terracotta dark:text-orange-400 tracking-wide m-0">
                         KATIBAYAN NING PAMAMASYAL
                       </h2>
-                      <p className="text-xs sm:text-sm font-black text-[#2C5E3B] tracking-wider font-sans uppercase m-0">
+                      <p className="text-xs sm:text-sm font-black text-[#2C5E3B] dark:text-emerald-400 tracking-wider font-sans uppercase m-0">
                         Certificate of Kapampangan Culinary Excursion
                       </p>
                       <div className="flex items-center justify-center gap-2 pt-1.5">
                         <div className="w-14 h-0.5 bg-[#E5A93C]"></div>
-                        <span className="text-[#C85A32] text-xs font-bold">★ ★ ★</span>
+                        <span className="text-[#C85A32] dark:text-orange-400 text-xs font-bold">★ ★ ★</span>
                         <div className="w-14 h-0.5 bg-[#E5A93C]"></div>
                       </div>
                     </div>
 
-                    <p className="text-xs text-charcoal-light italic m-0 pt-1">
+                    <p className="text-xs text-charcoal-light dark:text-gray-400 italic m-0 pt-1">
                       This Certificate of Culinary Distinction is proudly presented to
                     </p>
 
                     {/* Recipient Name */}
                     <div className="py-1">
-                      <h3 className="text-2xl sm:text-3xl font-black text-charcoal uppercase tracking-wider font-sans m-0 border-b-2 border-terracotta inline-block pb-0.5 px-4">
+                      <h3 className="text-2xl sm:text-3xl font-black text-charcoal dark:text-white uppercase tracking-wider font-sans m-0 border-b-2 border-terracotta dark:border-orange-500 inline-block pb-0.5 px-4">
                         {completionGroupName.trim() || userProfile.username || 'Kapampangan Food Enthusiasts'}
                       </h3>
                     </div>
 
-                    <p className="text-xs text-charcoal leading-relaxed max-w-lg mx-auto m-0 pt-1">
+                    <p className="text-xs text-charcoal dark:text-gray-200 leading-relaxed max-w-lg mx-auto m-0 pt-1">
                       For successfully navigating and conquering the authentic Kapampangan culinary route:
-                      <strong className="block text-terracotta font-sans text-sm sm:text-base mt-1 font-bold">
+                      <strong className="block text-terracotta dark:text-orange-400 font-sans text-sm sm:text-base mt-1 font-bold">
                         "{newItineraryName || 'Pampanga Heritage Food Trail'}"
                       </strong>
-                      <span className="block mt-1.5 text-xs font-bold text-[#2C5E3B] font-sans">
+                      <span className="block mt-1.5 text-xs font-bold text-[#2C5E3B] dark:text-emerald-400 font-sans">
                         🎉 Visiting {computedRoutePath.length} Heritage Stops • Certified 100% Legit Kapampangan Foodie! 🎉
                       </span>
                     </p>
 
                     {/* Official Stamp & Signatures */}
-                    <div className="pt-6 border-t border-[#2C5E3B]/20 grid grid-cols-2 gap-4 text-center font-sans">
+                    <div className="pt-6 border-t border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 grid grid-cols-2 gap-4 text-center font-sans">
                       <div className="space-y-1">
-                        <div className="w-36 h-px bg-[#2C5E3B] mx-auto mb-1.5"></div>
-                        <strong className="block text-xs font-black text-charcoal uppercase">JECCAN!</strong>
-                        <span className="block text-[10px] font-bold text-terracotta">System Developers</span>
+                        <div className="w-36 h-px bg-[#2C5E3B] dark:bg-emerald-500 mx-auto mb-1.5"></div>
+                        <strong className="block text-xs font-black text-charcoal dark:text-white uppercase">JECCAN!</strong>
+                        <span className="block text-[10px] font-bold text-terracotta dark:text-orange-400">System Developers</span>
                       </div>
                       <div className="space-y-1">
-                        <div className="w-36 h-px bg-[#2C5E3B] mx-auto mb-1.5"></div>
-                        <strong className="block text-xs font-black text-[#2C5E3B] leading-tight">
+                        <div className="w-36 h-px bg-[#2C5E3B] dark:bg-emerald-500 mx-auto mb-1.5"></div>
+                        <strong className="block text-xs font-black text-[#2C5E3B] dark:text-emerald-400 leading-tight">
                           Arts, Culture, and Tourism Office of Pampanga
                         </strong>
-                        <span className="block text-[10px] font-bold text-charcoal-light">
+                        <span className="block text-[10px] font-bold text-charcoal-light dark:text-gray-400">
                           Provincial Government of Pampanga
                         </span>
                       </div>
                     </div>
 
                     <div className="pt-3 text-center">
-                      <span className="text-[9px] font-mono text-charcoal-light uppercase tracking-wider">
+                      <span className="text-[9px] font-mono text-charcoal-light dark:text-gray-400 uppercase tracking-wider">
                         Official Entry Stamp • {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                       </span>
                     </div>
