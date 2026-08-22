@@ -32,7 +32,9 @@ import {
   Sparkles,
   MessageSquare,
   Compass,
-  FileText
+  FileText,
+  Sun,
+  Moon
 } from 'lucide-react';
 import {
   PRESEEDED_RESTAURANTS,
@@ -391,6 +393,29 @@ function App() {
       window.removeEventListener('popstate', handleHashChange);
     };
   }, []);
+
+  // Dark Mode / Light Mode state
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch (e) {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('kanyamanan_theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('kanyamanan_theme', 'light');
+      }
+    } catch (e) { }
+  }, [isDarkMode]);
 
   // Consumer Views: 'homepage', 'auth', 'dashboard'
   const [activeView, setActiveView] = useState('homepage');
@@ -4720,6 +4745,21 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
+              {/* Dark / Light Mode Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="p-2 rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all shadow-xs flex items-center justify-center cursor-pointer active:scale-95 shrink-0"
+                title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                aria-label="Toggle Theme"
+              >
+                {isDarkMode ? (
+                  <Sun className="h-4 w-4 text-saffron fill-saffron/20" />
+                ) : (
+                  <Moon className="h-4 w-4 text-gray-300 hover:text-white" />
+                )}
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
@@ -6654,6 +6694,21 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 </button>
               </>
             )}
+
+            {/* Dark / Light Mode Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-2 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A25] bg-[#FAF8F5] dark:bg-[#1E1B18] text-charcoal hover:text-terracotta transition-all shadow-2xs flex items-center justify-center cursor-pointer active:scale-95 shrink-0"
+              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              aria-label="Toggle Theme"
+            >
+              {isDarkMode ? (
+                <Sun className="h-4 w-4 text-saffron fill-saffron/20 transition-transform rotate-0 hover:rotate-45" />
+              ) : (
+                <Moon className="h-4 w-4 text-charcoal-light hover:text-terracotta transition-transform rotate-0 hover:-rotate-12" />
+              )}
+            </button>
           </nav>
         </div>
       </header>
