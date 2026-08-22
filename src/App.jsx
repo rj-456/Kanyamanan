@@ -7454,51 +7454,57 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
                   {/* Live Trip Departure & ETA Navigation Banner */}
                   {computedRoutePath.length > 0 && (
-                    <div className="bg-gradient-to-br from-[#FAF6F0] via-white to-[#F5EFE6] dark:from-[#1E1B18] dark:via-[#161412] dark:to-[#12100E] border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 rounded-2xl p-4.5 space-y-3.5 shadow-sm">
-                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-terracotta/10 dark:bg-terracotta/20 border border-terracotta/20 dark:border-terracotta/30 flex items-center justify-center text-xl shrink-0 shadow-2xs">
+                    <div className="bg-gradient-to-br from-[#FAF6F0] via-white to-[#F5EFE6] dark:from-[#1E1B18] dark:via-[#161412] dark:to-[#12100E] border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-3.5 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-4">
+                        {/* Left: Car Icon + Trip Headline */}
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <div className="w-12 h-12 rounded-2xl bg-terracotta/10 dark:bg-[#2A201A] border border-terracotta/20 dark:border-terracotta/40 flex items-center justify-center text-2xl shrink-0 shadow-2xs">
                             🚗
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">Live Trip ETA</h4>
-                              <button
-                                type="button"
-                                onClick={() => setIsCompletionModalOpen(true)}
-                                className="px-2.5 py-1 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-[10px] font-black uppercase tracking-wider shadow-2xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
-                              >
-                                <span>🎉</span> Finish Trip
-                              </button>
-                            </div>
-                            <span className="text-[11px] text-charcoal-light dark:text-gray-300 font-semibold block mt-0.5">
+                          <div className="min-w-0">
+                            <h4 className="text-sm font-black text-charcoal dark:text-white uppercase tracking-wider m-0 leading-tight">
+                              Live Trip ETA
+                            </h4>
+                            <span className="text-[11px] text-charcoal-light dark:text-gray-300 font-semibold block mt-1 truncate">
                               {isSimulating ? '⚡ Live Route Simulation Active' : '📍 Start: ' + userLocation.name}
                             </span>
                           </div>
                         </div>
 
-                        <div className="bg-white dark:bg-[#161412] border border-[#2C5E3B]/25 dark:border-[#2C5E3B]/40 px-4 py-2 rounded-2xl shadow-2xs text-right">
-                          <span className="text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider block">Estimated Arrival</span>
-                          <strong className="text-sm font-black text-[#2C5E3B] dark:text-emerald-400 flex items-center gap-1 justify-end mt-0.5">
-                            <span>⏰</span> {calculateETA(routeDurationMin)}
-                          </strong>
+                        {/* Right: Arrival Pill & Finish Trip Button */}
+                        <div className="flex items-center gap-2.5 shrink-0">
+                          <div className="bg-white dark:bg-[#161412] border border-[#2C5E3B]/25 dark:border-[#2C5E3B]/40 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl shadow-2xs text-right">
+                            <span className="text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider block">Estimated Arrival</span>
+                            <strong className="text-xs sm:text-sm font-black text-[#2C5E3B] dark:text-emerald-400 flex items-center gap-1 justify-end mt-0.5">
+                              <span>⏰</span> {calculateETA(routeDurationMin)}
+                            </strong>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsCompletionModalOpen(true)}
+                            className="px-3.5 py-2.5 sm:px-4 sm:py-3 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
+                            title="Finish and log this food trip"
+                          >
+                            <span>🎉</span> Finish Trip
+                          </button>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-2.5 text-center">
-                        <div className="bg-white dark:bg-[#161412] p-2.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs">
-                          <span className="block text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Total Distance</span>
-                          <strong className="text-xs font-black text-charcoal dark:text-white block mt-0.5">{routeDistanceKm > 0 ? `${routeDistanceKm} km` : '~12.5 km'}</strong>
+                      {/* 3 Metric Pills Grid */}
+                      <div className="grid grid-cols-3 gap-3 text-center">
+                        <div className="bg-white dark:bg-[#161412] p-3 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs">
+                          <span className="block text-[9px] sm:text-[10px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Total Distance</span>
+                          <strong className="text-xs sm:text-sm font-black text-charcoal dark:text-white block mt-1">{routeDistanceKm > 0 ? `${routeDistanceKm} km` : '~12.5 km'}</strong>
                         </div>
-                        <div className="bg-white dark:bg-[#161412] p-2.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs">
-                          <span className="block text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Drive Duration</span>
-                          <strong className="text-xs font-black text-terracotta block mt-0.5">
+                        <div className="bg-white dark:bg-[#161412] p-3 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs">
+                          <span className="block text-[9px] sm:text-[10px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Drive Duration</span>
+                          <strong className="text-xs sm:text-sm font-black text-terracotta dark:text-orange-400 block mt-1">
                             {routeDurationMin > 0 ? `${isTrafficCongested ? Math.round(routeDurationMin * 1.35) : routeDurationMin} mins` : '~25 mins'}
                           </strong>
                         </div>
-                        <div className="bg-white dark:bg-[#161412] p-2.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs">
-                          <span className="block text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Traffic Status</span>
-                          <strong className={`text-xs font-black block mt-0.5 ${isTrafficCongested ? 'text-red-500 dark:text-red-400' : 'text-bananaleaf dark:text-emerald-400'}`}>
+                        <div className="bg-white dark:bg-[#161412] p-3 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs">
+                          <span className="block text-[9px] sm:text-[10px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Traffic Status</span>
+                          <strong className={`text-xs sm:text-sm font-black block mt-1 ${isTrafficCongested ? 'text-red-500 dark:text-red-400' : 'text-bananaleaf dark:text-emerald-400'}`}>
                             {isTrafficCongested ? '⚠️ Congested' : '🟢 Smooth Flow'}
                           </strong>
                         </div>
