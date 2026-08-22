@@ -83,11 +83,18 @@ html.dark {
   color-scheme: dark;
 }
 
-html.dark .bg-ivory {
+html.dark body {
+  background-color: #141210 !important;
+  color: #F7F5F0 !important;
+}
+
+html.dark .bg-ivory,
+html.dark [class*="bg-ivory"] {
   background-color: #141210 !important;
 }
 
-html.dark .bg-white {
+html.dark .bg-white,
+html.dark [class*="bg-white"] {
   background-color: #1E1B18 !important;
 }
 

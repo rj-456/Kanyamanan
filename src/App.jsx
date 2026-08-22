@@ -6909,23 +6909,26 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               <div className="lg:col-span-3 space-y-6">
 
                 {/* Municipality Selector list in sidebar */}
-                <div className="bento-card p-5 bg-white space-y-4">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#E9E5DE]">
-                    <h3 className="text-xs font-extrabold text-charcoal uppercase tracking-wider flex items-center gap-2">
+                <div className="bento-card p-5 bg-white dark:bg-[#1E1B18] space-y-4 border-[#E9E5DE] dark:border-[#2E2A24]">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#E9E5DE] dark:border-[#2E2A24]">
+                    <h3 className="text-xs font-extrabold text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-terracotta" /> Municipality/City Selection
                     </h3>
-                    <span className="text-[10px] font-bold text-charcoal-light bg-[#FAF8F5] border border-[#E9E5DE] px-2 py-0.5 rounded-md">
+                    <span className="text-[10px] font-bold text-charcoal-light dark:text-gray-300 bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] px-2 py-0.5 rounded-md">
                       {MUNICIPALITIES.length} Areas
                     </span>
                   </div>
 
-                  <div className="space-y-1 max-h-[460px] overflow-y-auto pr-1">
+                  <div className="space-y-1.5 max-h-[460px] overflow-y-auto pr-1">
                     <button
                       onClick={() => setSelectedMunicipality('All')}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-all text-left ${selectedMunicipality === 'All' ? 'bg-terracotta text-white shadow-sm' : 'bg-ivory/50 hover:bg-[#E9E5DE] text-charcoal-light hover:text-charcoal'}`}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${selectedMunicipality === 'All' 
+                        ? 'bg-terracotta text-white shadow-sm font-black' 
+                        : 'bg-[#FAF8F5] dark:bg-[#161412] hover:bg-white dark:hover:bg-[#25221E] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white border border-[#E9E5DE]/60 dark:border-[#2A2621]'
+                      }`}
                     >
                       <span>All Locations</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${selectedMunicipality === 'All' ? 'bg-white/20 text-white' : 'bg-charcoal/5 text-charcoal-light'}`}>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full ${selectedMunicipality === 'All' ? 'bg-white/20 text-white font-black' : 'bg-black/5 dark:bg-white/10 text-charcoal-light dark:text-gray-300 font-bold'}`}>
                         {restaurants.length}
                       </span>
                     </button>
@@ -6934,10 +6937,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       <button
                         key={mun}
                         onClick={() => setSelectedMunicipality(mun)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-all text-left ${selectedMunicipality === mun ? 'bg-terracotta text-white shadow-sm' : 'bg-ivory/50 hover:bg-[#E9E5DE] text-charcoal-light hover:text-charcoal'}`}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${selectedMunicipality === mun 
+                          ? 'bg-terracotta text-white shadow-sm font-black' 
+                          : 'bg-[#FAF8F5] dark:bg-[#161412] hover:bg-white dark:hover:bg-[#25221E] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white border border-[#E9E5DE]/60 dark:border-[#2A2621]'
+                        }`}
                       >
                         <span className="truncate pr-1">{mun}</span>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${selectedMunicipality === mun ? 'bg-white/20 text-white' : 'bg-charcoal/5 text-charcoal-light'}`}>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${selectedMunicipality === mun ? 'bg-white/20 text-white font-black' : 'bg-black/5 dark:bg-white/10 text-charcoal-light dark:text-gray-300 font-bold'}`}>
                           {municipalityCounts[mun] || 0}
                         </span>
                       </button>
@@ -7172,13 +7178,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           <div className="space-y-6 animate-slide-up">
 
             {/* Tabbed Side Menu/Navbar */}
-            <div className="bg-white/90 backdrop-blur-sm border border-[#E9E5DE] rounded-2xl p-1.5 shadow-sm flex flex-wrap sm:flex-nowrap gap-1.5">
+            <div className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl p-1.5 shadow-sm flex flex-wrap sm:flex-nowrap gap-1.5 transition-colors">
               <button
                 type="button"
                 onClick={() => setDashboardTab('planner')}
                 className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'planner'
                   ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
-                  : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                  : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#282420]'
                   }`}
               >
                 <Compass className={`h-4 w-4 transition-transform ${dashboardTab === 'planner' ? 'rotate-12' : ''}`} />
@@ -7189,7 +7195,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 onClick={() => setDashboardTab('health')}
                 className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'health'
                   ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
-                  : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                  : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#282420]'
                   }`}
               >
                 <Heart className={`h-4 w-4 ${dashboardTab === 'health' ? 'fill-white' : ''}`} />
@@ -7200,7 +7206,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 onClick={() => setDashboardTab('assistant')}
                 className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'assistant'
                   ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
-                  : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                  : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#282420]'
                   }`}
               >
                 <MessageSquare className={`h-4 w-4 ${dashboardTab === 'assistant' ? 'fill-white' : ''}`} />
@@ -7212,7 +7218,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 onClick={() => setDashboardTab('history')}
                 className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'history'
                   ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
-                  : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                  : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#282420]'
                   }`}
               >
                 <Star className={`h-4 w-4 ${dashboardTab === 'history' ? 'fill-white' : ''}`} />
