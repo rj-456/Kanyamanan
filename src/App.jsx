@@ -470,7 +470,7 @@ function App() {
             return {
               ...res,
               id: res.id || `res-${Date.now()}-${idx}`,
-              name: res.name || `Heritage Kitchen #${idx + 1}`,
+              name: res.name || `Kapampangan Restaurant #${idx + 1}`,
               municipality: res.municipality || 'City of San Fernando',
               corridor: res.corridor || 'MacArthur Highway Line',
               operatingHours: res.operatingHours || '09:00 AM - 09:00 PM',
@@ -1125,7 +1125,7 @@ function App() {
   const downloadRealPolaroidAlbum = async () => {
     setIsGeneratingAlbum(true);
     try {
-      const stops = computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Heritage Kitchen', municipality: 'Pampanga', image: '' }];
+      const stops = computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Kapampangan Restaurant', municipality: 'Pampanga', image: '' }];
       const cardsToDraw = stops; // Draws all polaroids regardless of how many stops!
       const numCols = cardsToDraw.length === 1 ? 1 : 2;
       const numRows = Math.ceil(cardsToDraw.length / numCols);
@@ -3415,7 +3415,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       address: r.address || '',
       lat: Number(r.lat) || 15.0300,
       lng: Number(r.lng) || 120.6800,
-      type: r.type || '🍽️ Heritage Kitchen',
+      type: r.type || '🍽️ Kapampangan Restaurant',
       corridor: r.corridor || 'Pampanga Tourism Line',
       image: r.image || '',
       priceTier: r.priceTier || '$',
@@ -4005,7 +4005,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         address: primaryBranch?.address || adminForm.address || originalRes?.address || '',
         image: adminForm.image || (adminForm.images && adminForm.images[0]) || originalRes?.image || '',
         images: adminForm.images && adminForm.images.length > 0 ? adminForm.images : (adminForm.image ? [adminForm.image] : originalRes?.images || []),
-        description: adminForm.description || originalRes?.description || 'Heritage Kitchen in Pampanga',
+        description: adminForm.description || originalRes?.description || 'Kapampangan Restaurant in Pampanga',
         branches: updatedBranches,
         username: usernameToSave,
         password: passwordToSave,
@@ -4254,7 +4254,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
       // Sync new restaurant to Django REST API Backend
       createDjangoRestaurant(newRes);
-      alert("New Heritage Restaurant registered successfully.");
+      alert("New Kapampangan Restaurant registered successfully.");
     }
 
     setAdminForm({
@@ -6554,7 +6554,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             </div>
             <input
               type="text"
-              placeholder="Search dishes, heritage kitchens, or ingredients..."
+              placeholder="Search dishes, Kapampangan Restaurants, or ingredients..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-sm placeholder-charcoal-light focus:outline-none focus:ring-1 focus:ring-terracotta focus:border-terracotta focus:bg-white transition-colors"
@@ -6893,7 +6893,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <div className="absolute inset-0 bg-image opacity-15 pointer-events-none bg-center bg-no-repeat bg-cover lantern-overlay"></div>
                                 <div className="z-10 text-center p-4">
                                   <span className="block text-2xl mb-1">🏛️</span>
-                                  <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal-light block">Heritage Kitchen</span>
+                                  <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal-light block">Kapampangan Restaurant</span>
                                 </div>
                               </>
                             )}
@@ -8802,7 +8802,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    {(computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Heritage Kitchen Stop #1', municipality: 'Pampanga', image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80' }]).map((stop, pIdx) => {
+                    {(computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Kapampangan Restaurant Stop #1', municipality: 'Pampanga', image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80' }]).map((stop, pIdx) => {
                       const currentSlotImg = slotPhotos[pIdx] !== undefined ? slotPhotos[pIdx] : (completionPhotos[pIdx] || stop.image);
 
                       return (
