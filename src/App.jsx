@@ -6711,10 +6711,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               </div>
 
               <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                {/* Left Column: Typography & Narrative */}
-                <div className="lg:col-span-6 space-y-4">
+                {/* Left Column: Rich Editorial Typography & Narrative */}
+                <div className="lg:col-span-6 space-y-4 text-left">
                   {/* Top Cultural Badge */}
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-black tracking-wider uppercase bg-terracotta/10 text-terracotta border border-terracotta/20 shadow-2xs">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black tracking-wider uppercase bg-terracotta/10 text-terracotta border border-terracotta/25 shadow-xs">
                     <span>✨ Manyaman a Kayamanan</span>
                     <span className="text-terracotta/40">•</span>
                     <span>Culinary Heritage of Pampanga</span>
@@ -6722,77 +6722,77 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   
                   {/* Main Headline */}
                   <div>
-                    <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-charcoal tracking-tight leading-tight m-0">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1E1915] tracking-tight leading-tight m-0 drop-shadow-xs">
                       Mekeni, Mangan Tana!
                     </h2>
-                    <div className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron mt-1">
+                    <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron mt-1">
                       Explore Pampanga’s Culinary Map
                     </div>
                   </div>
                   
-                  {/* Description */}
-                  <p className="text-xs sm:text-sm text-charcoal-light leading-relaxed max-w-2xl font-medium m-0">
-                    Welcome to <strong className="text-charcoal font-bold">Kanyamanan</strong>, Pampanga’s provincial culinary guide and health informatics portal. Discover ancestral heirloom recipes with verified nutritional and allergen insights, explore certified Kapampangan kitchens across all 22 municipalities and cities, craft AI-guided food trails, and navigate travel corridors in real time.
+                  {/* Rich Narrative Description with Highlighted Feature Anchors */}
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-medium m-0">
+                    Welcome to <strong className="text-charcoal font-black bg-terracotta/10 px-1.5 py-0.5 rounded-md text-terracotta">Kanyamanan</strong>, the provincial culinary guide and health informatics portal for Pampanga. Discover ancestral heirloom recipes with verified <strong className="text-[#1E1915] font-bold">nutritional &amp; allergen insights</strong>, explore certified Kapampangan kitchens across all <strong className="text-[#1E1915] font-bold">22 municipalities &amp; cities</strong>, craft <strong className="text-[#1E1915] font-bold">AI-guided food trails</strong>, and navigate travel corridors in real time.
                   </p>
                 </div>
 
                 {/* Right Column: Kapampangan Culture & Food Showcase Visuals */}
                 <div className="lg:col-span-6 flex items-center justify-center lg:justify-end">
-                  <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-2.5 sm:gap-3.5">
+                  <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-3 sm:gap-4">
                     {/* Card 1: Real Mount Arayat (Bunduk Alaya) */}
-                    <div className="w-32 sm:w-36 lg:w-40 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1">
-                      <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative">
+                    <div className="w-32 sm:w-36 lg:w-40 bg-white p-2.5 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center">
+                      <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative shadow-xs">
                         <img 
                           src="/attractions/real_mt_arayat.png" 
                           alt="Mount Arayat (Bunduk Alaya) Pampanga" 
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "/attractions/mt_arayat_park.jpg"; }}
                         />
-                        <span className="absolute bottom-1.5 left-1.5 bg-black/65 backdrop-blur-xs text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-white/10">
+                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[9px] font-black px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                           ⛰️ Mt. Arayat
                         </span>
                       </div>
-                      <div className="pt-1.5 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
-                        <span className="truncate">Bunduk Alaya</span>
-                        <span className="text-bananaleaf shrink-0 text-[9px]">Sacred Peak</span>
+                      <div className="pt-2 text-center">
+                        <span className="font-extrabold text-xs text-charcoal block leading-tight">Bunduk Alaya</span>
+                        <span className="text-[10px] font-black text-bananaleaf block mt-0.5">Sacred Peak</span>
                       </div>
                     </div>
 
                     {/* Card 2: Center Feature - Authentic Sizzling Sisig */}
-                    <div className="w-34 sm:w-38 lg:w-42 bg-white p-2 rounded-2xl border-2 border-terracotta/30 shadow-xl ring-4 ring-terracotta/10 hover:shadow-2xl transition-all duration-300 transform sm:scale-105 sm:-translate-y-2 z-10">
-                      <div className="h-26 sm:h-30 rounded-xl overflow-hidden relative">
+                    <div className="w-36 sm:w-40 lg:w-44 bg-white p-2.5 rounded-2xl border-2 border-terracotta/40 shadow-xl ring-4 ring-terracotta/10 hover:shadow-2xl transition-all duration-300 transform sm:scale-105 sm:-translate-y-2 z-10 text-center">
+                      <div className="h-28 sm:h-32 rounded-xl overflow-hidden relative shadow-xs">
                         <img 
                           src="/restaurants/authentic_sisig.jpg" 
                           alt="Authentic Kapampangan Sizzling Sisig" 
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"; }}
                         />
-                        <span className="absolute bottom-1.5 left-1.5 bg-terracotta backdrop-blur-xs text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-xs">
+                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[9px] font-black px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap border border-white/20">
                           🔥 Sizzling Sisig
                         </span>
                       </div>
-                      <div className="pt-1.5 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
-                        <span className="truncate">Culinary Capital</span>
-                        <span className="text-terracotta shrink-0 text-[9px] font-extrabold">Food</span>
+                      <div className="pt-2 text-center">
+                        <span className="font-black text-xs text-charcoal block leading-tight">Culinary Capital</span>
+                        <span className="text-[10px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Authentic Food</span>
                       </div>
                     </div>
 
                     {/* Card 3: Giant Lantern (Parul Sampernandu) */}
-                    <div className="w-32 sm:w-36 lg:w-40 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1">
-                      <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative">
+                    <div className="w-32 sm:w-36 lg:w-40 bg-white p-2.5 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center">
+                      <div className="h-24 sm:h-28 rounded-xl overflow-hidden relative shadow-xs">
                         <img 
                           src="/attractions/giant_lantern_san_fernando.jpg" 
                           alt="Parul Sampernandu Giant Lantern" 
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "/attractions/giant_lantern_san_fernando.png"; }}
                         />
-                        <span className="absolute bottom-1.5 left-1.5 bg-saffron/90 backdrop-blur-xs text-charcoal text-[8px] font-black px-2 py-0.5 rounded-full border border-white/10">
-                          ✨ Giant Lantern
+                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-saffron text-charcoal text-[9px] font-black px-2 py-0.5 rounded-full border border-charcoal/10 whitespace-nowrap shadow-xs">
+                          ✨ Parul
                         </span>
                       </div>
-                      <div className="pt-1.5 px-1 flex items-center justify-between text-[10px] font-black text-charcoal">
-                        <span className="truncate">Giant Lantern</span>
-                        <span className="text-saffron-dark shrink-0 text-[9px]">Festival</span>
+                      <div className="pt-2 text-center">
+                        <span className="font-extrabold text-xs text-charcoal block leading-tight">Giant Lantern</span>
+                        <span className="text-[10px] font-black text-[#D97706] block mt-0.5 uppercase tracking-wide">Festival</span>
                       </div>
                     </div>
                   </div>
