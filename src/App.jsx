@@ -6730,38 +6730,57 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </p>
                 </div>
 
-                {/* Right Column: Kapampangan Culture & Food Showcase Visuals */}
+                {/* Right Column: Kapampangan Culture & Food Showcase Visuals (4 Iconic Pillars) */}
                 <div className="lg:col-span-5 flex items-center justify-center lg:justify-end">
-                  <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-2.5 sm:gap-3.5 pt-2">
+                  <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-2 sm:gap-2.5 pt-2">
                     {/* Card 1: Real Mount Arayat (Bunduk Alaya) */}
-                    <div className="w-28 sm:w-32 lg:w-36 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
-                      <div className="h-22 sm:h-24 lg:h-26 rounded-xl overflow-hidden relative shadow-xs">
+                    <div className="w-26 sm:w-28 xl:w-32 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
+                      <div className="h-20 sm:h-22 xl:h-24 rounded-xl overflow-hidden relative shadow-xs">
                         <img
                           src="/attractions/real_mt_arayat.png"
                           alt="Mount Arayat (Bunduk Alaya) Pampanga"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "/attractions/mt_arayat_park.jpg"; }}
                         />
-                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                           ⛰️ Mt. Arayat
                         </span>
                       </div>
-                      <div className="pt-1.5 text-center">
-                        <span className="font-extrabold text-[11px] text-charcoal block leading-tight truncate">Bunduk Alaya</span>
-                        <span className="text-[9px] font-black text-bananaleaf block mt-0.5">Sacred Peak</span>
+                      <div className="pt-1 text-center">
+                        <span className="font-extrabold text-[10px] text-charcoal block leading-tight truncate">Bunduk Alaya</span>
+                        <span className="text-[8.5px] font-black text-bananaleaf block mt-0.5">Sacred Peak</span>
                       </div>
                     </div>
 
-                    {/* Card 2: Centerpiece Feature - Big Authentic Sizzling Sisig */}
-                    <div className="w-36 sm:w-42 lg:w-46 bg-white p-2.5 rounded-2xl border-2 border-terracotta shadow-2xl ring-4 ring-terracotta/20 hover:shadow-2xl transition-all duration-300 transform sm:scale-110 sm:-translate-y-2 z-10 text-center shrink-0">
-                      <div className="h-28 sm:h-32 lg:h-34 rounded-xl overflow-hidden relative shadow-xs">
+                    {/* Card 2: Famous Heritage Church - Betis Church */}
+                    <div className="w-26 sm:w-28 xl:w-32 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
+                      <div className="h-20 sm:h-22 xl:h-24 rounded-xl overflow-hidden relative shadow-xs">
+                        <img
+                          src="/attractions/betis_church_guagua.png"
+                          alt="Betis Heritage Church Guagua Pampanga"
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          onError={(e) => { e.target.src = "/attractions/betis_church_guagua.jpg"; }}
+                        />
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                          🏛️ Betis Church
+                        </span>
+                      </div>
+                      <div className="pt-1 text-center">
+                        <span className="font-extrabold text-[10px] text-charcoal block leading-tight truncate">Betis Church</span>
+                        <span className="text-[8.5px] font-black text-[#2C5E3B] block mt-0.5 uppercase tracking-wide">Heritage</span>
+                      </div>
+                    </div>
+
+                    {/* Card 3: Centerpiece Feature - Big Authentic Sizzling Sisig */}
+                    <div className="w-36 sm:w-40 xl:w-44 bg-white p-2.5 rounded-2xl border-2 border-terracotta shadow-2xl ring-4 ring-terracotta/20 hover:shadow-2xl transition-all duration-300 transform sm:scale-110 sm:-translate-y-2 z-10 text-center shrink-0">
+                      <div className="h-26 sm:h-30 xl:h-32 rounded-xl overflow-hidden relative shadow-xs">
                         <img
                           src="/restaurants/authentic_sisig.jpg"
                           alt="Authentic Kapampangan Sizzling Sisig"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"; }}
                         />
-                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[9px] font-black px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap border border-white/20">
+                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[8.5px] font-black px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap border border-white/20">
                           🔥 Sizzling Sisig
                         </span>
                       </div>
@@ -6771,22 +6790,22 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       </div>
                     </div>
 
-                    {/* Card 3: Famous Pampanga Heritage Church - Betis Church */}
-                    <div className="w-28 sm:w-32 lg:w-36 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
-                      <div className="h-22 sm:h-24 lg:h-26 rounded-xl overflow-hidden relative shadow-xs">
+                    {/* Card 4: Giant Lantern (Parul Sampernandu) */}
+                    <div className="w-26 sm:w-28 xl:w-32 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center shrink-0">
+                      <div className="h-20 sm:h-22 xl:h-24 rounded-xl overflow-hidden relative shadow-xs">
                         <img
-                          src="/attractions/betis_church_guagua.png"
-                          alt="Betis Heritage Church Guagua Pampanga"
+                          src="/attractions/giant_lantern_san_fernando.jpg"
+                          alt="Parul Sampernandu Giant Lantern"
                           className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                          onError={(e) => { e.target.src = "/attractions/betis_church_guagua.jpg"; }}
+                          onError={(e) => { e.target.src = "/attractions/giant_lantern_san_fernando.png"; }}
                         />
-                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
-                          🏛️ Betis Church
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-saffron text-charcoal text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-charcoal/10 whitespace-nowrap shadow-xs">
+                          ✨ Parul
                         </span>
                       </div>
-                      <div className="pt-1.5 text-center">
-                        <span className="font-extrabold text-[11px] text-charcoal block leading-tight truncate">Betis Church</span>
-                        <span className="text-[9px] font-black text-[#D97706] block mt-0.5 uppercase tracking-wide">Heritage Site</span>
+                      <div className="pt-1 text-center">
+                        <span className="font-extrabold text-[10px] text-charcoal block leading-tight truncate">Giant Lantern</span>
+                        <span className="text-[8.5px] font-black text-[#D97706] block mt-0.5 uppercase tracking-wide">Festival</span>
                       </div>
                     </div>
                   </div>
