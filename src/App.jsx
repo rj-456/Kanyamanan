@@ -7063,7 +7063,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   <input
                     type="email"
                     required
-                    placeholder="juan@pampanga.gov.ph"
+                    placeholder="juandelacruz@gmail.com"
                     value={regForm.email}
                     onChange={(e) => setRegForm({ ...regForm, email: e.target.value })}
                     className="block w-full px-3.5 py-2.5 border border-[#E9E5DE] rounded-xl text-sm bg-ivory focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white"
@@ -7124,7 +7124,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'planner'
                   ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
                   : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
-                }`}
+                  }`}
               >
                 <Compass className={`h-4 w-4 transition-transform ${dashboardTab === 'planner' ? 'rotate-12' : ''}`} />
                 <span>Food Trip Planner</span>
@@ -7135,7 +7135,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'health'
                   ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
                   : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
-                }`}
+                  }`}
               >
                 <Heart className={`h-4 w-4 ${dashboardTab === 'health' ? 'fill-white' : ''}`} />
                 <span>Health Informatics</span>
@@ -7146,10 +7146,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'assistant'
                   ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
                   : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
-                }`}
+                  }`}
               >
                 <MessageSquare className={`h-4 w-4 ${dashboardTab === 'assistant' ? 'fill-white' : ''}`} />
-{/* ... */}
+                {/* ... */}
                 <span>Travel Kasaup</span>
               </button>
               <button
@@ -7158,7 +7158,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'history'
                   ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
                   : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
-                }`}
+                  }`}
               >
                 <Star className={`h-4 w-4 ${dashboardTab === 'history' ? 'fill-white' : ''}`} />
                 <span>Travel History</span>
@@ -7171,7 +7171,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
                 {/* Left Pane: Config fields & Itinerary Controls */}
                 <div className="lg:col-span-5 space-y-5">
-                  
+
                   {/* Card 1: Itinerary Config & Starting Location */}
                   <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-4 shadow-sm">
                     <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 pb-3">
@@ -7290,10 +7290,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   handleAddToItinerary(attr);
                                   alert(`✓ Added "${attr.name}" (${attr.municipality}) to your trip itinerary!`);
                                 }}
-                                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black transition-all ${isAdded 
-                                  ? 'bg-bananaleaf/10 text-bananaleaf border border-bananaleaf/20' 
+                                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black transition-all ${isAdded
+                                  ? 'bg-bananaleaf/10 text-bananaleaf border border-bananaleaf/20'
                                   : 'bg-[#2C5E3B] hover:bg-[#20452B] text-white cursor-pointer shadow-xs active:scale-95'
-                                }`}
+                                  }`}
                               >
                                 {isAdded ? '✓ Added' : '+ Add Place'}
                               </button>
@@ -7366,7 +7366,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         </div>
 
                         {/* Progress Stepper Pills */}
-                        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
                           {computedRoutePath.map((stop, idx) => {
                             const isVisited = visitedStops.includes(stop.id);
                             const isCurrentTarget = isTripActive && idx === currentStopIndex;
@@ -7379,10 +7379,10 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   : isCurrentTarget
                                     ? 'bg-terracotta text-white border-terracotta font-black shadow-xs animate-pulse'
                                     : 'bg-[#FAF8F5] border-[#E9E5DE] text-charcoal-light font-semibold'
-                                }`}
+                                  }`}
                               >
                                 <span>{isVisited ? '✓' : isCurrentTarget ? '🎯' : idx + 1}</span>
-                                <span className="truncate max-w-[120px]">{stop.name}</span>
+                                <span className="truncate max-w-[130px]">{stop.name}</span>
                               </div>
                             );
                           })}
@@ -7393,49 +7393,51 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
                   {/* Live Trip Departure & ETA Navigation Banner */}
                   {computedRoutePath.length > 0 && (
-                    <div className="bg-gradient-to-r from-[#2C5E3B]/10 via-terracotta/10 to-saffron/10 border border-[#2C5E3B]/20 rounded-2xl p-4 space-y-3 shadow-xs">
-                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#2C5E3B]/15 pb-2.5">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">🚗</span>
+                    <div className="bg-gradient-to-br from-[#FAF6F0] via-white to-[#F5EFE6] border border-[#2C5E3B]/20 rounded-2xl p-4.5 space-y-3.5 shadow-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E9E5DE] pb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-terracotta/10 border border-terracotta/20 flex items-center justify-center text-xl shrink-0 shadow-2xs">
+                            🚗
+                          </div>
                           <div>
                             <div className="flex items-center gap-2">
                               <h4 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">Live Trip ETA</h4>
                               <button
                                 type="button"
                                 onClick={() => setIsCompletionModalOpen(true)}
-                                className="px-2.5 py-1 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-[10px] font-black uppercase tracking-wider shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                                className="px-2.5 py-1 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-[10px] font-black uppercase tracking-wider shadow-2xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
                               >
                                 <span>🎉</span> Finish Trip
                               </button>
                             </div>
-                            <span className="text-[10px] text-charcoal-light font-bold">
+                            <span className="text-[11px] text-charcoal-light font-semibold block mt-0.5">
                               {isSimulating ? '⚡ Live Route Simulation Active' : '📍 Start: ' + userLocation.name}
                             </span>
                           </div>
                         </div>
 
-                        <div className="bg-white border border-[#2C5E3B]/30 px-3 py-1.5 rounded-xl shadow-2xs text-right">
+                        <div className="bg-white border border-[#2C5E3B]/25 px-4 py-2 rounded-2xl shadow-2xs text-right">
                           <span className="text-[9px] font-black text-charcoal-light uppercase tracking-wider block">Estimated Arrival</span>
-                          <strong className="text-xs font-black text-[#2C5E3B]">
-                            ⏰ {calculateETA(routeDurationMin)}
+                          <strong className="text-sm font-black text-[#2C5E3B] flex items-center gap-1 justify-end mt-0.5">
+                            <span>⏰</span> {calculateETA(routeDurationMin)}
                           </strong>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                        <div className="bg-white p-2 rounded-xl border border-[#E9E5DE]">
-                          <span className="block text-[9px] font-bold text-charcoal-light uppercase">Total Distance</span>
-                          <strong className="text-xs font-black text-charcoal">{routeDistanceKm > 0 ? `${routeDistanceKm} km` : '~12.5 km'}</strong>
+                      <div className="grid grid-cols-3 gap-2.5 text-center">
+                        <div className="bg-white p-2.5 rounded-xl border border-[#E9E5DE] shadow-2xs">
+                          <span className="block text-[9px] font-black text-charcoal-light uppercase tracking-wider">Total Distance</span>
+                          <strong className="text-xs font-black text-charcoal block mt-0.5">{routeDistanceKm > 0 ? `${routeDistanceKm} km` : '~12.5 km'}</strong>
                         </div>
-                        <div className="bg-white p-2 rounded-xl border border-[#E9E5DE]">
-                          <span className="block text-[9px] font-bold text-charcoal-light uppercase">Drive Duration</span>
-                          <strong className="text-xs font-black text-terracotta">
+                        <div className="bg-white p-2.5 rounded-xl border border-[#E9E5DE] shadow-2xs">
+                          <span className="block text-[9px] font-black text-charcoal-light uppercase tracking-wider">Drive Duration</span>
+                          <strong className="text-xs font-black text-terracotta block mt-0.5">
                             {routeDurationMin > 0 ? `${isTrafficCongested ? Math.round(routeDurationMin * 1.35) : routeDurationMin} mins` : '~25 mins'}
                           </strong>
                         </div>
-                        <div className="bg-white p-2 rounded-xl border border-[#E9E5DE]">
-                          <span className="block text-[9px] font-bold text-charcoal-light uppercase">Traffic Flow</span>
-                          <strong className={`text-xs font-black ${isTrafficCongested ? 'text-red-600' : 'text-bananaleaf'}`}>
+                        <div className="bg-white p-2.5 rounded-xl border border-[#E9E5DE] shadow-2xs">
+                          <span className="block text-[9px] font-black text-charcoal-light uppercase tracking-wider">Traffic Status</span>
+                          <strong className={`text-xs font-black block mt-0.5 ${isTrafficCongested ? 'text-red-600' : 'text-bananaleaf'}`}>
                             {isTrafficCongested ? '⚠️ Congested' : '🟢 Smooth Flow'}
                           </strong>
                         </div>
@@ -7443,13 +7445,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     </div>
                   )}
 
-                  {/* Card 4: Active Route Nodes List (Single Clean Badge) */}
-                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-3 shadow-sm">
+                  {/* Card 4: Active Route Nodes List */}
+                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-3.5 shadow-sm">
                     <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 pb-2.5">
                       <h4 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
                         Active Route Nodes ({activeTrip.length} Stops)
                       </h4>
-                      <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 px-2.5 py-0.5 rounded-full border border-terracotta/10">
+                      <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 px-2.5 py-1 rounded-full border border-terracotta/15">
                         🖐️ Drag cards or use ▲ ▼ to reorder
                       </span>
                     </div>
@@ -7483,16 +7485,16 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                               className={`bg-[#FAF8F5] p-3 rounded-xl border transition-all flex items-center justify-between gap-3 shadow-2xs group cursor-grab active:cursor-grabbing ${draggedIndex === index ? 'border-terracotta bg-terracotta/5 opacity-50 scale-[0.98]' : 'border-[#E9E5DE] hover:border-terracotta/40 hover:bg-white'
                                 }`}
                             >
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <span className="text-charcoal-light group-hover:text-terracotta font-bold text-sm select-none shrink-0" title="Drag to reorder">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <span className="text-charcoal-light/60 group-hover:text-terracotta font-bold text-sm select-none shrink-0" title="Drag to reorder">
                                   ⋮⋮
                                 </span>
-                                <span className="w-6 h-6 rounded-full bg-bananaleaf text-white text-[11px] font-black flex items-center justify-center shrink-0 shadow-xs">
+                                <span className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#2C5E3B] to-bananaleaf text-white text-xs font-black flex items-center justify-center shrink-0 shadow-xs">
                                   {index + 1}
                                 </span>
                                 <div className="min-w-0">
                                   <span className="block text-xs font-black text-charcoal truncate group-hover:text-terracotta transition-colors">{res.name}</span>
-                                  <span className="block text-[9px] text-charcoal-light font-semibold truncate">
+                                  <span className="block text-[10px] text-charcoal-light font-medium truncate">
                                     📍 {res.municipality} • {res.address}
                                   </span>
                                 </div>
@@ -7503,7 +7505,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   type="button"
                                   disabled={index === 0}
                                   onClick={() => moveItineraryItem(index, index - 1)}
-                                  className="p-1 text-charcoal-light hover:text-charcoal hover:bg-white rounded border border-transparent hover:border-[#E9E5DE] disabled:opacity-30"
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#E9E5DE] bg-white text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5] text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                   title="Move Up"
                                 >
                                   ▲
@@ -7512,7 +7514,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   type="button"
                                   disabled={index === computedRoutePath.length - 1}
                                   onClick={() => moveItineraryItem(index, index + 1)}
-                                  className="p-1 text-charcoal-light hover:text-charcoal hover:bg-white rounded border border-transparent hover:border-[#E9E5DE] disabled:opacity-30"
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#E9E5DE] bg-white text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5] text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                   title="Move Down"
                                 >
                                   ▼
@@ -7520,7 +7522,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveFromItinerary(res.id)}
-                                  className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-700 transition-colors ml-0.5"
                                   title="Remove stop"
                                 >
                                   ✕
@@ -7533,9 +7535,9 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         {/* Save & Manage Plan Form */}
                         {loadedItineraryId ? (
                           <div className="pt-3 border-t border-[#E9E5DE] space-y-2.5">
-                            <div className="p-3 bg-[#2C5E3B]/5 border border-[#2C5E3B]/20 rounded-xl space-y-2">
+                            <div className="p-3.5 bg-[#2C5E3B]/5 border border-[#2C5E3B]/20 rounded-2xl space-y-2">
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black text-[#2C5E3B] uppercase tracking-wider flex items-center gap-1">
+                                <span className="text-[10px] font-black text-[#2C5E3B] uppercase tracking-wider flex items-center gap-1.5">
                                   <span>📂</span> Currently Editing: <strong className="text-charcoal underline">{loadedItineraryName}</strong>
                                 </span>
                                 <button
@@ -7555,7 +7557,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 value={newItineraryName}
                                 onChange={(e) => setNewItineraryName(e.target.value)}
                                 placeholder="Itinerary Name"
-                                className="px-3 py-1.5 text-xs font-bold text-charcoal border border-[#2C5E3B]/30 rounded-lg bg-white w-full focus:outline-none focus:ring-1 focus:ring-[#2C5E3B]"
+                                className="px-3.5 py-2 text-xs font-bold text-charcoal border border-[#2C5E3B]/30 rounded-xl bg-white w-full focus:outline-none focus:ring-1 focus:ring-[#2C5E3B]"
                               />
                             </div>
 
@@ -7563,14 +7565,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                               <button
                                 type="button"
                                 onClick={handleUpdateLoadedItinerary}
-                                className="px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                                className="px-4 py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
                               >
                                 <span>💾</span> Update Plan ({activeTrip.length} Stops)
                               </button>
                               <button
                                 type="button"
                                 onClick={handleSaveActiveTrip}
-                                className="px-3.5 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                                className="px-4 py-2.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
                               >
                                 + Save Copy
                               </button>
@@ -7588,11 +7590,11 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 placeholder="e.g. My Heritage Weekend Crawl"
                                 value={newItineraryName}
                                 onChange={(e) => setNewItineraryName(e.target.value)}
-                                className="flex-1 px-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs font-semibold focus:outline-none focus:bg-white"
+                                className="flex-1 px-3.5 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs font-semibold focus:outline-none focus:bg-white focus:ring-1 focus:ring-terracotta"
                               />
                               <button
                                 type="submit"
-                                className="px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer"
+                                className="px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer active:scale-95"
                               >
                                 Save Route
                               </button>
