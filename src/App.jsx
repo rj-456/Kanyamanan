@@ -7149,6 +7149,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 }`}
               >
                 <MessageSquare className={`h-4 w-4 ${dashboardTab === 'assistant' ? 'fill-white' : ''}`} />
+{/* ... */}
                 <span>Travel Kasaup</span>
               </button>
               <button
@@ -7168,448 +7169,449 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
             {dashboardTab === 'planner' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-                {/* Left Pane: Config fields */}
-                <div className="lg:col-span-5 space-y-6">
-                  <div className="bento-card p-5 bg-white space-y-5">
-                    <h3 className="text-sm font-extrabold text-charcoal tracking-tight flex items-center gap-2">
-                      <Sliders className="h-4.5 w-4.5 text-terracotta" /> Itinerary Optimization Bounding
-                    </h3>
-
-                    {/* Geolocation Starting Point */}
-                    <div className="space-y-2">
-                      <label className="block text-xs font-bold text-charcoal uppercase tracking-wider">
-                        Starting Location Point
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          readOnly
-                          value={userLocation.name === "Your Detected Location" ? `📍 Detected (${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)})` : userLocation.name}
-                          className="flex-1 px-3 py-1.5 border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] text-xs font-semibold focus:outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={detectUserLocation}
-                          className="px-3 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-xs font-bold transition-colors shrink-0"
-                        >
-                          {isDetectingLocation ? "Locating..." : "📍 Locate Me"}
-                        </button>
+                {/* Left Pane: Config fields & Itinerary Controls */}
+                <div className="lg:col-span-5 space-y-5">
+                  
+                  {/* Card 1: Itinerary Config & Starting Location */}
+                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-4 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-terracotta/10 flex items-center justify-center text-terracotta">
+                          <Sliders className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
+                            Itinerary Setup
+                          </h3>
+                          <span className="text-[10px] text-charcoal-light font-medium">Starting point &amp; routing base</span>
+                        </div>
                       </div>
-                      <span className="block text-[10px] text-charcoal-light">
-                        Calibrate starting coords point via browser device GPS.
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-terracotta bg-terracotta/10 px-2 py-0.5 rounded-full border border-terracotta/20">
+                        GPS Active
                       </span>
                     </div>
 
-                    <div className="h-px bg-[#E9E5DE]"></div >
-
-
-                    {/* Tourist Destinations Picker per Municipality in Planner */}
-                    <div className="bento-card p-5 bg-white space-y-4 border-[#E9E5DE]">
-                      <div className="flex items-center justify-between border-b border-[#E9E5DE] pb-2.5">
-                        <div>
-                          <h3 className="text-xs font-extrabold text-charcoal uppercase tracking-wider flex items-center gap-1.5 m-0">
-                            <span>🏛️</span> Tourist Destinations Per Place
-                          </h3>
-                          <span className="text-[10px] text-charcoal-light font-medium block mt-0.5">
-                            Pick heritage sights & landmarks to visit on your trip
-                          </span>
+                    {/* Geolocation Starting Point */}
+                    <div className="space-y-1.5">
+                      <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
+                        Starting Location Point
+                      </label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            readOnly
+                            value={userLocation.name === "Your Detected Location" ? `📍 Detected (${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)})` : userLocation.name}
+                            className="w-full pl-3 pr-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs font-bold text-charcoal focus:outline-none"
+                          />
                         </div>
-                        <span className="text-[10px] font-bold text-terracotta bg-terracotta/5 px-2 py-0.5 rounded border border-terracotta/10">
-                          {attractions.filter(a => attractionMunFilter === 'All' || a.municipality === attractionMunFilter).length} Places
-                        </span>
-                      </div>
-
-                      {/* Select Municipality/City Filter for Destinations */}
-                      <div className="space-y-2">
-                        <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider">
-                          Select Municipality / City Destinations
-                        </label>
-                        <select
-                          value={attractionMunFilter}
-                          onChange={(e) => setAttractionMunFilter(e.target.value)}
-                          className="w-full px-3 py-2 text-xs border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] font-bold focus:outline-none focus:bg-white"
+                        <button
+                          type="button"
+                          onClick={detectUserLocation}
+                          className="px-3.5 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 flex items-center gap-1.5 cursor-pointer active:scale-95"
                         >
-                          <option value="All">All Municipalities & Cities ({attractions.length} Heritage Sites)</option>
-                          {MUNICIPALITIES.map(mun => (
-                            <option key={mun} value={mun}>📍 {mun}</option>
-                          ))}
-                        </select>
+                          <span>📍</span>
+                          <span>{isDetectingLocation ? "Locating..." : "Locate Me"}</span>
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-charcoal-light m-0 font-medium">
+                        Calibrates starting coordinates point via browser GPS.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Tourist Destinations Picker per Municipality */}
+                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-4 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-[#2C5E3B]/10 flex items-center justify-center text-lg">
+                          🏛️
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
+                            Tourist Destinations
+                          </h3>
+                          <span className="text-[10px] text-charcoal-light font-medium">Add heritage sights &amp; landmarks to trip</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-black text-[#2C5E3B] bg-[#2C5E3B]/10 px-2.5 py-0.5 rounded-full border border-[#2C5E3B]/20">
+                        {attractions.filter(a => attractionMunFilter === 'All' || a.municipality === attractionMunFilter).length} Places
+                      </span>
+                    </div>
+
+                    {/* Select Municipality/City Filter */}
+                    <div className="space-y-1.5">
+                      <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
+                        Filter By Municipality / City
+                      </label>
+                      <select
+                        value={attractionMunFilter}
+                        onChange={(e) => setAttractionMunFilter(e.target.value)}
+                        className="w-full px-3 py-2 text-xs border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] font-bold text-charcoal focus:outline-none focus:bg-white focus:ring-1 focus:ring-terracotta"
+                      >
+                        <option value="All">All Municipalities &amp; Cities ({attractions.length} Heritage Sites)</option>
+                        {MUNICIPALITIES.map(mun => (
+                          <option key={mun} value={mun}>📍 {mun}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Destinations Cards List */}
+                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                      {attractions.filter(attr => attractionMunFilter === 'All' || attr.municipality === attractionMunFilter).map(attr => {
+                        const isAdded = activeTrip.some(item => item.id === attr.id);
+
+                        return (
+                          <div key={attr.id} className="p-2.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl flex items-center justify-between gap-3 hover:border-terracotta/40 hover:bg-white transition-all shadow-2xs">
+                            <div className="flex items-start gap-2.5 min-w-0">
+                              {attr.image && (
+                                <img src={attr.image} alt={attr.name} className="w-11 h-11 rounded-lg object-cover border border-[#E9E5DE] shrink-0 shadow-2xs" />
+                              )}
+                              <div className="min-w-0">
+                                <strong className="text-xs font-black text-charcoal block truncate">{attr.name}</strong>
+                                <span className="text-[10px] font-bold text-terracotta block">📍 {attr.municipality}</span>
+                                <span className="text-[9px] text-charcoal-light font-medium block truncate">{attr.type}</span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedAttraction(attr)}
+                                className="p-1.5 text-charcoal hover:text-terracotta text-xs font-bold rounded-lg bg-white border border-[#E9E5DE] shadow-2xs hover:bg-[#FAF8F5] transition-colors"
+                                title="View Details"
+                              >
+                                ℹ️
+                              </button>
+                              <button
+                                type="button"
+                                disabled={isAdded}
+                                onClick={() => {
+                                  handleAddToItinerary(attr);
+                                  alert(`✓ Added "${attr.name}" (${attr.municipality}) to your trip itinerary!`);
+                                }}
+                                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black transition-all ${isAdded 
+                                  ? 'bg-bananaleaf/10 text-bananaleaf border border-bananaleaf/20' 
+                                  : 'bg-[#2C5E3B] hover:bg-[#20452B] text-white cursor-pointer shadow-xs active:scale-95'
+                                }`}
+                              >
+                                {isAdded ? '✓ Added' : '+ Add Place'}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Card 3: Live Trip Navigation & Route Controls */}
+                  <div className="bg-white border border-[#2C5E3B]/25 rounded-2xl p-5 space-y-4 shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <span className="text-[9px] font-black text-terracotta uppercase tracking-wider block">
+                          🚀 Multi-Stop Navigation Engine
+                        </span>
+                        <h4 className="text-sm font-black text-charcoal m-0 flex items-center gap-2 mt-0.5">
+                          {isTripActive ? (
+                            <span className="flex items-center gap-1.5 text-bananaleaf">
+                              <span className="w-2.5 h-2.5 rounded-full bg-bananaleaf animate-ping inline-block"></span>
+                              Live Navigation Active
+                            </span>
+                          ) : (
+                            "Start Your Kapampangan Crawl"
+                          )}
+                        </h4>
                       </div>
 
-                      {/* Destinations Cards List in Planner */}
-                      <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                        {attractions.filter(attr => attractionMunFilter === 'All' || attr.municipality === attractionMunFilter).map(attr => {
-                          const isAdded = activeTrip.some(item => item.id === attr.id);
+                      <div className="flex items-center gap-2">
+                        {!isTripActive ? (
+                          <button
+                            type="button"
+                            onClick={handleStartLiveTrip}
+                            className="px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                          >
+                            🚀 Start Navigation
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleAdvanceNextStop}
+                              className="px-3.5 py-2 bg-saffron hover:bg-saffron-dark text-charcoal text-xs font-extrabold rounded-xl shadow-xs transition-colors cursor-pointer"
+                            >
+                              ✓ Next Stop ➡️
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleEndLiveTrip}
+                              className="px-3 py-2 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                            >
+                              ⏹️ End Trip
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
 
-                          return (
-                            <div key={attr.id} className="p-3 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl flex items-center justify-between gap-3 hover:border-terracotta/30 transition-all">
-                              <div className="flex items-start gap-2.5 min-w-0">
-                                {attr.image && (
-                                  <img src={attr.image} alt={attr.name} className="w-11 h-11 rounded-lg object-cover border border-[#E9E5DE] shrink-0" />
-                                )}
+                    {/* Multi-Stop Progress Track */}
+                    {computedRoutePath.length > 0 && (
+                      <div className="pt-3 border-t border-[#E9E5DE] space-y-2">
+                        <div className="flex items-center justify-between text-[10px] font-black uppercase text-charcoal-light">
+                          <span>Itinerary Progress: {visitedStops.length} of {computedRoutePath.length} Visited</span>
+                          {isTripActive && computedRoutePath[currentStopIndex] && (
+                            <span className="text-terracotta font-black">
+                              Target: {computedRoutePath[currentStopIndex].name} ({distanceToTargetKm ? `${distanceToTargetKm} km` : 'Navigating'})
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Progress Stepper Pills */}
+                        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                          {computedRoutePath.map((stop, idx) => {
+                            const isVisited = visitedStops.includes(stop.id);
+                            const isCurrentTarget = isTripActive && idx === currentStopIndex;
+
+                            return (
+                              <div
+                                key={stop.id}
+                                className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 shrink-0 transition-all ${isVisited
+                                  ? 'bg-bananaleaf/10 border-bananaleaf text-bananaleaf font-bold'
+                                  : isCurrentTarget
+                                    ? 'bg-terracotta text-white border-terracotta font-black shadow-xs animate-pulse'
+                                    : 'bg-[#FAF8F5] border-[#E9E5DE] text-charcoal-light font-semibold'
+                                }`}
+                              >
+                                <span>{isVisited ? '✓' : isCurrentTarget ? '🎯' : idx + 1}</span>
+                                <span className="truncate max-w-[120px]">{stop.name}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Live Trip Departure & ETA Navigation Banner */}
+                  {computedRoutePath.length > 0 && (
+                    <div className="bg-gradient-to-r from-[#2C5E3B]/10 via-terracotta/10 to-saffron/10 border border-[#2C5E3B]/20 rounded-2xl p-4 space-y-3 shadow-xs">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#2C5E3B]/15 pb-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">🚗</span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">Live Trip ETA</h4>
+                              <button
+                                type="button"
+                                onClick={() => setIsCompletionModalOpen(true)}
+                                className="px-2.5 py-1 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-[10px] font-black uppercase tracking-wider shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                              >
+                                <span>🎉</span> Finish Trip
+                              </button>
+                            </div>
+                            <span className="text-[10px] text-charcoal-light font-bold">
+                              {isSimulating ? '⚡ Live Route Simulation Active' : '📍 Start: ' + userLocation.name}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="bg-white border border-[#2C5E3B]/30 px-3 py-1.5 rounded-xl shadow-2xs text-right">
+                          <span className="text-[9px] font-black text-charcoal-light uppercase tracking-wider block">Estimated Arrival</span>
+                          <strong className="text-xs font-black text-[#2C5E3B]">
+                            ⏰ {calculateETA(routeDurationMin)}
+                          </strong>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div className="bg-white p-2 rounded-xl border border-[#E9E5DE]">
+                          <span className="block text-[9px] font-bold text-charcoal-light uppercase">Total Distance</span>
+                          <strong className="text-xs font-black text-charcoal">{routeDistanceKm > 0 ? `${routeDistanceKm} km` : '~12.5 km'}</strong>
+                        </div>
+                        <div className="bg-white p-2 rounded-xl border border-[#E9E5DE]">
+                          <span className="block text-[9px] font-bold text-charcoal-light uppercase">Drive Duration</span>
+                          <strong className="text-xs font-black text-terracotta">
+                            {routeDurationMin > 0 ? `${isTrafficCongested ? Math.round(routeDurationMin * 1.35) : routeDurationMin} mins` : '~25 mins'}
+                          </strong>
+                        </div>
+                        <div className="bg-white p-2 rounded-xl border border-[#E9E5DE]">
+                          <span className="block text-[9px] font-bold text-charcoal-light uppercase">Traffic Flow</span>
+                          <strong className={`text-xs font-black ${isTrafficCongested ? 'text-red-600' : 'text-bananaleaf'}`}>
+                            {isTrafficCongested ? '⚠️ Congested' : '🟢 Smooth Flow'}
+                          </strong>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Card 4: Active Route Nodes List (Single Clean Badge) */}
+                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-3 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 pb-2.5">
+                      <h4 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
+                        Active Route Nodes ({activeTrip.length} Stops)
+                      </h4>
+                      <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 px-2.5 py-0.5 rounded-full border border-terracotta/10">
+                        🖐️ Drag cards or use ▲ ▼ to reorder
+                      </span>
+                    </div>
+
+                    {activeTrip.length === 0 ? (
+                      <div className="bg-[#FAF8F5] border border-dashed border-[#E9E5DE] p-6 rounded-xl text-center space-y-2">
+                        <p className="text-xs text-charcoal-light font-medium m-0">No destinations or restaurants added yet.</p>
+                        <button
+                          onClick={() => setActiveView('homepage')}
+                          className="px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        >
+                          Browse Food Feed
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                          {computedRoutePath.map((res, index) => (
+                            <div
+                              key={res.id}
+                              draggable={true}
+                              onDragStart={() => setDraggedIndex(index)}
+                              onDragOver={(e) => e.preventDefault()}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                if (draggedIndex !== null && draggedIndex !== index) {
+                                  moveItineraryItem(draggedIndex, index);
+                                  setDraggedIndex(null);
+                                }
+                              }}
+                              className={`bg-[#FAF8F5] p-3 rounded-xl border transition-all flex items-center justify-between gap-3 shadow-2xs group cursor-grab active:cursor-grabbing ${draggedIndex === index ? 'border-terracotta bg-terracotta/5 opacity-50 scale-[0.98]' : 'border-[#E9E5DE] hover:border-terracotta/40 hover:bg-white'
+                                }`}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <span className="text-charcoal-light group-hover:text-terracotta font-bold text-sm select-none shrink-0" title="Drag to reorder">
+                                  ⋮⋮
+                                </span>
+                                <span className="w-6 h-6 rounded-full bg-bananaleaf text-white text-[11px] font-black flex items-center justify-center shrink-0 shadow-xs">
+                                  {index + 1}
+                                </span>
                                 <div className="min-w-0">
-                                  <strong className="text-xs font-black text-charcoal block truncate">{attr.name}</strong>
-                                  <span className="text-[10px] font-bold text-terracotta block">📍 {attr.municipality}</span>
-                                  <span className="text-[9px] text-charcoal-light font-medium block truncate">{attr.type}</span>
+                                  <span className="block text-xs font-black text-charcoal truncate group-hover:text-terracotta transition-colors">{res.name}</span>
+                                  <span className="block text-[9px] text-charcoal-light font-semibold truncate">
+                                    📍 {res.municipality} • {res.address}
+                                  </span>
                                 </div>
                               </div>
 
                               <div className="flex items-center gap-1 shrink-0">
                                 <button
                                   type="button"
-                                  onClick={() => setSelectedAttraction(attr)}
-                                  className="p-1.5 text-charcoal-light hover:text-charcoal text-[10px] font-bold rounded-md bg-white border border-[#E9E5DE]"
-                                  title="View Details"
+                                  disabled={index === 0}
+                                  onClick={() => moveItineraryItem(index, index - 1)}
+                                  className="p-1 text-charcoal-light hover:text-charcoal hover:bg-white rounded border border-transparent hover:border-[#E9E5DE] disabled:opacity-30"
+                                  title="Move Up"
                                 >
-                                  ℹ️
+                                  ▲
                                 </button>
                                 <button
                                   type="button"
-                                  disabled={isAdded}
+                                  disabled={index === computedRoutePath.length - 1}
+                                  onClick={() => moveItineraryItem(index, index + 1)}
+                                  className="p-1 text-charcoal-light hover:text-charcoal hover:bg-white rounded border border-transparent hover:border-[#E9E5DE] disabled:opacity-30"
+                                  title="Move Down"
+                                >
+                                  ▼
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveFromItinerary(res.id)}
+                                  className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                  title="Remove stop"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Save & Manage Plan Form */}
+                        {loadedItineraryId ? (
+                          <div className="pt-3 border-t border-[#E9E5DE] space-y-2.5">
+                            <div className="p-3 bg-[#2C5E3B]/5 border border-[#2C5E3B]/20 rounded-xl space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-black text-[#2C5E3B] uppercase tracking-wider flex items-center gap-1">
+                                  <span>📂</span> Currently Editing: <strong className="text-charcoal underline">{loadedItineraryName}</strong>
+                                </span>
+                                <button
+                                  type="button"
                                   onClick={() => {
-                                    handleAddToItinerary(attr);
-                                    alert(`✓ Added "${attr.name}" (${attr.municipality}) to your trip itinerary!`);
+                                    setLoadedItineraryId(null);
+                                    setLoadedItineraryName('');
+                                    setNewItineraryName('');
                                   }}
-                                  className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black transition-colors ${isAdded ? 'bg-bananaleaf/10 text-bananaleaf border border-bananaleaf/20' : 'bg-[#2C5E3B] hover:bg-[#20452B] text-white cursor-pointer shadow-2xs'
-                                    }`}
+                                  className="text-[10px] font-bold text-terracotta hover:underline cursor-pointer"
                                 >
-                                  {isAdded ? '✓ Added' : '+ Add Place'}
+                                  + Save as New Instead
                                 </button>
                               </div>
+                              <input
+                                type="text"
+                                value={newItineraryName}
+                                onChange={(e) => setNewItineraryName(e.target.value)}
+                                placeholder="Itinerary Name"
+                                className="px-3 py-1.5 text-xs font-bold text-charcoal border border-[#2C5E3B]/30 rounded-lg bg-white w-full focus:outline-none focus:ring-1 focus:ring-[#2C5E3B]"
+                              />
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
 
-                    <div className="h-px bg-[#E9E5DE]"></div>
-
-
-
-                    {/* Live Trip Start & Navigation Control Panel */}
-                    <div className="bg-white border border-[#2C5E3B]/25 rounded-2xl p-4 space-y-3 shadow-sm">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                          <span className="text-[10px] font-black text-terracotta uppercase tracking-wider block">
-                            🚀 Real-Time Multi-Stop Navigation Engine
-                          </span>
-                          <h4 className="text-sm font-black text-charcoal m-0 flex items-center gap-1.5">
-                            {isTripActive ? (
-                              <span className="flex items-center gap-1.5 text-bananaleaf">
-                                <span className="w-2.5 h-2.5 rounded-full bg-bananaleaf animate-ping inline-block"></span>
-                                Live Navigation Active
-                              </span>
-                            ) : (
-                              "Start Your Kapampangan Crawl"
-                            )}
-                          </h4>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          {!isTripActive ? (
-                            <button
-                              type="button"
-                              onClick={handleStartLiveTrip}
-                              className="px-5 py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-                            >
-                              🚀 Start Trip Navigation
-                            </button>
-                          ) : (
-                            <>
+                            <div className="flex flex-wrap gap-2 justify-end">
                               <button
                                 type="button"
-                                onClick={handleAdvanceNextStop}
-                                className="px-3.5 py-2 bg-saffron hover:bg-saffron-dark text-charcoal text-xs font-extrabold rounded-xl shadow-xs transition-colors cursor-pointer"
+                                onClick={handleUpdateLoadedItinerary}
+                                className="px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
                               >
-                                ✓ Arrived / Next Stop ➡️
+                                <span>💾</span> Update Plan ({activeTrip.length} Stops)
                               </button>
                               <button
                                 type="button"
-                                onClick={handleEndLiveTrip}
-                                className="px-3.5 py-2 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                                onClick={handleSaveActiveTrip}
+                                className="px-3.5 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
                               >
-                                ⏹️ End Trip
+                                + Save Copy
                               </button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Multi-Stop Progress Track */}
-                      {computedRoutePath.length > 0 && (
-                        <div className="pt-2 border-t border-[#E9E5DE] space-y-2">
-                          <div className="flex items-center justify-between text-[10px] font-black uppercase text-charcoal-light">
-                            <span>Itinerary Progress: {visitedStops.length} of {computedRoutePath.length} Visited</span>
-                            {isTripActive && computedRoutePath[currentStopIndex] && (
-                              <span className="text-terracotta font-black">
-                                Target: {computedRoutePath[currentStopIndex].name} ({distanceToTargetKm ? `${distanceToTargetKm} km away` : 'Navigating'})
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Progress Stepper Pills */}
-                          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                            {computedRoutePath.map((stop, idx) => {
-                              const isVisited = visitedStops.includes(stop.id);
-                              const isCurrentTarget = isTripActive && idx === currentStopIndex;
-
-                              return (
-                                <div
-                                  key={stop.id}
-                                  className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 shrink-0 transition-all ${isVisited
-                                    ? 'bg-bananaleaf/10 border-bananaleaf text-bananaleaf font-bold'
-                                    : isCurrentTarget
-                                      ? 'bg-terracotta text-white border-terracotta font-black shadow-xs animate-pulse'
-                                      : 'bg-[#FAF8F5] border-[#E9E5DE] text-charcoal-light font-semibold'
-                                    }`}
-                                >
-                                  <span>{isVisited ? '✓' : isCurrentTarget ? '🎯' : idx + 1}</span>
-                                  <span className="truncate max-w-[120px]">{stop.name}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-
-                    {/* Live Trip Departure & ETA Navigation Banner */}
-                    {computedRoutePath.length > 0 && (
-                      <div className="bg-gradient-to-r from-[#2C5E3B]/10 via-terracotta/10 to-saffron/10 border border-[#2C5E3B]/20 rounded-2xl p-4 space-y-3">
-                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#2C5E3B]/15 pb-2.5">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl">🚗</span>
-                            <div>
-                              <div className="flex items-center justify-between w-full">
-                                <h4 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">Live Trip Navigation & ETA</h4>
-                                <button
-                                  type="button"
-                                  onClick={() => setIsCompletionModalOpen(true)}
-                                  className="px-3.5 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-                                >
-                                  <span>🎉</span> Done / Finish Trip
-                                </button>
-                              </div>
-                              <span className="text-[10px] text-charcoal-light font-bold">
-                                {isSimulating ? '⚡ Live Route Simulation Active' : '📍 Trip Departure Point: ' + userLocation.name}
-                              </span>
                             </div>
                           </div>
-
-                          <div className="bg-white border border-[#2C5E3B]/30 px-3.5 py-1.5 rounded-xl shadow-xs text-right">
-                            <span className="text-[9px] font-black text-charcoal-light uppercase tracking-wider block">Estimated Arrival (ETA)</span>
-                            <strong className="text-sm font-black text-[#2C5E3B]">
-                              ⏰ {calculateETA(routeDurationMin)}
-                            </strong>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                          <div className="bg-white p-2 rounded-xl border border-[#E9E5DE]">
-                            <span className="block text-[9px] font-bold text-charcoal-light uppercase">Total Distance</span>
-                            <strong className="text-xs font-black text-charcoal">{routeDistanceKm > 0 ? `${routeDistanceKm} km` : '~12.5 km'}</strong>
-                          </div>
-                          <div className="bg-white p-2 rounded-xl border border-[#E9E5DE]">
-                            <span className="block text-[9px] font-bold text-charcoal-light uppercase">Drive Duration</span>
-                            <strong className="text-xs font-black text-terracotta">
-                              {routeDurationMin > 0 ? `${isTrafficCongested ? Math.round(routeDurationMin * 1.35) : routeDurationMin} mins` : '~25 mins'}
-                            </strong>
-                          </div>
-                          <div className="bg-white p-2 rounded-xl border border-[#E9E5DE]">
-                            <span className="block text-[9px] font-bold text-charcoal-light uppercase">Traffic Status</span>
-                            <strong className={`text-xs font-black ${isTrafficCongested ? 'text-red-600' : 'text-bananaleaf'}`}>
-                              {isTrafficCongested ? '⚠️ Congested (+35%)' : '🟢 Smooth Flow'}
-                            </strong>
-                          </div>
-                        </div>
+                        ) : (
+                          <form onSubmit={handleSaveActiveTrip} className="pt-3 border-t border-[#E9E5DE] space-y-2">
+                            <label className="block text-[10px] font-black text-charcoal-light uppercase tracking-wider">
+                              Name and Store Your Plan
+                            </label>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                required
+                                placeholder="e.g. My Heritage Weekend Crawl"
+                                value={newItineraryName}
+                                onChange={(e) => setNewItineraryName(e.target.value)}
+                                className="flex-1 px-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs font-semibold focus:outline-none focus:bg-white"
+                              />
+                              <button
+                                type="submit"
+                                className="px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer"
+                              >
+                                Save Route
+                              </button>
+                            </div>
+                          </form>
+                        )}
                       </div>
                     )}
-
-
-                    {/* Active Itinerary List */}
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-[10px] font-black text-charcoal-light uppercase tracking-wider">
-                            Active Route Nodes ({activeTrip.length} Stops)
-                          </h4>
-                          <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 px-2 py-0.5 rounded border border-terracotta/10">
-                            🖐️ Drag cards or use ▲ ▼ to reorder stop numbers
-                          </span>
-                        </div>
-                        <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 px-2 py-0.5 rounded border border-terracotta/10">
-                          🖐️ Drag cards or use ▲ ▼ to reorder stop numbers
-                        </span>
-                      </div>
-
-                      {activeTrip.length === 0 ? (
-                        <div className="bg-[#FAF8F5] border border-dashed border-[#E9E5DE] p-6 rounded-xl text-center">
-                          <p className="text-xs text-charcoal-light">No destinations added yet.</p>
-                          <button
-                            onClick={() => setActiveView('homepage')}
-                            className="mt-3 px-3.5 py-1.5 bg-terracotta text-white rounded-lg text-xs font-bold"
-                          >
-                            Browse Feed
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          <div className="space-y-2">
-                            {computedRoutePath.map((res, index) => (
-                              <div
-                                key={res.id}
-                                draggable={true}
-                                onDragStart={() => setDraggedIndex(index)}
-                                onDragOver={(e) => e.preventDefault()}
-                                onDrop={(e) => {
-                                  e.preventDefault();
-                                  if (draggedIndex !== null && draggedIndex !== index) {
-                                    moveItineraryItem(draggedIndex, index);
-                                    setDraggedIndex(null);
-                                  }
-                                }}
-                                className={`bg-[#FAF8F5] p-3 rounded-xl border transition-all flex items-center justify-between gap-3 shadow-2xs group cursor-grab active:cursor-grabbing ${draggedIndex === index ? 'border-terracotta bg-terracotta/5 opacity-50 scale-[0.98]' : 'border-[#E9E5DE] hover:border-terracotta/40 hover:bg-white'
-                                  }`}
-                              >
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                  {/* Drag Handle & Numbering */}
-                                  <span className="text-charcoal-light group-hover:text-terracotta font-bold text-sm select-none shrink-0" title="Drag to reorder">
-                                    ⋮⋮
-                                  </span>
-                                  <span className="w-6 h-6 rounded-full bg-bananaleaf text-white text-[11px] font-black flex items-center justify-center shrink-0 shadow-xs">
-                                    {index + 1}
-                                  </span>
-                                  <div className="min-w-0">
-                                    <span className="block text-xs font-black text-charcoal truncate group-hover:text-terracotta transition-colors">{res.name}</span>
-                                    <span className="block text-[9px] text-charcoal-light font-semibold truncate">
-                                      📍 {res.municipality} • {res.address}
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div className="flex items-center gap-1 shrink-0">
-                                  {/* Move Up Button */}
-                                  <button
-                                    type="button"
-                                    disabled={index === 0}
-                                    onClick={() => moveItineraryItem(index, index - 1)}
-                                    className={`p-1 rounded text-xs font-bold transition-colors ${index === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 cursor-pointer'}`}
-                                    title="Move Stop Up (Change to previous number)"
-                                  >
-                                    ▲
-                                  </button>
-                                  {/* Move Down Button */}
-                                  <button
-                                    type="button"
-                                    disabled={index === computedRoutePath.length - 1}
-                                    onClick={() => moveItineraryItem(index, index + 1)}
-                                    className={`p-1 rounded text-xs font-bold transition-colors ${index === computedRoutePath.length - 1 ? 'text-gray-300 cursor-not-allowed' : 'text-charcoal-light hover:text-terracotta hover:bg-terracotta/5 cursor-pointer'}`}
-                                    title="Move Stop Down (Change to next number)"
-                                  >
-                                    ▼
-                                  </button>
-                                  {/* Remove Button */}
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveFromItinerary(res.id)}
-                                    className="p-1 text-charcoal-light hover:text-terracotta cursor-pointer transition-colors ml-1"
-                                    title="Remove Stop"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* Save or Direct Update Plan Form */}
-                          {loadedItineraryId ? (
-                            <div className="mt-4 pt-4 border-t border-[#E9E5DE] space-y-3">
-                              <div className="p-3 bg-[#E2F1E7]/70 border border-[#2C5E3B]/20 rounded-xl space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <span className="text-[10px] font-black text-[#2C5E3B] uppercase tracking-wider flex items-center gap-1">
-                                    <span>📂</span> Currently Editing: <strong className="text-charcoal underline">{loadedItineraryName}</strong>
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      setLoadedItineraryId(null);
-                                      setLoadedItineraryName('');
-                                      setNewItineraryName('');
-                                    }}
-                                    className="text-[10px] font-bold text-terracotta hover:underline cursor-pointer"
-                                    title="Unlink from this plan to save as a new separate plan"
-                                  >
-                                    + Save as New Instead
-                                  </button>
-                                </div>
-                                <div>
-                                  <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Plan Name</label>
-                                  <input
-                                    type="text"
-                                    value={newItineraryName}
-                                    onChange={(e) => setNewItineraryName(e.target.value)}
-                                    placeholder="Itinerary Name"
-                                    className="px-3 py-1.5 text-xs font-bold text-charcoal border border-[#2C5E3B]/30 rounded-lg bg-white w-full focus:outline-none focus:ring-1 focus:ring-[#2C5E3B]"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="flex flex-wrap gap-2 justify-end">
-                                <button
-                                  type="button"
-                                  onClick={handleUpdateLoadedItinerary}
-                                  className="px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
-                                >
-                                  <span>💾</span> Update Plan ({activeTrip.length} Stops)
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={handleSaveActiveTrip}
-                                  className="px-3.5 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
-                                >
-                                  + Save as New Copy
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <form onSubmit={handleSaveActiveTrip} className="mt-4 pt-4 border-t border-[#E9E5DE] space-y-2">
-                              <label className="block text-[10px] font-black text-charcoal-light uppercase tracking-wider">
-                                Name and Store Your Plan
-                              </label>
-                              <div className="flex gap-2">
-                                <input
-                                  type="text"
-                                  required
-                                  placeholder="e.g. My Heritage Weekend Crawl"
-                                  value={newItineraryName}
-                                  onChange={(e) => setNewItineraryName(e.target.value)}
-                                  className="flex-1 px-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs font-semibold focus:outline-none focus:bg-white"
-                                />
-                                <button
-                                  type="submit"
-                                  className="px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer"
-                                >
-                                  Save Route
-                                </button>
-                              </div>
-                            </form>
-                          )}
-                        </div>
-                      )}
-                    </div>
                   </div>
 
-                  {/* Adaptive Highway Traffic Adjuster Notifications Ticker */}
-                  <div className="bento-card p-5 bg-white space-y-4">
-                    <div className="flex items-center justify-between border-b border-[#FAF8F5] pb-2">
-                      <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-1.5">
-                        <Activity className="h-4 w-4 text-terracotta animate-pulse" /> Traffic Adjuster Simulation
+                  {/* Card 5: Traffic Simulation & Highway Status */}
+                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-3 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 pb-2.5">
+                      <h3 className="text-xs font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5">
+                        <Activity className="h-4 w-4 text-terracotta animate-pulse" /> Traffic Flow Simulator
                       </h3>
                       <button
                         onClick={() => setIsTrafficCongested(!isTrafficCongested)}
-                        className={`px-2 py-0.5 rounded text-[9px] font-black uppercase border tracking-wider transition-colors ${isTrafficCongested ? 'bg-terracotta text-white border-terracotta' : 'bg-white text-terracotta border-terracotta/20'}`}
+                        className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase border tracking-wider transition-colors cursor-pointer ${isTrafficCongested ? 'bg-terracotta text-white border-terracotta' : 'bg-[#FAF8F5] text-terracotta border-terracotta/30 hover:bg-white'}`}
                       >
                         {isTrafficCongested ? "Clear Jams" : "Simulate Congestion"}
                       </button>
@@ -7619,34 +7621,34 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       {trafficNotifications.slice(0, 2).map(n => (
                         <div
                           key={n.id}
-                          className={`p-2.5 rounded-lg border text-xs leading-normal flex gap-2 ${n.type === 'danger' ? 'bg-terracotta/5 border-terracotta/20 text-terracotta-dark font-semibold' : 'bg-bananaleaf/5 border-bananaleaf/20 text-bananaleaf'}`}
+                          className={`p-2.5 rounded-xl border text-xs leading-normal flex gap-2.5 items-center ${n.type === 'danger' ? 'bg-terracotta/5 border-terracotta/20 text-terracotta font-semibold' : 'bg-bananaleaf/5 border-bananaleaf/20 text-bananaleaf font-semibold'}`}
                         >
-                          <span className="text-sm shrink-0">{n.type === 'danger' ? '⚠️' : '🟢'}</span>
-                          <span>{n.message}</span>
+                          <span className="text-base shrink-0">{n.type === 'danger' ? '⚠️' : '🟢'}</span>
+                          <span className="text-[11px]">{n.message}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  {/* Budget settings panel */}
-                  <div className="bento-card p-5 bg-white space-y-4">
-                    <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-1.5">
-                      <span className="text-base">💰</span> Budget Allocation Settings
+                  {/* Card 6: Budget Allocation Settings */}
+                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-3 shadow-sm">
+                    <h3 className="text-xs font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5 border-b border-[#E9E5DE]/80 pb-2.5">
+                      <span className="text-base">💰</span> Budget Allocation Calculator
                     </h3>
 
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-[9px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                            Total Budget Limit (PHP)
+                            Total Budget (PHP)
                           </label>
                           <input
                             type="number"
                             min="200"
-                            max="10000"
+                            max="50000"
                             value={userProfile.budgetLimit}
                             onChange={(e) => setUserProfile({ ...userProfile, budgetLimit: Number(e.target.value) || 1500 })}
-                            className="block w-full px-2.5 py-1.5 border border-[#E9E5DE] rounded bg-[#FAF8F5] text-xs text-charcoal font-bold focus:outline-none focus:bg-white"
+                            className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs text-charcoal font-bold focus:outline-none focus:bg-white focus:ring-1 focus:ring-terracotta"
                           />
                         </div>
                         <div>
@@ -7659,40 +7661,43 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                             max="50"
                             value={numPersons}
                             onChange={(e) => setNumPersons(Math.max(1, Number(e.target.value) || 1))}
-                            className="block w-full px-2.5 py-1.5 border border-[#E9E5DE] rounded bg-[#FAF8F5] text-xs text-charcoal font-bold focus:outline-none focus:bg-white"
+                            className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs text-charcoal font-bold focus:outline-none focus:bg-white focus:ring-1 focus:ring-terracotta"
                           />
                         </div>
                       </div>
 
-
-
                       {/* Division Calculations */}
-                      <div className="bg-[#FAF8F5] p-3 rounded-lg border border-[#E9E5DE] text-xs space-y-2">
-                        <h4 className="font-bold text-charcoal tracking-tight">Per-Person Allocations ({numPersons} pax):</h4>
-                        <div className="flex justify-between items-center text-charcoal-light">
-                          <span>Budget Limit per Person:</span>
-                          <strong className="text-charcoal font-extrabold">₱{Math.round(userProfile.budgetLimit / numPersons)}</strong>
-                        </div>
+                      <div className="bg-[#FAF8F5] p-3 rounded-xl border border-[#E9E5DE] text-xs flex justify-between items-center">
+                        <span className="text-charcoal-light font-bold">Per-Person Share ({numPersons} pax):</span>
+                        <strong className="text-terracotta text-sm font-black">₱{Math.round(userProfile.budgetLimit / numPersons)} <span className="text-[10px] text-charcoal-light font-medium">/ person</span></strong>
                       </div>
                     </div>
                   </div>
 
                 </div>
 
-                {/* Right Pane: Accurate Map */}
+                {/* Right Pane: Accurate Map Workstation */}
                 <div className="lg:col-span-7">
-                  <div className="bento-card p-5 bg-[#FAF8F5] border border-[#E9E5DE] space-y-4 h-full flex flex-col">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#E9E5DE] pb-2">
-                      <h3 className="text-xs font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5">
-                        <MapIcon className="h-4.5 w-4.5 text-terracotta" /> Provincial Route Mapping Engine
-                      </h3>
+                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-4 sm:p-5 shadow-sm sticky top-20 flex flex-col min-h-[620px] lg:h-[calc(100vh-140px)]">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#E9E5DE]/80 pb-3 mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-terracotta/10 flex items-center justify-center text-terracotta">
+                          <MapIcon className="h-4.5 w-4.5" />
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
+                            Provincial Route Mapping Engine
+                          </h3>
+                          <span className="text-[10px] text-charcoal-light font-medium">Pampanga interactive transit network</span>
+                        </div>
+                      </div>
 
                       {/* Nav Controls */}
                       <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
                           onClick={toggleGPSWatch}
-                          className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center gap-1 border ${isTrackingGPS ? 'bg-bananaleaf text-white border-bananaleaf' : 'bg-white text-charcoal-light border-[#E9E5DE] hover:text-charcoal hover:bg-white'}`}
+                          className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-1.5 border cursor-pointer ${isTrackingGPS ? 'bg-bananaleaf text-white border-bananaleaf shadow-xs' : 'bg-[#FAF8F5] text-charcoal-light border-[#E9E5DE] hover:text-charcoal hover:bg-white'}`}
                         >
                           🌐 {isTrackingGPS ? "Tracking GPS..." : "Track My GPS"}
                         </button>
@@ -7700,16 +7705,16 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                           <button
                             type="button"
                             onClick={startRouteSimulation}
-                            className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center gap-1 border ${isSimulating ? 'bg-terracotta text-white border-terracotta animate-pulse' : 'bg-white text-charcoal-light border-[#E9E5DE] hover:text-charcoal hover:bg-white'}`}
+                            className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-1.5 border cursor-pointer ${isSimulating ? 'bg-terracotta text-white border-terracotta shadow-xs animate-pulse' : 'bg-[#FAF8F5] text-charcoal-light border-[#E9E5DE] hover:text-charcoal hover:bg-white'}`}
                           >
-                            🚗 {isSimulating ? "Navigating..." : "Simulate Navigation"}
+                            🚗 {isSimulating ? "Navigating..." : "Simulate Trip"}
                           </button>
                         )}
                       </div>
                     </div>
 
-                    <div className="relative flex-1 min-h-[360px] rounded-2xl overflow-hidden shadow-inner flex items-center justify-center border border-[#E9E5DE]">
-                      <div id="leaflet-map" className="w-full h-full min-h-[360px] rounded-2xl z-10"></div>
+                    <div className="relative flex-1 min-h-[480px] rounded-2xl overflow-hidden shadow-inner border border-[#E9E5DE]">
+                      <div id="leaflet-map" className="w-full h-full min-h-[480px] rounded-2xl z-10"></div>
                     </div>
                   </div>
                 </div>
