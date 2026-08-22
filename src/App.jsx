@@ -6706,7 +6706,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
 
               <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 {/* Left Column: Rich Editorial Typography & Narrative */}
-                <div className="lg:col-span-5 space-y-4 text-left">
+                <div className="lg:col-span-6 space-y-4 text-left">
                   {/* Top Cultural Badge */}
                   <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-terracotta/10 via-[#FFF8F3] to-saffron/15 border border-terracotta/30 text-terracotta shadow-2xs whitespace-nowrap">
                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-terracotta text-white text-[10px] shadow-xs">
@@ -6722,11 +6722,11 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </div>
 
                   {/* Main Headline */}
-                  <div className="space-y-1">
-                    <h2 className="text-3xl sm:text-4xl lg:text-4.5xl font-black text-[#1E1915] tracking-tight leading-tight m-0 drop-shadow-xs">
+                  <div className="space-y-1.5">
+                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1E1915] tracking-tight leading-tight m-0 drop-shadow-xs">
                       Mekeni, Mangan Tana!
                     </h2>
-                    <div className="text-xl sm:text-2xl lg:text-2.5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron tracking-tight">
+                    <div className="text-base sm:text-xl lg:text-2xl xl:text-[28px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron tracking-tight whitespace-nowrap">
                       Explore Pampanga’s Culinary Map and more!
                     </div>
                   </div>
@@ -6738,8 +6738,8 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                 </div>
 
                 {/* Right Column: Kapampangan Culture & Food Showcase (Centerpiece Sisig surrounded by 4 Heritage Pillars) */}
-                <div className="lg:col-span-7 flex items-center justify-center lg:justify-end">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center w-full max-w-xl">
+                <div className="lg:col-span-6 flex items-center justify-center lg:justify-end">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center w-full max-w-lg">
 
                     {/* Left Flank: Nature & Heritage (Stacked 2 Cards) */}
                     <div className="flex flex-row sm:flex-col gap-2.5">
