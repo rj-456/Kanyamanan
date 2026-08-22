@@ -6726,7 +6726,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1E1915] tracking-tight leading-tight m-0 drop-shadow-xs">
                       Mekeni, Mangan Tana!
                     </h2>
-                    <div className="text-base sm:text-xl lg:text-2xl xl:text-[28px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron tracking-tight whitespace-nowrap">
+                    <div className="text-base sm:text-xl lg:text-2xl xl:text-[26px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron tracking-tight whitespace-nowrap pr-4">
                       Explore Pampanga’s Culinary Map and more!
                     </div>
                   </div>
@@ -6737,19 +6737,19 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   </p>
                 </div>
 
-                {/* Right Column: Kapampangan Culture & Food Showcase (Centerpiece Sisig surrounded by 4 Heritage Pillars) */}
+                {/* Right Column: Kapampangan Culture & Food Showcase (Dynamic Organic Collage) */}
                 <div className="lg:col-span-6 flex items-center justify-center lg:justify-end">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center w-full max-w-lg">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-center w-full max-w-lg">
 
-                    {/* Left Flank: Nature & Heritage (Stacked 2 Cards) */}
-                    <div className="flex flex-row sm:flex-col gap-2.5">
+                    {/* Left Flank: Nature & Heritage (Dynamic Angled & Staggered Cards) */}
+                    <div className="flex flex-row sm:flex-col gap-3">
                       {/* Card 1: Real Mount Arayat (Bunduk Alaya) */}
-                      <div className="flex-1 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5 text-center">
+                      <div className="flex-1 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-3 hover:rotate-0 hover:-translate-y-1 text-center group">
                         <div className="h-20 rounded-xl overflow-hidden relative shadow-xs">
                           <img
                             src="/attractions/real_mt_arayat.png"
                             alt="Mount Arayat (Bunduk Alaya) Pampanga"
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
                             onError={(e) => { e.target.src = "/attractions/mt_arayat_park.jpg"; }}
                           />
                           <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
@@ -6758,37 +6758,37 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         </div>
                         <div className="pt-1.5 text-center">
                           <span className="font-extrabold text-xs text-charcoal block leading-tight truncate">Bunduk Alaya</span>
-                          <span className="text-[9px] font-black text-bananaleaf block mt-0.5">Natures</span>
+                          <span className="text-[9px] font-black text-bananaleaf block mt-0.5 uppercase tracking-wide">Natures</span>
                         </div>
                       </div>
 
-                      {/* Card 2: Authentic Betis Church (User Uploaded Photo) */}
-                      <div className="flex-1 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5 text-center">
+                      {/* Card 2: Historical Churches (User Uploaded Photo) */}
+                      <div className="flex-1 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center group">
                         <div className="h-20 rounded-xl overflow-hidden relative shadow-xs">
                           <img
                             src="/attractions/real_betis_church.jpg"
-                            alt="Betis Heritage Church Guagua Pampanga"
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            alt="Historical Churches Pampanga"
+                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
                             onError={(e) => { e.target.src = "/attractions/betis_church_guagua.png"; }}
                           />
                           <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
-                            🏛️ Betis Church
+                            🏛️ Heritage Church
                           </span>
                         </div>
                         <div className="pt-1.5 text-center">
-                          <span className="font-extrabold text-xs text-charcoal block leading-tight truncate">Betis Church</span>
+                          <span className="font-extrabold text-xs text-charcoal block leading-tight truncate">Historical Churches</span>
                           <span className="text-[9px] font-black text-[#2C5E3B] block mt-0.5 uppercase tracking-wide">Heritage</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Center Column: Prominent Large Sisig Focal Piece */}
-                    <div className="bg-white p-3 rounded-2xl border-2 border-terracotta shadow-2xl ring-4 ring-terracotta/20 hover:shadow-2xl transition-all duration-300 transform sm:scale-105 z-10 text-center flex flex-col justify-between">
+                    <div className="bg-white p-3 rounded-2xl border-2 border-terracotta shadow-2xl ring-4 ring-terracotta/25 hover:shadow-2xl transition-all duration-300 transform sm:scale-110 z-20 text-center flex flex-col justify-between group">
                       <div className="h-44 sm:h-48 rounded-xl overflow-hidden relative shadow-xs">
                         <img
                           src="/restaurants/authentic_sisig.jpg"
                           alt="Authentic Kapampangan Sizzling Sisig"
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
                           onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"; }}
                         />
                         <span className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[10px] font-black px-3 py-1 rounded-full shadow-md whitespace-nowrap border border-white/30">
@@ -6801,15 +6801,15 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       </div>
                     </div>
 
-                    {/* Right Flank: Festivals & Celebrations (Stacked 2 Cards) */}
-                    <div className="flex flex-row sm:flex-col gap-2.5">
+                    {/* Right Flank: Festivals & Celebrations (Dynamic Angled & Staggered Cards) */}
+                    <div className="flex flex-row sm:flex-col gap-3">
                       {/* Card 4: Giant Lantern (Parul Sampernandu) */}
-                      <div className="flex-1 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5 text-center">
+                      <div className="flex-1 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-3 hover:rotate-0 hover:-translate-y-1 text-center group">
                         <div className="h-20 rounded-xl overflow-hidden relative shadow-xs">
                           <img
                             src="/attractions/giant_lantern_san_fernando.jpg"
                             alt="Parul Sampernandu Giant Lantern"
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
                             onError={(e) => { e.target.src = "/attractions/giant_lantern_san_fernando.png"; }}
                           />
                           <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-saffron text-charcoal text-[8px] font-black px-2 py-0.5 rounded-full border border-charcoal/10 whitespace-nowrap shadow-xs">
@@ -6823,12 +6823,12 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                       </div>
 
                       {/* Card 5: Majigangga Festival Santa Rita (User Uploaded Photo) */}
-                      <div className="flex-1 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5 text-center">
+                      <div className="flex-1 bg-white p-2 rounded-2xl border border-[#E9E5DE] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center group">
                         <div className="h-20 rounded-xl overflow-hidden relative shadow-xs">
                           <img
                             src="/attractions/real_majigangga.png"
                             alt="Majigangga Festival Santa Rita Pampanga"
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
                             onError={(e) => { e.target.src = "/attractions/majigangga_festival.jpg"; }}
                           />
                           <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-[#C84B31] text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
