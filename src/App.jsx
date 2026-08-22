@@ -7117,30 +7117,50 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           <div className="space-y-6 animate-slide-up">
 
             {/* Tabbed Side Menu/Navbar */}
-            <div className="flex border-b border-[#E9E5DE] bg-white rounded-xl p-1.5 shadow-sm">
+            <div className="bg-white/90 backdrop-blur-sm border border-[#E9E5DE] rounded-2xl p-1.5 shadow-sm flex flex-wrap sm:flex-nowrap gap-1.5">
               <button
+                type="button"
                 onClick={() => setDashboardTab('planner')}
-                className={`flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${dashboardTab === 'planner' ? 'bg-terracotta text-white shadow-sm' : 'text-charcoal-light hover:text-charcoal'}`}
+                className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'planner'
+                  ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
+                  : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                }`}
               >
-                <Compass className="h-4 w-4" /> Provincial Food Trip Planner
+                <Compass className={`h-4 w-4 transition-transform ${dashboardTab === 'planner' ? 'rotate-12' : ''}`} />
+                <span>Food Trip Planner</span>
               </button>
               <button
+                type="button"
                 onClick={() => setDashboardTab('health')}
-                className={`flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${dashboardTab === 'health' ? 'bg-terracotta text-white shadow-sm' : 'text-charcoal-light hover:text-charcoal'}`}
+                className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'health'
+                  ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
+                  : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                }`}
               >
-                <Heart className="h-4 w-4" /> Health Informatics Core
+                <Heart className={`h-4 w-4 ${dashboardTab === 'health' ? 'fill-white' : ''}`} />
+                <span>Health Informatics</span>
               </button>
               <button
+                type="button"
                 onClick={() => setDashboardTab('assistant')}
-                className={`flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${dashboardTab === 'assistant' ? 'bg-terracotta text-white shadow-sm' : 'text-charcoal-light hover:text-charcoal'}`}
+                className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'assistant'
+                  ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
+                  : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                }`}
               >
-                <MessageSquare className="h-4 w-4" /> Interactive Travel Kanyamanan-Kasaup
+                <MessageSquare className={`h-4 w-4 ${dashboardTab === 'assistant' ? 'fill-white' : ''}`} />
+                <span>Travel Kasaup</span>
               </button>
               <button
+                type="button"
                 onClick={() => setDashboardTab('history')}
-                className={`flex-1 py-3 text-xs font-black uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-2 ${dashboardTab === 'history' ? 'bg-terracotta text-white shadow-sm' : 'text-charcoal-light hover:text-charcoal'}`}
+                className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'history'
+                  ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
+                  : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
+                }`}
               >
-                <Star className="h-4 w-4" /> User Travel History
+                <Star className={`h-4 w-4 ${dashboardTab === 'history' ? 'fill-white' : ''}`} />
+                <span>Travel History</span>
               </button>
             </div>
 
