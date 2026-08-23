@@ -34,7 +34,9 @@ import {
   Compass,
   FileText,
   Sun,
-  Moon
+  Moon,
+  Users,
+  UserPlus
 } from 'lucide-react';
 import {
   PRESEEDED_RESTAURANTS,
@@ -1642,30 +1644,413 @@ function App() {
   });
   // claimableMerchantView has been removed as customer traffic features are deprecated
 
-  // Active cumulative calorie and cost estimator logic
+  // Dining Mode: 'solo' (Individual Customer) vs 'group' (Multiple Customers / Family)
+  const [diningMode, setDiningMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_dining_mode');
+      if (saved) return saved;
+    } catch (e) { }
+    return 'solo';
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('kanyamanan_dining_mode', diningMode);
+    } catch (e) { }
+  }, [diningMode]);
+
+  // Group Members Roster for Multi-Customer Health Informatics
+  const [groupMembers, setGroupMembers] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_group_members');
+      if (saved) return JSON.parse(saved);
+    } catch (e) { }
+    return [
+      { id: 'p1', name: 'Person 1', calorieLimit: 2200, dietaryGoal: 'Standard' },
+      { id: 'p2', name: 'Person 2', calorieLimit: 1800, dietaryGoal: 'Low Calorie' }
+    ];
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('kanyamanan_group_members', JSON.stringify(groupMembers));
+    } catch (e) { }
+  }, [groupMembers]);
+
+  const [activeMemberTab, setActiveMemberTab] = useState('all');
+
+  const handleAddGroupMember = () => {
+    if (groupMembers.length >= 8) return;
+    const nextIdx = groupMembers.length + 1;
+    const newMember = {
+      id: `p${Date.now()}`,
+      name: `Person ${nextIdx}`,
+      calorieLimit: 2000,
+      dietaryGoal: 'Standard'
+    };
+    setGroupMembers(prev => [...prev, newMember]);
+  };
+
+  const handleRemoveGroupMember = (memberId) => {
+    if (groupMembers.length <= 2) return;
+    setGroupMembers(prev => prev.filter(m => m.id !== memberId));
+    if (activeMemberTab === memberId) setActiveMemberTab('all');
+    // Clean up selections for removed member
+    setTripSelectedDishes(prev => {
+      const next = { ...prev };
+      Object.keys(next).forEach(stopId => {
+        if (next[stopId]) {
+          const stopDishes = { ...next[stopId] };
+          Object.keys(stopDishes).forEach(dishId => {
+            if (typeof stopDishes[dishId] === 'object' && stopDishes[dishId] !== null) {
+              const dishAlloc = { ...stopDishes[dishId] };
+              delete dishAlloc[memberId];
+              stopDishes[dishId] = dishAlloc;
+            }
+          });
+          next[stopId] = stopDishes;
+        }
+      });
+      return next;
+    });
+  };
+
+  const handleUpdateMember = (memberId, patch) => {
+    setGroupMembers(prev => prev.map(m => m.id === memberId ? { ...m, ...patch } : m));
+  };
+
+  // Dynamic Per-Stop Meal / Dish Selections for Active Itinerary (Supports both solo & group mapping)
+  const [tripSelectedDishes, setTripSelectedDishes] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_trip_selected_dishes');
+      if (saved) return JSON.parse(saved);
+    } catch (e) { }
+    return {};
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('kanyamanan_trip_selected_dishes', JSON.stringify(tripSelectedDishes));
+    } catch (e) { }
+  }, [tripSelectedDishes]);
+
+  const getDishQtyFor = (stopId, dishId, key = 'solo', isDefaultFirst = false) => {
+    const stopMap = tripSelectedDishes[stopId];
+    if (!stopMap) {
+      if (isDefaultFirst) {
+        return (key === 'solo' || key === 'shared' || key === groupMembers[0]?.id) ? 1 : 0;
+      }
+      return 0;
+    }
+    const entry = stopMap[dishId];
+    if (entry === undefined) return 0;
+    if (typeof entry === 'number') {
+      return (key === 'solo' || key === 'shared' || key === groupMembers[0]?.id) ? entry : 0;
+    }
+    if (typeof entry === 'object' && entry !== null) {
+      return Number(entry[key]) || 0;
+    }
+    return 0;
+  };
+
+  const getDishTotalQty = (stopId, dishId, isDefaultFirst = false) => {
+    const stopMap = tripSelectedDishes[stopId];
+    if (!stopMap) return isDefaultFirst ? 1 : 0;
+    const entry = stopMap[dishId];
+    if (entry === undefined) return 0;
+    if (typeof entry === 'number') return entry;
+    if (typeof entry === 'object' && entry !== null) {
+      return Object.values(entry).reduce((sum, val) => sum + (Number(val) || 0), 0);
+    }
+    return 0;
+  };
+
+  const handleSetDishQuantity = (stopId, dishId, memberKey, qty) => {
+    const sanitizedQty = Math.max(0, Math.min(20, Number(qty) || 0));
+    setTripSelectedDishes(prev => {
+      const stopMap = { ...(prev[stopId] || {}) };
+      const currentEntry = stopMap[dishId];
+      let alloc = {};
+      if (typeof currentEntry === 'object' && currentEntry !== null) {
+        alloc = { ...currentEntry };
+      } else if (typeof currentEntry === 'number') {
+        alloc = { solo: currentEntry, shared: currentEntry, [groupMembers[0]?.id || 'p1']: currentEntry };
+      }
+
+      if (sanitizedQty === 0) {
+        delete alloc[memberKey];
+      } else {
+        alloc[memberKey] = sanitizedQty;
+      }
+
+      const totalActive = Object.values(alloc).reduce((sum, v) => sum + (Number(v) || 0), 0);
+      if (totalActive === 0) {
+        delete stopMap[dishId];
+      } else {
+        stopMap[dishId] = alloc;
+      }
+
+      return {
+        ...prev,
+        [stopId]: stopMap
+      };
+    });
+  };
+
+  const handleClearAllDishSelections = () => {
+    setTripSelectedDishes({});
+  };
+
+  // Comprehensive Real-Time Cumulative Nutrition & Cost Estimator (Solo + Multi-Person Group Support)
   const activeTripMetrics = useMemo(() => {
-    let calories = 0;
-    let cost = 0;
-    activeTrip.forEach(res => {
-      if (res.menu && res.menu[0]) {
-        calories += res.menu[0].nutrition.calories;
-        cost += res.menu[0].price;
-      }
-      if (res.menu && res.menu[1]) {
-        calories += res.menu[1].nutrition.calories * 0.5;
-        cost += res.menu[1].price * 0.5;
-      }
+    let tableCalories = 0;
+    let tableProtein = 0;
+    let tableCarbs = 0;
+    let tableFat = 0;
+    let tableCost = 0;
+    let tableDishesCount = 0;
+    const activeAllergens = new Set();
+    const activeHealthTags = new Set();
+    const perStopBreakdown = [];
+
+    const memberMetrics = {};
+    groupMembers.forEach(m => {
+      memberMetrics[m.id] = {
+        memberId: m.id,
+        name: m.name,
+        calorieLimit: m.calorieLimit || 2000,
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        cost: 0,
+        dishesCount: 0,
+        allergens: new Set()
+      };
     });
 
-    if (cvUploadedMeal) {
-      calories += cvUploadedMeal.nutrition.calories;
+    const restaurantStops = activeTrip.filter(item => {
+      if (!item) return false;
+      const isAttr = (item.id && String(item.id).startsWith('att-')) ||
+        (item.id && String(item.id).startsWith('parish-')) ||
+        (Array.isArray(attractions) && attractions.some(a => a.id === item.id));
+      return !isAttr && Array.isArray(item.menu) && item.menu.length > 0;
+    });
+
+    const groupCount = Math.max(1, groupMembers.length);
+
+    restaurantStops.forEach(res => {
+      const stopId = res.id;
+      const stopSelections = tripSelectedDishes[stopId];
+      let stopCalories = 0;
+      let stopCost = 0;
+      let stopDishesCount = 0;
+
+      res.menu.forEach((dish, dIdx) => {
+        const dishCals = Number(dish.nutrition?.calories) || Number(dish.calories) || 300;
+        const dishProt = Number(dish.nutrition?.protein) || Number(dish.protein) || 15;
+        const dishCarbs = Number(dish.nutrition?.carbs) || Number(dish.carbs) || 25;
+        const dishFat = Number(dish.nutrition?.fat) || Number(dish.fat) || 12;
+        const dishPrice = Number(dish.price) || 0;
+
+        if (diningMode === 'solo') {
+          let qty = 0;
+          if (stopSelections) {
+            const entry = stopSelections[dish.id];
+            if (typeof entry === 'number') qty = entry;
+            else if (typeof entry === 'object' && entry !== null) qty = (entry.solo ?? entry[groupMembers[0]?.id]) || 0;
+          } else {
+            qty = dIdx === 0 ? 1 : 0;
+          }
+
+          if (qty > 0) {
+            tableCalories += dishCals * qty;
+            tableProtein += dishProt * qty;
+            tableCarbs += dishCarbs * qty;
+            tableFat += dishFat * qty;
+            tableCost += dishPrice * qty;
+            tableDishesCount += qty;
+
+            stopCalories += dishCals * qty;
+            stopCost += dishPrice * qty;
+            stopDishesCount += qty;
+
+            if (dish.allergens) {
+              dish.allergens.split(',').map(a => a.trim()).filter(Boolean).forEach(a => activeAllergens.add(a));
+            }
+            if (dish.healthIndicators) {
+              activeHealthTags.add(dish.healthIndicators);
+            }
+          }
+        } else {
+          // GROUP / MULTI-PERSON MODE
+          let entry = stopSelections ? stopSelections[dish.id] : null;
+          let hasAllocations = entry !== undefined && entry !== null;
+
+          let sharedQty = 0;
+          let dishTotalQty = 0;
+
+          if (hasAllocations) {
+            if (typeof entry === 'number') {
+              if (memberMetrics[groupMembers[0]?.id]) {
+                memberMetrics[groupMembers[0].id].calories += dishCals * entry;
+                memberMetrics[groupMembers[0].id].protein += dishProt * entry;
+                memberMetrics[groupMembers[0].id].carbs += dishCarbs * entry;
+                memberMetrics[groupMembers[0].id].fat += dishFat * entry;
+                memberMetrics[groupMembers[0].id].cost += dishPrice * entry;
+                memberMetrics[groupMembers[0].id].dishesCount += entry;
+              }
+              dishTotalQty = entry;
+            } else if (typeof entry === 'object') {
+              sharedQty = Number(entry.shared) || 0;
+              groupMembers.forEach(m => {
+                const memberQty = Number(entry[m.id]) || 0;
+                if (memberQty > 0) {
+                  memberMetrics[m.id].calories += dishCals * memberQty;
+                  memberMetrics[m.id].protein += dishProt * memberQty;
+                  memberMetrics[m.id].carbs += dishCarbs * memberQty;
+                  memberMetrics[m.id].fat += dishFat * memberQty;
+                  memberMetrics[m.id].cost += dishPrice * memberQty;
+                  memberMetrics[m.id].dishesCount += memberQty;
+                  if (dish.allergens) {
+                    dish.allergens.split(',').map(a => a.trim()).filter(Boolean).forEach(a => memberMetrics[m.id].allergens.add(a));
+                  }
+                }
+                dishTotalQty += memberQty;
+              });
+              dishTotalQty += sharedQty;
+            }
+          } else if (dIdx === 0) {
+            sharedQty = 1;
+            dishTotalQty = 1;
+          }
+
+          if (sharedQty > 0) {
+            const sharedCalsPerPerson = (dishCals * sharedQty) / groupCount;
+            const sharedProtPerPerson = (dishProt * sharedQty) / groupCount;
+            const sharedCarbsPerPerson = (dishCarbs * sharedQty) / groupCount;
+            const sharedFatPerPerson = (dishFat * sharedQty) / groupCount;
+            const sharedCostPerPerson = (dishPrice * sharedQty) / groupCount;
+
+            groupMembers.forEach(m => {
+              memberMetrics[m.id].calories += sharedCalsPerPerson;
+              memberMetrics[m.id].protein += sharedProtPerPerson;
+              memberMetrics[m.id].carbs += sharedCarbsPerPerson;
+              memberMetrics[m.id].fat += sharedFatPerPerson;
+              memberMetrics[m.id].cost += sharedCostPerPerson;
+              memberMetrics[m.id].dishesCount += sharedQty / groupCount;
+              if (dish.allergens) {
+                dish.allergens.split(',').map(a => a.trim()).filter(Boolean).forEach(a => memberMetrics[m.id].allergens.add(a));
+              }
+            });
+          }
+
+          if (dishTotalQty > 0) {
+            tableCalories += dishCals * dishTotalQty;
+            tableProtein += dishProt * dishTotalQty;
+            tableCarbs += dishCarbs * dishTotalQty;
+            tableFat += dishFat * dishTotalQty;
+            tableCost += dishPrice * dishTotalQty;
+            tableDishesCount += dishTotalQty;
+
+            stopCalories += dishCals * dishTotalQty;
+            stopCost += dishPrice * dishTotalQty;
+            stopDishesCount += dishTotalQty;
+
+            if (dish.allergens) {
+              dish.allergens.split(',').map(a => a.trim()).filter(Boolean).forEach(a => activeAllergens.add(a));
+            }
+            if (dish.healthIndicators) {
+              activeHealthTags.add(dish.healthIndicators);
+            }
+          }
+        }
+      });
+
+      perStopBreakdown.push({
+        stopId: res.id,
+        name: res.name,
+        municipality: res.municipality,
+        image: res.image || (res.images && res.images[0]),
+        calories: Math.round(stopCalories),
+        cost: Math.round(stopCost),
+        dishesCount: stopDishesCount
+      });
+    });
+
+    if (cvUploadedMeal && cvUploadedMeal.nutrition) {
+      const cvCals = Number(cvUploadedMeal.nutrition.calories) || 0;
+      const cvProt = Number(cvUploadedMeal.nutrition.protein) || 0;
+      const cvCarbs = Number(cvUploadedMeal.nutrition.carbs) || 0;
+      const cvFat = Number(cvUploadedMeal.nutrition.fat) || 0;
+
+      tableCalories += cvCals;
+      tableProtein += cvProt;
+      tableCarbs += cvCarbs;
+      tableFat += cvFat;
+
+      if (diningMode === 'group') {
+        groupMembers.forEach(m => {
+          memberMetrics[m.id].calories += cvCals / groupCount;
+          memberMetrics[m.id].protein += cvProt / groupCount;
+          memberMetrics[m.id].carbs += cvCarbs / groupCount;
+          memberMetrics[m.id].fat += cvFat / groupCount;
+        });
+      }
     }
 
+    const memberMetricsList = groupMembers.map(m => {
+      const data = memberMetrics[m.id] || {};
+      const cals = Math.round(data.calories || 0);
+      const limit = m.calorieLimit || 2000;
+      return {
+        ...m,
+        calories: cals,
+        protein: Math.round(data.protein || 0),
+        carbs: Math.round(data.carbs || 0),
+        fat: Math.round(data.fat || 0),
+        cost: Math.round(data.cost || 0),
+        dishesCount: Number((data.dishesCount || 0).toFixed(1)),
+        allergens: Array.from(data.allergens || []),
+        caloriePercent: Math.min(100, Math.round((cals / limit) * 100)),
+        isExceeded: cals > limit,
+        remaining: Math.max(0, limit - cals)
+      };
+    });
+
+    const hasBagoong = Array.from(activeAllergens).some(a => /bagoong|shrimp paste|alamang/i.test(a));
+    const hasPurines = restaurantStops.some(r => r.menu?.some(d => getDishTotalQty(r.id, d.id, r.menu[0]?.id === d.id) > 0 && /sisig|pork|liver|snout|ear|offal|bopis|dinuguan/i.test((d.ingredients || '') + ' ' + (d.name || ''))));
+    const hasHighLipids = tableFat >= (diningMode === 'group' ? 65 * groupCount : 65);
+    const hasHighSugar = restaurantStops.some(r => r.menu?.some(d => getDishTotalQty(r.id, d.id, r.menu[0]?.id === d.id) > 0 && /halo-halo|pastillas|tibok-tibok|ube|sweet|sugar/i.test((d.name || '') + ' ' + (d.ingredients || ''))));
+
+    const activeCalorieLimit = diningMode === 'solo'
+      ? (userProfile?.calorieLimit || 2200)
+      : groupMembers.reduce((sum, m) => sum + (m.calorieLimit || 2000), 0);
+
     return {
-      calories: Math.round(calories),
-      cost: Math.round(cost)
+      calories: Math.round(tableCalories),
+      protein: Math.round(tableProtein),
+      carbs: Math.round(tableCarbs),
+      fat: Math.round(tableFat),
+      cost: Math.round(tableCost),
+      totalDishesCount: tableDishesCount,
+      activeAllergens: Array.from(activeAllergens),
+      activeHealthTags: Array.from(activeHealthTags),
+      perStopBreakdown,
+      restaurantStopsCount: restaurantStops.length,
+      memberMetricsList,
+      diningMode,
+      activeCalorieLimit,
+      splitCostPerPerson: Math.round(tableCost / groupCount),
+      clinicalFlags: {
+        hasBagoong,
+        hasPurines,
+        hasHighLipids,
+        hasHighSugar,
+        isCalorieOver: tableCalories > activeCalorieLimit
+      }
     };
-  }, [activeTrip, cvUploadedMeal]);
+  }, [activeTrip, tripSelectedDishes, cvUploadedMeal, userProfile?.calorieLimit, diningMode, groupMembers]);
 
   // Dynamic Route planning sequences (recalculates based on stops and congestion state)
   const computedRoutePath = useMemo(() => {
@@ -1747,6 +2132,7 @@ function App() {
 
   const [attractionMunFilter, setAttractionMunFilter] = useState('All');
   const [attractionTypeFilter, setAttractionTypeFilter] = useState('All');
+  const [attractionSearchQuery, setAttractionSearchQuery] = useState('');
   const [selectedAttraction, setSelectedAttraction] = useState(null);
 
   // Sync open attraction detail modal & active trip when attractions update
@@ -7210,8 +7596,18 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                   }`}
               >
                 <MessageSquare className={`h-4 w-4 ${dashboardTab === 'assistant' ? 'fill-white' : ''}`} />
-                {/* ... */}
                 <span>Travel Kasaup</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setDashboardTab('destinations')}
+                className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'destinations'
+                  ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
+                  : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#282420]'
+                  }`}
+              >
+                <MapPin className={`h-4 w-4 ${dashboardTab === 'destinations' ? 'fill-white' : ''}`} />
+                <span>Tourist Destinations</span>
               </button>
               <button
                 type="button"
@@ -7281,88 +7677,29 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                     </div>
                   </div>
 
-                  {/* Card 2: Tourist Destinations Picker per Municipality */}
-                  <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 dark:border-[#2E2A24] pb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-xl bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 flex items-center justify-center text-lg">
-                          🏛️
-                        </div>
-                        <div>
-                          <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">
-                            Tourist Destinations
-                          </h3>
-                          <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">Add heritage sights &amp; landmarks to trip</span>
-                        </div>
+                  {/* Quick Shortcut to Tourist Destinations Tab */}
+                  <div className="bg-gradient-to-r from-[#2C5E3B]/10 to-amber-500/10 dark:from-[#2C5E3B]/20 dark:to-amber-500/20 rounded-2xl border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 p-4 flex items-center justify-between gap-3 shadow-2xs">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-[#2C5E3B]/15 dark:bg-[#2C5E3B]/30 flex items-center justify-center text-lg shrink-0">
+                        🏛️
                       </div>
-                      <span className="text-[10px] font-black text-[#2C5E3B] dark:text-emerald-400 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/25 px-2.5 py-0.5 rounded-full border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40">
-                        {attractions.filter(a => attractionMunFilter === 'All' || a.municipality === attractionMunFilter).length} Places
-                      </span>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-black text-charcoal dark:text-white m-0 truncate">
+                          Pampanga Heritage &amp; Tourist Sights
+                        </h4>
+                        <p className="text-[10px] text-charcoal-light dark:text-gray-300 m-0 truncate">
+                          Explore all {attractions.length} heritage parish churches, parks &amp; landmarks.
+                        </p>
+                      </div>
                     </div>
-
-                    {/* Select Municipality/City Filter */}
-                    <div className="space-y-1.5">
-                      <label className="block text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider">
-                        Filter By Municipality / City
-                      </label>
-                      <select
-                        value={attractionMunFilter}
-                        onChange={(e) => setAttractionMunFilter(e.target.value)}
-                        className="w-full px-3 py-2 text-xs border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] font-bold text-charcoal dark:text-white focus:outline-none focus:bg-white dark:focus:bg-[#1E1B18] focus:ring-1 focus:ring-terracotta"
-                      >
-                        <option value="All">All Municipalities &amp; Cities ({attractions.length} Heritage Sites)</option>
-                        {MUNICIPALITIES.map(mun => (
-                          <option key={mun} value={mun}>📍 {mun}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Destinations Cards List */}
-                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                      {attractions.filter(attr => attractionMunFilter === 'All' || attr.municipality === attractionMunFilter).map(attr => {
-                        const isAdded = activeTrip.some(item => item.id === attr.id);
-
-                        return (
-                          <div key={attr.id} className="p-2.5 bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl flex items-center justify-between gap-3 hover:border-terracotta/40 dark:hover:border-terracotta/40 hover:bg-white dark:hover:bg-[#1F1C18] transition-all shadow-2xs">
-                            <div className="flex items-start gap-2.5 min-w-0">
-                              {attr.image && (
-                                <img src={attr.image} alt={attr.name} className="w-11 h-11 rounded-lg object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 shadow-2xs" />
-                              )}
-                              <div className="min-w-0">
-                                <strong className="text-xs font-black text-charcoal dark:text-white block truncate">{attr.name}</strong>
-                                <span className="text-[10px] font-bold text-terracotta dark:text-orange-400 block">📍 {attr.municipality}</span>
-                                <span className="text-[9px] text-charcoal-light dark:text-gray-400 font-medium block truncate">{attr.type}</span>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <button
-                                type="button"
-                                onClick={() => setSelectedAttraction(attr)}
-                                className="p-1.5 text-charcoal dark:text-gray-300 hover:text-terracotta text-xs font-bold rounded-lg bg-white dark:bg-[#221F1C] border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:bg-[#FAF8F5] dark:hover:bg-[#2D2924] transition-colors"
-                                title="View Details"
-                              >
-                                ℹ️
-                              </button>
-                              <button
-                                type="button"
-                                disabled={isAdded}
-                                onClick={() => {
-                                  handleAddToItinerary(attr);
-                                  alert(`✓ Added "${attr.name}" (${attr.municipality}) to your trip itinerary!`);
-                                }}
-                                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black transition-all ${isAdded
-                                  ? 'bg-bananaleaf/10 text-bananaleaf dark:text-emerald-400 border border-bananaleaf/20'
-                                  : 'bg-[#2C5E3B] hover:bg-[#20452B] text-white cursor-pointer shadow-xs active:scale-95'
-                                  }`}
-                              >
-                                {isAdded ? '✓ Added' : '+ Add Place'}
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setDashboardTab('destinations')}
+                      className="px-3 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-[10px] font-black uppercase tracking-wider shadow-xs transition-all shrink-0 cursor-pointer active:scale-95 flex items-center gap-1"
+                    >
+                      <span>Explore Tab</span>
+                      <ChevronRight className="h-3 w-3" />
+                    </button>
                   </div>
 
                   {/* Card 3: Live Trip Navigation & Route Controls */}
@@ -7791,154 +8128,1119 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
               </div>
             )}
 
-            {/* TAB CONTENT: 2. Health Informatics Core */}
-            {dashboardTab === 'health' && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* TAB CONTENT: 2. Dedicated Tourist Destinations Hub */}
+            {dashboardTab === 'destinations' && (() => {
+              const q = (attractionSearchQuery || '').toLowerCase().trim();
+              const filteredAttractions = (attractions || []).filter(attr => {
+                if (!attr || typeof attr !== 'object') return false;
+                const matchesMun = attractionMunFilter === 'All' || attr.municipality === attractionMunFilter;
+                const matchesType = attractionTypeFilter === 'All' || attr.type === attractionTypeFilter;
+                const nameStr = (attr.name || '').toLowerCase();
+                const descStr = (attr.description || '').toLowerCase();
+                const munStr = (attr.municipality || '').toLowerCase();
+                const typeStr = (attr.type || '').toLowerCase();
+                const matchesSearch = !q || nameStr.includes(q) || descStr.includes(q) || munStr.includes(q) || typeStr.includes(q);
+                return matchesMun && matchesType && matchesSearch;
+              });
 
-                {/* Left side: Image uploader uploader card & Daily budget meters */}
-                <div className="lg:col-span-5 space-y-6">
+              const uniqueTypes = ['All', ...Array.from(new Set((attractions || []).map(a => a.type).filter(Boolean)))];
 
-                  {/* Visual Calorie Scanners Dropzone */}
-                  <div className="bento-card p-5 bg-white space-y-4">
-                    <div>
-                      <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-1.5">
-                        <Upload className="h-4.5 w-4.5 text-terracotta" /> Image Uploader (Computer Vision Estimator)
-                      </h3>
-                      <p className="text-[10px] text-charcoal-light mt-0.5">
-                        Simulate photo scans to deconstruct caloric compositions.
-                      </p>
+              const activeSideTripsCount = (activeTrip || []).filter(t => 
+                (t.id && String(t.id).startsWith('att-')) || 
+                (t.id && String(t.id).startsWith('parish-')) || 
+                (Array.isArray(attractions) && attractions.some(a => a.id === t.id))
+              ).length;
+
+              return (
+                <div className="space-y-6 animate-fade-in">
+                  {/* Hero Banner for Tourist Destinations */}
+                  <div className="bg-gradient-to-r from-[#2C5E3B] via-[#20452B] to-[#16301E] rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden shadow-lg border border-[#2C5E3B]/40">
+                    <div className="absolute -right-6 -bottom-8 opacity-10 text-9xl pointer-events-none select-none">
+                      🏛️
                     </div>
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="space-y-2 max-w-2xl">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-white text-[10px] font-black uppercase tracking-wider backdrop-blur-xs border border-white/20">
+                          ✨ Heritage, Faith &amp; Scenic Landmarks
+                        </span>
+                        <h2 className="text-xl sm:text-3xl font-black tracking-tight text-white m-0">
+                          Pampanga Tourist Destinations
+                        </h2>
+                        <p className="text-xs sm:text-sm text-white/80 leading-relaxed font-medium m-0">
+                          Discover historic Spanish-colonial parish churches, ancestral monuments, nature reserves, and cultural institutions across all 22 municipalities of Pampanga.
+                        </p>
+                      </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      {PRESEEDED_MEAL_PHOTOS.slice(0, 2).map(m => (
-                        <button
-                          key={m.id}
-                          onClick={() => triggerCVMealUpload(m)}
-                          className={`p-2.5 rounded-lg border text-center transition-all ${cvUploadedMeal?.id === m.id ? 'border-bananaleaf bg-bananaleaf/5' : 'border-[#E9E5DE]'}`}
-                        >
-                          <span className="text-xs font-black block text-charcoal truncate">{m.name}</span>
-                          <span className="text-[9px] text-terracotta font-bold mt-1 block">Simulate Scan</span>
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="border border-dashed border-[#E9E5DE] rounded-xl p-4 bg-[#FAF8F5] text-center min-h-[140px] flex flex-col justify-center items-center">
-                      {isCVProcessing ? (
-                        <div className="space-y-1.5 animate-pulse text-center">
-                          <span className="text-xl block">🧠</span>
-                          <span className="text-xs font-black text-terracotta">Analyzing Portion Volume...</span>
+                      <div className="flex flex-wrap items-center gap-3 shrink-0">
+                        <div className="bg-white/10 backdrop-blur-xs px-4 py-2.5 rounded-2xl border border-white/15 text-center">
+                          <span className="block text-[9px] font-bold text-white/70 uppercase tracking-wider">Heritage Sites</span>
+                          <strong className="text-base sm:text-lg font-black text-white">{attractions.length} Places</strong>
                         </div>
-                      ) : cvUploadedMeal ? (
-                        <div className="text-left w-full space-y-2 text-xs">
-                          <span className="block text-xs font-extrabold text-bananaleaf bg-bananaleaf/5 px-2 py-0.5 rounded">
-                            Identified: {cvUploadedMeal.name} ({cvUploadedMeal.nutrition.calories} kcal)
-                          </span>
-                          <p className="text-[10px] text-charcoal-light leading-relaxed">{cvUploadedMeal.description}</p>
-
-                          <div className="grid grid-cols-3 gap-2 text-[9px] text-center font-bold text-charcoal pt-1">
-                            <div className="bg-white p-1 rounded border border-[#E9E5DE]">P: {cvUploadedMeal.nutrition.protein}g</div>
-                            <div className="bg-white p-1 rounded border border-[#E9E5DE]">C: {cvUploadedMeal.nutrition.carbs}g</div>
-                            <div className="bg-white p-1 rounded border border-[#E9E5DE]">F: {cvUploadedMeal.nutrition.fat}g</div>
-                          </div>
+                        <div className="bg-white/10 backdrop-blur-xs px-4 py-2.5 rounded-2xl border border-white/15 text-center">
+                          <span className="block text-[9px] font-bold text-white/70 uppercase tracking-wider">On Active Route</span>
+                          <strong className="text-base sm:text-lg font-black text-amber-300">{activeSideTripsCount} Added</strong>
                         </div>
-                      ) : (
-                        <span className="text-xs text-charcoal-light font-bold">Drag and drop meal photos here</span>
-                      )}
+                        {activeTrip.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setDashboardTab('planner')}
+                            className="px-4 py-3 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-black rounded-2xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                          >
+                            <span>🗺️ View on Route Map</span>
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Calorie settings panel */}
-                  <div className="bento-card p-5 bg-white space-y-4">
-                    <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-1.5">
-                      <span className="text-base">🥗</span> Calorie Allocation Settings
-                    </h3>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-[9px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                          Daily Calorie Limit (kcal)
-                        </label>
+                  {/* Filter & Search Bar */}
+                  <div className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl p-4 sm:p-5 space-y-4 shadow-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-center">
+                      {/* Search Bar */}
+                      <div className="md:col-span-6 relative flex items-center">
+                        <Search className="absolute left-3.5 h-4 w-4 text-charcoal-light dark:text-gray-400 pointer-events-none" />
                         <input
-                          type="number"
-                          min="1200"
-                          max="4000"
-                          value={userProfile.calorieLimit}
-                          onChange={(e) => setUserProfile({ ...userProfile, calorieLimit: Number(e.target.value) || 2200 })}
-                          className="block w-full px-2.5 py-1.5 border border-[#E9E5DE] rounded bg-[#FAF8F5] text-xs text-charcoal font-bold focus:outline-none focus:bg-white"
+                          type="text"
+                          placeholder="Search heritage churches, landmarks, museums, or towns..."
+                          value={attractionSearchQuery}
+                          onChange={(e) => setAttractionSearchQuery(e.target.value)}
+                          className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] text-xs font-semibold text-charcoal dark:text-white focus:outline-none focus:bg-white dark:focus:bg-[#1E1B18] focus:ring-1 focus:ring-terracotta"
                         />
+                        {attractionSearchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setAttractionSearchQuery('')}
+                            className="absolute right-3 text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white text-xs font-bold"
+                          >
+                            ✕
+                          </button>
+                        )}
                       </div>
 
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-charcoal-light">Calorie Allowance Meter</span>
-                          <span className="font-bold">{activeTripMetrics.calories} / {userProfile.calorieLimit} kcal</span>
-                        </div>
-                        <div className="w-full bg-[#FAF8F5] rounded-full h-2 overflow-hidden border border-[#E9E5DE]">
+                      {/* Municipality Dropdown */}
+                      <div className="md:col-span-6 flex items-center gap-2">
+                        <span className="text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider whitespace-nowrap shrink-0">
+                          📍 Town / City:
+                        </span>
+                        <select
+                          value={attractionMunFilter}
+                          onChange={(e) => setAttractionMunFilter(e.target.value)}
+                          className="w-full px-3 py-2.5 text-xs border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] font-bold text-charcoal dark:text-white focus:outline-none focus:bg-white dark:focus:bg-[#1E1B18] focus:ring-1 focus:ring-terracotta"
+                        >
+                          <option value="All">All Municipalities &amp; Cities ({attractions.length} Heritage Sites)</option>
+                          {MUNICIPALITIES.map(mun => {
+                            const count = attractions.filter(a => a.municipality === mun).length;
+                            return (
+                              <option key={mun} value={mun}>
+                                {mun} {count > 0 ? `(${count} site${count > 1 ? 's' : ''})` : ''}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Category / Type Pills */}
+                    {uniqueTypes.length > 2 && (
+                      <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-[#E9E5DE]/70 dark:border-[#2E2A24] pb-1 scrollbar-thin">
+                        <span className="text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider shrink-0">
+                          Category:
+                        </span>
+                        {uniqueTypes.map(t => (
+                          <button
+                            key={t}
+                            type="button"
+                            onClick={() => setAttractionTypeFilter(t)}
+                            className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold transition-all shrink-0 cursor-pointer whitespace-nowrap ${attractionTypeFilter === t
+                              ? 'bg-terracotta text-white shadow-xs'
+                              : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 border border-[#E9E5DE] dark:border-[#2E2A24] hover:bg-white dark:hover:bg-[#221F1C]'
+                              }`}
+                          >
+                            {t === 'All' ? '🏛️ All Categories' : t}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Results Count Info */}
+                  <div className="flex items-center justify-between px-1">
+                    <span className="text-xs text-charcoal-light dark:text-gray-400 font-semibold">
+                      Showing <strong className="text-charcoal dark:text-white font-extrabold">{filteredAttractions.length}</strong> tourist destination{filteredAttractions.length !== 1 ? 's' : ''}
+                      {attractionMunFilter !== 'All' && <span> in <strong className="text-terracotta dark:text-orange-400">{attractionMunFilter}</strong></span>}
+                    </span>
+                    {(attractionMunFilter !== 'All' || attractionTypeFilter !== 'All' || attractionSearchQuery) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAttractionMunFilter('All');
+                          setAttractionTypeFilter('All');
+                          setAttractionSearchQuery('');
+                        }}
+                        className="text-xs text-terracotta dark:text-orange-400 hover:underline font-bold"
+                      >
+                        Reset All Filters
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Tourist Destinations Grid */}
+                  {filteredAttractions.length === 0 ? (
+                    <div className="bg-white dark:bg-[#1E1B18] p-12 rounded-3xl border border-[#E9E5DE] dark:border-[#2E2A24] text-center space-y-3 shadow-sm">
+                      <span className="text-4xl block">🏛️</span>
+                      <h4 className="text-sm font-black text-charcoal dark:text-white m-0">No tourist destinations match your search or filter</h4>
+                      <p className="text-xs text-charcoal-light dark:text-gray-400 max-w-sm mx-auto m-0">
+                        Try selecting another municipality or clearing your search term.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAttractionMunFilter('All');
+                          setAttractionTypeFilter('All');
+                          setAttractionSearchQuery('');
+                        }}
+                        className="px-4 py-2 bg-terracotta text-white rounded-xl text-xs font-bold hover:bg-terracotta-dark transition-all cursor-pointer shadow-xs"
+                      >
+                        Reset Filters
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {filteredAttractions.map(attr => {
+                        const isAdded = activeTrip.some(item => item.id === attr.id);
+
+                        return (
                           <div
-                            className="h-full bg-bananaleaf transition-all duration-300"
-                            style={{ width: `${Math.min(100, (activeTripMetrics.calories / userProfile.calorieLimit) * 100)}%` }}
-                          ></div>
+                            key={attr.id}
+                            className="bento-card bg-white dark:bg-[#1E1B18] p-5 flex flex-col justify-between border-[#E9E5DE] dark:border-[#2E2A24] hover:border-[#2C5E3B]/40 dark:hover:border-[#2C5E3B]/60 rounded-3xl shadow-sm hover:shadow-md transition-all group"
+                          >
+                            <div>
+                              {/* Photo Slot */}
+                              <div className="aspect-[16/10] w-full rounded-2xl bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] mb-4 relative overflow-hidden flex items-center justify-center shadow-inner">
+                                {attr.image ? (
+                                  <img
+                                    src={attr.image}
+                                    alt={attr.name}
+                                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    onError={(e) => {
+                                      e.target.src = "/attractions/san_fernando_cathedral.jpg";
+                                    }}
+                                  />
+                                ) : (
+                                  <span className="text-3xl">🏛️</span>
+                                )}
+
+                                {/* Category Badge */}
+                                <div className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-xs text-white text-[9px] font-black px-2.5 py-1 rounded-lg border border-white/20 shadow-xs">
+                                  {attr.type || '🏛️ Historic Destination'}
+                                </div>
+
+                                {/* Municipality Stamp */}
+                                <div className="absolute bottom-2.5 right-2.5 bg-white/95 dark:bg-black/85 backdrop-blur-xs text-[#2C5E3B] dark:text-emerald-400 text-[10px] font-black px-2.5 py-1 rounded-lg border border-[#2C5E3B]/30 shadow-xs flex items-center gap-1">
+                                  <span>📍</span>
+                                  <span>{attr.municipality}</span>
+                                </div>
+                              </div>
+
+                              {/* Title & Town */}
+                              <div className="space-y-1">
+                                <h3 className="text-sm font-black text-charcoal dark:text-white leading-snug group-hover:text-[#2C5E3B] dark:group-hover:text-emerald-400 transition-colors m-0">
+                                  {attr.name}
+                                </h3>
+                                <span className="text-[10px] font-bold text-terracotta dark:text-orange-400 block">
+                                  📍 {attr.address || `${attr.municipality}, Pampanga`}
+                                </span>
+                              </div>
+
+                              {/* Description Snippet */}
+                              <p className="text-xs text-charcoal-light dark:text-gray-300 leading-relaxed mt-2.5 line-clamp-3 font-normal">
+                                {attr.description}
+                              </p>
+                            </div>
+
+                            {/* Card Footer Actions */}
+                            <div className="mt-4 pt-3.5 border-t border-[#FAF8F5] dark:border-[#26221D] flex items-center justify-between gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedAttraction(attr)}
+                                className="px-3 py-2 text-xs font-bold text-charcoal dark:text-gray-300 hover:text-terracotta dark:hover:text-white bg-[#FAF8F5] dark:bg-[#161412] hover:bg-[#E9E5DE] dark:hover:bg-[#25221E] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl transition-colors cursor-pointer flex items-center gap-1"
+                              >
+                                <span>ℹ️ Story &amp; Details</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={isAdded}
+                                onClick={() => {
+                                  handleAddToItinerary(attr);
+                                  alert(`✓ Added "${attr.name}" (${attr.municipality}) to your trip itinerary!`);
+                                }}
+                                className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${isAdded
+                                  ? 'bg-bananaleaf/10 text-bananaleaf dark:text-emerald-400 border border-bananaleaf/25 font-bold cursor-default'
+                                  : 'bg-[#2C5E3B] hover:bg-[#20452B] text-white shadow-xs cursor-pointer active:scale-95'
+                                  }`}
+                              >
+                                <span>{isAdded ? '✓ Added to Trail' : '+ Add to Trail'}</span>
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* TAB CONTENT: 2. Health Informatics Core */}
+            {dashboardTab === 'health' && (() => {
+              const restaurantStops = (activeTrip || []).filter(item => {
+                if (!item) return false;
+                const isAttr = (item.id && String(item.id).startsWith('att-')) ||
+                  (item.id && String(item.id).startsWith('parish-')) ||
+                  (Array.isArray(attractions) && attractions.some(a => a.id === item.id));
+                return !isAttr && Array.isArray(item.menu) && item.menu.length > 0;
+              });
+
+              const isSolo = diningMode === 'solo';
+              const soloLimit = userProfile?.calorieLimit || 2200;
+              const totalTableCals = activeTripMetrics.calories || 0;
+              const activeLimit = isSolo ? soloLimit : activeTripMetrics.activeCalorieLimit;
+              const caloriePercent = Math.min(100, Math.round((totalTableCals / activeLimit) * 100));
+              const isExceeded = totalTableCals > activeLimit;
+              const calsRemaining = Math.max(0, activeLimit - totalTableCals);
+
+              const activeSelectedMember = !isSolo && activeMemberTab !== 'all'
+                ? activeTripMetrics.memberMetricsList.find(m => m.id === activeMemberTab)
+                : null;
+
+              const totalMacros = (activeTripMetrics.protein * 4) + (activeTripMetrics.carbs * 4) + (activeTripMetrics.fat * 9);
+              const proteinPct = totalMacros > 0 ? Math.round(((activeTripMetrics.protein * 4) / totalMacros) * 100) : 25;
+              const carbsPct = totalMacros > 0 ? Math.round(((activeTripMetrics.carbs * 4) / totalMacros) * 100) : 45;
+              const fatPct = totalMacros > 0 ? Math.round(((activeTripMetrics.fat * 9) / totalMacros) * 100) : 30;
+
+              return (
+                <div className="space-y-6 animate-fade-in">
+                  {/* Top Health Informatics Banner with Mode Switcher */}
+                  <div className="bg-gradient-to-r from-emerald-800 via-[#2C5E3B] to-[#1E3F28] rounded-3xl p-6 sm:p-7 text-white shadow-lg border border-emerald-700/40 relative overflow-hidden">
+                    <div className="absolute -right-6 -bottom-10 opacity-10 text-9xl pointer-events-none select-none">
+                      🥗
+                    </div>
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+                      <div className="space-y-2 max-w-2xl">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-emerald-100 text-[10px] font-black uppercase tracking-wider backdrop-blur-xs border border-white/20">
+                            🩺 Clinical Health Informatics
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-400/20 text-amber-200 text-[10px] font-black uppercase tracking-wider border border-amber-300/30">
+                            {isSolo ? '👤 Individual Dinnig' : `👥 Group Dining (${groupMembers.length} Members)`}
+                          </span>
+                        </div>
+
+                        <h2 className="text-xl sm:text-2xl font-black text-white m-0 tracking-tight">
+                          {isSolo ? 'Personalized Nutrition & Meal Builder' : 'Group & Family Dietary Health Manager'}
+                        </h2>
+                        <p className="text-xs sm:text-sm text-white/85 leading-relaxed font-medium m-0">
+                          {isSolo
+                            ? 'Configure your single-diner calorie targets and pick exact dish portions per restaurant stop.'
+                            : 'Manage distinct calorie allowances for Person 1, Person 2, etc., assign specific dishes or shared table plates, and audit table-wide allergen safety.'
+                          }
+                        </p>
+                      </div>
+
+                      {/* Mode Switcher Toggle Button */}
+                      <div className="flex flex-col items-start md:items-end gap-3 shrink-0">
+                        <div className="bg-black/30 p-1.5 rounded-2xl border border-white/20 backdrop-blur-md flex gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setDiningMode('solo')}
+                            className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${isSolo
+                              ? 'bg-terracotta text-white shadow-md'
+                              : 'text-white/80 hover:text-white hover:bg-white/10'
+                              }`}
+                          >
+                            <User className="h-4 w-4" />
+                            <span>Individual Only</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDiningMode('group')}
+                            className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${!isSolo
+                              ? 'bg-[#E5A93C] text-charcoal font-black shadow-md'
+                              : 'text-white/80 hover:text-white hover:bg-white/10'
+                              }`}
+                          >
+                            <Users className="h-4 w-4" />
+                            <span>Group / Family</span>
+                          </button>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          <div className="bg-white/10 backdrop-blur-xs px-3.5 py-1.5 rounded-xl border border-white/15 text-center">
+                            <span className="block text-[8px] font-bold text-emerald-200 uppercase tracking-wider">Stops</span>
+                            <strong className="text-sm font-black text-white">{restaurantStops.length} Venues</strong>
+                          </div>
+                          <div className="bg-white/10 backdrop-blur-xs px-3.5 py-1.5 rounded-xl border border-white/15 text-center">
+                            <span className="block text-[8px] font-bold text-emerald-200 uppercase tracking-wider">Total Portions</span>
+                            <strong className="text-sm font-black text-amber-300">{activeTripMetrics.totalDishesCount} Servings</strong>
+                          </div>
+                          <div className={`px-3.5 py-1.5 rounded-xl border text-center ${isExceeded ? 'bg-red-500/30 border-red-400 text-red-100' : 'bg-emerald-500/25 border-emerald-400/40 text-emerald-100'}`}>
+                            <span className="block text-[8px] font-bold uppercase tracking-wider">Table Calories</span>
+                            <strong className="text-sm font-black">{totalTableCals} / {activeLimit} kcal</strong>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
+                  {/* Group Members Roster Manager (Visible only in Group Mode) */}
+                  {!isSolo && (
+                    <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 shadow-sm">
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                            👥
+                          </div>
+                          <div>
+                            <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">
+                              Group Dining Party Members ({groupMembers.length} Diners)
+                            </h3>
+                            <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">
+                              Customize member names and personal calorie limits
+                            </span>
+                          </div>
+                        </div>
 
+                        {groupMembers.length < 8 && (
+                          <button
+                            type="button"
+                            onClick={handleAddGroupMember}
+                            className="px-3 py-1.5 rounded-xl bg-[#2C5E3B] hover:bg-[#20452B] text-white text-[11px] font-black flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                          >
+                            <UserPlus className="h-3.5 w-3.5" />
+                            <span>+ Add Person</span>
+                          </button>
+                        )}
+                      </div>
 
-                </div>
+                      {/* Member Cards Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {activeTripMetrics.memberMetricsList.map((m, idx) => (
+                          <div
+                            key={m.id}
+                            className={`p-3.5 rounded-xl border transition-all space-y-2.5 relative ${activeMemberTab === m.id
+                              ? 'bg-amber-500/10 border-amber-500 dark:border-amber-400 shadow-xs'
+                              : 'bg-[#FAF8F5] dark:bg-[#161412] border-[#E9E5DE] dark:border-[#2E2A24]'
+                              }`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                <span className="w-6 h-6 rounded-lg bg-terracotta text-white font-black text-[10px] flex items-center justify-center shrink-0">
+                                  P{idx + 1}
+                                </span>
+                                <input
+                                  type="text"
+                                  value={m.name}
+                                  onChange={(e) => handleUpdateMember(m.id, { name: e.target.value })}
+                                  placeholder={`Person ${idx + 1}`}
+                                  className="text-xs font-black text-charcoal dark:text-white bg-transparent border-b border-transparent hover:border-[#E9E5DE] focus:border-terracotta focus:outline-none w-full truncate"
+                                />
+                              </div>
 
-                {/* Right side: Dynamic menu parsing list with warnings */}
-                <div className="lg:col-span-7">
-                  <div className="bento-card p-5 bg-white space-y-4">
-                    <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider">
-                      Dynamic Menu Parsing & Allergen Registry
-                    </h3>
+                              {groupMembers.length > 2 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveGroupMember(m.id)}
+                                  className="text-gray-400 hover:text-red-500 p-1 cursor-pointer"
+                                  title="Remove person"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              )}
+                            </div>
 
-                    <div className="space-y-3">
-                      {/* Standard allergen alerts */}
-                      <div className="p-3.5 bg-terracotta/5 border border-terracotta/20 rounded-xl space-y-2 text-xs">
-                        <h4 className="font-extrabold text-terracotta flex items-center gap-1.5">
-                          <AlertTriangle className="h-4 w-4 shrink-0" /> SYSTEM LOCALIZATION ALLERGEN ALERTS
-                        </h4>
-                        <div className="space-y-1.5 text-charcoal leading-relaxed">
-                          <p className="font-semibold text-terracotta-dark">⚠️ Contains Fermented Shrimp Paste / Bagoong Alamang</p>
-                          <p className="text-[10px] text-charcoal-light">Often present as a standard seasoning layer in *Kare-Kare* and sour *Bulanglang*.</p>
+                            {/* Calorie Limit Input */}
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-charcoal-light dark:text-gray-400 font-bold uppercase">Daily Limit:</span>
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="number"
+                                  min="800"
+                                  max="4500"
+                                  step="50"
+                                  value={m.calorieLimit}
+                                  onChange={(e) => handleUpdateMember(m.id, { calorieLimit: Math.max(800, Number(e.target.value) || 2000) })}
+                                  className="w-16 px-1.5 py-0.5 text-right font-black border border-[#E9E5DE] dark:border-[#2E2A24] rounded bg-white dark:bg-[#201D1A] text-charcoal dark:text-white text-[10px]"
+                                />
+                                <span className="text-charcoal-light dark:text-gray-400 font-bold">kcal</span>
+                              </div>
+                            </div>
 
-                          <p className="font-semibold text-terracotta-dark mt-2">⚠️ Contains Peanuts/Tree Nuts</p>
-                          <p className="text-[10px] text-charcoal-light">Standard thickener component in heritage *Kare-Kareng Duman* dishes.</p>
+                            {/* Progress Gauge */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between text-[10px] font-bold">
+                                <span className="text-charcoal-light dark:text-gray-400">Intake:</span>
+                                <span className={`font-black ${m.isExceeded ? 'text-red-500' : 'text-[#2C5E3B] dark:text-emerald-400'}`}>
+                                  {m.calories} / {m.calorieLimit} kcal
+                                </span>
+                              </div>
+                              <div className="w-full bg-white dark:bg-[#201D1A] rounded-full h-2 overflow-hidden border border-[#E9E5DE] dark:border-[#2E2A24]">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-300 ${m.isExceeded ? 'bg-red-500' : 'bg-emerald-500'}`}
+                                  style={{ width: `${m.caloriePercent}%` }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Quick Stats Pill */}
+                            <div className="flex items-center justify-between text-[9px] font-bold pt-1 border-t border-[#E9E5DE]/80 dark:border-[#2E2A24]">
+                              <span className="text-charcoal-light dark:text-gray-400">{m.dishesCount} portions</span>
+                              <span className="text-terracotta dark:text-orange-400">₱{m.cost} bill</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* Left Pane (col-span-5): Health Goals, Calorie Meter & Visual CV Scanner */}
+                    <div className="lg:col-span-5 space-y-6">
+
+                      {/* Card 1: Daily Target & Nutritional Meter */}
+                      <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-5 shadow-sm">
+                        <div className="flex items-center justify-between border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                              📊
+                            </div>
+                            <div>
+                              <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">
+                                {isSolo ? 'Nutritional Targets' : 'Table Nutrition & Intake Balance'}
+                              </h3>
+                              <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">
+                                {isSolo ? 'Daily allowance vs active crawl' : 'Aggregated for all group members'}
+                              </span>
+                            </div>
+                          </div>
+                          <span className={`text-[10px] font-black px-2.5 py-1 rounded-full border ${isExceeded
+                            ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-300 border-red-300 dark:border-red-800 animate-pulse'
+                            : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800'
+                            }`}>
+                            {isExceeded ? `⚠️ +${totalTableCals - activeLimit} kcal Over` : `🟢 ${calsRemaining} kcal Left`}
+                          </span>
+                        </div>
+
+                        {/* Presets in Solo Mode */}
+                        {isSolo ? (
+                          <div className="space-y-1.5">
+                            <label className="block text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider">
+                              🎯 Quick Dietary Goal Presets
+                            </label>
+                            <div className="grid grid-cols-2 gap-2">
+                              {[
+                                { label: '🥗 Calorie Deficit', target: 1600 },
+                                { label: '🚶 Standard Explorer', target: 2000 },
+                                { label: '🏋️ Active / High Protein', target: 2500 },
+                                { label: '🍖 Kapampangan Fiesta', target: 3200 }
+                              ].map(preset => (
+                                <button
+                                  key={preset.target}
+                                  type="button"
+                                  onClick={() => setUserProfile({ ...userProfile, calorieLimit: preset.target })}
+                                  className={`px-2.5 py-2 rounded-xl text-[10px] font-black transition-all border text-left cursor-pointer ${soloLimit === preset.target
+                                    ? 'bg-terracotta text-white border-terracotta shadow-xs'
+                                    : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 border-[#E9E5DE] dark:border-[#2E2A24] hover:bg-white dark:hover:bg-[#25221E]'
+                                    }`}
+                                >
+                                  <span>{preset.label}</span>
+                                  <span className="block text-[9px] opacity-80 mt-0.5">{preset.target} kcal/day</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          /* Group Overview Switcher Tabs */
+                          <div className="space-y-2">
+                            <label className="block text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider">
+                              🔍 Inspect Member Nutritional Breakdown:
+                            </label>
+                            <div className="flex flex-wrap gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setActiveMemberTab('all')}
+                                className={`px-3 py-1.5 rounded-xl text-[10px] font-black transition-all border cursor-pointer ${activeMemberTab === 'all'
+                                  ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] shadow-2xs'
+                                  : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 border-[#E9E5DE] dark:border-[#2E2A24]'
+                                  }`}
+                              >
+                                📊 Whole Table
+                              </button>
+                              {activeTripMetrics.memberMetricsList.map((m, idx) => (
+                                <button
+                                  key={m.id}
+                                  type="button"
+                                  onClick={() => setActiveMemberTab(m.id)}
+                                  className={`px-3 py-1.5 rounded-xl text-[10px] font-black transition-all border cursor-pointer ${activeMemberTab === m.id
+                                    ? 'bg-terracotta text-white border-terracotta shadow-2xs'
+                                    : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 border-[#E9E5DE] dark:border-[#2E2A24]'
+                                    }`}
+                                >
+                                  P{idx + 1}: {m.name}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Progress Gauge */}
+                        <div className="space-y-3 pt-2 border-t border-[#E9E5DE] dark:border-[#2E2A24]">
+                          {isSolo ? (
+                            <div className="flex items-center justify-between">
+                              <label className="text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider">
+                                Daily Calorie Target (kcal)
+                              </label>
+                              <input
+                                type="number"
+                                min="1000"
+                                max="5000"
+                                step="50"
+                                value={soloLimit}
+                                onChange={(e) => setUserProfile({ ...userProfile, calorieLimit: Math.max(800, Number(e.target.value) || 2000) })}
+                                className="w-24 px-2.5 py-1 text-right text-xs font-black border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-white focus:outline-none focus:ring-1 focus:ring-terracotta"
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-charcoal-light dark:text-gray-400 font-bold uppercase">
+                                {activeSelectedMember ? `${activeSelectedMember.name}'s Target` : 'Combined Table Ceiling'}
+                              </span>
+                              <strong className="text-charcoal dark:text-white font-black">
+                                {activeSelectedMember ? `${activeSelectedMember.calorieLimit} kcal` : `${activeLimit} kcal`}
+                              </strong>
+                            </div>
+                          )}
+
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between text-xs font-bold">
+                              <span className="text-charcoal-light dark:text-gray-400">
+                                {activeSelectedMember ? `${activeSelectedMember.name}'s Consumed:` : 'Total Table Intake:'}
+                              </span>
+                              <span className={`font-black ${(activeSelectedMember ? activeSelectedMember.isExceeded : isExceeded) ? 'text-red-500 dark:text-red-400' : 'text-charcoal dark:text-white'}`}>
+                                {activeSelectedMember
+                                  ? `${activeSelectedMember.calories} / ${activeSelectedMember.calorieLimit} kcal (${activeSelectedMember.caloriePercent}%)`
+                                  : `${totalTableCals} / ${activeLimit} kcal (${caloriePercent}%)`
+                                }
+                              </span>
+                            </div>
+                            <div className="w-full bg-[#FAF8F5] dark:bg-[#141210] rounded-full h-3 overflow-hidden border border-[#E9E5DE] dark:border-[#2E2A24] p-0.5">
+                              <div
+                                className={`h-full rounded-full transition-all duration-500 ${(activeSelectedMember ? activeSelectedMember.isExceeded : isExceeded)
+                                  ? 'bg-gradient-to-r from-amber-500 to-red-600'
+                                  : (activeSelectedMember ? activeSelectedMember.caloriePercent : caloriePercent) > 80
+                                    ? 'bg-gradient-to-r from-emerald-500 to-amber-500'
+                                    : 'bg-gradient-to-r from-emerald-600 to-emerald-400'
+                                  }`}
+                                style={{
+                                  width: `${activeSelectedMember ? activeSelectedMember.caloriePercent : Math.min(100, (totalTableCals / activeLimit) * 100)}%`
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Macronutrient Breakdown */}
+                        <div className="pt-3 border-t border-[#E9E5DE] dark:border-[#2E2A24] space-y-3">
+                          <span className="text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider block">
+                            🥩 {activeSelectedMember ? `${activeSelectedMember.name}'s Macros` : 'Cumulative Macronutrient Balance'}
+                          </span>
+
+                          <div className="grid grid-cols-3 gap-2 text-center">
+                            <div className="p-2.5 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 rounded-xl">
+                              <span className="text-[9px] font-black text-blue-800 dark:text-blue-300 uppercase block">Protein</span>
+                              <strong className="text-sm font-black text-blue-950 dark:text-blue-100">
+                                {activeSelectedMember ? activeSelectedMember.protein : activeTripMetrics.protein}g
+                              </strong>
+                              <span className="text-[9px] text-blue-700 dark:text-blue-300 block font-semibold">{proteinPct}% cals</span>
+                            </div>
+                            <div className="p-2.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-xl">
+                              <span className="text-[9px] font-black text-amber-800 dark:text-amber-300 uppercase block">Carbohydrates</span>
+                              <strong className="text-sm font-black text-amber-950 dark:text-amber-100">
+                                {activeSelectedMember ? activeSelectedMember.carbs : activeTripMetrics.carbs}g
+                              </strong>
+                              <span className="text-[9px] text-amber-700 dark:text-amber-300 block font-semibold">{carbsPct}% cals</span>
+                            </div>
+                            <div className="p-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800/40 rounded-xl">
+                              <span className="text-[9px] font-black text-rose-800 dark:text-rose-300 uppercase block">Fats &amp; Lipids</span>
+                              <strong className="text-sm font-black text-rose-950 dark:text-rose-100">
+                                {activeSelectedMember ? activeSelectedMember.fat : activeTripMetrics.fat}g
+                              </strong>
+                              <span className="text-[9px] text-rose-700 dark:text-rose-300 block font-semibold">{fatPct}% cals</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Estimated Cost & Bill Split */}
+                        <div className="p-3 bg-[#FAF8F5] dark:bg-[#161412] rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] space-y-1.5 text-xs">
+                          <div className="flex items-center justify-between">
+                            <span className="text-charcoal-light dark:text-gray-400 font-bold">Total Estimated Meal Bill:</span>
+                            <strong className="text-terracotta dark:text-orange-400 text-sm font-black">₱{activeTripMetrics.cost}</strong>
+                          </div>
+                          {!isSolo && (
+                            <div className="flex items-center justify-between text-[11px] pt-1 border-t border-[#E9E5DE]/70 dark:border-[#2E2A24]">
+                              <span className="text-charcoal-light dark:text-gray-400 font-bold">Even Bill Split per Person:</span>
+                              <strong className="text-[#2C5E3B] dark:text-emerald-400 font-black">₱{activeTripMetrics.splitCostPerPerson} / diner</strong>
+                            </div>
+                          )}
                         </div>
                       </div>
 
-                      {/* Active catalog menu list */}
-                      <div className="border border-[#E9E5DE] rounded-xl overflow-hidden divide-y divide-[#E9E5DE] text-xs">
-                        <div className="bg-[#FAF8F5] p-3 font-bold text-charcoal-light uppercase tracking-wider">
-                          Active Recipe Deconstruct Items
+                      {/* Card 2: Computer Vision Meal Photo Scanner */}
+                      <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 shadow-sm">
+                        <div>
+                          <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-1.5 m-0">
+                            <Upload className="h-4 w-4 text-terracotta" /> Image Calorie Estimator (CV)
+                          </h3>
+                          <p className="text-[10px] text-charcoal-light dark:text-gray-400 mt-1 m-0">
+                            Snap or simulate meal photo scans to deconstruct caloric density on the fly.
+                          </p>
                         </div>
-                        <div className="p-3 flex justify-between items-center">
-                          <div>
-                            <span className="block font-black text-charcoal">Original Sizzling Sisig</span>
-                            <span className="block text-[9px] text-charcoal-light">Ingredients: Pork snout, ears, cheeks, chicken liver</span>
-                          </div>
-                          <span className="text-[10px] bg-terracotta/10 text-terracotta border border-terracotta/15 px-2 py-0.5 rounded font-bold shrink-0">
-                            High Cholesterol warning
-                          </span>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          {PRESEEDED_MEAL_PHOTOS.slice(0, 4).map(m => (
+                            <button
+                              key={m.id}
+                              type="button"
+                              onClick={() => triggerCVMealUpload(m)}
+                              className={`p-2 rounded-xl border text-center transition-all cursor-pointer ${cvUploadedMeal?.id === m.id
+                                ? 'border-[#2C5E3B] bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-emerald-400 font-black shadow-2xs'
+                                : 'border-[#E9E5DE] dark:border-[#2E2A24] bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 hover:border-terracotta/40'
+                                }`}
+                            >
+                              <span className="text-[11px] font-bold block truncate">{m.name}</span>
+                              <span className="text-[9px] text-terracotta dark:text-orange-400 font-black mt-0.5 block">⚡ Scan {m.nutrition.calories} kcal</span>
+                            </button>
+                          ))}
                         </div>
-                        <div className="p-3 flex justify-between items-center">
-                          <div>
-                            <span className="block font-black text-charcoal">Kare-Kareng Duman</span>
-                            <span className="block text-[9px] text-charcoal-light">Ingredients: Oxtail, peanut paste, bagoong alamang</span>
-                          </div>
-                          <span className="text-[10px] bg-terracotta/15 text-terracotta border border-terracotta/20 px-2 py-0.5 rounded font-bold shrink-0">
-                            Peanut & Shrimp Paste Alert
-                          </span>
+
+                        {/* Scanner Output Box */}
+                        <div className="border border-dashed border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl p-4 bg-[#FAF8F5] dark:bg-[#161412] text-center min-h-[120px] flex flex-col justify-center items-center">
+                          {isCVProcessing ? (
+                            <div className="space-y-1.5 animate-pulse text-center">
+                              <span className="text-2xl block">🧠</span>
+                              <span className="text-xs font-black text-terracotta dark:text-orange-400">Analyzing Volumetric Composition...</span>
+                            </div>
+                          ) : cvUploadedMeal ? (
+                            <div className="text-left w-full space-y-2 text-xs">
+                              <div className="flex items-center justify-between">
+                                <span className="block text-xs font-black text-[#2C5E3B] dark:text-emerald-400 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/25 px-2.5 py-0.5 rounded-md">
+                                  ✓ Identified: {cvUploadedMeal.name}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => setCvUploadedMeal(null)}
+                                  className="text-[10px] text-red-500 hover:underline font-bold"
+                                >
+                                  Clear
+                                </button>
+                              </div>
+                              <p className="text-[10px] text-charcoal-light dark:text-gray-300 leading-relaxed m-0">{cvUploadedMeal.description}</p>
+                              <div className="grid grid-cols-3 gap-2 text-[9px] text-center font-bold text-charcoal dark:text-white pt-1">
+                                <div className="bg-white dark:bg-[#1F1C18] p-1.5 rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24]">P: {cvUploadedMeal.nutrition.protein}g</div>
+                                <div className="bg-white dark:bg-[#1F1C18] p-1.5 rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24]">C: {cvUploadedMeal.nutrition.carbs}g</div>
+                                <div className="bg-white dark:bg-[#1F1C18] p-1.5 rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24]">F: {cvUploadedMeal.nutrition.fat}g</div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-1 text-center">
+                              <span className="text-xl block">📸</span>
+                              <span className="text-xs text-charcoal-light dark:text-gray-400 font-bold block">Select a meal preset above to simulate a vision scan</span>
+                            </div>
+                          )}
                         </div>
                       </div>
+
+                    </div>
+
+                    {/* Right Pane (col-span-7): Isolated Active Itinerary Menus & Live Clinical Warning Alerts */}
+                    <div className="lg:col-span-7 space-y-6">
+
+                      {/* Card 3: Dynamic Menu Isolation per Restaurant Stop */}
+                      <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-5 shadow-sm">
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
+                          <div>
+                            <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0 flex items-center gap-2">
+                              <span>🍽️</span> Active Itinerary Menus &amp; Portion Builder
+                            </h3>
+                            <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">
+                              {isSolo
+                                ? `Select dish portions for your trip (${restaurantStops.length} stops)`
+                                : `Assign portions per person or to the shared table (${groupMembers.length} diners, ${restaurantStops.length} stops)`
+                              }
+                            </span>
+                          </div>
+
+                          {activeTripMetrics.totalDishesCount > 0 && (
+                            <button
+                              type="button"
+                              onClick={handleClearAllDishSelections}
+                              className="text-[10px] font-bold text-terracotta dark:text-orange-400 hover:underline cursor-pointer"
+                            >
+                              Reset All Portions
+                            </button>
+                          )}
+                        </div>
+
+                        {restaurantStops.length === 0 ? (
+                          <div className="p-8 text-center bg-[#FAF8F5] dark:bg-[#161412] rounded-2xl border border-dashed border-[#E9E5DE] dark:border-[#2E2A24] space-y-3">
+                            <span className="text-3xl block">🍲</span>
+                            <div className="space-y-1 max-w-md mx-auto">
+                              <h4 className="text-sm font-black text-charcoal dark:text-white m-0">No restaurant stops in your active trip</h4>
+                              <p className="text-xs text-charcoal-light dark:text-gray-400 m-0 leading-relaxed">
+                                Add Kapampangan restaurants from the Explore Feed or Trip Planner to customize your meal portions and view isolated nutritional metrics.
+                              </p>
+                            </div>
+                            <div className="pt-2 flex flex-wrap justify-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setActiveView('homepage')}
+                                className="px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                              >
+                                Browse Restaurant Feed
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDashboardTab('planner')}
+                                className="px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                              >
+                                Go to Trip Planner
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-5">
+                            {restaurantStops.map((res, stopIdx) => {
+                              const stopId = res.id;
+                              const stopBreakdown = activeTripMetrics.perStopBreakdown.find(b => b.stopId === stopId);
+
+                              return (
+                                <div
+                                  key={res.id}
+                                  className="bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl p-4 space-y-3.5 shadow-2xs"
+                                >
+                                  {/* Restaurant Header */}
+                                  <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 dark:border-[#2E2A24] pb-2.5">
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                      <span className="w-6 h-6 rounded-full bg-terracotta text-white font-black text-[10px] flex items-center justify-center shrink-0">
+                                        {stopIdx + 1}
+                                      </span>
+                                      <div className="min-w-0">
+                                        <h4 className="text-xs font-black text-charcoal dark:text-white m-0 truncate">
+                                          {res.name}
+                                        </h4>
+                                        <span className="text-[10px] text-terracotta dark:text-orange-400 font-bold block">
+                                          📍 {res.municipality} • {res.priceTier || '$$'}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <div className="text-right shrink-0">
+                                      <span className="text-[9px] font-bold text-charcoal-light dark:text-gray-400 block uppercase">
+                                        Stop Total
+                                      </span>
+                                      <strong className="text-xs font-black text-[#2C5E3B] dark:text-emerald-400">
+                                        {stopBreakdown?.calories || 0} kcal • ₱{stopBreakdown?.cost || 0}
+                                      </strong>
+                                    </div>
+                                  </div>
+
+                                  {/* Menu Items List */}
+                                  <div className="space-y-3">
+                                    {(res.menu || []).map((dish, dIdx) => {
+                                      const isDefaultFirst = dIdx === 0;
+                                      const dishTotalQty = getDishTotalQty(stopId, dish.id, isDefaultFirst);
+                                      const isSelected = dishTotalQty > 0;
+                                      const dishCals = Number(dish.nutrition?.calories) || Number(dish.calories) || 300;
+                                      const dishProt = Number(dish.nutrition?.protein) || Number(dish.protein) || 15;
+                                      const dishCarbs = Number(dish.nutrition?.carbs) || Number(dish.carbs) || 25;
+                                      const dishFat = Number(dish.nutrition?.fat) || Number(dish.fat) || 12;
+
+                                      return (
+                                        <div
+                                          key={dish.id}
+                                          className={`p-3.5 rounded-xl border transition-all space-y-3 ${isSelected
+                                            ? 'bg-white dark:bg-[#1E1B18] border-emerald-500/40 dark:border-emerald-500/50 shadow-xs'
+                                            : 'bg-white/60 dark:bg-[#181614] border-[#E9E5DE] dark:border-[#282420] opacity-85 hover:opacity-100'
+                                            }`}
+                                        >
+                                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                                            {/* Dish Info */}
+                                            <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                                              {dish.image && (
+                                                <img
+                                                  src={dish.image}
+                                                  alt={dish.name}
+                                                  className="w-12 h-12 rounded-lg object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0"
+                                                />
+                                              )}
+                                              <div className="min-w-0">
+                                                <div className="flex items-center gap-1.5">
+                                                  <strong className="text-xs font-black text-charcoal dark:text-white truncate">
+                                                    {dish.name}
+                                                  </strong>
+                                                  <span className="text-xs font-extrabold text-terracotta dark:text-orange-400 shrink-0">
+                                                    ₱{dish.price}
+                                                  </span>
+                                                  {dishTotalQty > 0 && (
+                                                    <span className="text-[9px] font-black bg-terracotta/10 text-terracotta dark:text-orange-300 px-1.5 py-0.2 rounded-md">
+                                                      {dishTotalQty} total
+                                                    </span>
+                                                  )}
+                                                </div>
+
+                                                <p className="text-[10px] text-charcoal-light dark:text-gray-400 m-0 truncate mt-0.5">
+                                                  {dish.ingredients || 'Authentic Kapampangan heirloom ingredients'}
+                                                </p>
+
+                                                {/* Nutrition Badges */}
+                                                <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                                  <span className="text-[9px] font-black bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 px-1.5 py-0.2 rounded">
+                                                    🔥 {dishCals} kcal
+                                                  </span>
+                                                  <span className="text-[9px] font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded">
+                                                    🥩 {dishProt}g P
+                                                  </span>
+                                                  <span className="text-[9px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 px-1.5 py-0.2 rounded">
+                                                    🌾 {dishCarbs}g C
+                                                  </span>
+                                                  <span className="text-[9px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-300 px-1.5 py-0.2 rounded">
+                                                    🧈 {dishFat}g F
+                                                  </span>
+                                                  {dish.healthIndicators && (
+                                                    <span className="text-[9px] font-black bg-purple-500/10 text-purple-700 dark:text-purple-300 px-1.5 py-0.2 rounded">
+                                                      ✨ {dish.healthIndicators}
+                                                    </span>
+                                                  )}
+                                                  {dish.allergens && (
+                                                    <span className="text-[9px] font-bold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded">
+                                                      ⚠️ {dish.allergens}
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            </div>
+
+                                            {/* Quantity Stepper in Solo Mode */}
+                                            {isSolo && (
+                                              <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                                                <div className="flex items-center border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] p-0.5 shadow-2xs">
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => handleSetDishQuantity(stopId, dish.id, 'solo', Math.max(0, getDishQtyFor(stopId, dish.id, 'solo', isDefaultFirst) - 1))}
+                                                    className="w-7 h-7 rounded-lg bg-white dark:bg-[#201D1A] hover:bg-[#E9E5DE] dark:hover:bg-[#2A2622] text-charcoal dark:text-white font-black text-xs flex items-center justify-center cursor-pointer transition-colors border border-[#E9E5DE] dark:border-[#2E2A24]"
+                                                    title="Decrease serving"
+                                                  >
+                                                    -
+                                                  </button>
+                                                  <span className="w-8 text-center text-xs font-black text-charcoal dark:text-white">
+                                                    {getDishQtyFor(stopId, dish.id, 'solo', isDefaultFirst)}
+                                                  </span>
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => handleSetDishQuantity(stopId, dish.id, 'solo', getDishQtyFor(stopId, dish.id, 'solo', isDefaultFirst) + 1)}
+                                                    className="w-7 h-7 rounded-lg bg-terracotta hover:bg-terracotta-dark text-white font-black text-xs flex items-center justify-center cursor-pointer transition-colors shadow-2xs"
+                                                    title="Add serving"
+                                                  >
+                                                    +
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
+
+                                          {/* Multi-Customer Allocation Row (Group Mode) */}
+                                          {!isSolo && (
+                                            <div className="pt-2.5 border-t border-[#E9E5DE]/80 dark:border-[#2E2A24] space-y-2">
+                                              <div className="flex items-center justify-between text-[10px] font-bold text-charcoal-light dark:text-gray-400 uppercase tracking-wider">
+                                                <span>Portion Allocation for Diners:</span>
+                                                <span className="text-terracotta font-black">
+                                                  Subtotal: ₱{dishTotalQty * dish.price} ({dishTotalQty * dishCals} kcal)
+                                                </span>
+                                              </div>
+
+                                              <div className="flex flex-wrap items-center gap-2">
+                                                {/* Per Member Stepper Chips */}
+                                                {groupMembers.map((m, mIdx) => {
+                                                  const mQty = getDishQtyFor(stopId, dish.id, m.id, isDefaultFirst && mIdx === 0);
+                                                  return (
+                                                    <div
+                                                      key={m.id}
+                                                      className={`flex items-center gap-1.5 px-2 py-1 rounded-xl border text-[11px] transition-all ${mQty > 0
+                                                        ? 'bg-amber-500/10 border-amber-400 text-charcoal dark:text-white font-black'
+                                                        : 'bg-[#FAF8F5] dark:bg-[#161412] border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal-light dark:text-gray-400'
+                                                        }`}
+                                                    >
+                                                      <span className="truncate max-w-[80px]" title={m.name}>
+                                                        P{mIdx + 1} ({m.name}):
+                                                      </span>
+                                                      <div className="flex items-center gap-1">
+                                                        <button
+                                                          type="button"
+                                                          onClick={() => handleSetDishQuantity(stopId, dish.id, m.id, Math.max(0, mQty - 1))}
+                                                          className="w-5 h-5 rounded bg-white dark:bg-[#201D1A] hover:bg-[#E9E5DE] text-charcoal dark:text-white flex items-center justify-center font-black text-xs cursor-pointer border border-[#E9E5DE] dark:border-[#2E2A24]"
+                                                        >
+                                                          -
+                                                        </button>
+                                                        <span className="w-4 text-center font-black">{mQty}</span>
+                                                        <button
+                                                          type="button"
+                                                          onClick={() => handleSetDishQuantity(stopId, dish.id, m.id, mQty + 1)}
+                                                          className="w-5 h-5 rounded bg-terracotta hover:bg-terracotta-dark text-white flex items-center justify-center font-black text-xs cursor-pointer"
+                                                        >
+                                                          +
+                                                        </button>
+                                                      </div>
+                                                    </div>
+                                                  );
+                                                })}
+
+                                                {/* Shared Table Plate Stepper */}
+                                                {(() => {
+                                                  const sharedQty = getDishQtyFor(stopId, dish.id, 'shared', isDefaultFirst);
+                                                  return (
+                                                    <div
+                                                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-[11px] transition-all ${sharedQty > 0
+                                                        ? 'bg-emerald-500/15 border-emerald-500 text-[#2C5E3B] dark:text-emerald-300 font-black'
+                                                        : 'bg-[#FAF8F5] dark:bg-[#161412] border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal-light dark:text-gray-400'
+                                                        }`}
+                                                    >
+                                                      <span>👥 Table Shared:</span>
+                                                      <div className="flex items-center gap-1">
+                                                        <button
+                                                          type="button"
+                                                          onClick={() => handleSetDishQuantity(stopId, dish.id, 'shared', Math.max(0, sharedQty - 1))}
+                                                          className="w-5 h-5 rounded bg-white dark:bg-[#201D1A] hover:bg-[#E9E5DE] text-charcoal dark:text-white flex items-center justify-center font-black text-xs cursor-pointer border border-[#E9E5DE] dark:border-[#2E2A24]"
+                                                        >
+                                                          -
+                                                        </button>
+                                                        <span className="w-4 text-center font-black">{sharedQty}</span>
+                                                        <button
+                                                          type="button"
+                                                          onClick={() => handleSetDishQuantity(stopId, dish.id, 'shared', sharedQty + 1)}
+                                                          className="w-5 h-5 rounded bg-[#2C5E3B] hover:bg-[#20452B] text-white flex items-center justify-center font-black text-xs cursor-pointer"
+                                                        >
+                                                          +
+                                                        </button>
+                                                      </div>
+                                                    </div>
+                                                  );
+                                                })()}
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Card 4: Real-Time Clinical Health & Allergen Warning Matrix */}
+                      <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 shadow-sm">
+                        <div className="flex items-center justify-between border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
+                          <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0 flex items-center gap-1.5">
+                            <AlertTriangle className="h-4 w-4 text-terracotta" /> Clinical Health Alerts &amp; Allergen Registry
+                          </h3>
+                          <span className="text-[10px] font-black uppercase text-terracotta bg-terracotta/10 dark:bg-terracotta/20 px-2 py-0.5 rounded-full border border-terracotta/20">
+                            Live Audit
+                          </span>
+                        </div>
+
+                        <div className="space-y-3">
+                          {/* Purines Alert */}
+                          {activeTripMetrics.clinicalFlags.hasPurines && (
+                            <div className="p-3.5 bg-amber-500/10 border border-amber-500/25 rounded-xl space-y-1">
+                              <h4 className="text-xs font-black text-amber-900 dark:text-amber-300 flex items-center gap-1.5 m-0">
+                                ⚠️ High Purine &amp; Uric Acid Warning (Gout Risk)
+                              </h4>
+                              <p className="text-[11px] text-amber-800 dark:text-amber-200/90 leading-relaxed m-0">
+                                Contains pork mask, cheeks, or liver (*Sisig / Bopis*). Diners with elevated uric acid or gout conditions should moderate portions and drink plenty of water.
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Sodium / Bagoong Alert */}
+                          {activeTripMetrics.clinicalFlags.hasBagoong && (
+                            <div className="p-3.5 bg-terracotta/10 border border-terracotta/25 rounded-xl space-y-1">
+                              <h4 className="text-xs font-black text-terracotta dark:text-orange-400 flex items-center gap-1.5 m-0">
+                                🦐 Fermented Shrimp Paste (*Bagoong Alamang*) Detected
+                              </h4>
+                              <p className="text-[11px] text-charcoal dark:text-gray-300 leading-relaxed m-0">
+                                High in sodium and shellfish allergens. Often paired with *Kare-Kare* and *Buro*. Hypertension-conscious diners should request reduced bagoong condiments.
+                              </p>
+                            </div>
+                          )}
+
+                          {/* High Lipids Alert */}
+                          {activeTripMetrics.clinicalFlags.hasHighLipids && (
+                            <div className="p-3.5 bg-rose-500/10 border border-rose-500/25 rounded-xl space-y-1">
+                              <h4 className="text-xs font-black text-rose-900 dark:text-rose-300 flex items-center gap-1.5 m-0">
+                                🧈 High Lipid &amp; Saturated Fat Concentration
+                              </h4>
+                              <p className="text-[11px] text-rose-800 dark:text-rose-200/90 leading-relaxed m-0">
+                                Fat concentration is heavy due to deep-fried pork knuckle (*Crispy Pata* / *Lechon Kawali*). Balance with high-fiber dishes like *Pako Salad*.
+                              </p>
+                            </div>
+                          )}
+
+                          {/* High Sugar Alert */}
+                          {activeTripMetrics.clinicalFlags.hasHighSugar && (
+                            <div className="p-3.5 bg-purple-500/10 border border-purple-500/25 rounded-xl space-y-1">
+                              <h4 className="text-xs font-black text-purple-900 dark:text-purple-300 flex items-center gap-1.5 m-0">
+                                🍧 Glycemic Sugar Content (Carabao Milk / Native Sweets)
+                              </h4>
+                              <p className="text-[11px] text-purple-800 dark:text-purple-200/90 leading-relaxed m-0">
+                                Sweet desserts (*Halo-Halo with Pastillas / Tibok-Tibok*) are high in simple carbs. Diabetic-conscious diners are advised to split dessert portions.
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Active Allergens Matrix */}
+                          <div className="pt-2 border-t border-[#E9E5DE] dark:border-[#2E2A24] space-y-2">
+                            <span className="text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider block">
+                              Detected Allergens Across Selected Dishes:
+                            </span>
+                            {activeTripMetrics.activeAllergens.length === 0 ? (
+                              <span className="text-xs text-bananaleaf dark:text-emerald-400 font-bold block">
+                                ✓ No common allergens flagged in current selection.
+                              </span>
+                            ) : (
+                              <div className="flex flex-wrap gap-1.5">
+                                {activeTripMetrics.activeAllergens.map((allergen, aIdx) => (
+                                  <span
+                                    key={aIdx}
+                                    className="px-2.5 py-1 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800/40 rounded-lg text-[10px] font-black flex items-center gap-1"
+                                  >
+                                    <span>⚠️</span>
+                                    <span>{allergen}</span>
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
                     </div>
                   </div>
                 </div>
-
-              </div>
-            )}
+              );
+            })()}
 
             {/* TAB CONTENT: 3. Interactive Travel Kanyamanan-Kasaup */}
             {/* TAB CONTENT: 3. Interactive Travel Kanyamanan-Kasaup */}
