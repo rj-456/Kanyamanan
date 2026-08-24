@@ -2932,6 +2932,11 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       ]);
 
       const asksRecommendation = /\b(?:recommend|recommendation|suggest|suggestion|best|top|good|great|ideal|worth|must try|where should|what should|which should|pick|choose)\b/i.test(raw);
+      const asksRestaurantRecommendation =
+        /\b(?:recommend|suggest|pick|choose|best|top|good|great|ideal|worth|must try)\b.*\b(?:restaurant|restaurants|kainan|eatery|eateries|place|places|where to eat)\b/i.test(raw) ||
+        /\b(?:where|saan)\s+(?:should|can|could|do)?\s*(?:i|we|kami|tayo)?\s*(?:eat|dine|kumain|mangan)\b/i.test(raw) ||
+        /\b(?:good|best|cheap|cheapest|affordable|nearby|closest)\s+(?:restaurant|restaurants|place to eat|places to eat|kainan)\b/i.test(raw) ||
+        /\b(?:which one|which restaurant|the cheaper one|the cheapest one|cheapest one)\b/i.test(raw);
       const asksComparison = /\b(?:compare|comparison|versus|vs\.?|difference|better|best between|which is better)\b/i.test(raw);
       const asksDirections = /\b(?:how do i get|how to get|directions?|navigate|navigation|drive to|go to|route to|way to)\b/i.test(raw);
       const asksTravelTime = /\b(?:how long|travel time|drive time|eta|minutes away|far is|distance)\b/i.test(raw);
@@ -2958,6 +2963,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         asksFamilyOrGroup,
         groupSize: groupSize ? Math.max(1, Math.min(100, groupSize)) : null,
         asksRecommendation,
+        asksRestaurantRecommendation,
         asksComparison,
         asksDirections,
         asksTravelTime,
@@ -3117,31 +3123,451 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       return score;
     };
 
-    const restaurantScore = (r) => {
-      let score = overlapScore(getRestaurantText(r), queryTokens) * 2;
+    // ------------------------------------------------------------
+    // Restaurant recommendation engine (Batch 1)
+    // ------------------------------------------------------------
+    // Recommendations are ranked by actual fit to the user's request:
+    // location/branch, menu relevance, registered menu prices, dietary
+    // constraints, group budget, nearby distance, and conversational scope.
+    // We deliberately do NOT invent ratings or popularity scores.
 
-      if (localConstraints.location && getRestaurantMunicipalities(r)
-        .some(m => normalize(m) === normalize(localConstraints.location))) {
-        score += 35;
-      }
+    const recommendationStopWords = new Set([
+      'recommend', 'recommendation', 'suggest', 'suggestion', 'best', 'top',
+      'good', 'great', 'ideal', 'worth', 'must', 'try', 'where', 'what',
+      'which', 'should', 'could', 'would', 'please', 'restaurant',
+      'restaurants', 'place', 'places', 'eat', 'eating', 'dine', 'dining',
+      'food', 'foods', 'meal', 'meals', 'kainan', 'pagkain', 'somewhere',
+      'something', 'near', 'nearby', 'around', 'here', 'there', 'with',
+      'under', 'below', 'budget', 'cheap', 'cheapest', 'affordable',
+      'price', 'cost', 'peso', 'pesos', 'php', 'people', 'person', 'persons',
+      'pax', 'family', 'group', 'friends', 'today', 'tonight', 'tomorrow',
+      'breakfast', 'lunch', 'dinner', 'city', 'pampanga',
+      // Common Filipino / Taglish recommendation phrasing.
+      'saan', 'kami', 'tayo', 'ako', 'namin', 'natin', 'dito', 'doon',
+      'kumain', 'kakain', 'mangan', 'maganda', 'okay', 'pwede', 'pede',
+      'gusto', 'mura', 'murang', 'hanap', 'ahanap', 'bigay', 'para',
+      'saakin', 'amin', 'atin', 'keni'
+    ]);
 
-      if (localConstraints.asksBudget && r?.priceTier === '$') score += 10;
-      if (localConstraints.asksRecommendation) score += 3;
-      if (localConstraints.asksRestaurantList) score += 4;
-      if (localConstraints.asksHours && (r?.operatingHours || safeArray(r?.branches).some(b => b?.operatingHours))) score += 5;
+    const municipalityTokens = new Set(
+      safeArray(MUNICIPALITIES)
+        .flatMap(m => normalize(m).split(/\s+/))
+        .filter(Boolean)
+    );
 
-      if (localConstraints.asksCurrentLocation) {
-        const distance = calculateHaversineKm(
-          toNumber(userLocation?.lat, 15.03),
-          toNumber(userLocation?.lng, 120.68),
-          toNumber(getBranchLat(r), 15.03),
-          toNumber(getBranchLng(r), 120.68)
-        );
-        if (Number.isFinite(distance)) score += Math.max(0, 20 - distance);
-      }
+    // Only treat a word as a food preference when it is represented in the
+    // registered menu catalog. This prevents conversational words from
+    // becoming accidental hard dish filters.
+    const registeredMenuVocabulary = new Set(
+      allDishes.flatMap(({ dish }) =>
+        normalize([
+          dish?.name,
+          dish?.ingredients,
+          dish?.healthIndicators,
+          dish?.allergens
+        ].filter(Boolean).join(' '))
+          .split(/\s+/)
+          .filter(token => token.length >= 3)
+      )
+    );
 
-      return score;
+    const recommendationFoodTokens = unique(
+      normalize(userMsg)
+        .split(/\s+/)
+        .filter(token =>
+          token.length >= 3 &&
+          !recommendationStopWords.has(token) &&
+          !municipalityTokens.has(token) &&
+          !/^\d+(?:\.\d+)?$/.test(token) &&
+          registeredMenuVocabulary.has(token)
+        )
+    );
+
+    const requestedGroupSize =
+      toNumber(localConstraints.groupSize, null) ||
+      toNumber(numPersons, 1) ||
+      1;
+
+    // When the user explicitly gives both a total budget and a group size,
+    // use a rough per-person allowance for restaurant affordability ranking.
+    // This is a ranking aid only, not a claim that one dish equals a full meal.
+    const recommendationPerPersonBudget =
+      localConstraints.budgetLimit !== null && requestedGroupSize > 1
+        ? localConstraints.budgetLimit / requestedGroupSize
+        : localConstraints.budgetLimit;
+
+    const recentMentionedRestaurantIds = new Set(
+      allRestaurants
+        .filter(r => recentBotText && normalize(recentBotText).includes(normalize(r?.name)))
+        .map(r => r?.id || normalize(r?.name))
+        .filter(Boolean)
+    );
+
+    const restaurantRecommendationFollowUp =
+      recentMentionedRestaurantIds.size > 0 &&
+      /\b(?:which one|which restaurant|that one|this one|the first|first one|the second|second one|the third|third one|cheaper|cheapest|closest|best one|what about|how about|among those|among them|of those|of them)\b/i.test(userMsg);
+
+    const restaurantMenuStats = (r) => {
+      const menu = safeArray(r?.menu);
+      const safeMenu = menu.filter(d => {
+        const dishText = getDishText(r, d);
+
+        if (localConstraints.exclusionTerms.some(term =>
+          dishText.includes(normalize(term))
+        )) return false;
+
+        if (localConstraints.asksPurine &&
+          /organ|liver|kidney|intestine|offal|anchov|sardine|mackerel|shellfish|shrimp|prawn|mussel|clam|squid|dried fish|bagoong|meat extract|broth|gravy/i.test(dishText)) {
+          return false;
+        }
+
+        const kcal = toNumber(d?.nutrition?.calories, null);
+        if (localConstraints.calorieLimit !== null &&
+          kcal !== null &&
+          kcal > localConstraints.calorieLimit) {
+          return false;
+        }
+
+        return true;
+      });
+
+      const menuForBudget = safeMenu.filter(d => {
+        if (recommendationPerPersonBudget === null) return true;
+        const price = toNumber(d?.price, null);
+        return price !== null && price <= recommendationPerPersonBudget;
+      });
+
+      const relevantMenuBase = recommendationPerPersonBudget !== null
+        ? menuForBudget
+        : safeMenu;
+
+      const scoredDishes = relevantMenuBase
+        .map(d => ({
+          dish: d,
+          tokenScore: recommendationFoodTokens.length
+            ? overlapScore(getDishText(r, d), recommendationFoodTokens)
+            : 0,
+          price: toNumber(d?.price, null),
+          calories: toNumber(d?.nutrition?.calories, null)
+        }))
+        .sort((a, b) => {
+          if (b.tokenScore !== a.tokenScore) return b.tokenScore - a.tokenScore;
+          const ap = a.price === null ? Infinity : a.price;
+          const bp = b.price === null ? Infinity : b.price;
+          return ap - bp;
+        });
+
+      const matchingDishes = recommendationFoodTokens.length
+        ? scoredDishes.filter(x => x.tokenScore > 0)
+        : scoredDishes;
+
+      const knownPrices = safeMenu
+        .map(d => toNumber(d?.price, null))
+        .filter(Number.isFinite)
+        .sort((a, b) => a - b);
+
+      const minPrice = knownPrices.length ? knownPrices[0] : null;
+      const medianPrice = knownPrices.length
+        ? knownPrices[Math.floor((knownPrices.length - 1) / 2)]
+        : null;
+
+      return {
+        menu,
+        safeMenu,
+        menuForBudget,
+        matchingDishes,
+        minPrice,
+        medianPrice,
+        hasKnownPrices: knownPrices.length > 0
+      };
     };
+
+    const parseClockMinutes = (value) => {
+      const raw = String(value || '').trim();
+      const match = raw.match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?/i);
+      if (!match) return null;
+
+      let hour = Number(match[1]);
+      const minute = Number(match[2] || 0);
+      const meridiem = String(match[3] || '').toUpperCase();
+
+      if (!Number.isFinite(hour) || !Number.isFinite(minute) || minute > 59) return null;
+
+      if (meridiem) {
+        if (hour < 1 || hour > 12) return null;
+        if (meridiem === 'AM' && hour === 12) hour = 0;
+        if (meridiem === 'PM' && hour !== 12) hour += 12;
+      } else if (hour > 23) {
+        return null;
+      }
+
+      return hour * 60 + minute;
+    };
+
+    const registeredHoursFit = (r) => {
+      const targetLocation = localConstraints.location;
+      const primaryHours = !targetLocation ||
+        normalize(r?.municipality) === normalize(targetLocation)
+          ? [r?.operatingHours]
+          : [];
+
+      const branchHours = safeArray(r?.branches)
+        .filter(b => {
+          if (typeof b !== 'object') return false;
+          if (!targetLocation) return true;
+          return normalize(b?.municipality) === normalize(targetLocation);
+        })
+        .map(b => b?.operatingHours || b?.hours);
+
+      const hoursCandidates = unique([
+        ...primaryHours,
+        ...branchHours
+      ].filter(Boolean));
+
+      let targetMinutes = null;
+      let targetLabel = '';
+
+      if (localConstraints.asksBreakfast) {
+        targetMinutes = 8 * 60;
+        targetLabel = 'breakfast';
+      } else if (localConstraints.asksLunch) {
+        targetMinutes = 12 * 60 + 30;
+        targetLabel = 'lunch';
+      } else if (localConstraints.asksDinner) {
+        targetMinutes = 18 * 60 + 30;
+        targetLabel = 'dinner';
+      } else if (localConstraints.asksHours && localConstraints.asksToday) {
+        const now = new Date();
+        targetMinutes = now.getHours() * 60 + now.getMinutes();
+        targetLabel = 'the current time';
+      }
+
+      if (targetMinutes === null || !hoursCandidates.length) {
+        return { known: false, fits: null, label: targetLabel };
+      }
+
+      let anyParseable = false;
+
+      for (const hours of hoursCandidates) {
+        const parts = String(hours).split(/\s*(?:-|–|—|to)\s*/i);
+        if (parts.length < 2) continue;
+
+        const open = parseClockMinutes(parts[0]);
+        const close = parseClockMinutes(parts[1]);
+        if (open === null || close === null) continue;
+
+        anyParseable = true;
+
+        const fits = close >= open
+          ? targetMinutes >= open && targetMinutes <= close
+          : targetMinutes >= open || targetMinutes <= close;
+
+        if (fits) return { known: true, fits: true, label: targetLabel };
+      }
+
+      return anyParseable
+        ? { known: true, fits: false, label: targetLabel }
+        : { known: false, fits: null, label: targetLabel };
+    };
+
+    const nearestRegisteredBranchInfo = (r) => {
+      if (!localConstraints.asksCurrentLocation) {
+        return { distanceKm: null, branchName: '', municipality: '' };
+      }
+
+      const originLat = toNumber(userLocation?.lat, 15.03);
+      const originLng = toNumber(userLocation?.lng, 120.68);
+      const candidates = [];
+
+      const primaryLat = toNumber(r?.lat, null);
+      const primaryLng = toNumber(r?.lng, null);
+      if (primaryLat !== null && primaryLng !== null) {
+        candidates.push({
+          lat: primaryLat,
+          lng: primaryLng,
+          branchName: r?.municipality || 'Main location',
+          municipality: r?.municipality || ''
+        });
+      }
+
+      safeArray(r?.branches).forEach(b => {
+        if (!b) return;
+        const municipality = typeof b === 'string' ? b : b?.municipality;
+        const lat = typeof b === 'object'
+          ? toNumber(b?.lat, toNumber(getBranchLat(r, municipality), null))
+          : toNumber(getBranchLat(r, municipality), null);
+        const lng = typeof b === 'object'
+          ? toNumber(b?.lng, toNumber(getBranchLng(r, municipality), null))
+          : toNumber(getBranchLng(r, municipality), null);
+
+        if (lat === null || lng === null) return;
+
+        candidates.push({
+          lat,
+          lng,
+          branchName: typeof b === 'object'
+            ? (b?.branchName || municipality || 'Branch')
+            : municipality,
+          municipality: municipality || ''
+        });
+      });
+
+      if (!candidates.length) {
+        const fallbackLat = toNumber(getBranchLat(r, localConstraints.location || null), null);
+        const fallbackLng = toNumber(getBranchLng(r, localConstraints.location || null), null);
+        if (fallbackLat !== null && fallbackLng !== null) {
+          candidates.push({
+            lat: fallbackLat,
+            lng: fallbackLng,
+            branchName: localConstraints.location || r?.municipality || 'Registered location',
+            municipality: localConstraints.location || r?.municipality || ''
+          });
+        }
+      }
+
+      const ranked = candidates
+        .map(c => ({
+          ...c,
+          distanceKm: calculateHaversineKm(originLat, originLng, c.lat, c.lng)
+        }))
+        .filter(c => Number.isFinite(c.distanceKm))
+        .sort((a, b) => a.distanceKm - b.distanceKm);
+
+      return ranked[0] || { distanceKm: null, branchName: '', municipality: '' };
+    };
+
+    const restaurantRecommendationProfile = (r) => {
+      const stats = restaurantMenuStats(r);
+      const restaurantId = r?.id || normalize(r?.name);
+      const municipalities = getRestaurantMunicipalities(r);
+      const explicitLocationMatch =
+        !localConstraints.location ||
+        municipalities.some(m => normalize(m) === normalize(localConstraints.location));
+
+      const mentionedRecently = recentMentionedRestaurantIds.has(restaurantId);
+      const hoursFit = registeredHoursFit(r);
+
+      const nearestBranch = nearestRegisteredBranchInfo(r);
+      const distanceKm = nearestBranch.distanceKm;
+
+      const bestDishMatch = stats.matchingDishes[0]?.tokenScore || 0;
+      const hasRequestedDishMatch =
+        !recommendationFoodTokens.length || bestDishMatch > 0;
+
+      const hasBudgetFit =
+        recommendationPerPersonBudget === null ||
+        stats.menuForBudget.length > 0 ||
+        (!stats.menu.length && !stats.hasKnownPrices);
+
+      const hasDietaryFit =
+        !localConstraints.exclusionTerms.length ||
+        stats.safeMenu.length > 0 ||
+        stats.menu.length === 0;
+
+      const hasCalorieFit =
+        localConstraints.calorieLimit === null ||
+        stats.safeMenu.some(d => {
+          const kcal = toNumber(d?.nutrition?.calories, null);
+          return kcal !== null && kcal <= localConstraints.calorieLimit;
+        }) ||
+        stats.menu.length === 0;
+
+      let score = 5;
+
+      // Explicit municipality is a hard geographic preference.
+      if (localConstraints.location) score += explicitLocationMatch ? 90 : -500;
+
+      // A follow-up like "which one is cheapest?" should primarily compare
+      // restaurants from the previous recommendation instead of restarting.
+      if (restaurantRecommendationFollowUp) {
+        score += mentionedRecently ? 75 : -30;
+      }
+
+      // Specific food/dish intent gets the strongest content relevance weight.
+      if (recommendationFoodTokens.length) {
+        score += bestDishMatch * 18;
+        score += Math.min(24, stats.matchingDishes.length * 6);
+        if (!hasRequestedDishMatch && stats.menu.length) score -= 45;
+      }
+
+      // Real menu-price fit is more useful than the coarse "$" tier.
+      if (recommendationPerPersonBudget !== null) {
+        if (stats.menuForBudget.length) {
+          score += 35;
+          const cheapest = stats.menuForBudget
+            .map(d => toNumber(d?.price, null))
+            .filter(Number.isFinite)
+            .sort((a, b) => a - b)[0];
+          if (Number.isFinite(cheapest) && recommendationPerPersonBudget > 0) {
+            score += Math.max(0, 12 - (cheapest / recommendationPerPersonBudget) * 8);
+          }
+        } else if (stats.hasKnownPrices) {
+          score -= 120;
+        } else {
+          score -= 8; // Unknown, not automatically disqualified.
+        }
+      } else if (localConstraints.asksBudget) {
+        if (r?.priceTier === '$') score += 10;
+        else if (r?.priceTier === '$$') score += 4;
+      }
+
+      if (localConstraints.exclusionTerms.length) {
+        score += stats.safeMenu.length ? 20 : (stats.menu.length ? -120 : -5);
+      }
+
+      if (localConstraints.calorieLimit !== null) {
+        score += hasCalorieFit && stats.menu.length ? 18 : (stats.menu.length ? -100 : -5);
+      }
+
+      if (localConstraints.asksPurine) {
+        score += stats.safeMenu.length ? 15 : (stats.menu.length ? -100 : -5);
+      }
+
+      // Nearby recommendations should visibly favor closer branches.
+      if (localConstraints.asksCurrentLocation && Number.isFinite(distanceKm)) {
+        score += Math.max(0, 40 - distanceKm * 3);
+      }
+
+      // For broad "where should I eat?" prompts, favor restaurants with enough
+      // registered information to make a useful recommendation.
+      if (!recommendationFoodTokens.length) {
+        score += Math.min(12, stats.menu.length * 1.5);
+        if (r?.description) score += 4;
+        if (r?.operatingHours || safeArray(r?.branches).some(b => b?.operatingHours)) score += 3;
+        if (safeArray(r?.branches).length) score += 2;
+      }
+
+      if (localConstraints.asksFamilyOrGroup) {
+        score += Math.min(8, stats.safeMenu.length);
+      }
+
+      if (hoursFit.known) {
+        score += hoursFit.fits ? 16 : -35;
+      }
+
+      return {
+        restaurant: r,
+        score,
+        stats,
+        distanceKm,
+        nearestBranch,
+        hoursFit,
+        explicitLocationMatch,
+        mentionedRecently,
+        hasRequestedDishMatch,
+        hasBudgetFit,
+        hasDietaryFit,
+        hasCalorieFit
+      };
+    };
+
+    const restaurantProfiles = allRestaurants.map(restaurantRecommendationProfile);
+    const restaurantProfileMap = new Map(
+      restaurantProfiles.map(profile => [profile.restaurant, profile])
+    );
+
+    const restaurantScore = (r) =>
+      restaurantProfileMap.get(r)?.score ?? 0;
 
     const dishScore = ({ restaurant: r, dish: d }) => {
       let score = overlapScore(getDishText(r, d), queryTokens) * 3;
@@ -3211,6 +3637,95 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     const relevantRestaurants = rankedRestaurants
       .filter(r => restaurantScore(r) > 0)
       .slice(0, 16);
+
+    const recommendationCandidateProfiles = restaurantProfiles
+      .filter(p => {
+        // Explicit city/location should not leak recommendations from elsewhere.
+        if (localConstraints.location && !p.explicitLocationMatch) return false;
+
+        // For follow-up ranking, stay inside the restaurants just discussed when
+        // we can identify them from the preceding Kasaup response.
+        if (restaurantRecommendationFollowUp && !p.mentionedRecently) {
+          return false;
+        }
+
+        // If the user gave a hard budget and prices are known, require at least
+        // one registered menu option inside the rough per-person allowance.
+        if (recommendationPerPersonBudget !== null &&
+            p.stats.hasKnownPrices &&
+            !p.stats.menuForBudget.length) {
+          return false;
+        }
+
+        if (localConstraints.exclusionTerms.length &&
+            p.stats.menu.length &&
+            !p.stats.safeMenu.length) {
+          return false;
+        }
+
+        if (localConstraints.calorieLimit !== null &&
+            p.stats.menu.length &&
+            !p.hasCalorieFit) {
+          return false;
+        }
+
+        const hasExplicitMealTime =
+          localConstraints.asksBreakfast ||
+          localConstraints.asksLunch ||
+          localConstraints.asksDinner ||
+          (localConstraints.asksHours && localConstraints.asksToday);
+
+        if (hasExplicitMealTime && p.hoursFit.known && !p.hoursFit.fits) {
+          return false;
+        }
+
+        // A specific food request like "sisig" should prefer restaurants whose
+        // registered menu actually contains a matching item.
+        if (recommendationFoodTokens.length &&
+            p.stats.menu.length &&
+            !p.hasRequestedDishMatch) {
+          return false;
+        }
+
+        return p.score > -50;
+      })
+      .sort((a, b) => {
+        // If affordability is the user's ranking question, actual registered
+        // menu prices outrank generic profile completeness.
+        if (/\b(?:cheap|cheaper|cheapest|affordable|lowest price|mura|murang)\b/i.test(userMsg)) {
+          const ap = a.stats.minPrice ?? Infinity;
+          const bp = b.stats.minPrice ?? Infinity;
+          if (ap !== bp) return ap - bp;
+        }
+
+        // For "near me" requests, distance should be the primary ordering.
+        if (localConstraints.asksCurrentLocation) {
+          const ad = Number.isFinite(a.distanceKm) ? a.distanceKm : Infinity;
+          const bd = Number.isFinite(b.distanceKm) ? b.distanceKm : Infinity;
+          if (ad !== bd) return ad - bd;
+        }
+
+        if (b.score !== a.score) return b.score - a.score;
+
+        return normalize(a.restaurant?.name).localeCompare(normalize(b.restaurant?.name));
+      });
+
+    const recommendationSingleChoice =
+      /\b(?:which one|which restaurant|cheapest one|the cheapest one|closest one|best restaurant|best place|pick one|choose one)\b/i.test(userMsg) ||
+      /\b(?:recommend|suggest)\s+(?:me\s+)?(?:a|one)\s+(?:restaurant|place|kainan)\b/i.test(userMsg);
+
+    const recommendationResultLimit = Math.max(
+      1,
+      Math.min(
+        6,
+        toNumber(localConstraints.stopCount, null) ||
+        (recommendationSingleChoice ? 1 : 3)
+      )
+    );
+
+    const recommendedRestaurants = recommendationCandidateProfiles
+      .slice(0, recommendationResultLimit)
+      .map(p => p.restaurant);
 
     const relevantDishes = rankedDishes
       .filter(item => dishScore(item) > 0)
@@ -3364,7 +3879,8 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     if (localConstraints.asksAllergen) plan.allergenConcern = true;
     if (localConstraints.asksHours) plan.hoursConcern = true;
     if (localConstraints.asksComparison) plan.primaryIntent = 'comparison';
-    if (localConstraints.asksRecommendation && !['planning', 'current_trip', 'comparison'].includes(plan.primaryIntent)) {
+    if ((localConstraints.asksRecommendation || localConstraints.asksRestaurantRecommendation) &&
+        !['planning', 'current_trip', 'comparison'].includes(plan.primaryIntent)) {
       plan.primaryIntent = 'recommendation';
     }
     if (localConstraints.asksAction) plan.primaryIntent = 'action';
@@ -3714,7 +4230,9 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         calorieCeiling: toNumber(plan.calorieCeiling),
         budgetCeiling: toNumber(plan.budgetCeiling)
       },
-      restaurants: relevantRestaurants.map(compactRestaurant),
+      restaurants: (localConstraints.asksRestaurantRecommendation
+        ? recommendedRestaurants
+        : relevantRestaurants).map(compactRestaurant),
       attractions: relevantAttractions.map(compactAttraction)
     };
 
@@ -3740,6 +4258,7 @@ QUALITY BAR:
 - For general travel knowledge not contained in the database, still answer helpfully and label it as general guidance when appropriate.
 - Never claim real-time availability, reservations, live traffic, current opening status, or exact current travel conditions unless the supplied live context supports the claim.
 - If a recommendation was generated from Kanyamanan's registered data, identify the restaurant/dish and use its recorded values.
+- For restaurant recommendations, rank by the user's actual fit (location/branch, requested food, registered menu prices, dietary constraints, group budget, and nearby distance). Never imply public ratings or popularity unless such data is actually supplied.
 - If a requested combination is impossible, clearly say which constraint caused the problem and show the closest valid options.
 - For calculations, show the arithmetic.
 - For comparisons, compare the requested entities rather than giving unrelated recommendations.
@@ -3869,6 +4388,146 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             ? `\n\n✅ **Other registered dishes with no current flagged ingredient pattern**\n${alternatives.map(x => `• **${x.dish.name}** — ${x.restaurant.name} — ${toNumber(x.dish?.nutrition?.calories)} kcal`).join('\n')}`
             : '') +
           `\n\n💡 **Tip:** For a strict uric-acid/gout diet, use your clinician or dietitian's advice as the final authority.`;
+      }
+
+      if (
+        !localConstraints.asksRoute &&
+        !localConstraints.asksComparison &&
+        !['planning', 'comparison'].includes(plan.primaryIntent) &&
+        (
+          localConstraints.asksRestaurantRecommendation ||
+          (
+            plan.primaryIntent === 'recommendation' &&
+            !localConstraints.asksDishList &&
+            !localConstraints.asksAttraction
+          )
+        )
+      ) {
+        const profiles = recommendationCandidateProfiles.slice(0, recommendationResultLimit);
+
+        if (!profiles.length) {
+          const locationText = localConstraints.location
+            ? ` in **${localConstraints.location}**`
+            : '';
+          const budgetText = localConstraints.budgetLimit !== null
+            ? ` within the stated **₱${localConstraints.budgetLimit}** budget`
+            : '';
+          const foodText = recommendationFoodTokens.length
+            ? ` matching **${recommendationFoodTokens.join(', ')}**`
+            : '';
+
+          return `🍴 **Restaurant recommendations**\n\n` +
+            `I couldn't find a registered restaurant${locationText}${foodText}${budgetText} that satisfies all of those constraints at once.\n\n` +
+            `I won't invent a match. Try relaxing one constraint, or ask me for the closest registered options.`;
+        }
+
+        const formatRecommendation = (profile, index) => {
+          const r = profile.restaurant;
+          const stats = profile.stats;
+          const reasons = [];
+
+          if (localConstraints.location && profile.explicitLocationMatch) {
+            reasons.push(`has a registered branch/location in ${localConstraints.location}`);
+          }
+
+          if (localConstraints.asksCurrentLocation && Number.isFinite(profile.distanceKm)) {
+            const branchLabel = profile.nearestBranch?.branchName
+              ? ` (${profile.nearestBranch.branchName})`
+              : '';
+            reasons.push(`nearest registered branch${branchLabel} is about ${profile.distanceKm.toFixed(1)} km away`);
+          }
+
+          if (profile.hoursFit?.known && profile.hoursFit?.fits && profile.hoursFit?.label) {
+            reasons.push(`registered hours cover ${profile.hoursFit.label}`);
+          }
+
+          if (recommendationFoodTokens.length && stats.matchingDishes.length) {
+            const dishNames = stats.matchingDishes
+              .slice(0, 2)
+              .map(x => x.dish?.name)
+              .filter(Boolean);
+            if (dishNames.length) reasons.push(`menu match: ${dishNames.join(' / ')}`);
+          }
+
+          if (recommendationPerPersonBudget !== null && stats.menuForBudget.length) {
+            const cheapestBudgetDish = stats.menuForBudget
+              .map(d => ({ name: d?.name, price: toNumber(d?.price, null) }))
+              .filter(x => Number.isFinite(x.price))
+              .sort((a, b) => a.price - b.price)[0];
+
+            if (cheapestBudgetDish) {
+              reasons.push(
+                requestedGroupSize > 1
+                  ? `registered options from ₱${cheapestBudgetDish.price}, within the rough ₱${Math.floor(recommendationPerPersonBudget)}/person allowance`
+                  : `registered options from ₱${cheapestBudgetDish.price}, within your budget`
+              );
+            }
+          } else if (stats.minPrice !== null && localConstraints.asksBudget) {
+            reasons.push(`registered menu prices start around ₱${stats.minPrice}`);
+          }
+
+          if (localConstraints.exclusionTerms.length && stats.safeMenu.length) {
+            reasons.push(`${stats.safeMenu.length} registered menu option(s) remain after your exclusion filter`);
+          }
+
+          if (localConstraints.calorieLimit !== null && profile.hasCalorieFit) {
+            reasons.push(`has registered options within ${localConstraints.calorieLimit} kcal`);
+          }
+
+          if (!reasons.length) {
+            if (stats.menu.length) reasons.push(`${stats.menu.length} registered menu item(s) available for comparison`);
+            if (r?.operatingHours) reasons.push('operating hours are registered');
+            if (!reasons.length) reasons.push('matches the available Kanyamanan restaurant data');
+          }
+
+          const featured = stats.matchingDishes[0] || (
+            stats.safeMenu.length
+              ? {
+                  dish: stats.safeMenu
+                    .slice()
+                    .sort((a, b) =>
+                      toNumber(a?.price, Infinity) - toNumber(b?.price, Infinity)
+                    )[0]
+                }
+              : null
+          );
+
+          const featuredDish = featured?.dish;
+          const featuredLine = featuredDish
+            ? `\n   **Try:** ${featuredDish.name}` +
+              (featuredDish.price != null ? ` • ₱${toNumber(featuredDish.price)}` : '') +
+              (featuredDish.nutrition?.calories != null
+                ? ` • ${toNumber(featuredDish.nutrition.calories)} kcal`
+                : '')
+            : '';
+
+          const municipalityLabel =
+            localConstraints.location ||
+            getRestaurantMunicipalities(r).join(', ') ||
+            r?.municipality ||
+            'Pampanga';
+
+          return `${index + 1}. **${r.name}** — ${municipalityLabel}\n` +
+            `   **Why it fits:** ${reasons.slice(0, 3).join('; ')}.` +
+            featuredLine;
+        };
+
+        const scopeNote =
+          restaurantRecommendationFollowUp
+            ? `\n\n_I ranked the restaurants from the previous Kasaup recommendation._`
+            : '';
+
+        const rankingNote =
+          `\n\n_Ranking is based on Kanyamanan's registered location, menu, price, and constraint fit—not invented ratings or live popularity._`;
+
+        const heading = profiles.length === 1
+          ? `🍴 **Kasaup's top restaurant match**`
+          : `🍴 **Kasaup's restaurant recommendations**`;
+
+        return `${heading}\n\n` +
+          profiles.map(formatRecommendation).join('\n\n') +
+          scopeNote +
+          rankingNote;
       }
 
       if (plan.primaryIntent === 'planning' || localConstraints.asksRoute || plan.stopCount) {
