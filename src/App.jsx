@@ -2949,8 +2949,25 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
       const asksRestaurantList = /\b(?:restaurant|restaurants|kainan|where to eat|food places|places to eat|eatery|eateries|dining|dine)\b/i.test(raw);
       const asksDishList = /\b(?:dish|dishes|menu|food|foods|meal|meals|what to eat|options|specialty|specialties|ulam|pagkain)\b/i.test(raw);
-      const asksAttraction = /\b(?:attraction|tourist|heritage|landmark|museum|church|cathedral|park|historical|destination|scenic|nature|cultural|sightseeing)\b/i.test(raw);
+      const asksAttraction = /\b(?:attraction|attractions|tourist spot|tourist spots|tourist destination|tourist destinations|heritage|landmark|landmarks|museum|museums|church|churches|cathedral|cathedrals|parish|shrine|park|parks|historical|historic|destination|destinations|scenic|nature|cultural|sightseeing|pasyalan|puntahan)\b/i.test(raw);
       const asksHours = /\b(?:open now|open today|opening|operating hours|hours|close|closing|when.*open|when.*close|what time)\b/i.test(raw);
+
+      const asksAttractionRecommendation =
+        /\b(?:recommend|suggest|pick|choose|best|top|good|great|ideal|worth|must see|must-see|must visit|must-visit)\b.*\b(?:attraction|attractions|tourist spot|tourist spots|destination|destinations|landmark|landmarks|place|places|pasyalan|puntahan)\b/i.test(raw) ||
+        /\b(?:where|what)\s+(?:can|should|could|do)?\s*(?:i|we|kami|tayo)?\s*(?:visit|see|explore|go|pasyal|puntahan)\b/i.test(raw) ||
+        /\b(?:things to do|places to visit|places to see|saan.*(?:pasyal|puntahan)|ano.*(?:pasyalan|puntahan))\b/i.test(raw);
+
+      const asksAttractionDetails =
+        /\b(?:tell me about|more about|details? about|information about|info about|describe|description of|what is|what's|what makes|known for|famous for|story of)\b/i.test(raw) &&
+        (asksAttraction || /\b(?:this|that|it|first|second|third|one)\b/i.test(raw));
+
+      const asksAttractionNearby =
+        /\b(?:nearest|closest|near me|nearby|around me|around here|closest to me|nearest to me)\b/i.test(raw) &&
+        (asksAttraction || asksActivities || /\b(?:place|places|spot|spots|destination|destinations)\b/i.test(raw));
+
+      const asksAttractionPrice =
+        /\b(?:free|entrance fee|admission|ticket|tickets|cheap|cheapest|affordable|price|cost|fee|fees|bayad|libre|mura)\b/i.test(raw) &&
+        (asksAttraction || asksActivities || /\b(?:place|places|spot|spots|destination|destinations)\b/i.test(raw));
 
       return {
         location,
@@ -2982,10 +2999,14 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         asksBudget: /budget|cheap|cheapest|affordable|price|cost|spend|peso|php|inexpensive|expensive/i.test(q),
         asksRoute:
           /\b(?:plan|route|itinerary|trail|food crawl|food tour|tour|schedule|stops?|day trip|day tour|one day|1 day|half day|morning|afternoon|evening)\b/i.test(q) ||
-          asksRecommendation && asksGeneralTravel,
+          (asksRecommendation && asksGeneralTravel && !asksAttraction && !asksActivities),
         asksRestaurantList,
         asksDishList,
         asksAttraction,
+        asksAttractionRecommendation,
+        asksAttractionDetails,
+        asksAttractionNearby,
+        asksAttractionPrice,
         asksHours,
         asksCurrentTrip: /current trip|my trip|my itinerary|active trip|current route|this trip|our trip|the trip i made/i.test(q),
         asksGreeting: /^(?:hi|hello|hey|kumusta|mabuhay|mekeni|good morning|good afternoon|good evening)\b/i.test(q)
@@ -3613,14 +3634,282 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       return score;
     };
 
-    const attractionScore = (a) => {
-      let score = overlapScore(getAttractionText(a), queryTokens) * 2;
-      if (localConstraints.location &&
-        normalize(a?.municipality) === normalize(localConstraints.location)) {
-        score += 30;
+    // ============================================================
+    // TOURIST ATTRACTION RECOMMENDATION / QUESTION ENGINE
+    // ============================================================
+    // Attractions are ranked independently from restaurants. This keeps
+    // "recommend tourist spots" from turning into a food itinerary and makes
+    // category, municipality, nearby, hours, price metadata, and follow-ups
+    // first-class signals.
+    const lastBotAttractionText = safeArray(updatedMessages)
+      .slice()
+      .reverse()
+      .find(m => m?.sender === 'bot')?.text || '';
+
+    const normalizedLastBotAttractionText = normalize(lastBotAttractionText);
+    const recentAttractionOrder = allAttractions
+      .map(a => {
+        const name = normalize(a?.name);
+        return {
+          attraction: a,
+          position: name ? normalizedLastBotAttractionText.indexOf(name) : -1
+        };
+      })
+      .filter(x => x.position >= 0)
+      .sort((a, b) => a.position - b.position)
+      .map(x => x.attraction);
+
+    const attractionFollowUpLanguage =
+      /\b(?:it|that|this|those|these|there|first|second|third|fourth|last|next|same|one|ones|which one|what about|how about|tell me more|more about|closest|nearest|cheapest|best of those|best one)\b/i.test(userMsg);
+
+    const quickRegisteredAttractionMention = allAttractions.some(a => {
+      const name = normalize(a?.name);
+      return name.length >= 4 && normalize(userMsg).includes(name);
+    });
+
+    const attractionQuestion =
+      localConstraints.asksAttraction ||
+      localConstraints.asksActivities ||
+      localConstraints.asksAttractionRecommendation ||
+      localConstraints.asksAttractionDetails ||
+      localConstraints.asksAttractionNearby ||
+      localConstraints.asksAttractionPrice ||
+      quickRegisteredAttractionMention ||
+      (attractionFollowUpLanguage && recentAttractionOrder.length > 0);
+
+    const explicitAttractionPlanningRequest =
+      attractionQuestion &&
+      /\b(?:plan|itinerary|route|schedule|day trip|day tour|half day|full day|one day|1 day|multi-stop|multiple stops|tour plan)\b/i.test(userMsg);
+
+    const attractionCategorySpecs = [
+      {
+        key: 'heritage',
+        label: 'heritage / historical',
+        requested: /\b(?:heritage|historic|historical|history|ancestral|old town|architecture|architectural)\b/i.test(userMsg),
+        matches: (a) => /\b(?:heritage|historic|historical|ancestral|history|architecture|architectural)\b/i.test(getAttractionText(a))
+      },
+      {
+        key: 'religious',
+        label: 'church / religious heritage',
+        requested: /\b(?:church|churches|cathedral|cathedrals|parish|shrine|religious|faith|pilgrimage)\b/i.test(userMsg),
+        matches: (a) => /\b(?:church|cathedral|parish|shrine|religious|chapel|basilica)\b/i.test(getAttractionText(a))
+      },
+      {
+        key: 'museum',
+        label: 'museum',
+        requested: /\b(?:museum|museums|gallery|galleries|exhibit|exhibits)\b/i.test(userMsg),
+        matches: (a) => /\b(?:museum|gallery|exhibit)\b/i.test(getAttractionText(a))
+      },
+      {
+        key: 'nature',
+        label: 'nature / outdoor',
+        requested: /\b(?:nature|natural|scenic|outdoor|park|parks|eco|ecotourism|mountain|mountains|lake|lakes|river|waterfall|waterfalls|hiking|view|views)\b/i.test(userMsg),
+        matches: (a) => /\b(?:nature|natural|scenic|outdoor|park|eco|ecotourism|mountain|lake|river|waterfall|trail|garden|farm|view)\b/i.test(getAttractionText(a))
+      },
+      {
+        key: 'cultural',
+        label: 'cultural',
+        requested: /\b(?:culture|cultural|arts|art|tradition|traditional|kapampangan culture)\b/i.test(userMsg),
+        matches: (a) => /\b(?:culture|cultural|arts|art|tradition|traditional|kapampangan)\b/i.test(getAttractionText(a))
+      },
+      {
+        key: 'family',
+        label: 'family-oriented',
+        requested: /\b(?:family|families|kids|children|child|family friendly|family-friendly)\b/i.test(userMsg),
+        // Only treat this as a match when the registered attraction text says so.
+        // We do not infer family-friendliness from the attraction type alone.
+        matches: (a) => /\b(?:family|families|kids|children|child|family friendly|family-friendly)\b/i.test(getAttractionText(a))
       }
-      return score;
+    ];
+
+    const requestedAttractionCategories = attractionCategorySpecs.filter(x => x.requested);
+
+    const attractionMatchesRequestedCategories = (a) =>
+      !requestedAttractionCategories.length ||
+      requestedAttractionCategories.some(spec => spec.matches(a));
+
+    const attractionCategoryReasons = (a) =>
+      requestedAttractionCategories
+        .filter(spec => spec.matches(a))
+        .map(spec => spec.label);
+
+    const recentMentionedAttractionIds = new Set(
+      recentAttractionOrder.map(a => a?.id || normalize(a?.name))
+    );
+
+    const attractionRecommendationFollowUp =
+      attractionQuestion &&
+      attractionFollowUpLanguage &&
+      recentAttractionOrder.length > 0;
+
+    const attractionOrdinalIndex = (() => {
+      const q = normalize(userMsg);
+      if (/\b(?:first|1st|number 1|#1)\b/.test(q)) return 0;
+      if (/\b(?:second|2nd|number 2|#2)\b/.test(q)) return 1;
+      if (/\b(?:third|3rd|number 3|#3)\b/.test(q)) return 2;
+      if (/\b(?:fourth|4th|number 4|#4)\b/.test(q)) return 3;
+      if (/\b(?:last)\b/.test(q) && recentAttractionOrder.length) return recentAttractionOrder.length - 1;
+      return null;
+    })();
+
+    const explicitAttractionMentions = allAttractions
+      .map(a => {
+        const name = normalize(a?.name);
+        const q = normalize(userMsg);
+        if (!name) return { attraction: a, score: 0 };
+
+        if (q.includes(name)) return { attraction: a, score: 100 };
+
+        const nameTokens = unique(name.split(/\s+/).filter(t => t.length >= 4));
+        const matched = nameTokens.filter(t => q.includes(t)).length;
+        const ratio = nameTokens.length ? matched / nameTokens.length : 0;
+
+        return {
+          attraction: a,
+          score: ratio >= 0.7 && matched >= 2 ? Math.round(ratio * 70) : 0
+        };
+      })
+      .filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    const attractionDistanceKm = (a) => {
+      if (!(localConstraints.asksCurrentLocation || localConstraints.asksAttractionNearby ||
+            localConstraints.asksTravelTime ||
+            /\b(?:closest|nearest|how far|distance)\b/i.test(userMsg))) {
+        return null;
+      }
+
+      const lat = toNumber(a?.lat, null);
+      const lng = toNumber(a?.lng, null);
+      if (lat === null || lng === null) return null;
+
+      const distance = calculateHaversineKm(
+        toNumber(userLocation?.lat, 15.03),
+        toNumber(userLocation?.lng, 120.68),
+        lat,
+        lng
+      );
+
+      return Number.isFinite(distance) ? distance : null;
     };
+
+    const attractionHoursFit = (a) => {
+      const hours = String(a?.operatingHours || '').trim();
+      if (!hours) return { known: false, fits: null, label: '' };
+
+      let targetMinutes = null;
+      let targetLabel = '';
+
+      if (localConstraints.asksHours && localConstraints.asksToday) {
+        const now = new Date();
+        targetMinutes = now.getHours() * 60 + now.getMinutes();
+        targetLabel = 'the current time';
+      } else if (/\bmorning\b/i.test(userMsg)) {
+        targetMinutes = 9 * 60;
+        targetLabel = 'morning';
+      } else if (/\bafternoon\b/i.test(userMsg)) {
+        targetMinutes = 14 * 60;
+        targetLabel = 'afternoon';
+      } else if (/\bevening\b/i.test(userMsg)) {
+        targetMinutes = 18 * 60;
+        targetLabel = 'evening';
+      }
+
+      if (targetMinutes === null) return { known: false, fits: null, label: targetLabel };
+
+      const parts = hours.split(/\s*(?:-|–|—|to)\s*/i);
+      if (parts.length < 2) return { known: false, fits: null, label: targetLabel };
+
+      const open = parseClockMinutes(parts[0]);
+      const close = parseClockMinutes(parts[1]);
+      if (open === null || close === null) return { known: false, fits: null, label: targetLabel };
+
+      const fits = close >= open
+        ? targetMinutes >= open && targetMinutes <= close
+        : targetMinutes >= open || targetMinutes <= close;
+
+      return { known: true, fits, label: targetLabel };
+    };
+
+    const attractionPriceRank = (a) => {
+      const text = getAttractionText(a);
+      if (/\b(?:free admission|free entrance|admission free|no entrance fee|free entry)\b/i.test(text)) return 0;
+      const tier = String(a?.priceTier || '').trim();
+      if (tier === '$') return 1;
+      if (tier === '$$') return 2;
+      if (tier === '$$$') return 3;
+      return 9;
+    };
+
+    const attractionProfile = (a) => {
+      const id = a?.id || normalize(a?.name);
+      const municipalityMatch =
+        !localConstraints.location ||
+        normalize(a?.municipality) === normalize(localConstraints.location);
+
+      const categoryMatch = attractionMatchesRequestedCategories(a);
+      const categoryReasons = attractionCategoryReasons(a);
+      const recentlyMentioned = recentMentionedAttractionIds.has(id);
+      const explicitMention = explicitAttractionMentions.some(x => x.attraction === a);
+      const distanceKm = attractionDistanceKm(a);
+      const hoursFit = attractionHoursFit(a);
+      const priceRank = attractionPriceRank(a);
+
+      let score = overlapScore(getAttractionText(a), queryTokens) * 4 + 5;
+
+      if (localConstraints.location) score += municipalityMatch ? 100 : -500;
+
+      if (requestedAttractionCategories.length) {
+        score += categoryMatch ? 55 : -180;
+      }
+
+      if (explicitMention) score += 220;
+
+      if (attractionRecommendationFollowUp) {
+        score += recentlyMentioned ? 90 : -80;
+      }
+
+      if (Number.isFinite(distanceKm)) {
+        score += Math.max(0, 45 - distanceKm * 3);
+      }
+
+      if (localConstraints.asksAttractionPrice) {
+        score += priceRank <= 3 ? Math.max(0, 24 - priceRank * 6) : -4;
+      }
+
+      if (localConstraints.asksHours && localConstraints.asksToday && hoursFit.known) {
+        score += hoursFit.fits ? 24 : -80;
+      }
+
+      // Broad recommendations favor records with enough registered information
+      // to explain why they are useful, without pretending completeness is a rating.
+      if (a?.description) score += 8;
+      if (a?.details) score += 5;
+      if (a?.address) score += 4;
+      if (a?.operatingHours) score += 3;
+      if (a?.type || a?.category) score += 4;
+
+      return {
+        attraction: a,
+        score,
+        municipalityMatch,
+        categoryMatch,
+        categoryReasons,
+        recentlyMentioned,
+        explicitMention,
+        distanceKm,
+        hoursFit,
+        priceRank
+      };
+    };
+
+    const attractionProfiles = allAttractions.map(attractionProfile);
+    const attractionProfileMap = new Map(
+      attractionProfiles.map(profile => [profile.attraction, profile])
+    );
+
+    const attractionScore = (a) =>
+      attractionProfileMap.get(a)?.score ?? 0;
 
     const rankedRestaurants = allRestaurants
       .slice()
@@ -3731,9 +4020,64 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       .filter(item => dishScore(item) > 0)
       .slice(0, 22);
 
-    const relevantAttractions = rankedAttractions
-      .filter(a => attractionScore(a) > 0)
-      .slice(0, 14);
+    const attractionCandidateProfiles = attractionProfiles
+      .filter(profile => {
+        if (localConstraints.location && !profile.municipalityMatch) return false;
+
+        if (requestedAttractionCategories.length && !profile.categoryMatch) return false;
+
+        if (attractionRecommendationFollowUp && !profile.recentlyMentioned) return false;
+
+        if (localConstraints.asksHours &&
+            localConstraints.asksToday &&
+            profile.hoursFit.known &&
+            !profile.hoursFit.fits) {
+          return false;
+        }
+
+        return profile.score > -50;
+      })
+      .sort((a, b) => {
+        if (localConstraints.asksAttractionNearby ||
+            localConstraints.asksCurrentLocation ||
+            /\b(?:closest|nearest)\b/i.test(userMsg)) {
+          const ad = Number.isFinite(a.distanceKm) ? a.distanceKm : Infinity;
+          const bd = Number.isFinite(b.distanceKm) ? b.distanceKm : Infinity;
+          if (ad !== bd) return ad - bd;
+        }
+
+        if (localConstraints.asksAttractionPrice ||
+            /\b(?:free|cheap|cheapest|affordable|libre|mura)\b/i.test(userMsg)) {
+          if (a.priceRank !== b.priceRank) return a.priceRank - b.priceRank;
+        }
+
+        if (localConstraints.asksHours && localConstraints.asksToday) {
+          if (a.hoursFit.fits !== b.hoursFit.fits) return a.hoursFit.fits ? -1 : 1;
+        }
+
+        if (b.score !== a.score) return b.score - a.score;
+        return normalize(a.attraction?.name).localeCompare(normalize(b.attraction?.name));
+      });
+
+    const attractionSingleChoice =
+      /\b(?:which one|closest one|nearest one|best one|top one|pick one|choose one|recommend one|suggest one)\b/i.test(userMsg) ||
+      /\b(?:recommend|suggest)\s+(?:me\s+)?(?:a|one)\s+(?:tourist spot|attraction|destination|place|pasyalan)\b/i.test(userMsg);
+
+    const attractionResultLimit = Math.max(
+      1,
+      Math.min(
+        6,
+        toNumber(localConstraints.stopCount, null) ||
+        (attractionSingleChoice ? 1 : 4)
+      )
+    );
+
+    const recommendedAttractionProfiles = attractionCandidateProfiles
+      .slice(0, attractionResultLimit);
+
+    const relevantAttractions = attractionCandidateProfiles
+      .slice(0, 14)
+      .map(profile => profile.attraction);
 
     // ------------------------------
     // 4) Gemini access
@@ -3819,8 +4163,10 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           ? 'current_trip'
           : localConstraints.asksRoute
             ? 'planning'
-            : localConstraints.asksRestaurantList || localConstraints.asksDishList
-              ? 'lookup'
+            : localConstraints.asksAttraction || localConstraints.asksActivities
+              ? 'attraction'
+              : localConstraints.asksRestaurantList || localConstraints.asksDishList
+                ? 'lookup'
               : localConstraints.asksCalories || localConstraints.asksBudget || localConstraints.asksPurine
                 ? 'health'
                 : 'other',
@@ -4530,6 +4876,190 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           rankingNote;
       }
 
+      if (
+        attractionQuestion &&
+        !explicitAttractionPlanningRequest &&
+        !localConstraints.asksComparison &&
+        plan.primaryIntent !== 'comparison'
+      ) {
+        const selectedByOrdinal =
+          attractionOrdinalIndex !== null
+            ? recentAttractionOrder[attractionOrdinalIndex] || null
+            : null;
+
+        const selectedExplicit =
+          explicitAttractionMentions[0]?.attraction || null;
+
+        const pronounDetailFollowUp =
+          attractionRecommendationFollowUp &&
+          /\b(?:tell me more|more about|what about|how about|details?|info|information|what is it|what's it|that one|this one)\b/i.test(userMsg);
+
+        const selectedFromPronoun =
+          pronounDetailFollowUp && recentAttractionOrder.length === 1
+            ? recentAttractionOrder[0]
+            : null;
+
+        const selectedAttraction =
+          selectedByOrdinal ||
+          selectedExplicit ||
+          selectedFromPronoun;
+
+        const asksSpecificDetail =
+          Boolean(selectedAttraction) &&
+          (
+            localConstraints.asksAttractionDetails ||
+            localConstraints.asksHours ||
+            localConstraints.asksTravelTime ||
+            localConstraints.asksAttractionNearby ||
+            localConstraints.asksAttractionPrice ||
+            attractionOrdinalIndex !== null ||
+            pronounDetailFollowUp ||
+            /\b(?:address|located|location|where is|type|category|known for|famous for|entrance fee|admission|ticket|tickets|price|cost|fee|fees|free|libre|bayad)\b/i.test(userMsg)
+          );
+
+        const formatAttractionDetail = (a) => {
+          const profile = attractionProfileMap.get(a) || attractionProfile(a);
+          const type = a?.type || a?.category || '';
+          const municipality = a?.municipality || 'Pampanga';
+          const lines = [];
+
+          if (type) lines.push(`• **Type:** ${type}`);
+          lines.push(`• **Area:** ${municipality}`);
+          if (a?.address) lines.push(`• **Address:** ${a.address}`);
+          if (a?.operatingHours) lines.push(`• **Registered hours:** ${a.operatingHours}`);
+          if (a?.priceTier) lines.push(`• **Registered price level:** ${a.priceTier}`);
+
+          if ((localConstraints.asksCurrentLocation ||
+               localConstraints.asksAttractionNearby ||
+               /\b(?:closest|nearest|how far|distance)\b/i.test(userMsg)) &&
+              Number.isFinite(profile.distanceKm)) {
+            lines.push(`• **Approx. straight-line distance from your Kanyamanan start point:** ${profile.distanceKm.toFixed(1)} km`);
+          }
+
+          if (localConstraints.asksHours && localConstraints.asksToday) {
+            if (profile.hoursFit.known && profile.hoursFit.fits) {
+              lines.push(`• **Current-time check:** the registered hours cover the current time.`);
+            } else if (profile.hoursFit.known && !profile.hoursFit.fits) {
+              lines.push(`• **Current-time check:** the registered hours do not cover the current time.`);
+            } else {
+              lines.push(`• **Current-time check:** I can't reliably determine open/closed status from the registered hours.`);
+            }
+          }
+
+          const description = String(a?.description || '').trim();
+          const details = String(a?.details || '').trim();
+          const narrativeParts = unique([description, details].filter(Boolean));
+
+          const narrative = narrativeParts.length
+            ? `\n\n${narrativeParts.map(x => x.slice(0, 420)).join('\n\n')}`
+            : `\n\nNo additional description is currently registered for this attraction.`;
+
+          return `🗺️ **${a?.name || 'Registered attraction'}**\n\n${lines.join('\n')}${narrative}\n\n_This answer uses the attraction information currently registered in Kanyamanan._`;
+        };
+
+        if (asksSpecificDetail) {
+          return formatAttractionDetail(selectedAttraction);
+        }
+
+        const profiles = recommendedAttractionProfiles;
+
+        if (!profiles.length) {
+          const locationText = localConstraints.location
+            ? ` in **${localConstraints.location}**`
+            : '';
+          const categoryText = requestedAttractionCategories.length
+            ? ` matching **${requestedAttractionCategories.map(x => x.label).join(', ')}**`
+            : '';
+          const openText = localConstraints.asksHours && localConstraints.asksToday
+            ? ` whose registered hours cover the current time`
+            : '';
+
+          return `🗺️ **Tourist attraction results**\n\n` +
+            `I couldn't find a registered Kanyamanan attraction${locationText}${categoryText}${openText} that matches all of those conditions.\n\n` +
+            `I won't substitute an unrelated place or invent a local attraction.`;
+        }
+
+        const formatAttractionRecommendation = (profile, index) => {
+          const a = profile.attraction;
+          const reasons = [];
+
+          if (localConstraints.location && profile.municipalityMatch) {
+            reasons.push(`registered in ${localConstraints.location}`);
+          }
+
+          if (profile.categoryReasons.length) {
+            reasons.push(`matches your ${profile.categoryReasons.join(' + ')} preference`);
+          }
+
+          if ((localConstraints.asksAttractionNearby ||
+               localConstraints.asksCurrentLocation ||
+               /\b(?:closest|nearest)\b/i.test(userMsg)) &&
+              Number.isFinite(profile.distanceKm)) {
+            reasons.push(`about ${profile.distanceKm.toFixed(1)} km from your Kanyamanan start point`);
+          }
+
+          if (localConstraints.asksHours && localConstraints.asksToday) {
+            if (profile.hoursFit.known && profile.hoursFit.fits) {
+              reasons.push(`registered hours cover the current time`);
+            } else if (!profile.hoursFit.known) {
+              reasons.push(`current open/closed status cannot be verified from the registered hours`);
+            }
+          }
+
+          if (localConstraints.asksAttractionPrice) {
+            const attractionText = getAttractionText(a);
+            if (/\b(?:free admission|free entrance|admission free|no entrance fee|free entry)\b/i.test(attractionText)) {
+              reasons.push(`registered information indicates free entry`);
+            } else if (a?.priceTier) {
+              reasons.push(`registered price level: ${a.priceTier}`);
+            } else {
+              reasons.push(`no entrance-price data is registered`);
+            }
+          }
+
+          if (!reasons.length) {
+            const type = a?.type || a?.category;
+            if (type) reasons.push(`registered as ${type}`);
+            if (a?.municipality) reasons.push(`located in ${a.municipality}`);
+            if (!reasons.length) reasons.push(`matches the available Kanyamanan attraction data`);
+          }
+
+          const typeLine = a?.type || a?.category
+            ? ` • ${a?.type || a?.category}`
+            : '';
+
+          const description = String(a?.description || '').trim();
+          const descriptionLine = description
+            ? `\n   ${description.slice(0, 180)}`
+            : '';
+
+          const hoursLine = localConstraints.asksHours && a?.operatingHours
+            ? `\n   🕐 ${a.operatingHours}`
+            : '';
+
+          return `${index + 1}. **${a?.name || 'Registered attraction'}** — ${a?.municipality || 'Pampanga'}${typeLine}\n` +
+            `   **Why it fits:** ${reasons.slice(0, 3).join('; ')}.` +
+            descriptionLine +
+            hoursLine;
+        };
+
+        const followUpNote = attractionRecommendationFollowUp
+          ? `\n\n_I ranked only the attractions from the previous Kasaup attraction response._`
+          : '';
+
+        const rankingNote =
+          `\n\n_Ranking uses Kanyamanan's registered municipality, attraction type/description, hours, price metadata, and distance when relevant—not invented ratings or live popularity._`;
+
+        const heading = profiles.length === 1
+          ? `🗺️ **Kasaup's top attraction match**`
+          : `🗺️ **Kasaup's tourist attraction recommendations**`;
+
+        return `${heading}\n\n` +
+          profiles.map(formatAttractionRecommendation).join('\n\n') +
+          followUpNote +
+          rankingNote;
+      }
+
       if (plan.primaryIntent === 'planning' || localConstraints.asksRoute || plan.stopCount) {
         const summary = selectedPlanStops.length
           ? selectedPlanStops.map((x, i) => {
@@ -4656,8 +5186,15 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       // attractions, trip status and itinerary planning immediately. Gemini is
       // only used when the user explicitly needs deeper explanation/comparison
       // or when the local engine genuinely has no useful grounded answer.
+      const hasGroundedAttractionAnswer =
+        attractionQuestion &&
+        !explicitAttractionPlanningRequest &&
+        !localConstraints.asksComparison &&
+        !localDraftIsGeneric;
+
       const shouldUseGemini =
         useGeminiForKasaup &&
+        !hasGroundedAttractionAnswer &&
         (explicitAIDepth || localDraftIsGeneric);
 
       let botResponse = localDraft;
