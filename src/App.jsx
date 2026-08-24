@@ -2595,9 +2595,9 @@ function App() {
     if (has(/\b(current trip|my trip|my itinerary|active trip|current route|this trip|our trip)\b/i)) {
       addIntent('current_trip', 0.96);
     }
-    if (has(/\b(add|include|put|save|keep|remove|delete|take out|drop|clear|reset|replace|swap)\b/i) &&
-        has(/\b(itinerary|trip|route|stop|restaurant|place|destination|trail|this|that|it|them)\b/i)) {
-      addIntent('trip_action', 0.92);
+    if (has(/\b(add|include|put|insert|save|keep|remove|delete|take out|drop|clear|reset|empty|replace|change|swap|move|reorder|shift|reverse|update)\b/i) &&
+        has(/\b(itinerary|trip|route|stop|stops|restaurant|place|destination|trail|plan|this|that|it|them|those|these|first|second|third|fourth|last|next|previous)\b/i)) {
+      addIntent('trip_action', 0.96);
     }
 
     // Location
@@ -2766,7 +2766,16 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     const safeArray = (value) => Array.isArray(value) ? value : [];
 
     const toNumber = (value, fallback = null) => {
-      const n = Number(String(value ?? '').replace(/,/g, ''));
+      const raw = String(value ?? '').trim();
+      if (!raw) return fallback;
+
+      const cleaned = raw
+        .replace(/,/g, '')
+        .replace(/[^0-9.+-]/g, '');
+
+      if (!cleaned || !/[0-9]/.test(cleaned)) return fallback;
+
+      const n = Number(cleaned);
       return Number.isFinite(n) ? n : fallback;
     };
 
@@ -2880,8 +2889,8 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       };
 
       const stopCount = extractFirstNumber(raw, [
-        /\b(?:plan|make|create|build|design|give|suggest|recommend)\s+(?:me\s+)?(?:a\s+)?(\d+)\s+(?:stop|stops|restaurant|restaurants|places|destinations|spots|sites)\b/i,
-        /\b(\d+)\s+(?:stop|stops|restaurant|restaurants|places|destinations|spots|sites)\b/i
+        /\b(?:plan|make|create|build|design|give|suggest|recommend|show|list|find|pick)\s+(?:me\s+)?(?:a\s+)?(\d+)\s+(?:(?:best|top|good|great|heritage|historical|historic|cultural|nature|scenic|family(?:-friendly)?|religious|church|museum|tourist)\s+){0,4}(?:stop|stops|restaurant|restaurants|attraction|attractions|tourist\s+spot|tourist\s+spots|places|destinations|spots|sites|landmarks?)\b/i,
+        /\b(\d+)\s+(?:(?:best|top|good|great|heritage|historical|historic|cultural|nature|scenic|family(?:-friendly)?|religious|church|museum|tourist)\s+){0,4}(?:stop|stops|restaurant|restaurants|attraction|attractions|tourist\s+spot|tourist\s+spots|places|destinations|spots|sites|landmarks?)\b/i
       ]);
 
       const calorieLimit = extractFirstNumber(raw, [
@@ -2944,8 +2953,11 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       const asksGeneralTravel = /\b(?:tourist|tourism|excursion|excursionist|day trip|day tour|trip|travel|vacation|holiday|explore|exploring|pamasyal|mamasial|mamasyal)\b/i.test(raw);
 
       const asksAction =
-        /\b(?:add|put|include|remove|delete|take out|drop|clear|reset|save|keep|replace|change|swap)\b/i.test(raw) &&
-        /\b(?:itinerary|trip|route|stop|restaurant|place|destination|trail)\b/i.test(raw);
+        /\b(?:add|put|include|insert|remove|delete|take out|drop|clear|reset|empty|save|keep|replace|change|swap|move|reorder|shift|reverse|update)\b/i.test(raw) &&
+        (
+          /\b(?:itinerary|trip|route|stop|stops|restaurant|place|destination|trail|plan)\b/i.test(raw) ||
+          /\b(?:it|this|that|them|those|these|first|second|third|fourth|last|next|previous)\b/i.test(raw)
+        );
 
       const asksRestaurantList = /\b(?:restaurant|restaurants|kainan|where to eat|food places|places to eat|eatery|eateries|dining|dine)\b/i.test(raw);
       const asksDishList = /\b(?:dish|dishes|menu|food|foods|meal|meals|what to eat|options|specialty|specialties|ulam|pagkain)\b/i.test(raw);
@@ -4240,9 +4252,18 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       plan.currentTripConcern = true;
       plan.primaryIntent = 'current_trip';
     }
-    if (localConstraints.asksRoute || /food trail|food crawl|food tour|day trip|one day|1 day/i.test(userMsg)) {
+    if ((localConstraints.asksRoute || /food trail|food crawl|food tour|day trip|one day|1 day/i.test(userMsg)) &&
+        !localConstraints.asksAction) {
       plan.primaryIntent = 'planning';
       plan.answerMode = 'itinerary';
+    }
+
+    // Explicit itinerary mutations always outrank generic "itinerary/route"
+    // planning words. This keeps commands such as "add it to my itinerary"
+    // on the instant local action path.
+    if (localConstraints.asksAction) {
+      plan.primaryIntent = 'action';
+      plan.answerMode = 'direct';
     }
 
     // ------------------------------
@@ -4300,60 +4321,756 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         }) || null;
     };
 
+    // ------------------------------------------------------------
+    // Itinerary action engine (Batch 3)
+    // ------------------------------------------------------------
+    // The old Gemini planner used to populate plan.actions. Since that planner
+    // was removed for speed, action commands were often left as {type:'none'}.
+    // This local engine resolves itinerary mutations immediately and atomically.
     const actionResults = [];
+    let actionWorkingTrip = safeArray(activeTrip).slice();
+    let actionTripChanged = false;
+    let actionDetected = false;
+    let actionLoadedSavedTrip = false;
 
-    for (const action of safeArray(plan.actions)) {
-      const actionType = action?.type || 'none';
+    const actionQuery = normalize(userMsg);
+    const allTripCatalogEntities = [
+      ...allRestaurants,
+      ...allAttractions
+    ].filter(Boolean);
 
-      if (actionType === 'add_to_itinerary') {
-        const targets = safeArray(action?.targetNames)
-          .map(resolveRestaurant)
-          .filter(Boolean);
+    const entityKey = (item) =>
+      String(item?.id || normalize(item?.name || ''));
 
-        const attractionTargets = safeArray(action?.targetNames)
-          .map(resolveAttraction)
-          .filter(Boolean);
+    const sameEntity = (a, b) =>
+      Boolean(a && b) &&
+      (
+        (a?.id && b?.id && String(a.id) === String(b.id)) ||
+        normalize(a?.name) === normalize(b?.name)
+      );
 
-        const combinedTargets = unique([
-          ...targets.map(x => x.id),
-          ...attractionTargets.map(x => x.id)
-        ]).map(id =>
-          [...targets, ...attractionTargets].find(item => item.id === id)
-        );
+    // Preserve the exact order in which registered entities appeared in the
+    // most recent Kasaup answer. This powers "add the second one", "add them",
+    // "remove it", etc. without another AI call.
+    const recentActionReferenceEntities = (() => {
+      const botMessages = safeArray(updatedMessages)
+        .slice(0, -1)
+        .filter(m => m?.sender === 'bot')
+        .slice(-6)
+        .reverse();
 
-        if (combinedTargets.length) {
-          combinedTargets.forEach(target => handleAddToItinerary(target));
-          actionResults.push(
-            `Added ${combinedTargets.length} stop(s) to the active itinerary.`
-          );
-        } else {
-          actionResults.push('No exact registered destination was found to add.');
+      for (const message of botMessages) {
+        const messageText = normalize(message?.text || '');
+        if (!messageText) continue;
+
+        const found = allTripCatalogEntities
+          .map(item => {
+            const name = normalize(item?.name || '');
+            return {
+              item,
+              position: name ? messageText.indexOf(name) : -1
+            };
+          })
+          .filter(x => x.position >= 0)
+          .sort((a, b) => a.position - b.position);
+
+        const ordered = [];
+        const seen = new Set();
+        found.forEach(({ item }) => {
+          const key = entityKey(item);
+          if (!key || seen.has(key)) return;
+          seen.add(key);
+          ordered.push(item);
+        });
+
+        if (ordered.length) return ordered;
+      }
+
+      return [];
+    })();
+
+    const findCatalogMentions = (rawText) => {
+      const q = normalize(rawText);
+      if (!q) return [];
+
+      const exact = allTripCatalogEntities
+        .map(item => {
+          const name = normalize(item?.name || '');
+          return {
+            item,
+            name,
+            position: name ? q.indexOf(name) : -1
+          };
+        })
+        .filter(x => x.position >= 0)
+        .sort((a, b) => a.position - b.position);
+
+      if (exact.length) {
+        const seen = new Set();
+        return exact.filter(x => {
+          const key = entityKey(x.item);
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      }
+
+      // Conservative fuzzy matching for shortened registered names such as
+      // "Aling Lucing" -> "Aling Lucing's Sisig". Require at least two strong
+      // shared name tokens to avoid mutating the itinerary on weak guesses.
+      const ignored = new Set([
+        'add', 'include', 'put', 'insert', 'place', 'remove', 'delete', 'drop',
+        'take', 'out', 'replace', 'change', 'swap', 'move', 'reorder', 'shift',
+        'save', 'keep', 'clear', 'reset', 'empty', 'trip', 'itinerary', 'route',
+        'plan', 'stop', 'stops', 'my', 'the', 'this', 'that', 'it', 'them',
+        'those', 'these', 'to', 'from', 'into', 'in', 'on', 'with', 'for',
+        'before', 'after', 'first', 'second', 'third', 'fourth', 'last', 'next'
+      ]);
+
+      const qTokens = unique(
+        q.split(/\s+/)
+          .map(t => t.replace(/\.$/, ''))
+          .filter(t => t.length >= 4 && !ignored.has(t))
+      );
+
+      if (qTokens.length < 2) return [];
+
+      return allTripCatalogEntities
+        .map(item => {
+          const name = normalize(item?.name || '');
+          const nameTokens = unique(name.split(/\s+/).filter(t => t.length >= 4));
+          const shared = nameTokens.filter(t =>
+            qTokens.some(qt => t === qt || t.startsWith(qt) || qt.startsWith(t))
+          ).length;
+          const ratio = nameTokens.length ? shared / nameTokens.length : 0;
+          return { item, position: 0, score: shared * 10 + ratio };
+        })
+        .filter(x => x.score >= 20)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+    };
+
+    const findTripMentions = (rawText, trip = actionWorkingTrip) => {
+      const q = normalize(rawText);
+      if (!q) return [];
+
+      return safeArray(trip)
+        .map((stop, index) => {
+          const name = normalize(stop?.name || '');
+          return {
+            item: stop,
+            tripIndex: index,
+            position: name ? q.indexOf(name) : -1
+          };
+        })
+        .filter(x => x.position >= 0)
+        .sort((a, b) => a.position - b.position);
+    };
+
+    const ordinalSpecs = [
+      { index: 0, re: /\b(?:first|1st|number 1|#1)\b/gi },
+      { index: 1, re: /\b(?:second|2nd|number 2|#2)\b/gi },
+      { index: 2, re: /\b(?:third|3rd|number 3|#3)\b/gi },
+      { index: 3, re: /\b(?:fourth|4th|number 4|#4)\b/gi },
+      { index: 4, re: /\b(?:fifth|5th|number 5|#5)\b/gi },
+      { index: 5, re: /\b(?:sixth|6th|number 6|#6)\b/gi },
+      { index: 6, re: /\b(?:seventh|7th|number 7|#7)\b/gi },
+      { index: 7, re: /\b(?:eighth|8th|number 8|#8)\b/gi },
+      { index: 8, re: /\b(?:ninth|9th|number 9|#9)\b/gi },
+      { index: 9, re: /\b(?:tenth|10th|number 10|#10)\b/gi },
+      { index: 10, re: /\b(?:eleventh|11th|number 11|#11)\b/gi },
+      { index: 11, re: /\b(?:twelfth|12th|number 12|#12)\b/gi }
+    ];
+
+    const extractOrdinalIndices = (rawText, length) => {
+      const raw = String(rawText || '');
+      const matches = [];
+
+      ordinalSpecs.forEach(spec => {
+        const re = new RegExp(spec.re.source, 'gi');
+        let match;
+        while ((match = re.exec(raw)) !== null) {
+          if (spec.index < length) {
+            matches.push({ index: spec.index, position: match.index });
+          }
+          if (match.index === re.lastIndex) re.lastIndex++;
+        }
+      });
+
+      const stopNumberRe = /\b(?:stop|#)\s*(\d{1,2})\b/gi;
+      let stopMatch;
+      while ((stopMatch = stopNumberRe.exec(raw)) !== null) {
+        const idx = Number(stopMatch[1]) - 1;
+        if (idx >= 0 && idx < length) {
+          matches.push({ index: idx, position: stopMatch.index });
         }
       }
 
-      if (actionType === 'remove_from_itinerary') {
-        const matches = safeArray(action?.targetNames)
-          .map(name => {
-            const needle = normalize(name);
-            return safeArray(activeTrip).find(stop => {
-              const n = normalize(stop?.name);
-              return n === needle || n.includes(needle) || needle.includes(n);
-            });
-          })
+      if (/\blast\b/i.test(raw) && length > 0) {
+        const pos = normalize(raw).lastIndexOf('last');
+        matches.push({ index: length - 1, position: pos >= 0 ? pos : raw.length });
+      }
+
+      return unique(
+        matches
+          .sort((a, b) => a.position - b.position)
+          .map(x => x.index)
+      );
+    };
+
+    const resolveRecentReferences = (rawText, { allowAll = true } = {}) => {
+      const refs = recentActionReferenceEntities;
+      if (!refs.length) return { targets: [], ambiguous: false };
+
+      const q = normalize(rawText);
+      const ordinalIndices = extractOrdinalIndices(rawText, refs.length);
+      if (ordinalIndices.length) {
+        return {
+          targets: ordinalIndices.map(i => refs[i]).filter(Boolean),
+          ambiguous: false
+        };
+      }
+
+      const firstN =
+        q.match(/\b(?:first|top)\s+(\d{1,2})\b/) ||
+        q.match(/\b(\d{1,2})\s+(?:of\s+)?(?:them|those|these)\b/);
+
+      if (firstN) {
+        const count = Math.max(1, Math.min(refs.length, Number(firstN[1])));
+        return { targets: refs.slice(0, count), ambiguous: false };
+      }
+
+      if (allowAll && /\b(?:all|all of them|all of those|all of these|them|those|these)\b/i.test(rawText)) {
+        return { targets: refs.slice(), ambiguous: false };
+      }
+
+      if (/\bboth\b/i.test(rawText)) {
+        return {
+          targets: refs.length >= 2 ? refs.slice(0, 2) : refs.slice(),
+          ambiguous: false
+        };
+      }
+
+      if (/\b(?:it|that|this|that one|this one|the one)\b/i.test(rawText)) {
+        if (refs.length === 1) return { targets: [refs[0]], ambiguous: false };
+        return { targets: [], ambiguous: true };
+      }
+
+      return { targets: [], ambiguous: false };
+    };
+
+    const resolveTripReferences = (rawText, trip = actionWorkingTrip) => {
+      const explicitTripMentions = findTripMentions(rawText, trip);
+      if (explicitTripMentions.length) {
+        return {
+          targets: explicitTripMentions.map(x => x.item),
+          indices: explicitTripMentions.map(x => x.tripIndex),
+          ambiguous: false
+        };
+      }
+
+      const ordinalIndices = extractOrdinalIndices(rawText, trip.length);
+      if (ordinalIndices.length) {
+        return {
+          targets: ordinalIndices.map(i => trip[i]).filter(Boolean),
+          indices: ordinalIndices,
+          ambiguous: false
+        };
+      }
+
+      if (/\b(?:all|all stops|every stop|everything)\b/i.test(rawText)) {
+        return {
+          targets: trip.slice(),
+          indices: trip.map((_, i) => i),
+          ambiguous: false
+        };
+      }
+
+      const recent = resolveRecentReferences(rawText);
+      if (recent.targets.length) {
+        const matched = recent.targets
+          .map(ref =>
+            trip.find(stop => sameEntity(stop, ref))
+          )
           .filter(Boolean);
 
-        matches.forEach(stop => handleRemoveFromItinerary(stop.id));
-        actionResults.push(
-          matches.length
-            ? `Removed ${matches.length} stop(s) from the active itinerary.`
-            : 'No matching active itinerary stop was found.'
-        );
+        if (matched.length) {
+          return {
+            targets: matched,
+            indices: matched.map(stop => trip.findIndex(x => sameEntity(x, stop))),
+            ambiguous: false
+          };
+        }
       }
 
-      if (actionType === 'clear_itinerary') {
-        setActiveTrip([]);
-        actionResults.push('Cleared the active itinerary.');
+      if (/\b(?:it|that|this|that one|this one)\b/i.test(rawText)) {
+        if (trip.length === 1) {
+          return { targets: [trip[0]], indices: [0], ambiguous: false };
+        }
+        return { targets: [], indices: [], ambiguous: true };
       }
+
+      return { targets: [], indices: [], ambiguous: recent.ambiguous };
+    };
+
+    const materializeTripEntity = (item) => {
+      if (!item) return null;
+
+      // When a restaurant has several branches and the user explicitly named
+      // a municipality, preserve that branch's address/coordinates in the trip.
+      if (safeArray(item?.branches).length && localConstraints.location) {
+        const wanted = normalize(localConstraints.location);
+        const branch = safeArray(item.branches).find(b =>
+          normalize(typeof b === 'string' ? b : b?.municipality) === wanted
+        );
+
+        if (branch && typeof branch === 'object') {
+          return {
+            ...item,
+            municipality: branch.municipality || localConstraints.location || item.municipality,
+            address: branch.address || item.address || '',
+            lat: toNumber(branch.lat, toNumber(item.lat, 15.03)),
+            lng: toNumber(branch.lng, toNumber(item.lng, 120.68)),
+            operatingHours: branch.operatingHours || branch.hours || item.operatingHours,
+            selectedBranchName: branch.branchName || branch.name || branch.municipality || localConstraints.location
+          };
+        }
+      }
+
+      return item;
+    };
+
+    const insertTripEntity = (item, index = actionWorkingTrip.length) => {
+      const prepared = materializeTripEntity(item);
+      if (!prepared) return { added: false, duplicate: false };
+
+      if (actionWorkingTrip.some(stop => sameEntity(stop, prepared))) {
+        return { added: false, duplicate: true };
+      }
+
+      const safeIndex = Math.max(0, Math.min(actionWorkingTrip.length, index));
+      actionWorkingTrip.splice(safeIndex, 0, prepared);
+      actionTripChanged = true;
+      return { added: true, duplicate: false };
+    };
+
+    const removeTripTargets = (targets) => {
+      const ids = new Set(targets.map(entityKey));
+      const before = actionWorkingTrip.length;
+      actionWorkingTrip = actionWorkingTrip.filter(stop => !ids.has(entityKey(stop)));
+      const removed = before - actionWorkingTrip.length;
+      if (removed > 0) actionTripChanged = true;
+      return removed;
+    };
+
+    const summarizeNames = (items) =>
+      safeArray(items).map(x => x?.name).filter(Boolean).join(', ');
+
+    const clearAction =
+      /\b(?:clear|reset|empty)\b.*\b(?:itinerary|trip|route|plan|stops?)\b/i.test(userMsg) ||
+      /\b(?:remove|delete|drop|take out)\s+(?:all|every)\s+(?:the\s+)?(?:stops?|destinations?|places?)\b/i.test(userMsg) ||
+      /\bstart over\b.*\b(?:trip|itinerary|route|plan)\b/i.test(userMsg);
+
+    const reverseAction =
+      /\breverse\b.*\b(?:itinerary|trip|route|order|stops?)\b/i.test(userMsg);
+
+    const replaceAction =
+      /\b(?:replace|substitute|swap out)\b/i.test(userMsg) ||
+      /\bchange\b.*\b(?:stop|itinerary|trip|route)\b/i.test(userMsg);
+
+    const swapAction =
+      !replaceAction &&
+      /\bswap\b/i.test(userMsg);
+
+    const moveAction =
+      /\b(?:move|reorder|shift)\b/i.test(userMsg);
+
+    const removeAction =
+      !clearAction &&
+      /\b(?:remove|delete|take out|drop|exclude)\b/i.test(userMsg);
+
+    const addAction =
+      /\b(?:add|include|insert)\b/i.test(userMsg) ||
+      (
+        /\bput\b/i.test(userMsg) &&
+        /\b(?:itinerary|trip|route|plan|stop|stops|it|that|this|them|those|these)\b/i.test(userMsg) &&
+        !moveAction
+      );
+
+    const saveAction =
+      /\b(?:save|store)\b.*\b(?:itinerary|trip|route|plan)\b/i.test(userMsg) ||
+      /\bsave\s+(?:this|it)\b/i.test(userMsg) ||
+      /\bupdate\b.*\b(?:saved\s+)?(?:itinerary|trip|route|plan)\b/i.test(userMsg);
+
+    const loadAction =
+      /\b(?:load|open)\b.*\b(?:saved\s+)?(?:itinerary|trip|route|plan)\b/i.test(userMsg);
+
+    actionDetected =
+      clearAction || reverseAction || replaceAction || swapAction ||
+      moveAction || removeAction || addAction || saveAction || loadAction;
+
+    if (actionDetected) {
+      plan.primaryIntent = 'action';
+      plan.answerMode = 'direct';
+    }
+
+    // LOAD is handled first because subsequent commands may refer to the loaded
+    // itinerary on the next user turn. It never guesses between multiple saves.
+    if (loadAction) {
+      const q = normalize(userMsg);
+      const explicitSaved = safeArray(savedItineraries)
+        .map((itin, index) => ({
+          itin,
+          index,
+          pos: q.indexOf(normalize(itin?.name || ''))
+        }))
+        .filter(x => normalize(x.itin?.name || '') && x.pos >= 0)
+        .sort((a, b) => a.pos - b.pos);
+
+      let chosen = explicitSaved[0]?.itin || null;
+
+      if (!chosen) {
+        const indices = extractOrdinalIndices(userMsg, safeArray(savedItineraries).length);
+        if (indices.length === 1) chosen = savedItineraries[indices[0]];
+      }
+
+      if (!chosen && savedItineraries.length === 1 && /\b(?:it|that|this)\b/i.test(userMsg)) {
+        chosen = savedItineraries[0];
+      }
+
+      if (chosen) {
+        handleLoadSavedItinerary(chosen);
+        actionLoadedSavedTrip = true;
+        actionResults.push(`Loaded the saved itinerary **${chosen.name}**.`);
+      } else if (!savedItineraries.length) {
+        actionResults.push('You do not have a saved itinerary to load yet.');
+      } else {
+        actionResults.push(
+          `I found ${savedItineraries.length} saved itineraries. Tell me which one to load by name${savedItineraries.length <= 5 ? `: ${savedItineraries.map(x => x.name).join(', ')}` : '.'}`
+        );
+      }
+    }
+
+    if (clearAction && !loadAction) {
+      if (!actionWorkingTrip.length) {
+        actionResults.push('Your active itinerary is already empty.');
+      } else {
+        const count = actionWorkingTrip.length;
+        actionWorkingTrip = [];
+        actionTripChanged = true;
+        actionResults.push(`Cleared all ${count} stop${count === 1 ? '' : 's'} from the active itinerary.`);
+      }
+    }
+
+    if (reverseAction && !clearAction && !loadAction) {
+      if (actionWorkingTrip.length < 2) {
+        actionResults.push('There are not enough stops to reverse yet.');
+      } else {
+        actionWorkingTrip.reverse();
+        actionTripChanged = true;
+        actionResults.push('Reversed the order of the active itinerary.');
+      }
+    }
+
+    if (replaceAction && !clearAction && !loadAction) {
+      if (!actionWorkingTrip.length) {
+        actionResults.push('Your active itinerary is empty, so there is no stop to replace.');
+      } else {
+        const connectorMatch = String(userMsg).match(/\b(?:with|for|to)\b/i);
+        const connectorIndex = connectorMatch?.index ?? -1;
+        const leftText = connectorIndex >= 0 ? String(userMsg).slice(0, connectorIndex) : userMsg;
+        const rightText = connectorIndex >= 0
+          ? String(userMsg).slice(connectorIndex + connectorMatch[0].length)
+          : '';
+
+        const sourceRef = resolveTripReferences(leftText);
+        const replacementMentions = findCatalogMentions(rightText || userMsg)
+          .map(x => x.item)
+          .filter(item => !sourceRef.targets.some(source => sameEntity(source, item)));
+
+        const source = sourceRef.targets[0] || null;
+        const replacement = replacementMentions[0] || null;
+
+        if (!source) {
+          actionResults.push(
+            sourceRef.ambiguous
+              ? 'I’m not sure which itinerary stop you want to replace. Name it or say something like “replace the second stop with …”.'
+              : 'I could not find the itinerary stop you want to replace.'
+          );
+        } else if (!replacement) {
+          actionResults.push('Tell me which registered restaurant or attraction should replace that stop.');
+        } else if (actionWorkingTrip.some(stop => sameEntity(stop, replacement) && !sameEntity(stop, source))) {
+          actionResults.push(`**${replacement.name}** is already in your active itinerary, so I did not create a duplicate stop.`);
+        } else {
+          const sourceIndex = actionWorkingTrip.findIndex(stop => sameEntity(stop, source));
+          actionWorkingTrip[sourceIndex] = materializeTripEntity(replacement);
+          actionTripChanged = true;
+          actionResults.push(`Replaced **${source.name}** with **${replacement.name}** at stop ${sourceIndex + 1}.`);
+        }
+      }
+    }
+
+    if (swapAction && !replaceAction && !clearAction && !loadAction) {
+      const tripRefs = resolveTripReferences(userMsg);
+      const indices = unique(tripRefs.indices);
+
+      if (indices.length >= 2) {
+        const [a, b] = indices.slice(0, 2);
+        const nameA = actionWorkingTrip[a]?.name || `stop ${a + 1}`;
+        const nameB = actionWorkingTrip[b]?.name || `stop ${b + 1}`;
+        [actionWorkingTrip[a], actionWorkingTrip[b]] = [actionWorkingTrip[b], actionWorkingTrip[a]];
+        actionTripChanged = true;
+        actionResults.push(`Swapped **${nameA}** and **${nameB}**.`);
+      } else {
+        actionResults.push('Tell me which two active itinerary stops you want to swap.');
+      }
+    }
+
+    if (moveAction && !swapAction && !replaceAction && !clearAction && !loadAction) {
+      if (!actionWorkingTrip.length) {
+        actionResults.push('Your active itinerary is empty, so there is no stop to move.');
+      } else {
+        const currentMentions = findTripMentions(userMsg);
+        const ordinalIndices = extractOrdinalIndices(userMsg, actionWorkingTrip.length);
+        const sourceIndex =
+          currentMentions[0]?.tripIndex ??
+          ordinalIndices[0] ??
+          resolveTripReferences(userMsg).indices[0] ??
+          null;
+
+        let destinationIndex = null;
+
+        if (/\b(?:up|earlier)\b/i.test(userMsg) && sourceIndex !== null) {
+          destinationIndex = Math.max(0, sourceIndex - 1);
+        } else if (/\b(?:down|later)\b/i.test(userMsg) && sourceIndex !== null) {
+          destinationIndex = Math.min(actionWorkingTrip.length - 1, sourceIndex + 1);
+        } else if (/\b(?:to|as)\s+(?:the\s+)?(?:first|top|start|beginning)\b/i.test(userMsg)) {
+          destinationIndex = 0;
+        } else if (/\b(?:to|as)\s+(?:the\s+)?(?:last|end)\b/i.test(userMsg)) {
+          destinationIndex = actionWorkingTrip.length - 1;
+        } else if (ordinalIndices.length >= 2) {
+          destinationIndex = ordinalIndices[1];
+        }
+
+        const beforeAfterMatch = String(userMsg).match(/\b(before|after)\b/i);
+        if (beforeAfterMatch && sourceIndex !== null) {
+          const relation = beforeAfterMatch[1].toLowerCase();
+          const suffix = String(userMsg).slice((beforeAfterMatch.index || 0) + beforeAfterMatch[0].length);
+          const anchorMention = findTripMentions(suffix)[0];
+          const anchorOrdinal = extractOrdinalIndices(suffix, actionWorkingTrip.length)[0];
+          const anchorIndex = anchorMention?.tripIndex ?? anchorOrdinal ?? null;
+
+          if (anchorIndex !== null && anchorIndex !== sourceIndex) {
+            const sourceItem = actionWorkingTrip[sourceIndex];
+            const anchorItem = actionWorkingTrip[anchorIndex];
+            actionWorkingTrip.splice(sourceIndex, 1);
+            const recalculatedAnchorIndex = actionWorkingTrip.findIndex(stop => sameEntity(stop, anchorItem));
+            destinationIndex = relation === 'before'
+              ? recalculatedAnchorIndex
+              : recalculatedAnchorIndex + 1;
+            actionWorkingTrip.splice(
+              Math.max(0, Math.min(actionWorkingTrip.length, destinationIndex)),
+              0,
+              sourceItem
+            );
+            actionTripChanged = true;
+            actionResults.push(`Moved **${sourceItem.name}** ${relation} **${anchorItem.name}**.`);
+            destinationIndex = null; // already executed
+          }
+        }
+
+        if (!actionTripChanged && sourceIndex !== null && destinationIndex !== null) {
+          if (sourceIndex === destinationIndex) {
+            actionResults.push(`**${actionWorkingTrip[sourceIndex]?.name || 'That stop'}** is already in that position.`);
+          } else {
+            const [moved] = actionWorkingTrip.splice(sourceIndex, 1);
+            const safeDestination = Math.max(0, Math.min(actionWorkingTrip.length, destinationIndex));
+            actionWorkingTrip.splice(safeDestination, 0, moved);
+            actionTripChanged = true;
+            actionResults.push(`Moved **${moved.name}** to stop ${safeDestination + 1}.`);
+          }
+        } else if (!actionTripChanged && sourceIndex === null) {
+          actionResults.push('Tell me which active itinerary stop you want to move.');
+        } else if (!actionTripChanged && destinationIndex === null) {
+          actionResults.push('Tell me where to move that stop, for example “move the second stop to first” or “move it after the museum”.');
+        }
+      }
+    }
+
+    if (removeAction && !replaceAction && !swapAction && !moveAction && !clearAction && !loadAction) {
+      if (!actionWorkingTrip.length) {
+        actionResults.push('Your active itinerary is already empty.');
+      } else {
+        const resolved = resolveTripReferences(userMsg);
+
+        if (resolved.targets.length) {
+          const names = summarizeNames(resolved.targets);
+          const removed = removeTripTargets(resolved.targets);
+          actionResults.push(
+            removed
+              ? `Removed **${names}** from the active itinerary.`
+              : 'No matching active itinerary stop was found.'
+          );
+        } else {
+          actionResults.push(
+            resolved.ambiguous
+              ? 'I’m not sure which stop you mean. Say its name or position, for example “remove the second stop”.'
+              : 'I could not find that stop in your active itinerary.'
+          );
+        }
+      }
+    }
+
+    if (addAction && !replaceAction && !swapAction && !moveAction && !clearAction && !loadAction) {
+      const allExplicitMentions = findCatalogMentions(userMsg);
+      let addTargets = allExplicitMentions.map(x => x.item);
+      let insertionIndex = actionWorkingTrip.length;
+
+      const beforeAfterMatch = String(userMsg).match(/\b(before|after)\b/i);
+      if (beforeAfterMatch && allExplicitMentions.length) {
+        const relation = beforeAfterMatch[1].toLowerCase();
+        const relationPos = beforeAfterMatch.index || 0;
+
+        const beforeRelation = allExplicitMentions
+          .filter(x => x.position < relationPos)
+          .map(x => x.item);
+        if (beforeRelation.length) addTargets = beforeRelation;
+
+        const suffix = String(userMsg).slice(relationPos + beforeAfterMatch[0].length);
+        const anchorTripMention = findTripMentions(suffix)[0];
+        const anchorOrdinal = extractOrdinalIndices(suffix, actionWorkingTrip.length)[0];
+        const anchorIndex = anchorTripMention?.tripIndex ?? anchorOrdinal ?? null;
+
+        if (anchorIndex !== null) {
+          insertionIndex = relation === 'before' ? anchorIndex : anchorIndex + 1;
+        }
+      }
+
+      if (!addTargets.length) {
+        const recent = resolveRecentReferences(userMsg);
+        addTargets = recent.targets;
+
+        if (!addTargets.length && recent.ambiguous) {
+          actionResults.push(
+            `I found several destinations in my previous answer. Tell me which one to add, for example “add the first one” or “add ${recentActionReferenceEntities[0]?.name || 'the destination name'}”.`
+          );
+        }
+      }
+
+      if (!addTargets.length && !actionResults.length) {
+        actionResults.push('Tell me which registered restaurant or attraction you want to add.');
+      }
+
+      if (addTargets.length) {
+        const added = [];
+        const duplicates = [];
+
+        addTargets.forEach((target, offset) => {
+          const result = insertTripEntity(target, insertionIndex + offset);
+          if (result.added) added.push(target);
+          if (result.duplicate) duplicates.push(target);
+        });
+
+        if (added.length) {
+          actionResults.push(
+            `Added **${summarizeNames(added)}** to the active itinerary.`
+          );
+        }
+
+        if (duplicates.length) {
+          actionResults.push(
+            `Skipped **${summarizeNames(duplicates)}** because ${duplicates.length === 1 ? 'it is' : 'they are'} already in the itinerary.`
+          );
+        }
+      }
+    }
+
+    // Saving is intentionally independent from add/remove/reorder so a prompt
+    // like "add the museum and save my itinerary as Heritage Day" can do both.
+    if (saveAction && !loadAction) {
+      if (!actionWorkingTrip.length) {
+        actionResults.push('I can’t save an empty itinerary. Add at least one stop first.');
+      } else {
+        const saveNameMatch = String(userMsg).match(
+          /\b(?:save|store)(?:\s+(?:this|my|current))?\s*(?:itinerary|trip|route|plan)?\s+(?:as|named|called)\s+["“]?(.+?)["”]?\s*$/i
+        );
+
+        const requestedSaveName = String(saveNameMatch?.[1] || '').trim();
+        const wantsUpdateLoaded =
+          Boolean(loadedItineraryId) &&
+          (
+            /\b(?:save|update)\s+(?:the\s+)?(?:changes|current|loaded)\b/i.test(userMsg) ||
+            (!requestedSaveName && /\bupdate\b/i.test(userMsg))
+          );
+
+        if (wantsUpdateLoaded) {
+          const updatedSaved = safeArray(savedItineraries).map(item =>
+            item.id === loadedItineraryId
+              ? {
+                  ...item,
+                  name: requestedSaveName || loadedItineraryName || item.name || 'My Itinerary',
+                  stops: serializeItineraryStops(actionWorkingTrip),
+                  updatedAt: Date.now()
+                }
+              : item
+          );
+
+          persistSavedItineraries(updatedSaved);
+          if (requestedSaveName) {
+            setLoadedItineraryName(requestedSaveName);
+            setNewItineraryName(requestedSaveName);
+          }
+          actionResults.push(`Saved the latest stops to **${requestedSaveName || loadedItineraryName || 'your loaded itinerary'}**.`);
+        } else {
+          const nameToUse =
+            requestedSaveName ||
+            String(newItineraryName || '').trim();
+
+          if (!nameToUse) {
+            actionResults.push('Give this itinerary a name, for example: “save my itinerary as Pampanga Day Tour”.');
+          } else {
+            const newItin = {
+              id: `trail-${Date.now()}`,
+              name: nameToUse,
+              stops: serializeItineraryStops(actionWorkingTrip),
+              isFinished: false,
+              createdAt: Date.now(),
+              updatedAt: Date.now()
+            };
+
+            persistSavedItineraries([newItin, ...safeArray(savedItineraries)]);
+            setLoadedItineraryId(newItin.id);
+            setLoadedItineraryName(newItin.name);
+            setNewItineraryName(newItin.name);
+            actionResults.push(`Saved the active itinerary as **${newItin.name}**.`);
+          }
+        }
+      }
+    }
+
+    // Commit all in-memory trip mutations exactly once. This fixes the old
+    // forEach + setActiveTrip([...activeTrip, target]) stale-state bug where
+    // adding/removing several destinations in one command could keep only the
+    // last state update.
+    if (actionTripChanged && !actionLoadedSavedTrip) {
+      setActiveTrip(actionWorkingTrip);
+    }
+
+    if (actionDetected) {
+      plan.actions = [{
+        type:
+          clearAction ? 'clear_itinerary' :
+          replaceAction ? 'replace_stop' :
+          swapAction ? 'swap_stops' :
+          moveAction ? 'move_stop' :
+          removeAction ? 'remove_from_itinerary' :
+          addAction ? 'add_to_itinerary' :
+          saveAction ? 'save_itinerary' :
+          loadAction ? 'load_itinerary' :
+          reverseAction ? 'reverse_itinerary' :
+          'none',
+        targetNames: findCatalogMentions(userMsg).map(x => x.item?.name).filter(Boolean)
+      }];
     }
 
     // ------------------------------
@@ -4412,6 +5129,94 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
       return true;
     });
+
+
+    // --------------------------------------------------------------
+    // BATCH 1 DISH / MENU QUERY FIX
+    // Dish questions must remain dish questions. They should never
+    // silently fall through to restaurant-list output.
+    // --------------------------------------------------------------
+    const normalizedDishQuery = normalize(userMsg);
+
+    const explicitDishRestaurant = allRestaurants
+      .slice()
+      .sort((a, b) => normalize(b?.name).length - normalize(a?.name).length)
+      .find(r => {
+        const restaurantName = normalize(r?.name);
+        return restaurantName && normalizedDishQuery.includes(restaurantName);
+      }) || null;
+
+    const asksCheapestDish =
+      (
+        /\b(?:cheapest|lowest priced|lowest-priced|least expensive|most affordable)\b.*\b(?:dish|meal|food|menu item|ulam|pagkain)\b/i.test(userMsg) ||
+        /\b(?:dish|meal|food|menu item|ulam|pagkain)\b.*\b(?:cheapest|lowest priced|lowest-priced|least expensive|most affordable)\b/i.test(userMsg)
+      );
+
+    const asksDirectRestaurantMenu =
+      Boolean(explicitDishRestaurant) &&
+      /\b(?:dish|dishes|menu|meal|meals|food|foods|ulam|pagkain|serve|serves|have|has|offer|offers)\b/i.test(userMsg);
+
+    const isDirectDishQuestion =
+      localConstraints.asksDishList &&
+      !localConstraints.asksRoute &&
+      !localConstraints.asksAction &&
+      !localConstraints.asksAttraction &&
+      !(localConstraints.asksBagoong && !localConstraints.excludesBagoong);
+
+    const directDishCandidatesBase = explicitDishRestaurant
+      ? filteredDishes.filter(x =>
+          x?.restaurant?.id === explicitDishRestaurant?.id ||
+          normalize(x?.restaurant?.name) === normalize(explicitDishRestaurant?.name)
+        )
+      : filteredDishes.slice();
+
+    const directDishCandidates = directDishCandidatesBase
+      .slice()
+      .sort((a, b) => {
+        const priceA = toNumber(a?.dish?.price, null);
+        const priceB = toNumber(b?.dish?.price, null);
+        const kcalA = toNumber(a?.dish?.nutrition?.calories, null);
+        const kcalB = toNumber(b?.dish?.nutrition?.calories, null);
+
+        // Cheapest / budget requests are primarily price-ranked.
+        if (asksCheapestDish || localConstraints.budgetLimit !== null || localConstraints.asksBudget) {
+          const pa = priceA === null ? Infinity : priceA;
+          const pb = priceB === null ? Infinity : priceB;
+          if (pa !== pb) return pa - pb;
+        }
+
+        // Calorie-constrained dish queries prefer the lighter known option.
+        if (localConstraints.calorieLimit !== null || localConstraints.asksCalories) {
+          const ka = kcalA === null ? Infinity : kcalA;
+          const kb = kcalB === null ? Infinity : kcalB;
+          if (ka !== kb) return ka - kb;
+        }
+
+        // Otherwise retain query relevance as the main ranking signal.
+        const scoreDiff = dishScore(b) - dishScore(a);
+        if (scoreDiff !== 0) return scoreDiff;
+
+        const pa = priceA === null ? Infinity : priceA;
+        const pb = priceB === null ? Infinity : priceB;
+        return pa - pb;
+      });
+
+    const formatDirectDishLine = (item, index = null) => {
+      const d = item?.dish || {};
+      const r = item?.restaurant || {};
+      const price = toNumber(d?.price, null);
+      const kcal = toNumber(d?.nutrition?.calories, null);
+
+      const meta = [
+        r?.name || 'Registered restaurant',
+        r?.municipality || null,
+        price !== null ? `₱${price}` : 'price not registered',
+        kcal !== null ? `${kcal} kcal` : null
+      ].filter(Boolean).join(' • ');
+
+      const prefix = index === null ? '•' : `${index + 1}.`;
+      return `${prefix} **${d?.name || 'Unnamed dish'}** — ${meta}`;
+    };
 
     const sortedPlanDishes = filteredDishes.slice().sort((a, b) => {
       const kcalA = toNumber(a.dish?.nutrition?.calories, Infinity);
@@ -4651,15 +5456,47 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
     const localAnswer = () => {
       if (actionResults.length) {
-        return `✅ ${actionResults.join('\n✅ ')}`;
+        const tripForSummary = actionLoadedSavedTrip ? safeArray(activeTrip) : actionWorkingTrip;
+        const tripLines = tripForSummary
+          .map((stop, index) => `${index + 1}. **${stop?.name || 'Unnamed stop'}**${stop?.municipality ? ` — ${stop.municipality}` : ''}`)
+          .join('\n');
+
+        return `✅ ${actionResults.join('\n✅ ')}` +
+          (actionLoadedSavedTrip
+            ? ''
+            : `\n\n🗺️ **Current active itinerary (${tripForSummary.length} stop${tripForSummary.length === 1 ? '' : 's'})**\n${tripLines || 'No active stops.'}`);
       }
 
       if (plan.primaryIntent === 'current_trip' || localConstraints.asksCurrentTrip) {
+        const asksForItineraryContents =
+          /\b(?:what(?:'s| is) in|show(?: me)?|list|what are|which are|what stops|which stops|what places|which places)\b.*\b(?:my|our|current|active)?\s*(?:itinerary|trip|route)\b/i.test(userMsg) ||
+          /\b(?:my|our|current|active)\s*(?:itinerary|trip|route)\b.*\b(?:contents?|contain|contains|stops?|places|destinations?)\b/i.test(userMsg);
+
+        if (asksForItineraryContents) {
+          const itineraryStops = safeArray(activeTrip);
+
+          if (!itineraryStops.length) {
+            return `🗺️ **Your current itinerary is empty.**\n\nYou don't have any active stops yet.`;
+          }
+
+          const itineraryLines = itineraryStops
+            .map((stop, index) => {
+              const place = stop?.municipality || 'Pampanga';
+              const kind = safeArray(attractions).some(a => a?.id === stop?.id)
+                ? 'Tourist attraction'
+                : 'Restaurant';
+              return `${index + 1}. **${stop?.name || 'Unnamed stop'}** — ${place} • ${kind}`;
+            })
+            .join('\n');
+
+          return `🗺️ **Your current itinerary (${itineraryStops.length} stop${itineraryStops.length === 1 ? '' : 's'})**\n\n${itineraryLines}`;
+        }
+
         const calorieLimit = toNumber(userProfile?.calorieLimit, 2200);
         const budgetLimit = toNumber(userProfile?.budgetLimit, 1500);
 
         return `📊 **Your live Kanyamanan trip**\n\n` +
-          `• Stops: ${currentTrip.computedRoute.length}\n` +
+          `• Stops: ${currentTrip.activeStops.length}\n` +
           `• Calories: ${currentTrip.calories} / ${calorieLimit} kcal\n` +
           `• Cost: ₱${currentTrip.cost} / ₱${budgetLimit}\n` +
           `• Route distance: ${currentTrip.distanceKm} km\n` +
@@ -4734,6 +5571,94 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             ? `\n\n✅ **Other registered dishes with no current flagged ingredient pattern**\n${alternatives.map(x => `• **${x.dish.name}** — ${x.restaurant.name} — ${toNumber(x.dish?.nutrition?.calories)} kcal`).join('\n')}`
             : '') +
           `\n\n💡 **Tip:** For a strict uric-acid/gout diet, use your clinician or dietitian's advice as the final authority.`;
+      }
+
+
+      // ------------------------------------------------------------
+      // Direct dish / menu answers
+      // ------------------------------------------------------------
+      if (isDirectDishQuestion) {
+        // Named-restaurant menu lookup:
+        // "What dishes does Everybody's Cafe have?"
+        if (asksDirectRestaurantMenu) {
+          const restaurantMenuMatches = directDishCandidates;
+
+          if (!restaurantMenuMatches.length) {
+            return `🍽️ **${explicitDishRestaurant?.name || 'Registered restaurant'} menu**\n\n` +
+              `I found the restaurant in Kanyamanan, but I don't have a registered dish that matches the current filters.`;
+          }
+
+          const shown = restaurantMenuMatches.slice(0, 15);
+          const remaining = Math.max(0, restaurantMenuMatches.length - shown.length);
+
+          return `🍽️ **Registered dishes at ${explicitDishRestaurant.name}**\n\n` +
+            shown.map((x, i) => formatDirectDishLine(x, i)).join('\n') +
+            (remaining
+              ? `\n\n_+${remaining} more registered menu item${remaining === 1 ? '' : 's'} not shown._`
+              : '');
+        }
+
+        // "What is the cheapest dish available?"
+        if (asksCheapestDish) {
+          const priced = directDishCandidates
+            .filter(x => toNumber(x?.dish?.price, null) !== null);
+
+          if (!priced.length) {
+            return `💸 **Cheapest registered dish**\n\n` +
+              `I couldn't find a registered dish with a usable price in the current Kanyamanan menu data.`;
+          }
+
+          const minimumPrice = toNumber(priced[0]?.dish?.price, null);
+          const cheapestMatches = priced
+            .filter(x => toNumber(x?.dish?.price, null) === minimumPrice)
+            .slice(0, 6);
+
+          const heading = cheapestMatches.length > 1
+            ? `💸 **Cheapest registered dishes — ₱${minimumPrice}**`
+            : `💸 **Cheapest registered dish — ₱${minimumPrice}**`;
+
+          return `${heading}\n\n` +
+            cheapestMatches.map((x, i) => formatDirectDishLine(x, i)).join('\n') +
+            `\n\n_Price ranking uses the menu prices currently registered in Kanyamanan._`;
+        }
+
+        // Budget / normal dish recommendation:
+        // "Recommend a dish under ₱300."
+        // "Give me a meal under ₱250."
+        if (localConstraints.budgetLimit !== null || localConstraints.asksBudget || localConstraints.asksRecommendation) {
+          const matches = directDishCandidates
+            .filter(x => {
+              if (localConstraints.budgetLimit === null) return true;
+              const price = toNumber(x?.dish?.price, null);
+              return price !== null && price <= localConstraints.budgetLimit;
+            })
+            .slice(0, 8);
+
+          if (!matches.length) {
+            const budgetText = localConstraints.budgetLimit !== null
+              ? ` under **₱${localConstraints.budgetLimit}**`
+              : '';
+            return `🍽️ **Dish recommendations${budgetText}**\n\n` +
+              `I couldn't find a registered dish${budgetText} that matches the current filters. I won't substitute restaurant price tiers for actual dish prices.`;
+          }
+
+          const budgetHeading = localConstraints.budgetLimit !== null
+            ? `🍽️ **Registered dishes under ₱${localConstraints.budgetLimit}**`
+            : `🍽️ **Registered dish recommendations**`;
+
+          return `${budgetHeading}\n\n` +
+            matches.map((x, i) => formatDirectDishLine(x, i)).join('\n') +
+            `\n\n_These results use registered menu-item prices, not restaurant $/$$/$$$ tiers._`;
+        }
+
+        // General dish lookup.
+        const generalDishMatches = directDishCandidates.slice(0, 12);
+        if (generalDishMatches.length) {
+          return `🍽️ **Matching registered dishes**\n\n` +
+            generalDishMatches.map((x, i) => formatDirectDishLine(x, i)).join('\n');
+        }
+
+        return `🍽️ **Matching registered dishes**\n\nNo matching registered dishes were found for this request.`;
       }
 
       if (
@@ -5123,8 +6048,10 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             `• **${r.name}** — ${r.municipality} • ${r.priceTier || 'Price not specified'}`
           ).join('\n');
 
-        if (localConstraints.asksDishList && dishes) {
-          return `🍽️ **Matching dishes**\n\n${dishes}`;
+        if (localConstraints.asksDishList) {
+          return dishes
+            ? `🍽️ **Matching dishes**\n\n${dishes}`
+            : `🍽️ **Matching dishes**\n\nNo matching registered dishes were found for this request.`;
         }
 
         if (restaurants) {
