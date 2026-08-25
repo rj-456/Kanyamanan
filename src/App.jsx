@@ -3125,20 +3125,279 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     // ------------------------------
     // 3) Query-aware retrieval
     // ------------------------------
-    // Conversation-aware retrieval lets short follow-ups inherit the previous
-    // answer's entities: "what about the second one?", "add it", "how much there?"
-    const recentBotText = safeArray(updatedMessages)
-      .slice(-6)
+    // ============================================================
+    // FOLLOW-UP UNDERSTANDING ENGINE (Batch 4)
+    // ============================================================
+    // Instead of blending several previous bot answers together, keep ordered
+    // entity frames from the most recent relevant Kasaup responses. This lets
+    // "the second one", "it", "there", "how much?", "what dishes does it have?",
+    // and similar continuations resolve to the correct restaurant, attraction,
+    // or dish without restarting retrieval across unrelated older messages.
+    const priorBotMessages = safeArray(updatedMessages)
+      .slice(0, -1)
       .filter(m => m?.sender === 'bot')
+      .slice(-8)
+      .reverse();
+
+    const recentBotText = priorBotMessages
+      .slice()
+      .reverse()
       .map(m => m?.text || '')
       .join(' ');
 
-    const isFollowUpQuery =
-      /\b(?:it|that|this|those|these|there|then|also|another|second|third|first|next|same|them|they|he|she|how much|how far|what about|and what|what else|which one)\b/i.test(userMsg) ||
-      normalize(userMsg).split(/\s+/).filter(Boolean).length <= 5;
+    const orderedCatalogMentions = (messageText, catalog, getName, getKey) => {
+      const normalizedText = normalize(messageText);
+      const found = safeArray(catalog)
+        .map(item => {
+          const name = normalize(getName(item));
+          return {
+            item,
+            position: name ? normalizedText.indexOf(name) : -1
+          };
+        })
+        .filter(x => x.position >= 0)
+        .sort((a, b) => a.position - b.position);
 
-    const retrievalContextText = isFollowUpQuery
-      ? `${recentBotText} ${userMsg}`
+      const ordered = [];
+      const seen = new Set();
+      found.forEach(({ item }) => {
+        const key = String(getKey(item) || '');
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        ordered.push(item);
+      });
+      return ordered;
+    };
+
+    const buildConversationReferenceFrame = (message) => {
+      const messageText = String(message?.text || '');
+      const normalizedText = normalize(messageText);
+
+      const restaurantsInOrder = orderedCatalogMentions(
+        messageText,
+        allRestaurants,
+        r => r?.name || '',
+        r => r?.id || normalize(r?.name || '')
+      );
+
+      const attractionsInOrder = orderedCatalogMentions(
+        messageText,
+        allAttractions,
+        a => a?.name || '',
+        a => a?.id || normalize(a?.name || '')
+      );
+
+      const dishesInOrder = orderedCatalogMentions(
+        messageText,
+        allDishes,
+        x => x?.dish?.name || '',
+        x => `${x?.restaurant?.id || normalize(x?.restaurant?.name || '')}::${x?.dish?.id || normalize(x?.dish?.name || '')}`
+      );
+
+      const dishHeading =
+        /\b(?:registered dishes|registered dishes at|matching dishes|dish recommendations|food options|cheapest registered dish|cheapest registered dishes|cheapest from the dishes|lowest-calorie option from those dishes|menu items?|registered menu)\b/i.test(normalizedText);
+      const attractionHeading =
+        /\b(?:tourist attraction|attraction recommendations|places you may want to explore|top attraction match|registered attraction)\b/i.test(normalizedText);
+      const restaurantHeading =
+        /\b(?:restaurant recommendations|top restaurant match|matching restaurants|registered restaurants|restaurant details?|cheapest menu starting point from those restaurants)\b/i.test(normalizedText);
+
+      // Detail answers often contain both a restaurant name and a dish name.
+      // Field-label cues are therefore stronger than simple entity-count ties.
+      const dishDetailCue =
+        dishesInOrder.length > 0 &&
+        /\brestaurant\b/i.test(normalizedText) &&
+        /\b(?:calories|ingredients|allergens|health indicator)\b/i.test(normalizedText);
+
+      const restaurantDetailCue =
+        restaurantsInOrder.length > 0 &&
+        /\b(?:registered menu range|registered menu price|price level|registered hours|address)\b/i.test(normalizedText) &&
+        !dishDetailCue;
+
+      const attractionDetailCue =
+        attractionsInOrder.length > 0 &&
+        /\b(?:registered price level|approx straight-line distance|type)\b/i.test(normalizedText);
+
+      let primaryKind = null;
+
+      // Explicit response shape wins over raw entity counts.
+      if (dishHeading && dishesInOrder.length) primaryKind = 'dish';
+      else if (attractionHeading && attractionsInOrder.length) primaryKind = 'attraction';
+      else if (restaurantHeading && restaurantsInOrder.length) primaryKind = 'restaurant';
+      else if (dishDetailCue) primaryKind = 'dish';
+      else if (attractionDetailCue) primaryKind = 'attraction';
+      else if (restaurantDetailCue) primaryKind = 'restaurant';
+      else {
+        const counts = [
+          { kind: 'restaurant', count: restaurantsInOrder.length },
+          { kind: 'attraction', count: attractionsInOrder.length },
+          { kind: 'dish', count: dishesInOrder.length }
+        ].sort((a, b) => b.count - a.count);
+
+        if (counts[0].count > 0 && counts[0].count > counts[1].count) {
+          primaryKind = counts[0].kind;
+        } else if (restaurantsInOrder.length && !attractionsInOrder.length && !dishesInOrder.length) {
+          primaryKind = 'restaurant';
+        } else if (attractionsInOrder.length && !restaurantsInOrder.length && !dishesInOrder.length) {
+          primaryKind = 'attraction';
+        } else if (dishesInOrder.length && !attractionsInOrder.length) {
+          // Generic dish/menu output can also repeat the restaurant serving it.
+          primaryKind = 'dish';
+        }
+      }
+
+      const primaryItems =
+        primaryKind === 'restaurant' ? restaurantsInOrder :
+        primaryKind === 'attraction' ? attractionsInOrder :
+        primaryKind === 'dish' ? dishesInOrder :
+        [];
+
+      return {
+        text: messageText,
+        primaryKind,
+        primaryItems,
+        restaurants: restaurantsInOrder,
+        attractions: attractionsInOrder,
+        dishes: dishesInOrder
+      };
+    };
+
+    const recentReferenceFrames = priorBotMessages
+      .map(buildConversationReferenceFrame)
+      .filter(frame =>
+        frame.primaryItems.length ||
+        frame.restaurants.length ||
+        frame.attractions.length ||
+        frame.dishes.length
+      );
+
+    const latestReferenceFrame = recentReferenceFrames[0] || null;
+
+    const followUpOrdinalIndex = (() => {
+      const q = normalize(userMsg);
+      const ordinalPatterns = [
+        [0, /\b(?:first|1st|number 1|#1|una|unang)\b/],
+        [1, /\b(?:second|2nd|number 2|#2|pangalawa|ikalawa)\b/],
+        [2, /\b(?:third|3rd|number 3|#3|pangatlo|ikatlo)\b/],
+        [3, /\b(?:fourth|4th|number 4|#4|pang-apat|pangapat|ikaapat)\b/],
+        [4, /\b(?:fifth|5th|number 5|#5|pang-lima|panglima|ikalima)\b/],
+        [5, /\b(?:sixth|6th|number 6|#6|pang-anim|panganim|ikaanim)\b/]
+      ];
+      for (const [index, re] of ordinalPatterns) {
+        if (re.test(q)) return index;
+      }
+      if (/\b(?:last|huli|hulihan)\b/.test(q)) return -1;
+      return null;
+    })();
+
+    const followUpReferenceLanguage =
+      /\b(?:it|that|this|those|these|there|then|also|another|other|same|one|ones|them|they|first|second|third|fourth|fifth|sixth|last|next|previous|former|latter|that one|this one|the one|which one|what about|how about|tell me more|more about|what else|and what|and the)\b/i.test(userMsg) ||
+      /\b(?:yan|iyan|iyon|ito|yun|yung|yong|doon|diyan|dyan|pangalawa|pangatlo|una|huli|magkano|nasaan|saan yan|ano pa|kwento pa)\b/i.test(userMsg);
+
+    const shortFollowUpRefinement =
+      Boolean(latestReferenceFrame) &&
+      !/\b(?:recommend|suggest|show me|list|find|give me|plan|create|build)\b/i.test(userMsg) &&
+      normalize(userMsg).split(/\s+/).filter(Boolean).length <= 8 &&
+      /\b(?:cheaper|cheapest|closest|nearest|farther|nearer|open|closed|hours|price|cost|calories|kcal|ingredients|allergens|menu|dishes|food|details|address|where|how much|how far|under|below|instead|another|more|best|mura|mas mura|malapit|magkano|saan|bukas)\b/i.test(userMsg);
+
+    const isFollowUpQuery =
+      Boolean(latestReferenceFrame) &&
+      (followUpReferenceLanguage || shortFollowUpRefinement);
+
+    const followUpComparisonLanguage =
+      /\b(?:which one|which is|cheaper|cheapest|closest|nearest|lowest|highest|best of|most affordable|least expensive|lowest calorie|lightest|pinakamura|pinakamalapit)\b/i.test(userMsg);
+
+    const referenceFrameForFollowUp = (() => {
+      if (!recentReferenceFrames.length) return null;
+
+      // Ordinals and comparisons prefer an earlier list of the SAME entity type
+      // as the latest answer. Never cross from dishes back to an older restaurant
+      // list merely because that older response happened to contain multiple items.
+      if (followUpOrdinalIndex !== null || followUpComparisonLanguage) {
+        const preferredKind = latestReferenceFrame?.primaryKind;
+        const sameKindList = recentReferenceFrames.find(frame =>
+          frame.primaryKind === preferredKind && frame.primaryItems.length > 1
+        );
+        if (sameKindList) return sameKindList;
+
+        // Ordinals such as "the second one" may still use the most recent usable
+        // collection when the latest detail frame has no same-kind collection.
+        if (followUpOrdinalIndex !== null) {
+          const anyList = recentReferenceFrames.find(frame => frame.primaryItems.length > 1);
+          if (anyList) return anyList;
+        }
+
+        // Comparison language must remain anchored to the latest subject type.
+        if (followUpComparisonLanguage) return latestReferenceFrame;
+      }
+
+      return latestReferenceFrame;
+    })();
+
+    const followUpPrimaryItems = referenceFrameForFollowUp?.primaryItems || [];
+    const resolvedFollowUpOrdinal =
+      followUpOrdinalIndex === -1
+        ? (followUpPrimaryItems.length ? followUpPrimaryItems.length - 1 : null)
+        : followUpOrdinalIndex;
+
+    const selectedFollowUpItem =
+      resolvedFollowUpOrdinal !== null &&
+      resolvedFollowUpOrdinal >= 0 &&
+      resolvedFollowUpOrdinal < followUpPrimaryItems.length
+        ? followUpPrimaryItems[resolvedFollowUpOrdinal]
+        : (
+            followUpPrimaryItems.length === 1 &&
+            /\b(?:it|that|this|there|that one|this one|the one|yan|iyan|iyon|ito|yun|yung|yong|doon|diyan|dyan)\b/i.test(userMsg)
+              ? followUpPrimaryItems[0]
+              : null
+          );
+
+    const explicitRestaurantTopic = /\b(?:restaurant|restaurants|kainan|eatery|eateries|dining|dine)\b/i.test(userMsg);
+    const explicitDishTopic = /\b(?:dish|dishes|menu|meal|meals|food|foods|ulam|pagkain)\b/i.test(userMsg);
+    const explicitAttractionTopic = /\b(?:attraction|attractions|tourist spot|tourist spots|destination|destinations|heritage|landmark|museum|church|park|pasyalan|puntahan)\b/i.test(userMsg);
+
+    const followUpMenuQuestion =
+      /\b(?:dish|dishes|menu|meal|meals|food|foods|serve|serves|serving|offer|offers|available to eat|what can i eat|what to eat|ulam|pagkain|anong pagkain|ano.*(?:menu|pagkain|ulam))\b/i.test(userMsg);
+
+    // Correct ambiguous short follow-ups such as "which one is cheapest?"
+    // according to what Kasaup was actually discussing most recently.
+    if (isFollowUpQuery && referenceFrameForFollowUp?.primaryKind) {
+      const kind = referenceFrameForFollowUp.primaryKind;
+
+      if (kind === 'dish' && !explicitRestaurantTopic && !explicitAttractionTopic) {
+        localConstraints.asksDishList = true;
+        localConstraints.asksRestaurantRecommendation = false;
+        localConstraints.asksRestaurantList = false;
+      }
+
+      if (kind === 'restaurant' && !explicitAttractionTopic) {
+        if (followUpMenuQuestion) {
+          localConstraints.asksDishList = true;
+          localConstraints.asksRestaurantRecommendation = false;
+        } else if (!explicitDishTopic) {
+          localConstraints.asksRestaurantRecommendation = true;
+          localConstraints.asksRecommendation = true;
+        }
+      }
+
+      if (kind === 'attraction' && !explicitRestaurantTopic && !explicitDishTopic) {
+        localConstraints.asksAttraction = true;
+        localConstraints.asksRestaurantRecommendation = false;
+        localConstraints.asksRestaurantList = false;
+
+        if (/\b(?:cheapest|cheap|affordable|free|price|cost|fee|magkano|mura)\b/i.test(userMsg)) {
+          localConstraints.asksAttractionPrice = true;
+        }
+        if (/\b(?:closest|nearest|nearer|near me|malapit|pinakamalapit)\b/i.test(userMsg)) {
+          localConstraints.asksAttractionNearby = true;
+        }
+        if (/\b(?:tell me more|more about|details?|info|information|what about|how about|what is it|what's it|saan|where|address|located|location)\b/i.test(userMsg)) {
+          localConstraints.asksAttractionDetails = true;
+        }
+      }
+    }
+
+    const retrievalContextText = isFollowUpQuery && referenceFrameForFollowUp
+      ? `${referenceFrameForFollowUp.text} ${userMsg}`
       : userMsg;
 
     const queryTokens = unique(
@@ -3229,16 +3488,22 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         ? localConstraints.budgetLimit / requestedGroupSize
         : localConstraints.budgetLimit;
 
+    const recentRestaurantReferenceFrame = recentReferenceFrames.find(frame =>
+      frame.primaryKind === 'restaurant' && frame.restaurants.length
+    ) || null;
+
+    const recentRestaurantOrder = recentRestaurantReferenceFrame?.restaurants || [];
+
     const recentMentionedRestaurantIds = new Set(
-      allRestaurants
-        .filter(r => recentBotText && normalize(recentBotText).includes(normalize(r?.name)))
+      recentRestaurantOrder
         .map(r => r?.id || normalize(r?.name))
         .filter(Boolean)
     );
 
     const restaurantRecommendationFollowUp =
       recentMentionedRestaurantIds.size > 0 &&
-      /\b(?:which one|which restaurant|that one|this one|the first|first one|the second|second one|the third|third one|cheaper|cheapest|closest|best one|what about|how about|among those|among them|of those|of them)\b/i.test(userMsg);
+      isFollowUpQuery &&
+      /\b(?:which one|which restaurant|that one|this one|the first|first one|the second|second one|the third|third one|cheaper|cheapest|closest|nearest|best one|among those|among them|of those|of them|yan|iyan|iyon|pangalawa|pangatlo|pinakamura|pinakamalapit)\b/i.test(userMsg);
 
     const restaurantMenuStats = (r) => {
       const menu = safeArray(r?.menu);
@@ -3653,26 +3918,27 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     // "recommend tourist spots" from turning into a food itinerary and makes
     // category, municipality, nearby, hours, price metadata, and follow-ups
     // first-class signals.
-    const lastBotAttractionText = safeArray(updatedMessages)
-      .slice()
-      .reverse()
-      .find(m => m?.sender === 'bot')?.text || '';
+    const recentAttractionReferenceFrame = (() => {
+      const ordinalOrComparison =
+        followUpOrdinalIndex !== null || followUpComparisonLanguage;
 
-    const normalizedLastBotAttractionText = normalize(lastBotAttractionText);
-    const recentAttractionOrder = allAttractions
-      .map(a => {
-        const name = normalize(a?.name);
-        return {
-          attraction: a,
-          position: name ? normalizedLastBotAttractionText.indexOf(name) : -1
-        };
-      })
-      .filter(x => x.position >= 0)
-      .sort((a, b) => a.position - b.position)
-      .map(x => x.attraction);
+      if (ordinalOrComparison) {
+        return recentReferenceFrames.find(frame =>
+          frame.primaryKind === 'attraction' && frame.attractions.length > 1
+        ) || recentReferenceFrames.find(frame =>
+          frame.primaryKind === 'attraction' && frame.attractions.length
+        ) || null;
+      }
+
+      return recentReferenceFrames.find(frame =>
+        frame.primaryKind === 'attraction' && frame.attractions.length
+      ) || null;
+    })();
+
+    const recentAttractionOrder = recentAttractionReferenceFrame?.attractions || [];
 
     const attractionFollowUpLanguage =
-      /\b(?:it|that|this|those|these|there|first|second|third|fourth|last|next|same|one|ones|which one|what about|how about|tell me more|more about|closest|nearest|cheapest|best of those|best one)\b/i.test(userMsg);
+      /\b(?:it|that|this|those|these|there|first|second|third|fourth|fifth|sixth|last|next|same|one|ones|which one|what about|how about|tell me more|more about|closest|nearest|cheapest|best of those|best one|yan|iyan|iyon|ito|yun|yung|pangalawa|pangatlo|una|huli|pinakamura|pinakamalapit)\b/i.test(userMsg);
 
     const quickRegisteredAttractionMention = allAttractions.some(a => {
       const name = normalize(a?.name);
@@ -3749,18 +4015,31 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       recentAttractionOrder.map(a => a?.id || normalize(a?.name))
     );
 
+    const attractionHasDirectReference =
+      followUpOrdinalIndex !== null ||
+      /\b(?:it|that|this|those|these|that one|this one|the one|which one|closest|nearest|cheapest|best one|among those|among them|of those|of them|yan|iyan|iyon|ito|yun|yung|pangalawa|pangatlo|una|huli|pinakamura|pinakamalapit)\b/i.test(userMsg);
+
+    const attractionIntroducesNewScope =
+      Boolean(localConstraints.location || requestedAttractionCategories.length) &&
+      !attractionHasDirectReference;
+
     const attractionRecommendationFollowUp =
       attractionQuestion &&
       attractionFollowUpLanguage &&
-      recentAttractionOrder.length > 0;
+      recentAttractionOrder.length > 0 &&
+      !attractionIntroducesNewScope;
 
     const attractionOrdinalIndex = (() => {
-      const q = normalize(userMsg);
-      if (/\b(?:first|1st|number 1|#1)\b/.test(q)) return 0;
-      if (/\b(?:second|2nd|number 2|#2)\b/.test(q)) return 1;
-      if (/\b(?:third|3rd|number 3|#3)\b/.test(q)) return 2;
-      if (/\b(?:fourth|4th|number 4|#4)\b/.test(q)) return 3;
-      if (/\b(?:last)\b/.test(q) && recentAttractionOrder.length) return recentAttractionOrder.length - 1;
+      if (followUpOrdinalIndex === -1 && recentAttractionOrder.length) {
+        return recentAttractionOrder.length - 1;
+      }
+      if (
+        followUpOrdinalIndex !== null &&
+        followUpOrdinalIndex >= 0 &&
+        followUpOrdinalIndex < recentAttractionOrder.length
+      ) {
+        return followUpOrdinalIndex;
+      }
       return null;
     })();
 
@@ -5138,7 +5417,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     // --------------------------------------------------------------
     const normalizedDishQuery = normalize(userMsg);
 
-    const explicitDishRestaurant = allRestaurants
+    const namedDishRestaurant = allRestaurants
       .slice()
       .sort((a, b) => normalize(b?.name).length - normalize(a?.name).length)
       .find(r => {
@@ -5146,15 +5425,79 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         return restaurantName && normalizedDishQuery.includes(restaurantName);
       }) || null;
 
+    const followUpRestaurantForMenu = (() => {
+      if (!isFollowUpQuery || !followUpMenuQuestion || !referenceFrameForFollowUp) return null;
+
+      // Normal restaurant follow-up: "What dishes does it have?"
+      if (referenceFrameForFollowUp.primaryKind === 'restaurant') {
+        if (selectedFollowUpItem && !selectedFollowUpItem?.dish) {
+          return selectedFollowUpItem;
+        }
+
+        if (followUpPrimaryItems.length === 1) {
+          return followUpPrimaryItems[0];
+        }
+
+        return null;
+      }
+
+      // If Kasaup most recently discussed one dish, "What dishes does it have?"
+      // means the menu of the restaurant serving that dish—not that one dish again.
+      if (referenceFrameForFollowUp.primaryKind === 'dish') {
+        if (selectedFollowUpItem?.dish && selectedFollowUpItem?.restaurant) {
+          return selectedFollowUpItem.restaurant;
+        }
+
+        if (
+          followUpPrimaryItems.length === 1 &&
+          followUpPrimaryItems[0]?.dish &&
+          followUpPrimaryItems[0]?.restaurant
+        ) {
+          return followUpPrimaryItems[0].restaurant;
+        }
+
+        const servingRestaurants = [];
+        const seenRestaurantIds = new Set();
+
+        followUpPrimaryItems.forEach(item => {
+          const restaurant = item?.restaurant;
+          if (!restaurant) return;
+          const key = String(restaurant?.id || normalize(restaurant?.name || ''));
+          if (!key || seenRestaurantIds.has(key)) return;
+          seenRestaurantIds.add(key);
+          servingRestaurants.push(restaurant);
+        });
+
+        if (servingRestaurants.length === 1) {
+          return servingRestaurants[0];
+        }
+      }
+
+      return null;
+    })();
+
+    const explicitDishRestaurant =
+      namedDishRestaurant ||
+      followUpRestaurantForMenu ||
+      null;
+
     const asksCheapestDish =
       (
-        /\b(?:cheapest|lowest priced|lowest-priced|least expensive|most affordable)\b.*\b(?:dish|meal|food|menu item|ulam|pagkain)\b/i.test(userMsg) ||
-        /\b(?:dish|meal|food|menu item|ulam|pagkain)\b.*\b(?:cheapest|lowest priced|lowest-priced|least expensive|most affordable)\b/i.test(userMsg)
+        /\b(?:cheapest|lowest priced|lowest-priced|least expensive|most affordable|pinakamura)\b.*\b(?:dish|meal|food|menu item|ulam|pagkain)\b/i.test(userMsg) ||
+        /\b(?:dish|meal|food|menu item|ulam|pagkain)\b.*\b(?:cheapest|lowest priced|lowest-priced|least expensive|most affordable|pinakamura)\b/i.test(userMsg) ||
+        (
+          isFollowUpQuery &&
+          referenceFrameForFollowUp?.primaryKind === 'dish' &&
+          /\b(?:cheaper|cheapest|lowest|least expensive|most affordable|pinakamura|mas mura)\b/i.test(userMsg)
+        )
       );
 
     const asksDirectRestaurantMenu =
       Boolean(explicitDishRestaurant) &&
-      /\b(?:dish|dishes|menu|meal|meals|food|foods|ulam|pagkain|serve|serves|have|has|offer|offers)\b/i.test(userMsg);
+      (
+        /\b(?:dish|dishes|menu|meal|meals|food|foods|ulam|pagkain|serve|serves|have|has|offer|offers)\b/i.test(userMsg) ||
+        followUpMenuQuestion
+      );
 
     const isDirectDishQuestion =
       localConstraints.asksDishList &&
@@ -5163,12 +5506,36 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       !localConstraints.asksAttraction &&
       !(localConstraints.asksBagoong && !localConstraints.excludesBagoong);
 
+    const followUpDishScope = (() => {
+      if (!isFollowUpQuery || referenceFrameForFollowUp?.primaryKind !== 'dish') return [];
+
+      if (selectedFollowUpItem?.dish) {
+        return [selectedFollowUpItem];
+      }
+
+      return followUpPrimaryItems.filter(x => x?.dish && x?.restaurant);
+    })();
+
     const directDishCandidatesBase = explicitDishRestaurant
       ? filteredDishes.filter(x =>
           x?.restaurant?.id === explicitDishRestaurant?.id ||
           normalize(x?.restaurant?.name) === normalize(explicitDishRestaurant?.name)
         )
-      : filteredDishes.slice();
+      : followUpDishScope.length
+        ? followUpDishScope.filter(scopeItem =>
+            filteredDishes.some(x =>
+              (
+                x?.dish?.id && scopeItem?.dish?.id &&
+                String(x.dish.id) === String(scopeItem.dish.id) &&
+                normalize(x?.restaurant?.name) === normalize(scopeItem?.restaurant?.name)
+              ) ||
+              (
+                normalize(x?.dish?.name) === normalize(scopeItem?.dish?.name) &&
+                normalize(x?.restaurant?.name) === normalize(scopeItem?.restaurant?.name)
+              )
+            )
+          )
+        : filteredDishes.slice();
 
     const directDishCandidates = directDishCandidatesBase
       .slice()
@@ -5216,6 +5583,400 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
       const prefix = index === null ? '•' : `${index + 1}.`;
       return `${prefix} **${d?.name || 'Unnamed dish'}** — ${meta}`;
+    };
+
+
+    const followUpAsksPrice =
+      /\b(?:how much|price|cost|cheap|cheaper|cheapest|affordable|magkano|mura|pinakamura)\b/i.test(userMsg);
+
+    const followUpAsksCalories =
+      /\b(?:calorie|calories|kcal|lighter|lightest|lowest calorie)\b/i.test(userMsg);
+
+    const followUpAsksIngredients =
+      /\b(?:ingredient|ingredients|contains?|made of|allergen|allergens|bagoong|purine|uric acid|gout|sangkap|laman)\b/i.test(userMsg);
+
+    const followUpAsksHours =
+      /\b(?:open|closed|hours|opening|closing|what time|bukas|sarado|anong oras)\b/i.test(userMsg);
+
+    const followUpAsksLocation =
+      /\b(?:where|address|located|location|where is|where's|saan|nasaan|doon|diyan|dyan)\b/i.test(userMsg);
+
+    const followUpAsksDistance =
+      /\b(?:how far|distance|closest|nearest|nearer|malapit|pinakamalapit)\b/i.test(userMsg);
+
+    const followUpAsksGenericDetail =
+      /\b(?:what about|how about|tell me more|more about|details?|info|information|what is it|what's it|what is that|what's that|kwento pa|ano yan|ano iyon)\b/i.test(userMsg);
+
+    const calculatePlaceDistanceKm = (item, kind) => {
+      const originLat = toNumber(userLocation?.lat, 15.03);
+      const originLng = toNumber(userLocation?.lng, 120.68);
+
+      if (kind === 'attraction') {
+        const lat = toNumber(item?.lat, null);
+        const lng = toNumber(item?.lng, null);
+        if (lat === null || lng === null) return null;
+        const distance = calculateHaversineKm(originLat, originLng, lat, lng);
+        return Number.isFinite(distance) ? distance : null;
+      }
+
+      if (kind === 'restaurant') {
+        const candidates = [];
+
+        const primaryLat = toNumber(item?.lat, null);
+        const primaryLng = toNumber(item?.lng, null);
+        if (primaryLat !== null && primaryLng !== null) {
+          candidates.push({ lat: primaryLat, lng: primaryLng });
+        }
+
+        safeArray(item?.branches).forEach(branch => {
+          if (!branch) return;
+          const municipality = typeof branch === 'string' ? branch : branch?.municipality;
+          const lat = typeof branch === 'object'
+            ? toNumber(branch?.lat, toNumber(getBranchLat(item, municipality), null))
+            : toNumber(getBranchLat(item, municipality), null);
+          const lng = typeof branch === 'object'
+            ? toNumber(branch?.lng, toNumber(getBranchLng(item, municipality), null))
+            : toNumber(getBranchLng(item, municipality), null);
+
+          if (lat !== null && lng !== null) candidates.push({ lat, lng });
+        });
+
+        if (!candidates.length) {
+          const lat = toNumber(getBranchLat(item, localConstraints.location || null), null);
+          const lng = toNumber(getBranchLng(item, localConstraints.location || null), null);
+          if (lat !== null && lng !== null) candidates.push({ lat, lng });
+        }
+
+        const distances = candidates
+          .map(c => calculateHaversineKm(originLat, originLng, c.lat, c.lng))
+          .filter(Number.isFinite)
+          .sort((a, b) => a - b);
+
+        return distances[0] ?? null;
+      }
+
+      return null;
+    };
+
+    const formatRestaurantFollowUpDetail = (r) => {
+      const municipalities = getRestaurantMunicipalities(r);
+      const targetMunicipality =
+        localConstraints.location ||
+        municipalities[0] ||
+        r?.municipality ||
+        'Pampanga';
+
+      const address = getBranchAddressForMunicipality(r, targetMunicipality);
+      const hours = getBranchOperatingHours(r, targetMunicipality);
+      const menu = safeArray(r?.menu);
+      const priced = menu
+        .map(d => ({ dish: d, price: toNumber(d?.price, null) }))
+        .filter(x => x.price !== null)
+        .sort((a, b) => a.price - b.price);
+
+      const lines = [
+        `• **Area:** ${municipalities.join(', ') || r?.municipality || 'Pampanga'}`
+      ];
+
+      if (address) lines.push(`• **Address:** ${address}`);
+      if (hours) lines.push(`• **Registered hours:** ${hours}`);
+
+      if (followUpAsksHours && localConstraints.asksToday) {
+        const hoursFit = registeredHoursFit(r);
+        if (hoursFit.known && hoursFit.fits) {
+          lines.push(`• **Current-time check:** the registered hours cover the current time.`);
+        } else if (hoursFit.known && !hoursFit.fits) {
+          lines.push(`• **Current-time check:** the registered hours do not cover the current time.`);
+        } else {
+          lines.push(`• **Current-time check:** I can't reliably determine open/closed status from the registered hours.`);
+        }
+      }
+
+      if (r?.priceTier) lines.push(`• **Price level:** ${r.priceTier}`);
+
+      if (priced.length) {
+        const minPrice = priced[0].price;
+        const maxPrice = priced[priced.length - 1].price;
+        lines.push(
+          minPrice === maxPrice
+            ? `• **Registered menu price:** ₱${minPrice}`
+            : `• **Registered menu range:** ₱${minPrice}–₱${maxPrice}`
+        );
+      }
+
+      if (followUpAsksDistance) {
+        const distance = calculatePlaceDistanceKm(r, 'restaurant');
+        if (Number.isFinite(distance)) {
+          lines.push(`• **Approx. straight-line distance:** ${distance.toFixed(1)} km`);
+        }
+      }
+
+      const description = String(r?.description || '').trim();
+      const narrative =
+        description && followUpAsksGenericDetail
+          ? `\n\n${description.slice(0, 420)}`
+          : '';
+
+      return `🍴 **${r?.name || 'Registered restaurant'}**\n\n${lines.join('\n')}${narrative}`;
+    };
+
+    const formatDishFollowUpDetail = (item) => {
+      const d = item?.dish || {};
+      const r = item?.restaurant || {};
+      const price = toNumber(d?.price, null);
+      const kcal = toNumber(d?.nutrition?.calories, null);
+      const lines = [
+        `• **Restaurant:** ${r?.name || 'Registered restaurant'}`,
+        `• **Area:** ${r?.municipality || 'Pampanga'}`
+      ];
+
+      if (price !== null) lines.push(`• **Price:** ₱${price}`);
+      if (kcal !== null) lines.push(`• **Calories:** ${kcal} kcal`);
+      if (d?.ingredients) lines.push(`• **Ingredients:** ${d.ingredients}`);
+      if (d?.allergens) lines.push(`• **Allergens:** ${d.allergens}`);
+      if (d?.healthIndicators) lines.push(`• **Health indicator:** ${d.healthIndicators}`);
+
+      return `🍽️ **${d?.name || 'Registered dish'}**\n\n${lines.join('\n')}`;
+    };
+
+    const formatAttractionFollowUpDetail = (a) => {
+      const lines = [];
+      const type = a?.type || a?.category || '';
+
+      if (type) lines.push(`• **Type:** ${type}`);
+      lines.push(`• **Area:** ${a?.municipality || 'Pampanga'}`);
+      if (a?.address) lines.push(`• **Address:** ${a.address}`);
+      if (a?.operatingHours) lines.push(`• **Registered hours:** ${a.operatingHours}`);
+
+      if (followUpAsksHours && localConstraints.asksToday) {
+        const hoursFit = attractionHoursFit(a);
+        if (hoursFit.known && hoursFit.fits) {
+          lines.push(`• **Current-time check:** the registered hours cover the current time.`);
+        } else if (hoursFit.known && !hoursFit.fits) {
+          lines.push(`• **Current-time check:** the registered hours do not cover the current time.`);
+        } else {
+          lines.push(`• **Current-time check:** I can't reliably determine open/closed status from the registered hours.`);
+        }
+      }
+
+      if (a?.priceTier) lines.push(`• **Registered price level:** ${a.priceTier}`);
+
+      if (followUpAsksDistance) {
+        const distance = calculatePlaceDistanceKm(a, 'attraction');
+        if (Number.isFinite(distance)) {
+          lines.push(`• **Approx. straight-line distance:** ${distance.toFixed(1)} km`);
+        }
+      }
+
+      const narrativeParts = unique(
+        [a?.description, a?.details]
+          .map(x => String(x || '').trim())
+          .filter(Boolean)
+      );
+
+      const narrative =
+        narrativeParts.length && followUpAsksGenericDetail
+          ? `\n\n${narrativeParts.map(x => x.slice(0, 420)).join('\n\n')}`
+          : '';
+
+      return `🗺️ **${a?.name || 'Registered attraction'}**\n\n${lines.join('\n')}${narrative}`;
+    };
+
+    const buildConversationFollowUpAnswer = () => {
+      if (!isFollowUpQuery || !referenceFrameForFollowUp?.primaryKind) return null;
+
+      const kind = referenceFrameForFollowUp.primaryKind;
+      const items = followUpPrimaryItems;
+      if (!items.length) return null;
+
+      const isCheapestFollowUp =
+        /\b(?:cheaper|cheapest|lowest price|least expensive|most affordable|pinakamura|mas mura)\b/i.test(userMsg);
+
+      const isClosestFollowUp =
+        /\b(?:closest|nearest|nearer|pinakamalapit|mas malapit)\b/i.test(userMsg);
+
+      const isLowestCalorieFollowUp =
+        /\b(?:lowest calorie|fewest calories|lightest|lower calorie)\b/i.test(userMsg);
+
+      // A menu follow-up should create a new DISH COLLECTION context.
+      // This prevents "What dishes does it have?" from collapsing to one dish.
+      if (followUpMenuQuestion && explicitDishRestaurant) {
+        const menu = safeArray(explicitDishRestaurant?.menu)
+          .slice()
+          .sort((a, b) => toNumber(a?.price, Infinity) - toNumber(b?.price, Infinity));
+
+        if (!menu.length) {
+          return `🍽️ **${explicitDishRestaurant?.name || 'Registered restaurant'} menu**\n\n` +
+            `No menu items are currently registered for this restaurant.`;
+        }
+
+        const shown = menu.slice(0, 15);
+        const remaining = Math.max(0, menu.length - shown.length);
+
+        return `🍽️ **Registered dishes at ${explicitDishRestaurant.name}**\n\n` +
+          shown.map((dish, index) =>
+            formatDirectDishLine({ restaurant: explicitDishRestaurant, dish }, index)
+          ).join('\n') +
+          (remaining
+            ? `\n\n_+${remaining} more registered menu item${remaining === 1 ? '' : 's'} not shown._`
+            : '');
+      }
+
+      // Compare only the items Kasaup just discussed.
+      if (isCheapestFollowUp && items.length > 1) {
+        if (kind === 'dish') {
+          const priced = items
+            .filter(x => toNumber(x?.dish?.price, null) !== null)
+            .slice()
+            .sort((a, b) => toNumber(a?.dish?.price, Infinity) - toNumber(b?.dish?.price, Infinity));
+
+          if (priced.length) {
+            const cheapest = priced[0];
+            return `💸 **Cheapest from the dishes we were discussing**\n\n${formatDishFollowUpDetail(cheapest)}`;
+          }
+        }
+
+        if (kind === 'restaurant') {
+          const ranked = items
+            .map(r => {
+              const prices = safeArray(r?.menu)
+                .map(d => toNumber(d?.price, null))
+                .filter(Number.isFinite)
+                .sort((a, b) => a - b);
+              return { restaurant: r, minPrice: prices[0] ?? null };
+            })
+            .filter(x => x.minPrice !== null)
+            .sort((a, b) => a.minPrice - b.minPrice);
+
+          if (ranked.length) {
+            const best = ranked[0];
+            return `💸 **Cheapest menu starting point from those restaurants**\n\n` +
+              `**${best.restaurant.name}** — registered menu items start at **₱${best.minPrice}**.\n\n` +
+              `_This compares actual registered menu-item prices from the restaurants Kasaup just showed._`;
+          }
+        }
+
+        if (kind === 'attraction') {
+          const ranked = items
+            .map(a => ({ attraction: a, priceRank: attractionPriceRank(a) }))
+            .sort((a, b) => a.priceRank - b.priceRank);
+
+          if (ranked.length) {
+            return `💸 **Lowest registered price level from those attractions**\n\n${formatAttractionFollowUpDetail(ranked[0].attraction)}`;
+          }
+        }
+      }
+
+      if (isClosestFollowUp && items.length > 1 && (kind === 'restaurant' || kind === 'attraction')) {
+        const ranked = items
+          .map(item => ({
+            item,
+            distanceKm: calculatePlaceDistanceKm(item, kind)
+          }))
+          .filter(x => Number.isFinite(x.distanceKm))
+          .sort((a, b) => a.distanceKm - b.distanceKm);
+
+        if (ranked.length) {
+          const best = ranked[0];
+          const icon = kind === 'restaurant' ? '🍴' : '🗺️';
+          return `${icon} **Closest from the places we were discussing**\n\n` +
+            `**${best.item.name}** — approximately **${best.distanceKm.toFixed(1)} km** away by straight-line distance from your Kanyamanan start point.`;
+        }
+      }
+
+      if (isLowestCalorieFollowUp && items.length > 1 && kind === 'dish') {
+        const ranked = items
+          .filter(x => toNumber(x?.dish?.nutrition?.calories, null) !== null)
+          .slice()
+          .sort((a, b) =>
+            toNumber(a?.dish?.nutrition?.calories, Infinity) -
+            toNumber(b?.dish?.nutrition?.calories, Infinity)
+          );
+
+        if (ranked.length) {
+          return `🥗 **Lowest-calorie option from those dishes**\n\n${formatDishFollowUpDetail(ranked[0])}`;
+        }
+      }
+
+      if (selectedFollowUpItem) {
+        if (kind === 'restaurant') {
+          const r = selectedFollowUpItem;
+
+          if (followUpMenuQuestion) {
+            const menu = safeArray(r?.menu)
+              .slice()
+              .sort((a, b) => toNumber(a?.price, Infinity) - toNumber(b?.price, Infinity));
+
+            if (!menu.length) {
+              return `🍽️ **${r?.name || 'Registered restaurant'} menu**\n\nNo menu items are currently registered for this restaurant.`;
+            }
+
+            return `🍽️ **Registered dishes at ${r.name}**\n\n` +
+              menu.slice(0, 15).map((dish, index) =>
+                formatDirectDishLine({ restaurant: r, dish }, index)
+              ).join('\n');
+          }
+
+          return formatRestaurantFollowUpDetail(r);
+        }
+
+        if (kind === 'dish') {
+          const d = selectedFollowUpItem?.dish || {};
+          const r = selectedFollowUpItem?.restaurant || {};
+          const kcal = toNumber(d?.nutrition?.calories, null);
+          const price = toNumber(d?.price, null);
+
+          if (followUpAsksCalories && !isLowestCalorieFollowUp) {
+            return kcal !== null
+              ? `🥗 **${d?.name || 'That dish'}** has a registered calorie value of **${kcal} kcal**${r?.name ? ` at **${r.name}**` : ''}.`
+              : `🥗 **${d?.name || 'That dish'}** does not currently have a registered calorie value in Kanyamanan.`;
+          }
+
+          if (followUpAsksPrice && !isCheapestFollowUp) {
+            return price !== null
+              ? `💰 **${d?.name || 'That dish'}** is registered at **₱${price}**${r?.name ? ` at **${r.name}**` : ''}.`
+              : `💰 **${d?.name || 'That dish'}** does not currently have a registered menu price in Kanyamanan.`;
+          }
+
+          if (followUpAsksIngredients) {
+            const detailLines = [];
+            if (d?.ingredients) detailLines.push(`• **Ingredients:** ${d.ingredients}`);
+            if (d?.allergens) detailLines.push(`• **Allergens:** ${d.allergens}`);
+            if (d?.healthIndicators) detailLines.push(`• **Health indicator:** ${d.healthIndicators}`);
+
+            return `🍽️ **${d?.name || 'Registered dish'}**\n\n` +
+              (detailLines.length
+                ? detailLines.join('\n')
+                : 'No ingredient or allergen details are currently registered for this dish.');
+          }
+
+          return formatDishFollowUpDetail(selectedFollowUpItem);
+        }
+
+        if (kind === 'attraction') {
+          return formatAttractionFollowUpDetail(selectedFollowUpItem);
+        }
+      }
+
+      const singularReference =
+        /\b(?:it|that|this|that one|this one|the one|yan|iyan|iyon|ito|yun|yung|yong)\b/i.test(userMsg);
+
+      if (singularReference && items.length > 1) {
+        const choices = items
+          .slice(0, 5)
+          .map((item, index) => {
+            const name =
+              kind === 'dish'
+                ? item?.dish?.name
+                : item?.name;
+            return `${index + 1}. ${name || `Option ${index + 1}`}`;
+          })
+          .join('\n');
+
+        return `I can follow that, but there are several possible references in the last Kasaup result.\n\n${choices}\n\nSay the name or position, for example **“the second one.”**`;
+      }
+
+      return null;
     };
 
     const sortedPlanDishes = filteredDishes.slice().sort((a, b) => {
@@ -5501,6 +6262,11 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           `• Cost: ₱${currentTrip.cost} / ₱${budgetLimit}\n` +
           `• Route distance: ${currentTrip.distanceKm} km\n` +
           `• ETA: ${currentTrip.durationMin} min`;
+      }
+
+      const conversationFollowUpAnswer = buildConversationFollowUpAnswer();
+      if (conversationFollowUpAnswer) {
+        return conversationFollowUpAnswer;
       }
 
       if (plan.purineConcern || localConstraints.asksPurine) {
