@@ -3557,6 +3557,130 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       return ordered;
     };
 
+    // Build dish references from the actual structured dish names Kasaup
+    // displayed, not from arbitrary substring hits anywhere in the message.
+    //
+    // Why this matters:
+    //   "Lugaw Egg" must not also pull every registered "Lugaw" into the frame.
+    //   "Rice" in a menu/detail field must not pull rice rows from other restaurants.
+    //   Duplicate names such as two Hamsilog rows should remain distinguishable
+    //   by their displayed restaurant + registered price.
+    const orderedDishMentionsForFrame = (messageText, restaurantsMentioned = []) => {
+      const sourceText = String(messageText || '');
+      const dishNameMap = new Map();
+
+      safeArray(allDishes).forEach(item => {
+        const dishName = normalize(item?.dish?.name || '');
+        if (!dishName) return;
+        if (!dishNameMap.has(dishName)) dishNameMap.set(dishName, []);
+        dishNameMap.get(dishName).push(item);
+      });
+
+      const ordered = [];
+      const seen = new Set();
+
+      const itemKey = item =>
+        `${item?.restaurant?.id || normalize(item?.restaurant?.name || '')}::` +
+        `${item?.dish?.id || normalize(item?.dish?.name || '')}::` +
+        `${toNumber(item?.dish?.price, '')}`;
+
+      const addBestExactMatch = (displayedDishName, lineText = '') => {
+        const normalizedDishName = normalize(displayedDishName);
+        const candidates = safeArray(dishNameMap.get(normalizedDishName));
+        if (!candidates.length) return;
+
+        const normalizedLine = normalize(lineText);
+        const lineRestaurants = safeArray(restaurantsMentioned).filter(r => {
+          const restaurantName = normalize(r?.name || '');
+          return restaurantName && normalizedLine.includes(restaurantName);
+        });
+
+        const scopedRestaurant =
+          lineRestaurants.length === 1
+            ? lineRestaurants[0]
+            : safeArray(restaurantsMentioned).length === 1
+              ? restaurantsMentioned[0]
+              : null;
+
+        let scopedCandidates = scopedRestaurant
+          ? candidates.filter(item =>
+              (
+                item?.restaurant?.id &&
+                scopedRestaurant?.id &&
+                String(item.restaurant.id) === String(scopedRestaurant.id)
+              ) ||
+              normalize(item?.restaurant?.name || '') === normalize(scopedRestaurant?.name || '')
+            )
+          : candidates.slice();
+
+        if (!scopedCandidates.length) scopedCandidates = candidates.slice();
+
+        // Direct dish-list lines contain the registered price. Use it to keep
+        // same-name rows at one restaurant (for example two Hamsilog prices)
+        // tied to the exact row Kasaup showed.
+        const priceMatch = String(lineText || '').match(
+          /(?:₱|php\s*)\s*([0-9][0-9,]*(?:\.[0-9]+)?)/i
+        );
+        const displayedPrice = priceMatch?.[1]
+          ? toNumber(priceMatch[1], null)
+          : null;
+
+        if (displayedPrice !== null) {
+          const samePrice = scopedCandidates.filter(
+            item => toNumber(item?.dish?.price, null) === displayedPrice
+          );
+          if (samePrice.length) scopedCandidates = samePrice;
+        }
+
+        const chosen =
+          scopedCandidates.find(item => !seen.has(itemKey(item))) ||
+          scopedCandidates[0];
+
+        if (!chosen) return;
+
+        const key = itemKey(chosen);
+        if (!key || seen.has(key)) return;
+
+        seen.add(key);
+        ordered.push(chosen);
+      };
+
+      // Local Kasaup dish outputs consistently bold the dish name:
+      //   1. **Egg** — BOSS TAPSILOGAN ...
+      //   🍽️ **Lugaw**
+      // Read those exact labels first so ingredient words, restaurant-name
+      // fragments, and longer dish names cannot create false references.
+      sourceText.split('\n').forEach(line => {
+        const boldFragments = [...String(line || '').matchAll(/\*\*([^*\n]+)\*\*/g)];
+        boldFragments.forEach(match => addBestExactMatch(match?.[1] || '', line));
+      });
+
+      if (ordered.length) return ordered;
+
+      // Compatibility fallback for an unstructured/Gemini response that names
+      // dishes without Kasaup's normal bold formatting. If only one restaurant
+      // is present, keep the fallback inside that restaurant before scanning
+      // the broader catalog.
+      const fallbackCatalog =
+        safeArray(restaurantsMentioned).length === 1
+          ? safeArray(allDishes).filter(item =>
+              (
+                item?.restaurant?.id &&
+                restaurantsMentioned[0]?.id &&
+                String(item.restaurant.id) === String(restaurantsMentioned[0].id)
+              ) ||
+              normalize(item?.restaurant?.name || '') === normalize(restaurantsMentioned[0]?.name || '')
+            )
+          : allDishes;
+
+      return orderedCatalogMentions(
+        sourceText,
+        fallbackCatalog,
+        x => x?.dish?.name || '',
+        x => `${x?.restaurant?.id || normalize(x?.restaurant?.name || '')}::${x?.dish?.id || normalize(x?.dish?.name || '')}`
+      );
+    };
+
     const buildConversationReferenceFrame = (message) => {
       const messageText = String(message?.text || '');
       const normalizedText = normalize(messageText);
@@ -3575,11 +3699,9 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         a => a?.id || normalize(a?.name || '')
       );
 
-      const dishesInOrder = orderedCatalogMentions(
+      const dishesInOrder = orderedDishMentionsForFrame(
         messageText,
-        allDishes,
-        x => x?.dish?.name || '',
-        x => `${x?.restaurant?.id || normalize(x?.restaurant?.name || '')}::${x?.dish?.id || normalize(x?.dish?.name || '')}`
+        restaurantsInOrder
       );
 
       const leadLine = normalize(
