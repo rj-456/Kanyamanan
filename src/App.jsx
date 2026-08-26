@@ -3872,6 +3872,94 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     const explicitDishTopic = /\b(?:dish|dishes|menu|meal|meals|food|foods|ulam|pagkain)\b/i.test(userMsg);
     const explicitAttractionTopic = /\b(?:attraction|attractions|tourist spot|tourist spots|destination|destinations|heritage|landmark|museum|church|park|pasyalan|puntahan)\b/i.test(userMsg);
 
+    // ============================================================
+    // RESTAURANT-vs-DISH OUTPUT TARGET (Restaurant logic fix)
+    // ============================================================
+    // A prompt may mention both restaurants and dishes while asking Kasaup
+    // to RETURN only one entity type:
+    //
+    //   "Recommend restaurants in Porac with dishes under ₱300."
+    //        -> restaurant results; dish price is a restaurant constraint.
+    //
+    //   "Recommend dishes from restaurants in Porac."
+    //        -> dish results; restaurant/location is a dish constraint.
+    //
+    // Prefer the first requested entity after a recommendation/listing verb.
+    // This is intentionally local to Kasaup routing; it never rewrites data.
+    const requestedFoodResultKind = (() => {
+      const q = normalize(userMsg);
+      const actionMatch = q.match(
+        /\b(?:recommend|suggest|show|list|find|give|pick|choose)\b/
+      );
+
+      if (actionMatch && Number.isFinite(actionMatch.index)) {
+        const tail = q.slice(actionMatch.index + actionMatch[0].length);
+
+        const restaurantMatch = tail.match(
+          /\b(?:restaurant|restaurants|kainan|eatery|eateries|place to eat|places to eat)\b/
+        );
+        const dishMatch = tail.match(
+          /\b(?:dish|dishes|meal|meals|food|foods|menu item|menu items|ulam|pagkain)\b/
+        );
+
+        const restaurantPos =
+          restaurantMatch && Number.isFinite(restaurantMatch.index)
+            ? restaurantMatch.index
+            : Infinity;
+        const dishPos =
+          dishMatch && Number.isFinite(dishMatch.index)
+            ? dishMatch.index
+            : Infinity;
+
+        if (restaurantPos < dishPos) return 'restaurant';
+        if (dishPos < restaurantPos) return 'dish';
+      }
+
+      // Question forms where the requested result type is explicit.
+      if (
+        /\b(?:what|which)\s+(?:dish|dishes|meal|meals|food|foods|menu items?)\b/i.test(q) ||
+        /\bwhat\s+(?:can|should|could)\s+(?:i|we)\s+eat\b/i.test(q)
+      ) {
+        return 'dish';
+      }
+
+      if (
+        /\b(?:what|which)\s+(?:restaurant|restaurants|kainan|place to eat|places to eat)\b/i.test(q) ||
+        /\b(?:cheapest|most affordable|least expensive|lowest[- ]priced|best|closest|nearest)\s+(?:restaurant|restaurants|restaurant option|place to eat|places to eat|kainan)\b/i.test(q) ||
+        /\b(?:restaurant|restaurants)\s+option\b/i.test(q) ||
+        /\b(?:where|saan)\s+(?:should|can|could|do)?\s*(?:i|we|kami|tayo)?\s*(?:eat|dine|kumain|mangan)\b/i.test(q)
+      ) {
+        return 'restaurant';
+      }
+
+      if (explicitRestaurantTopic && !explicitDishTopic) return 'restaurant';
+      if (explicitDishTopic && !explicitRestaurantTopic) return 'dish';
+
+      return null;
+    })();
+
+    const explicitRestaurantResultRequest =
+      requestedFoodResultKind === 'restaurant';
+
+    const explicitDishResultRequest =
+      requestedFoodResultKind === 'dish';
+
+    const hasExplicitRecentSetReference =
+      followUpOrdinalIndex !== null ||
+      /\b(?:which one|which of|among those|among them|of those|of them|those|these|them|previous|above|former|latter|that one|this one|same one|other one|another one)\b/i.test(userMsg);
+
+    // A fresh restaurant search must outrank old conversation frames.
+    // A location change is always a new geographic scope.
+    const freshRestaurantSearch =
+      explicitRestaurantResultRequest &&
+      (
+        Boolean(localConstraints.location) ||
+        (
+          /\b(?:recommend|suggest|show|list|find|give|pick|choose)\b/i.test(userMsg) &&
+          !hasExplicitRecentSetReference
+        )
+      );
+
     const followUpMenuQuestion =
       /\b(?:dish|dishes|menu|meal|meals|food|foods|serve|serves|serving|offer|offers|available to eat|what can i eat|what to eat|ulam|pagkain|anong pagkain|ano.*(?:menu|pagkain|ulam))\b/i.test(userMsg);
 
@@ -3893,10 +3981,10 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       }
 
       if (kind === 'restaurant' && !explicitAttractionTopic) {
-        if (followUpMenuQuestion) {
+        if (followUpMenuQuestion && !explicitRestaurantResultRequest) {
           localConstraints.asksDishList = true;
           localConstraints.asksRestaurantRecommendation = false;
-        } else if (!explicitDishTopic) {
+        } else if (!explicitDishTopic || explicitRestaurantResultRequest) {
           localConstraints.asksRestaurantRecommendation = true;
           localConstraints.asksRecommendation = true;
         }
@@ -3917,6 +4005,16 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           localConstraints.asksAttractionDetails = true;
         }
       }
+    }
+
+    // The user's explicit requested output type outranks incidental constraint
+    // words. "restaurants ... with dishes under ₱300" is a restaurant query,
+    // even though the word "dishes" is present.
+    if (explicitRestaurantResultRequest) {
+      localConstraints.asksRestaurantRecommendation = true;
+      localConstraints.asksRestaurantList = true;
+      localConstraints.asksDishList = false;
+      localConstraints.asksRecommendation = true;
     }
 
     // ============================================================
@@ -4350,13 +4448,13 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
     const budgetContextLabel = (() => {
       if (budgetContext.amount === null) return '';
-      if (budgetContext.groupSize <= 1) {
-        return `${formatPeso(budgetContext.totalLimit)} budget`;
-      }
       if (budgetContext.itemCeiling) {
         return budgetContext.groupSize > 1
           ? `${formatPeso(budgetContext.perPersonLimit)} per-dish ceiling; about ${formatPeso(budgetContext.totalLimit)} if ${budgetContext.groupSize} people order one each`
           : `${formatPeso(budgetContext.perPersonLimit)} per-dish ceiling`;
+      }
+      if (budgetContext.groupSize <= 1) {
+        return `${formatPeso(budgetContext.totalLimit)} budget`;
       }
       if (budgetContext.perPersonExplicit) {
         return `${formatPeso(budgetContext.perPersonLimit)}/person × ${budgetContext.groupSize} = ${formatPeso(budgetContext.totalLimit)} group allowance`;
@@ -4396,8 +4494,10 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       'good', 'great', 'ideal', 'worth', 'must', 'try', 'where', 'what',
       'which', 'should', 'could', 'would', 'please', 'restaurant',
       'restaurants', 'place', 'places', 'eat', 'eating', 'dine', 'dining',
-      'food', 'foods', 'meal', 'meals', 'kainan', 'pagkain', 'somewhere',
-      'something', 'near', 'nearby', 'around', 'here', 'there', 'with',
+      'food', 'foods', 'meal', 'meals', 'dish', 'dishes', 'menu', 'menus',
+      'item', 'items', 'option', 'options', 'serve', 'serves', 'serving',
+      'kainan', 'pagkain', 'somewhere', 'something',
+      'near', 'nearby', 'around', 'here', 'there', 'with',
       'under', 'below', 'budget', 'cheap', 'cheapest', 'affordable',
       'price', 'cost', 'peso', 'pesos', 'php', 'people', 'person', 'persons',
       'pax', 'family', 'group', 'friends', 'today', 'tonight', 'tomorrow',
@@ -4445,12 +4545,18 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         .filter(Boolean)
     );
 
+    const genericRestaurantConstraintTokens = new Set([
+      'dish', 'dishes', 'menu', 'menus', 'item', 'items', 'option', 'options',
+      'serve', 'serves', 'serving', 'restaurant', 'restaurants'
+    ]);
+
     const recommendationFoodTokens = unique(
       normalize(userMsg)
         .split(/\s+/)
         .filter(token =>
           token.length >= 3 &&
           !recommendationStopWords.has(token) &&
+          !genericRestaurantConstraintTokens.has(token) &&
           !municipalityTokens.has(token) &&
           !dietaryExcludedFoodTokens.has(token) &&
           !/^\d+(?:\.\d+)?$/.test(token) &&
@@ -4507,6 +4613,27 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       if (ingredients.length >= 20) score += 10;
       if (name.split(/\s+/).filter(Boolean).length >= 2) score += 5;
       if (calories !== null) score += 2;
+
+      // Some imported menu rows may contain a price fragment in the dish name
+      // that conflicts with the structured price field. Keep the registered
+      // row available for direct lookup, but don't make it a broad "Try:" pick.
+      const embeddedPriceMatch = String(dish?.name || '').match(
+        /(?:₱|php\s*)\s*([0-9][0-9,]*(?:\.[0-9]+)?)/i
+      );
+      const embeddedNamePrice = embeddedPriceMatch?.[1]
+        ? toNumber(embeddedPriceMatch[1], null)
+        : null;
+
+      if (embeddedNamePrice !== null) {
+        score -= 12;
+
+        if (
+          price !== null &&
+          Math.abs(embeddedNamePrice - price) > Math.max(10, price * 0.15)
+        ) {
+          score -= 70;
+        }
+      }
 
       // For a budget ceiling, favor useful options comfortably inside the
       // allowance rather than automatically choosing the minimum price.
@@ -4746,10 +4873,14 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         mealMenuForBudget[0] ||
         menuForBudget
           .slice()
-          .sort((a, b) =>
-            getBudgetDishQuality(b, recommendationPerPersonBudget) -
-            getBudgetDishQuality(a, recommendationPerPersonBudget)
-          )[0] ||
+          .sort((a, b) => {
+            const qualityDiff =
+              getBudgetDishQuality(b, recommendationPerPersonBudget) -
+              getBudgetDishQuality(a, recommendationPerPersonBudget);
+            if (qualityDiff !== 0) return qualityDiff;
+
+            return toNumber(a?.price, Infinity) - toNumber(b?.price, Infinity);
+          })[0] ||
         null;
 
       const knownPrices = safeMenu
@@ -4757,7 +4888,37 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         .filter(Number.isFinite)
         .sort((a, b) => a - b);
 
+      // For restaurant-level affordability, don't let plain rice, drinks,
+      // add-ons, suspicious ultra-low rows, or malformed price text define
+      // the whole restaurant's "cheapest" position.
+      const mealLikePricedMenu = safeMenu
+        .filter(d =>
+          toNumber(d?.price, null) !== null &&
+          getBudgetDishQuality(d, null) > 0
+        )
+        .slice()
+        .sort((a, b) =>
+          toNumber(a?.price, Infinity) - toNumber(b?.price, Infinity)
+        );
+
+      const matchingKnownPrices = matchingDishes
+        .map(x => toNumber(x?.dish?.price, null))
+        .filter(Number.isFinite)
+        .sort((a, b) => a - b);
+
       const minPrice = knownPrices.length ? knownPrices[0] : null;
+      const mealMinPrice = mealLikePricedMenu.length
+        ? toNumber(mealLikePricedMenu[0]?.price, null)
+        : null;
+      const matchingMinPrice = matchingKnownPrices.length
+        ? matchingKnownPrices[0]
+        : null;
+
+      const affordabilityPrice =
+        recommendationFoodTokens.length && matchingMinPrice !== null
+          ? matchingMinPrice
+          : (mealMinPrice ?? minPrice);
+
       const medianPrice = knownPrices.length
         ? knownPrices[Math.floor((knownPrices.length - 1) / 2)]
         : null;
@@ -4769,7 +4930,11 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         mealMenuForBudget,
         representativeBudgetDish,
         matchingDishes,
+        mealLikePricedMenu,
         minPrice,
+        mealMinPrice,
+        matchingMinPrice,
+        affordabilityPrice,
         medianPrice,
         hasKnownPrices: knownPrices.length > 0,
         dietaryUnknownCount: dietaryUnknownMenu.length
@@ -5512,11 +5677,19 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
         // If the user gave a hard budget and prices are known, require at least
         // one registered menu option inside the rough per-person allowance.
-        if (recommendationPerPersonBudget !== null &&
-            p.stats.hasKnownPrices &&
-            !p.stats.mealMenuForBudget.length &&
-            !(recommendationFoodTokens.length && p.stats.menuForBudget.length)) {
-          return false;
+        if (
+          recommendationPerPersonBudget !== null &&
+          p.stats.hasKnownPrices
+        ) {
+          const hasPriceCeilingFit =
+            budgetContext.itemCeiling
+              ? p.stats.menuForBudget.length > 0
+              : (
+                  p.stats.mealMenuForBudget.length > 0 ||
+                  (recommendationFoodTokens.length && p.stats.menuForBudget.length > 0)
+                );
+
+          if (!hasPriceCeilingFit) return false;
         }
 
         if (hasActiveDietaryConstraint() && !p.stats.safeMenu.length) {
@@ -5558,8 +5731,8 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         }
 
         if (/\b(?:cheap|cheaper|cheapest|affordable|lowest price|mura|murang)\b/i.test(userMsg)) {
-          const ap = a.stats.minPrice ?? Infinity;
-          const bp = b.stats.minPrice ?? Infinity;
+          const ap = a.stats.affordabilityPrice ?? a.stats.minPrice ?? Infinity;
+          const bp = b.stats.affordabilityPrice ?? b.stats.minPrice ?? Infinity;
           if (ap !== bp) return ap - bp;
         }
 
@@ -5568,11 +5741,19 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         return normalize(a.restaurant?.name).localeCompare(normalize(b.restaurant?.name));
       });
 
+    const explicitPluralRestaurantRequest =
+      /\brestaurants\b/i.test(userMsg) &&
+      !/\b(?:which one|choose one|pick one|recommend one|suggest one)\b/i.test(userMsg);
+
     const recommendationSingleChoice =
-      localConstraints.asksNearestOnly ||
-      /\b(?:which one|which restaurant|cheapest one|the cheapest one|closest one|nearest one|best restaurant|best place|pick one|choose one)\b/i.test(userMsg) ||
-      /\b(?:what|which)\s+(?:restaurant|place to eat|kainan)\s+(?:is\s+)?(?:closest|nearest)\b/i.test(userMsg) ||
-      /\b(?:recommend|suggest)\s+(?:me\s+)?(?:a|one)\s+(?:restaurant|place|kainan)\b/i.test(userMsg);
+      !explicitPluralRestaurantRequest &&
+      (
+        localConstraints.asksNearestOnly ||
+        /\b(?:which one|which restaurant|cheapest one|the cheapest one|closest one|nearest one|best restaurant|best place|pick one|choose one)\b/i.test(userMsg) ||
+        /\b(?:what|which)\s+(?:restaurant|place to eat|kainan)\s+(?:is\s+)?(?:closest|nearest)\b/i.test(userMsg) ||
+        /\b(?:what(?:'s| is)?\s+)?(?:the\s+)?(?:cheapest|most affordable|least expensive|lowest[- ]priced)\s+(?:restaurant|restaurant option|place to eat|kainan)\b/i.test(userMsg) ||
+        /\b(?:recommend|suggest)\s+(?:me\s+)?(?:a|one)\s+(?:restaurant|place|kainan)\b/i.test(userMsg)
+      );
 
     const recommendationResultLimit = Math.max(
       1,
@@ -6741,7 +6922,13 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       }) || null;
 
     const followUpRestaurantForMenu = (() => {
-      if (!isFollowUpQuery || !followUpMenuQuestion || !referenceFrameForFollowUp) return null;
+      if (
+        !isFollowUpQuery ||
+        !followUpMenuQuestion ||
+        !referenceFrameForFollowUp ||
+        freshRestaurantSearch ||
+        explicitRestaurantResultRequest
+      ) return null;
 
       // Normal restaurant follow-up: "What dishes does it have?"
       if (referenceFrameForFollowUp.primaryKind === 'restaurant') {
@@ -6802,6 +6989,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         /\b(?:dish|meal|food|menu item|ulam|pagkain)\b.*\b(?:cheapest|lowest priced|lowest-priced|least expensive|most affordable|pinakamura)\b/i.test(userMsg) ||
         (
           isFollowUpQuery &&
+          !explicitRestaurantResultRequest &&
           referenceFrameForFollowUp?.primaryKind === 'dish' &&
           /\b(?:cheaper|cheapest|lowest|least expensive|most affordable|pinakamura|mas mura)\b/i.test(userMsg)
         )
@@ -6816,6 +7004,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
     const isDirectDishQuestion =
       localConstraints.asksDishList &&
+      !explicitRestaurantResultRequest &&
       !localConstraints.asksRoute &&
       !localConstraints.asksAction &&
       !localConstraints.asksAttraction &&
@@ -7154,7 +7343,17 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     const buildConversationFollowUpAnswer = () => {
       if (!isFollowUpQuery || !referenceFrameForFollowUp?.primaryKind) return null;
 
+      // Explicit fresh restaurant searches start a new result scope. This stops
+      // "Recommend restaurants that serve sisig" from opening the previous
+      // restaurant's menu, and stops a new-city restaurant query from comparing
+      // an older dish list.
+      if (freshRestaurantSearch) return null;
+
       const kind = referenceFrameForFollowUp.primaryKind;
+
+      // If the user explicitly asks for restaurants while the latest frame is
+      // dishes, do not answer the restaurant question as a dish comparison.
+      if (explicitRestaurantResultRequest && kind !== 'restaurant') return null;
       const items = followUpPrimaryItems;
       if (!items.length) return null;
 
@@ -7659,6 +7858,7 @@ QUALITY BAR:
 - For dietary constraints, use registered dish name/ingredient/allergen data conservatively. Never call an item allergy-safe, certified vegan/vegetarian, or halal-certified unless that certification is explicitly stored. For allergies, mention that cross-contact and complete recipes are not available and the user should verify with the restaurant.
 - For "near me", "nearby", "closest to me", and radius requests, use the supplied detected-location context. Never describe the default San Fernando start point as the user's current location. Distances in local Kasaup ranking are straight-line estimates unless a road-route result is explicitly supplied.
 - For comparisons, compare the requested entities rather than giving unrelated recommendations.
+- If a prompt asks for restaurants and mentions dishes only as a condition (for example, "restaurants with dishes under ₱300" or "restaurants that serve sisig"), return restaurants rather than converting the request into a dish list or a previous restaurant's menu.
 - For "what should I eat?" style prompts, rank choices and explain the trade-off.
 - For "why" or educational questions, explain the reasoning in plain language.
 - For tourist questions such as "how do I get there", "how far", "is it worth it", "what should I bring", "what can we do after lunch", "where can we eat nearby", "what is good for kids", "is this expensive", and "can we fit this in one day", answer the underlying travel need instead of requiring a special command.
@@ -8284,13 +8484,19 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
             if (representativeBudgetDish && representativePrice !== null) {
               reasons.push(
-                requestedGroupSize > 1
-                  ? `a registered meal option at ₱${representativePrice}, within the ${formatPeso(recommendationPerPersonBudget)}/person allowance`
-                  : `a registered meal option at ₱${representativePrice}, within your budget`
+                budgetContext.itemCeiling
+                  ? `has a registered dish at ₱${representativePrice}, within the ${formatPeso(recommendationPerPersonBudget)} per-dish ceiling`
+                  : requestedGroupSize > 1
+                    ? `a registered meal option at ₱${representativePrice}, within the ${formatPeso(recommendationPerPersonBudget)}/person allowance`
+                    : `a registered meal option at ₱${representativePrice}, within your budget`
               );
             }
-          } else if (stats.minPrice !== null && localConstraints.asksBudget) {
-            reasons.push(`registered menu prices start around ₱${stats.minPrice}`);
+          } else if (stats.affordabilityPrice !== null && localConstraints.asksBudget) {
+            reasons.push(
+              stats.mealMinPrice !== null
+                ? `meal-like registered options start around ₱${stats.affordabilityPrice}`
+                : `registered menu prices start around ₱${stats.affordabilityPrice}`
+            );
           }
 
           if (hasActiveDietaryConstraint() && stats.safeMenu.length) {
