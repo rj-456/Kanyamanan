@@ -2920,6 +2920,220 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       /\b(?:kami|tayo)\s+(?:ay\s+)?(\d+)\b/i
     ]);
 
+    // ============================================================
+    // DIETARY CONSTRAINT VOCABULARY (Batch 6)
+    // ============================================================
+    // These aliases are checked only against dish-level registered data.
+    const dietaryAliasGroups = {
+      pork: [
+        'pork', 'pig', 'baboy', 'bacon', 'ham', 'tocino', 'longganisa',
+        'longanisa', 'chorizo', 'lechon', 'chicharon', 'pork belly'
+      ],
+      beef: ['beef', 'baka', 'bulalo', 'beef shank'],
+      chicken: ['chicken', 'manok'],
+      other_meat: ['goat', 'kambing', 'lamb', 'mutton', 'duck', 'pato'],
+      fish: [
+        'fish', 'bangus', 'milkfish', 'tilapia', 'salmon', 'tuna',
+        'anchovy', 'anchovies', 'sardine', 'sardines', 'mackerel',
+        'galunggong', 'dilis'
+      ],
+      shellfish: [
+        'shellfish', 'shrimp', 'prawn', 'crab', 'lobster', 'mussel',
+        'mussels', 'clam', 'clams', 'oyster', 'oysters', 'scallop',
+        'scallops', 'hipon', 'alimango', 'alimasag'
+      ],
+      seafood: [
+        'seafood', 'fish', 'bangus', 'milkfish', 'tilapia', 'salmon', 'tuna',
+        'anchovy', 'anchovies', 'sardine', 'sardines', 'mackerel',
+        'shrimp', 'prawn', 'crab', 'lobster', 'mussel', 'mussels', 'clam',
+        'clams', 'oyster', 'oysters', 'squid', 'calamari', 'pusit'
+      ],
+      squid: ['squid', 'calamari', 'pusit', 'octopus'],
+      dairy: [
+        'dairy', 'milk', 'lactose', 'cheese', 'butter', 'cream', 'yogurt', 'yoghurt',
+        'whey', 'casein', 'condensed milk', 'evaporated milk'
+      ],
+      egg: ['egg', 'eggs', 'itlog', 'mayonnaise', 'mayo'],
+      soy: ['soy', 'soya', 'tofu', 'tokwa', 'soy sauce'],
+      gluten: [
+        'gluten', 'wheat', 'flour', 'breadcrumbs', 'bread crumbs',
+        'bread', 'noodle', 'noodles', 'pasta'
+      ],
+      nuts: [
+        'nut', 'nuts', 'peanut', 'peanuts', 'mani', 'cashew', 'cashews',
+        'almond', 'almonds', 'walnut', 'walnuts', 'pistachio', 'hazelnut'
+      ],
+      sesame: ['sesame', 'sesame seed', 'sesame seeds'],
+      alcohol: ['alcohol', 'wine', 'beer', 'rum', 'brandy', 'liquor'],
+      bagoong: ['bagoong', 'shrimp paste', 'alamang', 'fermented shrimp'],
+      honey: ['honey']
+    };
+
+    const dietaryGroupAliases = (term) => {
+      const normalizedTerm = normalize(term);
+      if (!normalizedTerm) return [];
+
+      if (dietaryAliasGroups[normalizedTerm]) {
+        return dietaryAliasGroups[normalizedTerm];
+      }
+
+      const matchingKey = Object.keys(dietaryAliasGroups).find(key =>
+        dietaryAliasGroups[key].some(alias => normalize(alias) === normalizedTerm)
+      );
+
+      return matchingKey ? dietaryAliasGroups[matchingKey] : [normalizedTerm];
+    };
+
+    const canonicalDietaryTerm = (term) => {
+      const normalizedTerm = normalize(term);
+      if (!normalizedTerm) return '';
+
+      const exactKey = Object.keys(dietaryAliasGroups).find(key =>
+        key === normalizedTerm ||
+        dietaryAliasGroups[key].some(alias => normalize(alias) === normalizedTerm)
+      );
+
+      return exactKey || normalizedTerm;
+    };
+
+    const dietaryTextIncludesTerm = (value, term) => {
+      const haystack = ` ${normalize(value)} `;
+      return dietaryGroupAliases(term).some(alias => {
+        const needle = normalize(alias);
+        return needle && haystack.includes(` ${needle} `);
+      });
+    };
+
+    const extractDietaryInfo = (value) => {
+      const raw = String(value || '');
+      const q = normalize(raw);
+
+      const reset =
+        /\b(?:no dietary restrictions?|no food restrictions?|ignore (?:my |our )?(?:dietary|food) restrictions?|clear (?:my |our )?(?:dietary|food) restrictions?|anything is fine|i can eat anything|we can eat anything)\b/i.test(raw);
+
+      const pattern =
+        /\bvegan\b/i.test(raw) ? 'vegan' :
+        /\b(?:vegetarian|meat[- ]?free|no meat)\b/i.test(raw) ? 'vegetarian' :
+        /\bpescatarian\b/i.test(raw) ? 'pescatarian' :
+        null;
+
+      const halalRequested = /\bhalal\b/i.test(raw);
+      const allergyTerms = [];
+      const exclusionTerms = [];
+
+      const pushSegmentTerms = (segment, target) => {
+        String(segment || '')
+          .replace(/[.!?]+$/g, '')
+          .split(/,|\/|\band\b|\bor\b/gi)
+          .map(x => x
+            .replace(/^(?:any|all|foods?|dishes?|meals?|ingredients?|anything with|anything containing)\s+/i, '')
+            .replace(/\s+(?:food|foods|dish|dishes|meal|meals|ingredient|ingredients|products?)$/i, '')
+            .replace(/\s+(?:please|thanks|thank you)$/i, '')
+            .trim()
+          )
+          .filter(x => x.length >= 2)
+          .forEach(x => target.push(canonicalDietaryTerm(x)));
+      };
+
+      const allergyPatterns = [
+        /(?:allergic to|allergy to|allergies to|intolerant to|intolerance to|sensitive to|sensitivity to|cannot have|can't have|cant have)\s+(.+?)(?=\s+(?:but|so|please|recommend|suggest|show|find|where|what|which|under|below|within|for|in|at|with a budget)\b|[.!?]|$)/gi,
+        /(?:allergic|may allergy)\s+(?:ako|kami|tayo)?\s*sa\s+(.+?)(?=\s+(?:pero|kaya|please|recommend|suggest|show|find|saan|ano|for|in|at)\b|[.!?]|$)/gi
+      ];
+
+      allergyPatterns.forEach(patternRegex => {
+        for (const match of raw.matchAll(patternRegex)) {
+          if (match?.[1]) pushSegmentTerms(match[1], allergyTerms);
+        }
+      });
+
+      // Also understand forms such as "shellfish allergy", "peanut allergy",
+      // "lactose intolerant", and "gluten intolerance".
+      Object.keys(dietaryAliasGroups).forEach(group => {
+        dietaryAliasGroups[group].forEach(alias => {
+          const escapedAlias = String(alias).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const suffixPattern = new RegExp(
+            `\\b${escapedAlias}\\s+(?:allergy|allergies|intolerance|sensitivity|intolerant|sensitive)\\b`,
+            'i'
+          );
+          if (suffixPattern.test(raw)) allergyTerms.push(group);
+        });
+      });
+
+      const exclusionPatterns = [
+        /(?:without|exclude|excluding|avoid|avoiding|(?:bawal(?:\s+(?:ako|kami|tayo))?\s+sa)|ayoko(?: ng)?|no)\s+(.+?)(?=\s+(?:but|so|pero|please|recommend|suggest|show|find|where|what|which|under|below|less|at most|max|budget|for|in|at|within|with|today|tonight)\b|[.!?]|$)/gi,
+        /(?:don't|do not|dont|can't|cannot|cant)\s+(?:eat|have|consume|want)\s+(.+?)(?=\s+(?:but|so|please|recommend|suggest|show|find|where|what|which|under|below|for|in|at|within|with|today|tonight)\b|[.!?]|$)/gi,
+        /hindi\s+(?:ako|kami|tayo)\s+(?:kumakain|kakain|kumain)\s+ng\s+(.+?)(?=\s+(?:pero|kaya|please|recommend|suggest|show|find|saan|ano|for|in|at)\b|[.!?]|$)/gi
+      ];
+
+      exclusionPatterns.forEach(patternRegex => {
+        for (const match of raw.matchAll(patternRegex)) {
+          if (match?.[1]) pushSegmentTerms(match[1], exclusionTerms);
+        }
+      });
+
+      const freeGroupSpecs = [
+        ['pork', /\b(?:pork|baboy)[ -]?free\b/i],
+        ['beef', /\b(?:beef|baka)[ -]?free\b/i],
+        ['chicken', /\b(?:chicken|manok)[ -]?free\b/i],
+        ['fish', /\bfish[ -]?free\b/i],
+        ['shellfish', /\bshellfish[ -]?free\b/i],
+        ['seafood', /\bseafood[ -]?free\b/i],
+        ['dairy', /\b(?:dairy|milk)[ -]?free\b/i],
+        ['egg', /\begg[ -]?free\b/i],
+        ['soy', /\bsoy[ -]?free\b/i],
+        ['gluten', /\bgluten[ -]?free\b/i],
+        ['nuts', /\b(?:nut|nuts|peanut|peanuts)[ -]?free\b/i],
+        ['sesame', /\bsesame[ -]?free\b/i],
+        ['alcohol', /\balcohol[ -]?free\b/i],
+        ['bagoong', /\b(?:bagoong|alamang)[ -]?free\b/i]
+      ];
+
+      freeGroupSpecs.forEach(([group, regex]) => {
+        if (regex.test(raw)) exclusionTerms.push(group);
+      });
+
+      allergyTerms.forEach(term => exclusionTerms.push(term));
+
+      const uniqueAllergyTerms = unique(allergyTerms);
+      const uniqueExclusions = unique(exclusionTerms);
+
+      if (reset) {
+        return {
+          reset: true,
+          pattern: null,
+          halalRequested: false,
+          allergyTerms: [],
+          exclusionTerms: [],
+          asksAllergenInfo: false,
+          hasConstraint: false
+        };
+      }
+
+      const asksAllergenInfo =
+        /\b(?:allergen|allergens|allergy warning|allergy warnings|contains allergens?|may contain allergens?|what allergens?)\b/i.test(raw) &&
+        uniqueAllergyTerms.length === 0;
+
+      const hasConstraint =
+        !reset &&
+        (
+          Boolean(pattern) ||
+          halalRequested ||
+          uniqueExclusions.length > 0 ||
+          uniqueAllergyTerms.length > 0 ||
+          /\b(?:gout|uric acid|purine|low[- ]purine)\b/i.test(q)
+        );
+
+      return {
+        reset,
+        pattern,
+        halalRequested,
+        allergyTerms: uniqueAllergyTerms,
+        exclusionTerms: uniqueExclusions,
+        asksAllergenInfo,
+        hasConstraint
+      };
+    };
+
     const detectConstraintsLocally = (text) => {
       const raw = String(text || '');
       const q = normalize(raw);
@@ -2978,23 +3192,28 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
       const location = resolveLocalMunicipality(raw);
 
-      const exclusionTerms = [];
-      const exclusionPatterns = [
-        /(?:without|exclude|excluding|avoid|avoiding|bawal|no|allergic to|allergy to|intolerant to)\s+(.+?)(?=\s+(?:under|below|less|at most|max|budget|for|in|at|within|with|and|but|please|today|tonight)\b|$)/i,
-        /(?:don't|do not|dont)\s+(?:include|recommend|suggest|add|show)\s+(.+?)(?=\s+(?:under|below|for|in|at|with|and|but|please|today|tonight)\b|$)/i
+      const dietaryInfo = extractDietaryInfo(raw);
+
+      // Preserve arbitrary ingredient exclusions such as "no onions".
+      const exclusionTerms = [...safeArray(dietaryInfo.exclusionTerms)];
+      const genericExclusionPatterns = [
+        /(?:don't|do not|dont)\s+(?:include|recommend|suggest|add|show)\s+(.+?)(?=\s+(?:under|below|for|in|at|with|but|please|today|tonight)\b|[.!?]|$)/gi
       ];
 
-      exclusionPatterns.forEach(pattern => {
-        const m = raw.match(pattern);
-        if (!m?.[1]) return;
-        m[1]
-          .split(/,|\band\b|\bor\b/gi)
-          .map(x => x.trim())
-          .filter(x => x.length >= 3 && !/^(food|foods|dish|dishes|restaurant|restaurants)$/i.test(x))
-          .forEach(x => exclusionTerms.push(x));
+      genericExclusionPatterns.forEach(patternRegex => {
+        for (const match of raw.matchAll(patternRegex)) {
+          if (!match?.[1]) continue;
+          match[1]
+            .split(/,|\band\b|\bor\b/gi)
+            .map(x => x.trim())
+            .filter(x => x.length >= 2 && !/^(food|foods|dish|dishes|restaurant|restaurants)$/i.test(x))
+            .forEach(x => exclusionTerms.push(canonicalDietaryTerm(x)));
+        }
       });
 
       const wantsBagoongExclusion =
+        dietaryInfo.exclusionTerms.includes('bagoong') ||
+        dietaryInfo.allergyTerms.includes('bagoong') ||
         /(?:without|exclude|excluding|avoid|avoiding|bawal|no|allergic to|intolerant to)\s+(?:.*\b)?(?:bagoong|shrimp paste|alamang)/i.test(raw);
 
       if (wantsBagoongExclusion) exclusionTerms.push('bagoong');
@@ -3037,7 +3256,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         );
 
       const asksRestaurantList = /\b(?:restaurant|restaurants|kainan|where to eat|food places|places to eat|eatery|eateries|dining|dine)\b/i.test(raw);
-      const asksDishList = /\b(?:dish|dishes|menu|food|foods|meal|meals|what to eat|options|specialty|specialties|ulam|pagkain)\b/i.test(raw);
+      const asksDishList = /\b(?:dish|dishes|menu|food|foods|meal|meals|what to eat|what can i eat|what should i eat|what could i eat|options|specialty|specialties|ulam|pagkain|ano(?:ng)? pwede(?: kong| naming| nating)? kainin|anong makakain)\b/i.test(raw);
       const asksAttraction = /\b(?:attraction|attractions|tourist spot|tourist spots|tourist destination|tourist destinations|heritage|landmark|landmarks|museum|museums|church|churches|cathedral|cathedrals|parish|shrine|park|parks|historical|historic|destination|destinations|scenic|nature|cultural|sightseeing|pasyalan|puntahan)\b/i.test(raw);
       const asksHours = /\b(?:open now|open today|opening|operating hours|hours|close|closing|when.*open|when.*close|what time)\b/i.test(raw);
 
@@ -3084,10 +3303,17 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         budgetItemCeiling: Boolean(budgetItemCeiling),
         budgetExplicitlyTotal: Boolean(explicitBudgetInfo.explicitlyTotal),
         exclusionTerms: unique(exclusionTerms),
+        allergyTerms: safeArray(dietaryInfo.allergyTerms),
+        dietaryPattern: dietaryInfo.pattern,
+        asksHalal: Boolean(dietaryInfo.halalRequested),
+        dietaryReset: Boolean(dietaryInfo.reset),
+        hasDietaryConstraint: Boolean(dietaryInfo.hasConstraint),
+        asksAllergenInfo: Boolean(dietaryInfo.asksAllergenInfo),
         asksBagoong: /bagoong|shrimp paste|alamang|fermented shrimp/i.test(q),
         excludesBagoong: wantsBagoongExclusion,
-        asksPurine: /purine|uric acid|gout/i.test(q),
-        asksAllergen: /allergen|allergy|allergies|intoleran|food sensitivity|food restriction|bawal na sangkap/i.test(q),
+        asksPurine: /purine|uric acid|gout|low purine|low-purine/i.test(q),
+        asksPurineAvoidList: /\b(?:avoid|which.*avoid|high[- ]purine|higher[- ]purine|purine risk|foods? to avoid|dishes? to avoid)\b/i.test(raw),
+        asksAllergen: safeArray(dietaryInfo.allergyTerms).length > 0 || /allergen|allergy|allergies|intoleran|food sensitivity|food restriction|bawal na sangkap/i.test(q),
         asksCalories: /calorie|kcal|diet|lighter|light meal|low calorie|healthy meal/i.test(q),
         asksBudget: /budget|cheap|cheapest|affordable|price|cost|spend|peso|php|inexpensive|expensive|afford|allowance|magkano|mura/i.test(q),
         asksRoute:
@@ -3178,6 +3404,26 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     });
 
     const localConstraints = detectConstraintsLocally(userMsg);
+
+    // ============================================================
+    // DIETARY RAW-INTENT GUARDS (Batch 6)
+    // ============================================================
+    const rawDietaryInfo = extractDietaryInfo(userMsg);
+
+    const rawDietaryTaskLanguage =
+      /\b(?:recommend|suggest|show|list|find|give|where|saan|what can i eat|what should i eat|what to eat|which|restaurant|restaurants|kainan|dish|dishes|meal|meals|menu|plan|route|itinerary|trip|tour)\b/i.test(userMsg) ||
+      /\b(?:need|want|looking for)\b.*\b(?:vegan|vegetarian|pescatarian|halal|gluten[- ]free|dairy[- ]free|pork[- ]free|shellfish[- ]free|seafood[- ]free)\b.*\b(?:food|meal|meals|restaurant|restaurants)\b/i.test(userMsg);
+
+    const dietaryStatementOnly =
+      rawDietaryInfo.hasConstraint &&
+      !rawDietaryTaskLanguage &&
+      !rawDietaryInfo.reset &&
+      !/\b(?:what if|how about|instead|also|make it|this time)\b/i.test(userMsg);
+
+    const dietaryRefinementLanguage =
+      !rawDietaryInfo.reset &&
+      rawDietaryInfo.hasConstraint &&
+      /\b(?:what if|how about|instead|also|make it|this time|without|no|free|vegetarian|vegan|pescatarian|halal|allergic|allergy|intolerant)\b/i.test(userMsg);
 
     // ============================================================
     // BUDGET RAW-INTENT GUARDS
@@ -3481,7 +3727,8 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       isFollowUpQuery &&
       referenceFrameForFollowUp?.primaryKind &&
       !budgetStatementOnly &&
-      !rawBudgetProfileQuery
+      !rawBudgetProfileQuery &&
+      !dietaryStatementOnly
     ) {
       const kind = referenceFrameForFollowUp.primaryKind;
 
@@ -3531,6 +3778,88 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       .filter(m => m?.sender === 'user')
       .slice(-6)
       .reverse();
+
+    // ============================================================
+    // DIETARY CONVERSATION CONTINUITY (Batch 6)
+    // ============================================================
+    const recentDietaryInfos = [];
+    let dietaryTaskBoundariesSeen = 0;
+
+    for (const message of priorUserMessages.slice(0, 5)) {
+      const priorText = String(message?.text || '');
+      const info = extractDietaryInfo(priorText);
+
+      if (info.reset) break;
+
+      const priorHasFoodTask =
+        /\b(?:recommend|suggest|show|list|find|where|saan|restaurant|restaurants|eat|dine|kumain|dish|dishes|meal|meals|food|menu|plan|itinerary|trip)\b/i.test(priorText);
+
+      if (info.hasConstraint) recentDietaryInfos.push(info);
+
+      if (priorHasFoodTask) {
+        dietaryTaskBoundariesSeen += 1;
+        if (dietaryTaskBoundariesSeen >= 2) break;
+      }
+    }
+
+    const mergeDietaryInfos = (infos) => {
+      const validInfos = safeArray(infos).filter(Boolean);
+      const patterns = validInfos.map(x => x?.pattern).filter(Boolean);
+
+      return {
+        pattern: patterns[0] || null,
+        halalRequested: validInfos.some(x => x?.halalRequested),
+        allergyTerms: unique(validInfos.flatMap(x => safeArray(x?.allergyTerms))),
+        exclusionTerms: unique(validInfos.flatMap(x => safeArray(x?.exclusionTerms))),
+        hasConstraint: validInfos.some(x => x?.hasConstraint)
+      };
+    };
+
+    const recentDietaryContext = mergeDietaryInfos(recentDietaryInfos);
+
+    const currentFoodRequest =
+      localConstraints.asksRestaurantRecommendation ||
+      localConstraints.asksRestaurantList ||
+      localConstraints.asksDishList ||
+      localConstraints.asksRoute ||
+      localConstraints.asksRecommendation;
+
+    const applyDietaryContext = (info) => {
+      if (!info || !info.hasConstraint) return;
+
+      localConstraints.exclusionTerms = unique([
+        ...safeArray(localConstraints.exclusionTerms),
+        ...safeArray(info.exclusionTerms)
+      ]);
+
+      localConstraints.allergyTerms = unique([
+        ...safeArray(localConstraints.allergyTerms),
+        ...safeArray(info.allergyTerms)
+      ]);
+
+      if (!localConstraints.dietaryPattern && info.pattern) {
+        localConstraints.dietaryPattern = info.pattern;
+      }
+
+      if (info.halalRequested) localConstraints.asksHalal = true;
+      localConstraints.hasDietaryConstraint =
+        localConstraints.hasDietaryConstraint || Boolean(info.hasConstraint);
+      localConstraints.asksAllergen =
+        localConstraints.asksAllergen || safeArray(info.allergyTerms).length > 0;
+    };
+
+    if (!rawDietaryInfo.reset) {
+      if ((currentFoodRequest || dietaryRefinementLanguage) && recentDietaryContext.hasConstraint) {
+        applyDietaryContext(recentDietaryContext);
+      }
+    } else {
+      localConstraints.exclusionTerms = [];
+      localConstraints.allergyTerms = [];
+      localConstraints.dietaryPattern = null;
+      localConstraints.asksHalal = false;
+      localConstraints.hasDietaryConstraint = false;
+      localConstraints.asksPurine = false;
+    }
 
     const recentExplicitGroupSize = priorUserMessages
       .map(m => extractGroupSizeFromText(m?.text || ''))
@@ -3665,6 +3994,36 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       }
     }
 
+    const dietaryRefinementWithContext =
+      (
+        dietaryRefinementLanguage ||
+        (
+          rawDietaryInfo.reset &&
+          /\b(?:no dietary restrictions?|anything is fine|i can eat anything|we can eat anything)\b/i.test(userMsg)
+        )
+      ) &&
+      Boolean(referenceFrameForFollowUp?.primaryKind);
+
+    if (dietaryRefinementWithContext && referenceFrameForFollowUp?.primaryKind === 'restaurant') {
+      localConstraints.asksRestaurantRecommendation = true;
+      localConstraints.asksRestaurantList = true;
+      localConstraints.asksDishList = false;
+      localConstraints.asksRecommendation = true;
+
+      if (!localConstraints.location && recentRestaurantRequest?.constraints?.location) {
+        localConstraints.location = recentRestaurantRequest.constraints.location;
+      }
+    }
+
+    if (dietaryRefinementWithContext && referenceFrameForFollowUp?.primaryKind === 'dish') {
+      localConstraints.asksDishList = true;
+      localConstraints.asksRestaurantRecommendation = false;
+
+      if (!localConstraints.location && recentDishRequest?.constraints?.location) {
+        localConstraints.location = recentDishRequest.constraints.location;
+      }
+    }
+
     const rawBudgetAmount = toNumber(localConstraints.budgetLimit, null);
 
     const budgetContext = {
@@ -3776,6 +4135,20 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       )
     );
 
+    const dietaryExcludedFoodTokens = new Set(
+      unique([
+        ...safeArray(localConstraints.exclusionTerms),
+        ...safeArray(localConstraints.allergyTerms),
+        localConstraints.dietaryPattern,
+        localConstraints.asksHalal ? 'pork' : null,
+        localConstraints.asksHalal ? 'alcohol' : null,
+        localConstraints.asksHalal ? 'halal' : null
+      ])
+        .flatMap(term => dietaryGroupAliases(term))
+        .flatMap(term => normalize(term).split(/\s+/))
+        .filter(Boolean)
+    );
+
     const recommendationFoodTokens = unique(
       normalize(userMsg)
         .split(/\s+/)
@@ -3783,6 +4156,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           token.length >= 3 &&
           !recommendationStopWords.has(token) &&
           !municipalityTokens.has(token) &&
+          !dietaryExcludedFoodTokens.has(token) &&
           !/^\d+(?:\.\d+)?$/.test(token) &&
           registeredMenuVocabulary.has(token)
         )
@@ -3811,6 +4185,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       recentMentionedRestaurantIds.size > 0 &&
       isFollowUpQuery &&
       !budgetConstraintRefinement &&
+      !dietaryRefinementWithContext &&
       /\b(?:which one|which restaurant|that one|this one|the first|first one|the second|second one|the third|third one|cheaper|cheapest|closest|nearest|best one|among those|among them|of those|of them|yan|iyan|iyon|pangalawa|pangatlo|pinakamura|pinakamalapit)\b/i.test(userMsg);
 
     const getBudgetDishQuality = (dish, budgetLimit = null) => {
@@ -3851,19 +4226,171 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     const isMealLikeBudgetDish = (dish) =>
       getBudgetDishQuality(dish, recommendationPerPersonBudget) > 0;
 
+    const getDietaryDishText = (dish) => normalize([
+      dish?.name,
+      dish?.ingredients,
+      dish?.allergens,
+      dish?.healthIndicators
+    ].filter(Boolean).join(' '));
+
+    const hasRegisteredDietaryMetadata = (dish) =>
+      Boolean(
+        String(dish?.ingredients || '').trim() ||
+        String(dish?.allergens || '').trim()
+      );
+
+    const dietaryPurinePattern =
+      /organ|liver|kidney|intestine|offal|anchov|sardine|mackerel|shellfish|shrimp|prawn|mussel|clam|squid|dried fish|bagoong|alamang|meat extract|bone marrow/i;
+
+    const getDietaryPatternBlockedGroups = (pattern) => {
+      if (pattern === 'vegan') {
+        return ['pork', 'beef', 'chicken', 'other_meat', 'fish', 'shellfish', 'squid', 'dairy', 'egg', 'honey'];
+      }
+      if (pattern === 'vegetarian') {
+        return ['pork', 'beef', 'chicken', 'other_meat', 'fish', 'shellfish', 'squid'];
+      }
+      if (pattern === 'pescatarian') {
+        return ['pork', 'beef', 'chicken', 'other_meat'];
+      }
+      return [];
+    };
+
+    const evaluateDishDietaryFit = (restaurant, dish, options = {}) => {
+      const exclusionTerms = unique([
+        ...safeArray(localConstraints.exclusionTerms),
+        ...safeArray(options.exclusionTerms)
+      ]);
+      const allergyTerms = unique([
+        ...safeArray(localConstraints.allergyTerms),
+        ...safeArray(options.allergyTerms)
+      ]);
+      const pattern = options.pattern || localConstraints.dietaryPattern || null;
+      const halalRequested =
+        options.halalRequested !== undefined
+          ? Boolean(options.halalRequested)
+          : Boolean(localConstraints.asksHalal);
+
+      const dishText = getDietaryDishText(dish);
+      const metadataKnown = hasRegisteredDietaryMetadata(dish);
+      const violations = [];
+
+      exclusionTerms.forEach(term => {
+        const canonical = canonicalDietaryTerm(term);
+        if (dietaryTextIncludesTerm(dishText, canonical)) {
+          violations.push(canonical);
+        }
+
+        // Shrimp paste / bagoong is a shellfish-derived ingredient, but a
+        // plain "avoid bagoong" preference should not exclude all shellfish.
+        if (
+          (canonical === 'shellfish' || canonical === 'seafood') &&
+          dietaryTextIncludesTerm(dishText, 'bagoong')
+        ) {
+          violations.push('bagoong');
+        }
+      });
+
+      getDietaryPatternBlockedGroups(pattern).forEach(group => {
+        if (dietaryTextIncludesTerm(dishText, group)) {
+          violations.push(group);
+        }
+      });
+
+      if (halalRequested) {
+        ['pork', 'alcohol'].forEach(group => {
+          if (dietaryTextIncludesTerm(dishText, group)) violations.push(group);
+        });
+      }
+
+      if (localConstraints.asksPurine && dietaryPurinePattern.test(dishText)) {
+        violations.push('purine-risk-pattern');
+      }
+
+      const strictDietaryGroups = new Set([
+        'gluten', 'nuts', 'shellfish', 'seafood', 'dairy', 'egg', 'soy', 'sesame'
+      ]);
+
+      const strictMetadataNeeded =
+        allergyTerms.length > 0 ||
+        Boolean(pattern) ||
+        halalRequested ||
+        exclusionTerms.some(term => strictDietaryGroups.has(canonicalDietaryTerm(term)));
+
+      const unknownForStrictConstraint =
+        strictMetadataNeeded && !metadataKnown;
+
+      return {
+        passes: unique(violations).length === 0 && !unknownForStrictConstraint,
+        violations: unique(violations),
+        metadataKnown,
+        unknownForStrictConstraint,
+        dishText
+      };
+    };
+
+    const hasActiveDietaryConstraint = () =>
+      Boolean(
+        safeArray(localConstraints.exclusionTerms).length ||
+        safeArray(localConstraints.allergyTerms).length ||
+        localConstraints.dietaryPattern ||
+        localConstraints.asksHalal ||
+        localConstraints.asksPurine
+      );
+
+    const dietaryConstraintLabel = (() => {
+      const parts = [];
+
+      if (localConstraints.dietaryPattern) parts.push(localConstraints.dietaryPattern);
+
+      const allergyTerms = safeArray(localConstraints.allergyTerms);
+      if (allergyTerms.length) parts.push(`allergy avoidance: ${allergyTerms.join(', ')}`);
+
+      const preferenceExclusions = safeArray(localConstraints.exclusionTerms)
+        .filter(term => !allergyTerms.includes(term))
+        .slice(0, 6);
+
+      if (preferenceExclusions.length) parts.push(`avoid: ${preferenceExclusions.join(', ')}`);
+      if (localConstraints.asksHalal) parts.push('pork/alcohol screen for halal request');
+      if (localConstraints.asksPurine) parts.push('purine-pattern screen');
+
+      return parts.join(' • ');
+    })();
+
+    const dietaryCautionNote = (() => {
+      const notes = [];
+
+      if (safeArray(localConstraints.allergyTerms).length) {
+        notes.push(`_⚠️ Allergy note: Kasaup filtered against registered ingredient/allergen text only. Cross-contact and complete recipes are not stored, so verify directly with the restaurant before ordering._`);
+      }
+
+      if (localConstraints.asksHalal) {
+        notes.push(`_ℹ️ Halal note: Kanyamanan does not store halal certification. These are only candidates with no registered pork/alcohol indicator in the available dish text; confirm certification/preparation with the restaurant._`);
+      }
+
+      if (localConstraints.dietaryPattern) {
+        notes.push(`_ℹ️ ${localConstraints.dietaryPattern[0].toUpperCase() + localConstraints.dietaryPattern.slice(1)} candidates are screened from registered ingredient/allergen text; Kanyamanan does not store formal dietary certification or full kitchen cross-contact data._`);
+      }
+
+      if (localConstraints.asksPurine) {
+        notes.push(`_⚠️ Purine note: Kanyamanan only screens ingredient wording and does not store laboratory purine values. For gout or uric-acid management, confirm choices with your clinician or dietitian._`);
+      }
+
+      if (
+        safeArray(localConstraints.exclusionTerms).length &&
+        !safeArray(localConstraints.allergyTerms).length &&
+        !localConstraints.dietaryPattern &&
+        !localConstraints.asksHalal
+      ) {
+        notes.push(`_ℹ️ Dietary filtering uses the registered dish name, ingredients, allergens, and health notes. Verify with the restaurant if your restriction is strict._`);
+      }
+
+      return notes.join('\n');
+    })();
+
     const restaurantMenuStats = (r) => {
       const menu = safeArray(r?.menu);
       const safeMenu = menu.filter(d => {
-        const dishText = getDishText(r, d);
-
-        if (localConstraints.exclusionTerms.some(term =>
-          dishText.includes(normalize(term))
-        )) return false;
-
-        if (localConstraints.asksPurine &&
-          /organ|liver|kidney|intestine|offal|anchov|sardine|mackerel|shellfish|shrimp|prawn|mussel|clam|squid|dried fish|bagoong|meat extract|broth|gravy/i.test(dishText)) {
-          return false;
-        }
+        if (!evaluateDishDietaryFit(r, d).passes) return false;
 
         const kcal = toNumber(d?.nutrition?.calories, null);
         if (localConstraints.calorieLimit !== null &&
@@ -3874,6 +4401,10 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
         return true;
       });
+
+      const dietaryUnknownMenu = menu.filter(d =>
+        evaluateDishDietaryFit(r, d).unknownForStrictConstraint
+      );
 
       const menuForBudget = safeMenu.filter(d => {
         if (recommendationPerPersonBudget === null) return true;
@@ -3944,7 +4475,8 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         matchingDishes,
         minPrice,
         medianPrice,
-        hasKnownPrices: knownPrices.length > 0
+        hasKnownPrices: knownPrices.length > 0,
+        dietaryUnknownCount: dietaryUnknownMenu.length
       };
     };
 
@@ -4130,9 +4662,8 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         (!stats.menu.length && !stats.hasKnownPrices);
 
       const hasDietaryFit =
-        !localConstraints.exclusionTerms.length ||
-        stats.safeMenu.length > 0 ||
-        stats.menu.length === 0;
+        !hasActiveDietaryConstraint() ||
+        stats.safeMenu.length > 0;
 
       const hasCalorieFit =
         localConstraints.calorieLimit === null ||
@@ -4179,8 +4710,10 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         else if (r?.priceTier === '$$') score += 4;
       }
 
-      if (localConstraints.exclusionTerms.length) {
-        score += stats.safeMenu.length ? 20 : (stats.menu.length ? -120 : -5);
+      if (hasActiveDietaryConstraint()) {
+        score += stats.safeMenu.length
+          ? Math.min(34, 18 + stats.safeMenu.length * 2)
+          : -160;
       }
 
       if (localConstraints.calorieLimit !== null) {
@@ -4255,13 +4788,14 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         if (price <= localConstraints.budgetLimit) score += 5;
       }
 
-      if (localConstraints.excludesBagoong) {
-        if (!/bagoong|shrimp paste|alamang/i.test(getDishText(r, d))) score += 10;
-        else score -= 100;
+      if (hasActiveDietaryConstraint()) {
+        const dietaryFit = evaluateDishDietaryFit(r, d);
+        if (dietaryFit.passes) score += 18;
+        else score -= 140;
       }
 
       if (localConstraints.asksBagoong && !localConstraints.excludesBagoong) {
-        if (/bagoong|shrimp paste|alamang/i.test(getDishText(r, d))) score += 15;
+        if (dietaryTextIncludesTerm(getDietaryDishText(d), 'bagoong')) score += 15;
       }
 
       if (localConstraints.asksDishList) score += 3;
@@ -4608,9 +5142,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           return false;
         }
 
-        if (localConstraints.exclusionTerms.length &&
-            p.stats.menu.length &&
-            !p.stats.safeMenu.length) {
+        if (hasActiveDietaryConstraint() && !p.stats.safeMenu.length) {
           return false;
         }
 
@@ -4829,12 +5361,14 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
               ? 'attraction'
               : localConstraints.asksRestaurantList || localConstraints.asksDishList
                 ? 'lookup'
-              : localConstraints.asksCalories || localConstraints.asksBudget || localConstraints.asksPurine
+              : localConstraints.asksCalories || localConstraints.asksBudget || localConstraints.asksPurine || localConstraints.hasDietaryConstraint
                 ? 'health'
                 : 'other',
       secondaryIntents: unique([
         localConstraints.asksBagoong ? 'bagoong' : null,
         localConstraints.asksAllergen ? 'allergen' : null,
+        localConstraints.dietaryPattern ? localConstraints.dietaryPattern : null,
+        localConstraints.asksHalal ? 'halal-request' : null,
         localConstraints.asksAttraction ? 'attraction' : null,
         localConstraints.asksHours ? 'hours' : null
       ]),
@@ -4851,7 +5385,14 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       budgetGroupSize: budgetContext.groupSize,
       excludedIngredients: localConstraints.exclusionTerms,
       requiredIngredients: [],
-      dietaryFlags: [],
+      dietaryFlags: unique([
+        localConstraints.dietaryPattern,
+        localConstraints.asksHalal ? 'halal-request' : null,
+        ...safeArray(localConstraints.allergyTerms).map(x => `allergy:${x}`)
+      ]),
+      allergyTerms: safeArray(localConstraints.allergyTerms),
+      dietaryPattern: localConstraints.dietaryPattern,
+      halalConcern: Boolean(localConstraints.asksHalal),
       purineConcern: localConstraints.asksPurine,
       allergenConcern: localConstraints.asksAllergen,
       hoursConcern: localConstraints.asksHours,
@@ -4892,6 +5433,14 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         ...localConstraints.exclusionTerms
       ]);
     }
+    if (safeArray(localConstraints.allergyTerms).length) {
+      plan.allergyTerms = unique([
+        ...safeArray(plan.allergyTerms),
+        ...localConstraints.allergyTerms
+      ]);
+    }
+    if (localConstraints.dietaryPattern) plan.dietaryPattern = localConstraints.dietaryPattern;
+    if (localConstraints.asksHalal) plan.halalConcern = true;
     if (localConstraints.asksPurine) plan.purineConcern = true;
     if (localConstraints.asksAllergen) plan.allergenConcern = true;
     if (localConstraints.asksHours) plan.hoursConcern = true;
@@ -5736,11 +6285,10 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     // 7) Deterministic tools/calculations
     // ------------------------------
     const isBagoong = (r, d) =>
-      /bagoong|shrimp paste|alamang/i.test(getDishText(r, d));
+      /bagoong|shrimp paste|alamang/i.test(getDietaryDishText(d));
 
     const isPurineRisk = (r, d) =>
-      /organ|liver|kidney|intestine|offal|anchov|sardine|mackerel|shellfish|shrimp|prawn|mussel|clam|squid|dried fish|bagoong|meat extract|broth|gravy/i
-        .test(getDishText(r, d));
+      dietaryPurinePattern.test(getDietaryDishText(d));
 
     const matchesLocation = (restaurantOrAttraction, location) => {
       if (!location) return true;
@@ -5762,7 +6310,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
       const text = getDishText(r, d);
 
-      if (safeArray(exclusions).some(term => text.includes(normalize(term)))) {
+      if (!evaluateDishDietaryFit(r, d, { exclusionTerms: exclusions }).passes) {
         return false;
       }
 
@@ -5772,8 +6320,6 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         );
         if (!hasAll) return false;
       }
-
-      if (plan.purineConcern && isPurineRisk(r, d)) return false;
 
       const kcalCeiling = toNumber(plan.calorieCeiling);
       const dishBudgetCeiling = toNumber(
@@ -6472,15 +7018,12 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     const planningRestaurants = allRestaurants
       .map(r => ({ original: r, resolved: resolveRestaurantForLocation(r, targetLocation) }))
       .filter(x => x.resolved)
-      .filter(x => !safeArray(plan.excludedIngredients).some(term => getRestaurantText(x.resolved).includes(normalize(term))))
-      .filter(x => !localConstraints.exclusionTerms.some(term => getRestaurantText(x.resolved).includes(normalize(term))))
       .map(({ original, resolved }) => {
         const availableDishes = safeArray(original?.menu)
           .filter(d => {
-            const text = getDishText(original, d);
-            if (safeArray(plan.excludedIngredients).some(term => text.includes(normalize(term)))) return false;
-            if (localConstraints.exclusionTerms.some(term => text.includes(normalize(term)))) return false;
-            if (plan.purineConcern && isPurineRisk(original, d)) return false;
+            if (!evaluateDishDietaryFit(original, d, {
+              exclusionTerms: safeArray(plan.excludedIngredients)
+            }).passes) return false;
 
             const kcal = toNumber(d?.nutrition?.calories, null);
             const price = toNumber(d?.price, null);
@@ -6523,6 +7066,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       const r = candidate?.restaurant;
       const rId = r?.id || r?.name;
       if (!rId || usedRestaurantIds.has(rId)) continue;
+      if (hasActiveDietaryConstraint() && !candidate.dishKnown) continue;
 
       const itemCalories = candidate.dish ? Number(candidate.dish?.nutrition?.calories) : null;
       const unitPrice = candidate.dish ? toNumber(candidate.dish?.price, null) : null;
@@ -6544,7 +7088,12 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     }
 
     // For unconstrained travel requests, fill remaining stops from valid branches.
-    if (selectedPlanStops.length < desiredStops && plan.calorieCeiling === null && plan.budgetCeiling === null) {
+    if (
+      selectedPlanStops.length < desiredStops &&
+      plan.calorieCeiling === null &&
+      plan.budgetCeiling === null &&
+      !hasActiveDietaryConstraint()
+    ) {
       for (const candidate of planningRestaurants) {
         const rId = candidate?.restaurant?.id || candidate?.restaurant?.name;
         if (!rId || usedRestaurantIds.has(rId)) continue;
@@ -6573,6 +7122,14 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         restaurant: compactRestaurant(x.restaurant),
         dish: compactDish(x.dish)
       })),
+      dietaryConstraints: {
+        exclusions: safeArray(localConstraints.exclusionTerms),
+        allergies: safeArray(localConstraints.allergyTerms),
+        pattern: localConstraints.dietaryPattern || null,
+        halalRequested: Boolean(localConstraints.asksHalal),
+        purineScreen: Boolean(localConstraints.asksPurine),
+        caution: dietaryCautionNote
+      },
       selectedPlanTotals: {
         stops: selectedPlanStops.length,
         requestedStops: desiredStops,
@@ -6619,6 +7176,7 @@ QUALITY BAR:
 - If a requested combination is impossible, clearly say which constraint caused the problem and show the closest valid options.
 - For calculations, show the arithmetic.
 - For budgets, preserve whether the user stated a TOTAL budget or a PER-PERSON budget. Never divide a per-person amount again. For group planning, use the supplied group-size and total/per-person ceilings.
+- For dietary constraints, use registered dish name/ingredient/allergen data conservatively. Never call an item allergy-safe, certified vegan/vegetarian, or halal-certified unless that certification is explicitly stored. For allergies, mention that cross-contact and complete recipes are not available and the user should verify with the restaurant.
 - For comparisons, compare the requested entities rather than giving unrelated recommendations.
 - For "what should I eat?" style prompts, rank choices and explain the trade-off.
 - For "why" or educational questions, explain the reasoning in plain language.
@@ -6681,6 +7239,38 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         /\b(?:can (?:i|we) afford|afford (?:my|our|this) trip|within (?:my|our|the) budget|over (?:my|our|the) budget|fit (?:my|our|the) budget|budget left|remaining budget)\b/i.test(userMsg);
 
       const asksBudgetProfileOnly = rawBudgetProfileQuery;
+
+      if (dietaryStatementOnly && !dietaryRefinementWithContext) {
+        const setupItems = [];
+
+        if (localConstraints.dietaryPattern) {
+          setupItems.push(`• **Pattern:** ${localConstraints.dietaryPattern}`);
+        }
+        if (safeArray(localConstraints.allergyTerms).length) {
+          setupItems.push(`• **Allergy avoidance:** ${localConstraints.allergyTerms.join(', ')}`);
+        }
+
+        const nonAllergyExclusions = safeArray(localConstraints.exclusionTerms)
+          .filter(term => !safeArray(localConstraints.allergyTerms).includes(term));
+
+        if (nonAllergyExclusions.length) {
+          setupItems.push(`• **Avoid:** ${nonAllergyExclusions.join(', ')}`);
+        }
+        if (localConstraints.asksHalal) {
+          setupItems.push(`• **Halal request:** I can screen registered dish text for pork/alcohol indicators, but Kanyamanan does not store halal certification.`);
+        }
+        if (localConstraints.asksPurine) {
+          setupItems.push(`• **Purine concern:** I’ll use ingredient-pattern screening only; the app does not store laboratory purine values.`);
+        }
+
+        return `🥗 **Dietary preference noted**\n\n${setupItems.join('\n')}\n\n` +
+          `I’ll apply this to your next restaurant, dish, or food-plan request.` +
+          (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '');
+      }
+
+      if (rawDietaryInfo.reset && !rawDietaryTaskLanguage && !dietaryRefinementWithContext) {
+        return `🥗 **Dietary conversation filter cleared**\n\nI won't carry the recent dietary restrictions into your next food request.`;
+      }
 
       if (budgetStatementOnly) {
         const setupPeople = Math.max(1, budgetContext.groupSize);
@@ -6762,26 +7352,70 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           `• **Per-person share:** ${formatPeso(profileTotal / people)}/person`;
       }
 
-      const conversationFollowUpAnswer = buildConversationFollowUpAnswer();
+      const asksGeneralAllergenInventory =
+        localConstraints.asksAllergenInfo &&
+        !safeArray(localConstraints.allergyTerms).length &&
+        (
+          localConstraints.asksDishList ||
+          /\b(?:show|list|which dishes|what dishes|dishes with|may contain allergens?|allergen notes|allergy warnings)\b/i.test(userMsg)
+        ) &&
+        !/\b(?:it|this|that|the first|the second|the third|first one|second one|third one)\b/i.test(userMsg);
+
+      if (asksGeneralAllergenInventory) {
+        const allergenScope = explicitDishRestaurant
+          ? allDishes.filter(x =>
+              x?.restaurant?.id === explicitDishRestaurant?.id ||
+              normalize(x?.restaurant?.name) === normalize(explicitDishRestaurant?.name)
+            )
+          : allDishes.filter(x =>
+              matchesLocation(x?.restaurant, localConstraints.location)
+            );
+
+        const allergenItems = allergenScope
+          .filter(x => {
+            const note = String(x?.dish?.allergens || '').trim();
+            return note && !/^(?:none|no known allergens?|n\/a|na)$/i.test(note);
+          })
+          .slice(0, 12);
+
+        if (!allergenItems.length) {
+          return `⚠️ **Registered allergen notes**\n\nNo dishes currently have a usable registered allergen note.`;
+        }
+
+        return `⚠️ **Dishes with registered allergen notes**\n\n` +
+          allergenItems
+            .map((x, i) =>
+              `${i + 1}. **${x.dish?.name || 'Unnamed dish'}** — ${x.restaurant?.name || 'Registered restaurant'}\n` +
+              `   • **Registered allergen note:** ${x.dish?.allergens}`
+            )
+            .join('\n\n') +
+          `\n\n_These are the allergen notes stored in Kanyamanan; absence from this list does not prove a dish is allergen-free._`;
+      }
+
+      const conversationFollowUpAnswer = dietaryRefinementWithContext
+        ? null
+        : buildConversationFollowUpAnswer();
+
       if (conversationFollowUpAnswer) {
         return conversationFollowUpAnswer;
       }
 
-      if (plan.purineConcern || localConstraints.asksPurine) {
+      if (
+        (plan.purineConcern || localConstraints.asksPurine) &&
+        !localConstraints.asksRestaurantRecommendation &&
+        !localConstraints.asksRoute
+      ) {
         const purineItems = allDishes
           .filter(x => isPurineRisk(x.restaurant, x.dish))
-          .map(x => ({
-            ...x,
-            text: getDishText(x.restaurant, x.dish)
-          }));
+          .map(x => ({ ...x, text: getDietaryDishText(x.dish) }));
 
         const strongerPatterns = /organ|liver|kidney|intestine|offal|anchov|sardine|mackerel|shellfish|mussel|clam|squid|dried fish/i;
-        const secondaryPatterns = /shrimp|prawn|bagoong|alamang|broth|gravy|meat extract|bone marrow/i;
+        const secondaryPatterns = /shrimp|prawn|bagoong|alamang|bone marrow|meat extract/i;
 
         const rankConcern = item => {
-          const text = item.text || '';
-          if (strongerPatterns.test(text)) return 2;
-          if (secondaryPatterns.test(text)) return 1;
+          const itemText = item.text || '';
+          if (strongerPatterns.test(itemText)) return 2;
+          if (secondaryPatterns.test(itemText)) return 1;
           return 0;
         };
 
@@ -6791,7 +7425,6 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           .sort((a, b) => rankConcern(b) - rankConcern(a))
           .forEach(item => {
             const baseName = normalize(item.dish?.name || '');
-            // Avoid flooding the user with near-duplicate set meals.
             const isComplexSet = /set meal|combo|family meal|bundle|platter/i.test(baseName);
             const key = isComplexSet
               ? `${normalize(item.restaurant?.name || '')}::set`
@@ -6802,39 +7435,48 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             representative.push({ ...item, isComplexSet });
           });
 
-        const stronger = representative.filter(x => rankConcern(x) === 2).slice(0, 4);
-        const secondary = representative.filter(x => rankConcern(x) === 1).slice(0, 2);
-
-        const alternatives = allDishes
-          .filter(x => !isPurineRisk(x.restaurant, x.dish))
-          .filter(x => toNumber(x.dish?.nutrition?.calories, Infinity) <= 600)
-          .slice(0, 3);
-
         const getConcernReason = item => {
-          const text = item.text || '';
-          if (/liver|kidney|offal|organ|intestine/i.test(text)) return 'contains organ/offal ingredients';
-          if (/anchov|sardine|mackerel|shellfish|mussel|clam|squid|dried fish/i.test(text)) return 'contains seafood ingredients flagged by the app';
-          if (/shrimp|prawn|bagoong|alamang/i.test(text)) return 'contains shrimp / bagoong-related ingredients';
-          if (/bone marrow|broth|gravy|meat extract/i.test(text)) return 'contains broth / meat-extract ingredients';
-          return 'contains an ingredient pattern flagged by the app';
+          const itemText = item.text || '';
+          if (/liver|kidney|offal|organ|intestine/i.test(itemText)) return 'contains organ/offal wording in the registered dish data';
+          if (/anchov|sardine|mackerel|shellfish|mussel|clam|squid|dried fish/i.test(itemText)) return 'contains a seafood ingredient pattern screened by Kasaup';
+          if (/shrimp|prawn|bagoong|alamang/i.test(itemText)) return 'contains shrimp / bagoong-related wording';
+          if (/bone marrow|meat extract/i.test(itemText)) return 'contains a concentrated meat ingredient pattern';
+          return 'contains an ingredient pattern screened by Kasaup';
         };
 
-        const formatItem = x =>
+        const formatConcernItem = x =>
           `• **${x.dish.name}** — ${x.restaurant.name}\n  _Why it was flagged: ${getConcernReason(x)}._`;
 
-        return `⚠️ **Purine & uric-acid screening**\n\n` +
-          `I checked the dishes currently registered in Kanyamanan. The app does not store laboratory purine values, so this is an **ingredient-pattern screening**, not a medical diagnosis.\n\n` +
-          (stronger.length
-            ? `🔴 **Higher-concern ingredient patterns**\n${stronger.map(formatItem).join('\n')}`
-            : `🔴 **Higher-concern patterns**\nNo strong flagged ingredient pattern was found in the registered menu data.`) +
-          `\n\n` +
-          (secondary.length
-            ? `🟠 **Also worth reviewing**\n${secondary.map(formatItem).join('\n')}`
-            : `🟠 **Also worth reviewing**\nNo additional flagged ingredient pattern was found.`) +
-          (alternatives.length
-            ? `\n\n✅ **Other registered dishes with no current flagged ingredient pattern**\n${alternatives.map(x => `• **${x.dish.name}** — ${x.restaurant.name} — ${toNumber(x.dish?.nutrition?.calories)} kcal`).join('\n')}`
-            : '') +
-          `\n\n💡 **Tip:** For a strict uric-acid/gout diet, use your clinician or dietitian's advice as the final authority.`;
+        if (localConstraints.asksPurineAvoidList) {
+          const stronger = representative.filter(x => rankConcern(x) === 2).slice(0, 5);
+          const secondary = representative.filter(x => rankConcern(x) === 1).slice(0, 3);
+
+          return `⚠️ **Purine & uric-acid ingredient screening**\n\n` +
+            `The app does not store laboratory purine values, so these are **ingredient-pattern flags**, not a medical classification.\n\n` +
+            (stronger.length
+              ? `🔴 **Higher-concern patterns**\n${stronger.map(formatConcernItem).join('\n')}`
+              : `🔴 **Higher-concern patterns**\nNo strong flagged ingredient pattern was found in the registered menu data.`) +
+            (secondary.length
+              ? `\n\n🟠 **Also worth reviewing**\n${secondary.map(formatConcernItem).join('\n')}`
+              : '') +
+            `\n\n💡 For gout or uric-acid management, use your clinician or dietitian's advice as the final authority.`;
+        }
+
+        const lowerConcernCandidates = filteredDishes
+          .filter(x => !isPurineRisk(x.restaurant, x.dish))
+          .filter(x => hasRegisteredDietaryMetadata(x.dish))
+          .slice(0, 8);
+
+        if (!lowerConcernCandidates.length) {
+          return `🥗 **Lower-concern purine candidates**\n\n` +
+            `I couldn't find a registered dish with enough ingredient information and no current purine-risk pattern. ` +
+            `This does not mean other dishes are unsafe; the menu data may simply be incomplete.\n\n` +
+            `💡 For gout or uric-acid management, use your clinician or dietitian's advice as the final authority.`;
+        }
+
+        return `🥗 **Registered dishes with no current purine-risk pattern detected**\n\n` +
+          lowerConcernCandidates.map((x, i) => formatDirectDishLine(x, i)).join('\n') +
+          `\n\n_This is ingredient-pattern screening only, not a medical low-purine certification. For gout or uric-acid management, confirm choices with your clinician or dietitian._`;
       }
 
 
@@ -6849,7 +7491,11 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
           if (!restaurantMenuMatches.length) {
             return `🍽️ **${explicitDishRestaurant?.name || 'Registered restaurant'} menu**\n\n` +
-              `I found the restaurant in Kanyamanan, but I don't have a registered dish that matches the current filters.`;
+              `I found the restaurant in Kanyamanan, but I don't have a registered dish that matches the current filters.` +
+              (hasActiveDietaryConstraint()
+                ? `\n\n_No match was treated conservatively because the requested dietary constraint may require ingredient/allergen data that is not registered._`
+                : '') +
+              (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '');
           }
 
           const shown = restaurantMenuMatches.slice(0, 15);
@@ -6859,7 +7505,11 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             shown.map((x, i) => formatDirectDishLine(x, i)).join('\n') +
             (remaining
               ? `\n\n_+${remaining} more registered menu item${remaining === 1 ? '' : 's'} not shown._`
-              : '');
+              : '') +
+            (hasActiveDietaryConstraint() && dietaryConstraintLabel
+              ? `\n\n_🥗 Applied dietary filter: ${dietaryConstraintLabel}._`
+              : '') +
+            (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '');
         }
 
         // "What is the cheapest dish available?"
@@ -6948,6 +7598,10 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           return `${budgetHeading}\n\n` +
             matches.map((x, i) => formatDirectDishLine(x, i)).join('\n') +
             groupEstimateNote +
+            (hasActiveDietaryConstraint() && dietaryConstraintLabel
+              ? `\n\n_🥗 Applied dietary filter: ${dietaryConstraintLabel}._`
+              : '') +
+            (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '') +
             `\n\n_These results use registered menu-item prices, not restaurant $/$$/$$$ tiers._`;
         }
 
@@ -6955,10 +7609,18 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         const generalDishMatches = directDishCandidates.slice(0, 12);
         if (generalDishMatches.length) {
           return `🍽️ **Matching registered dishes**\n\n` +
-            generalDishMatches.map((x, i) => formatDirectDishLine(x, i)).join('\n');
+            generalDishMatches.map((x, i) => formatDirectDishLine(x, i)).join('\n') +
+            (hasActiveDietaryConstraint() && dietaryConstraintLabel
+              ? `\n\n_🥗 Applied dietary filter: ${dietaryConstraintLabel}._`
+              : '') +
+            (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '');
         }
 
-        return `🍽️ **Matching registered dishes**\n\nNo matching registered dishes were found for this request.`;
+        return `🍽️ **Matching registered dishes**\n\nNo matching registered dishes were found for this request.` +
+          (hasActiveDietaryConstraint()
+            ? `\n\n_Kasaup did not guess around missing dietary data; try relaxing a constraint or ask about a specific dish._`
+            : '') +
+          (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '');
       }
 
       if (
@@ -6986,10 +7648,15 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           const foodText = recommendationFoodTokens.length
             ? ` matching **${recommendationFoodTokens.join(', ')}**`
             : '';
+          const dietaryText =
+            hasActiveDietaryConstraint() && dietaryConstraintLabel
+              ? ` with the dietary screen **${dietaryConstraintLabel}**`
+              : '';
 
           return `🍴 **Restaurant recommendations**\n\n` +
-            `I couldn't find a registered restaurant${locationText}${foodText}${budgetText} that satisfies all of those constraints at once.\n\n` +
-            `I won't invent a match. Try relaxing one constraint, or ask me for the closest registered options.`;
+            `I couldn't find a registered restaurant${locationText}${foodText}${budgetText}${dietaryText} that satisfies all of those constraints at once.\n\n` +
+            `I won't invent a match. Try relaxing one constraint, or ask me for the closest registered options.` +
+            (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '');
         }
 
         const formatRecommendation = (profile, index) => {
@@ -7035,8 +7702,8 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             reasons.push(`registered menu prices start around ₱${stats.minPrice}`);
           }
 
-          if (localConstraints.exclusionTerms.length && stats.safeMenu.length) {
-            reasons.push(`${stats.safeMenu.length} registered menu option(s) remain after your exclusion filter`);
+          if (hasActiveDietaryConstraint() && stats.safeMenu.length) {
+            reasons.push(`${stats.safeMenu.length} registered menu option(s) remain after the dietary screen`);
           }
 
           if (localConstraints.calorieLimit !== null && profile.hasCalorieFit) {
@@ -7104,9 +7771,16 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           ? `\n\n_💰 Budget check: ${budgetContextLabel}. Restaurant affordability uses actual registered menu-item prices._`
           : '';
 
+        const dietaryNote =
+          hasActiveDietaryConstraint() && dietaryConstraintLabel
+            ? `\n\n_🥗 Dietary screen: ${dietaryConstraintLabel}. Recommendations require at least one matching registered menu item._` +
+              (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '')
+            : '';
+
         return `${heading}\n\n` +
           profiles.map(formatRecommendation).join('\n\n') +
           budgetNote +
+          dietaryNote +
           scopeNote +
           rankingNote;
       }
@@ -7329,15 +8003,22 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             );
 
         const budgetStopWarning =
-          budgetContext.totalLimit !== null &&
           toNumber(plan.stopCount, null) !== null &&
-          selectedPlanStops.length < toNumber(plan.stopCount, null)
-            ? `\n⚠️ The budget/other hard constraints limited this plan to ${selectedPlanStops.length} of ${plan.stopCount} requested stop(s).`
+          selectedPlanStops.length < toNumber(plan.stopCount, null) &&
+          (budgetContext.totalLimit !== null || hasActiveDietaryConstraint())
+            ? `\n⚠️ The budget/dietary/other hard constraints limited this plan to ${selectedPlanStops.length} of ${plan.stopCount} requested stop(s).`
+            : '';
+
+        const planningDietaryNote =
+          hasActiveDietaryConstraint() && dietaryConstraintLabel
+            ? `\n🥗 Dietary screen: **${dietaryConstraintLabel}**` +
+              (dietaryCautionNote ? `\n${dietaryCautionNote}` : '')
             : '';
 
         return `🗺️ **Kasaup's recommended food plan**\n\n${summary}\n\n` +
           `📊 Registered dish calories across selected stops: **${planCalories} kcal**` +
           planningBudgetText +
+          planningDietaryNote +
           unknownText +
           budgetStopWarning +
           (toNumber(plan.stopCount) ? `\nRequested: ${plan.stopCount} stop(s).` : '') +
