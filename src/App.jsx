@@ -3218,7 +3218,33 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
       if (wantsBagoongExclusion) exclusionTerms.push('bagoong');
 
-      const asksCurrentLocation = /\b(?:near me|nearby|around me|around here|my location|current location|where i am|where we are)\b/i.test(raw);
+      const asksCurrentLocation =
+        /\b(?:near me|nearby|around me|around here|close to me|closest to me|nearest to me|my location|current location|near my current location|around my current location|where i am|where we are|malapit sa akin|malapit dito|malapit sa amin|pinakamalapit sa akin|pinakamalapit dito)\b/i.test(raw) ||
+        /\b(?:within|inside|under|less than|no more than|up to)\s*\d+(?:\.\d+)?\s*(?:km|kilometers?)\s*(?:of|from)?\s*(?:me|my location|here)\b/i.test(raw) ||
+        /\b(?:closest|nearest|pinakamalapit)(?:\s+na)?\s+(?:restaurant|restaurants|kainan|attraction|attractions|tourist spot|tourist spots|place|places|destination|destinations)\b/i.test(raw) ||
+        /\b(?:restaurant|restaurants|kainan|attraction|attractions|tourist spot|tourist spots|place|places|destination|destinations)\b.*\b(?:closest|nearest|pinakamalapit)\b/i.test(raw) ||
+        (
+          /\b(?:restaurant|restaurants|kainan|attraction|attractions|tourist spot|tourist spots|place|places|destination|destinations)\b/i.test(raw) &&
+          /\b(?:within|inside)\s*\d+(?:\.\d+)?\s*(?:km|kilometers?)\b/i.test(raw)
+        );
+
+      const nearbyRadiusKm = (() => {
+        if (!asksCurrentLocation) return null;
+        const match = raw.match(
+          /\b(?:within|inside|under|less than|no more than|up to)\s*(\d+(?:\.\d+)?)\s*(?:km|kilometers?)\b/i
+        ) || raw.match(
+          /\b(\d+(?:\.\d+)?)\s*(?:km|kilometers?)\s*(?:away\s*)?(?:from|of)\s*(?:me|my location|here)\b/i
+        );
+        const value = match?.[1] ? Number(match[1]) : null;
+        return Number.isFinite(value) && value > 0 ? Math.min(100, value) : null;
+      })();
+
+      const asksNearestOnly =
+        /\b(?:closest|nearest|pinakamalapit)\b/i.test(raw) &&
+        (
+          asksCurrentLocation ||
+          /\b(?:restaurant|restaurants|kainan|attraction|attractions|tourist spot|tourist spots|place|places|destination|destinations)\b/i.test(raw)
+        );
       const asksToday = /\b(?:today|tonight|this evening|this morning|right now|now)\b/i.test(raw);
       const asksTomorrow = /\b(?:tomorrow|next day)\b/i.test(raw);
       const asksLunch = /\b(?:lunch|lunchtime|noon)\b/i.test(raw);
@@ -3240,7 +3266,11 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       const asksRestaurantRecommendation =
         /\b(?:recommend|suggest|pick|choose|best|top|good|great|ideal|worth|must try)\b.*\b(?:restaurant|restaurants|kainan|eatery|eateries|place|places|where to eat)\b/i.test(raw) ||
         /\b(?:where|saan)\s+(?:should|can|could|do)?\s*(?:i|we|kami|tayo)?\s*(?:eat|dine|kumain|mangan)\b/i.test(raw) ||
-        /\b(?:good|best|cheap|cheapest|affordable|nearby|closest)\s+(?:restaurant|restaurants|place to eat|places to eat|kainan)\b/i.test(raw) ||
+        /\b(?:good|best|cheap|cheapest|affordable|nearby|closest|nearest)\s+(?:restaurant|restaurants|place to eat|places to eat|kainan)\b/i.test(raw) ||
+        /\b(?:restaurant|restaurants|place to eat|places to eat|kainan)\b.*\b(?:near me|nearby|around me|around here|close to me|closest to me|nearest to me|malapit sa akin|malapit dito|pinakamalapit)\b/i.test(raw) ||
+        /\b(?:near me|nearby|around me|around here|close to me|malapit sa akin|malapit dito)\b.*\b(?:restaurant|restaurants|place to eat|places to eat|kainan)\b/i.test(raw) ||
+        (asksCurrentLocation && /\b(?:restaurant|restaurants|place to eat|places to eat|kainan)\b/i.test(raw)) ||
+        /\b(?:pinakamalapit)(?:\s+na)?\s+(?:restaurant|restaurants|kainan)\b/i.test(raw) ||
         /\b(?:which one|which restaurant|the cheaper one|the cheapest one|cheapest one)\b/i.test(raw);
       const asksComparison = /\b(?:compare|comparison|versus|vs\.?|difference|better|best between|which is better)\b/i.test(raw);
       const asksDirections = /\b(?:how do i get|how to get|directions?|navigate|navigation|drive to|go to|route to|way to)\b/i.test(raw);
@@ -3270,8 +3300,8 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         (asksAttraction || /\b(?:this|that|it|first|second|third|one)\b/i.test(raw));
 
       const asksAttractionNearby =
-        /\b(?:nearest|closest|near me|nearby|around me|around here|closest to me|nearest to me)\b/i.test(raw) &&
-        (asksAttraction || asksActivities || /\b(?:place|places|spot|spots|destination|destinations)\b/i.test(raw));
+        /\b(?:nearest|closest|near me|nearby|around me|around here|close to me|closest to me|nearest to me|malapit sa akin|malapit dito|pinakamalapit)\b/i.test(raw) &&
+        (asksAttraction || asksActivities || /\b(?:place|places|spot|spots|destination|destinations|pasyalan|puntahan)\b/i.test(raw));
 
       const asksAttractionPrice =
         /\b(?:free|entrance fee|admission|ticket|tickets|cheap|cheapest|affordable|price|cost|fee|fees|bayad|libre|mura)\b/i.test(raw) &&
@@ -3280,6 +3310,8 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       return {
         location,
         asksCurrentLocation,
+        nearbyRadiusKm,
+        asksNearestOnly,
         asksToday,
         asksTomorrow,
         asksLunch,
@@ -3778,6 +3810,148 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       .filter(m => m?.sender === 'user')
       .slice(-6)
       .reverse();
+
+    // ============================================================
+    // "NEAR ME" CONTEXT + LOCATION RESOLUTION (Batch 7)
+    // ============================================================
+    const nearMeFollowUpLanguage =
+      isFollowUpQuery &&
+      /\b(?:what about|how about|which one|which is|closest|nearest|nearer|what else|another|tell me|more about|where|address|located|location|how far|distance|open|hours|menu|restaurants?|kainan|attractions?|tourist spots?|places?|food|dishes?|price|cost|malapit|pinakamalapit)\b/i.test(userMsg);
+
+    let recentNearMeConstraints = null;
+    for (const priorMessage of priorUserMessages.slice(0, 4)) {
+      const priorText = String(priorMessage?.text || '');
+      const priorConstraints = detectConstraintsLocally(priorText);
+
+      if (priorConstraints.location && !priorConstraints.asksCurrentLocation) break;
+
+      if (priorConstraints.asksCurrentLocation) {
+        recentNearMeConstraints = priorConstraints;
+        break;
+      }
+
+      const isShortReference =
+        /\b(?:what about|how about|which one|tell me|more about|second|third|first|it|that|this|closest|nearest)\b/i.test(priorText);
+
+      if (!isShortReference &&
+          /\b(?:recommend|suggest|show|list|find|where|restaurant|attraction|tourist|food|dish|places?)\b/i.test(priorText)) {
+        break;
+      }
+    }
+
+    if (
+      !localConstraints.location &&
+      !localConstraints.asksCurrentLocation &&
+      nearMeFollowUpLanguage &&
+      recentNearMeConstraints?.asksCurrentLocation
+    ) {
+      localConstraints.asksCurrentLocation = true;
+
+      if (localConstraints.nearbyRadiusKm === null &&
+          Number.isFinite(recentNearMeConstraints.nearbyRadiusKm)) {
+        localConstraints.nearbyRadiusKm = recentNearMeConstraints.nearbyRadiusKm;
+      }
+
+      if (explicitAttractionTopic) {
+        localConstraints.asksAttraction = true;
+        localConstraints.asksAttractionNearby = true;
+        localConstraints.asksRestaurantRecommendation = false;
+        localConstraints.asksRestaurantList = false;
+      } else if (explicitRestaurantTopic) {
+        localConstraints.asksRestaurantRecommendation = true;
+        localConstraints.asksRestaurantList = true;
+        localConstraints.asksRecommendation = true;
+      }
+    }
+
+    const hasValidKasaupCoordinates = (location) =>
+      Number.isFinite(toNumber(location?.lat, null)) &&
+      Number.isFinite(toNumber(location?.lng, null));
+
+    const isKasaupDefaultStart = (location) =>
+      !location?.name || /\bdefault start\b/i.test(String(location?.name || ''));
+
+    let kasaupLocationOrigin = {
+      lat: toNumber(userLocation?.lat, null),
+      lng: toNumber(userLocation?.lng, null),
+      name: userLocation?.name || '',
+      accuracyM: null
+    };
+
+    let kasaupLocationIsDetected =
+      hasValidKasaupCoordinates(kasaupLocationOrigin) &&
+      !isKasaupDefaultStart(userLocation);
+
+    let kasaupLocationIssue = '';
+
+    const requestKasaupBrowserLocation = () => new Promise((resolve) => {
+      if (typeof navigator === 'undefined' || !navigator.geolocation) {
+        resolve({ ok: false, reason: 'Browser geolocation is not available.' });
+        return;
+      }
+
+      try {
+        navigator.geolocation.getCurrentPosition(
+        position => {
+          const lat = Number(position?.coords?.latitude);
+          const lng = Number(position?.coords?.longitude);
+          const accuracyM = Number(position?.coords?.accuracy);
+
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+            resolve({ ok: false, reason: 'The browser did not return usable coordinates.' });
+            return;
+          }
+
+          resolve({
+            ok: true,
+            location: {
+              lat,
+              lng,
+              accuracyM: Number.isFinite(accuracyM) ? accuracyM : null,
+              name: 'Your Detected Location'
+            }
+          });
+        },
+        error => {
+          const reason =
+            error?.code === 1 ? 'Location permission was denied.' :
+            error?.code === 2 ? 'Your current position could not be determined.' :
+            error?.code === 3 ? 'Location detection timed out.' :
+            'Your current position could not be determined.';
+          resolve({ ok: false, reason });
+        },
+        { enableHighAccuracy: true, timeout: 3500, maximumAge: 60000 }
+        );
+      } catch (_) {
+        resolve({ ok: false, reason: 'Browser location access could not be started.' });
+      }
+    });
+
+    if (localConstraints.asksCurrentLocation && !kasaupLocationIsDetected) {
+      const locationResult = await requestKasaupBrowserLocation();
+
+      if (locationResult?.ok && locationResult.location) {
+        kasaupLocationOrigin = locationResult.location;
+        kasaupLocationIsDetected = true;
+
+        setUserLocation({
+          lat: locationResult.location.lat,
+          lng: locationResult.location.lng,
+          name: 'Your Detected Location'
+        });
+      } else {
+        kasaupLocationIssue = locationResult?.reason || 'Your current position is unavailable.';
+      }
+    }
+
+    const distanceOriginLabel = kasaupLocationIsDetected
+      ? 'your detected current location'
+      : 'your Kanyamanan start point';
+
+    const nearMeDistanceNote =
+      localConstraints.asksCurrentLocation && kasaupLocationIsDetected
+        ? `\n\n_📍 Distances are straight-line estimates from your detected current location, not driving-route distances._`
+        : '';
 
     // ============================================================
     // DIETARY CONVERSATION CONTINUITY (Batch 6)
@@ -4569,69 +4743,130 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     };
 
     const nearestRegisteredBranchInfo = (r) => {
-      if (!localConstraints.asksCurrentLocation) {
-        return { distanceKm: null, branchName: '', municipality: '' };
+      if (!localConstraints.asksCurrentLocation || !hasValidKasaupCoordinates(kasaupLocationOrigin)) {
+        return {
+          distanceKm: null, branchName: '', municipality: '', address: '',
+          operatingHours: '', lat: null, lng: null, coordinateQuality: 'unknown'
+        };
       }
 
-      const originLat = toNumber(userLocation?.lat, 15.03);
-      const originLng = toNumber(userLocation?.lng, 120.68);
+      const originLat = toNumber(kasaupLocationOrigin?.lat, null);
+      const originLng = toNumber(kasaupLocationOrigin?.lng, null);
       const candidates = [];
+      const seen = new Set();
+
+      const addCandidate = (candidate) => {
+        const lat = toNumber(candidate?.lat, null);
+        const lng = toNumber(candidate?.lng, null);
+        if (lat === null || lng === null) return;
+
+        const key = `${lat.toFixed(6)}::${lng.toFixed(6)}::${normalize(candidate?.branchName || candidate?.municipality || '')}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        candidates.push({
+          ...candidate,
+          lat,
+          lng,
+          branchName: candidate?.branchName || candidate?.municipality || 'Registered location',
+          municipality: candidate?.municipality || '',
+          address: candidate?.address || '',
+          operatingHours: candidate?.operatingHours || '',
+          coordinateQuality: candidate?.coordinateQuality || 'registered'
+        });
+      };
 
       const primaryLat = toNumber(r?.lat, null);
       const primaryLng = toNumber(r?.lng, null);
       if (primaryLat !== null && primaryLng !== null) {
-        candidates.push({
+        addCandidate({
           lat: primaryLat,
           lng: primaryLng,
           branchName: r?.municipality || 'Main location',
-          municipality: r?.municipality || ''
+          municipality: r?.municipality || '',
+          address: r?.address || '',
+          operatingHours: r?.operatingHours || r?.hours || '',
+          coordinateQuality: 'registered'
         });
       }
 
-      safeArray(r?.branches).forEach(b => {
-        if (!b) return;
-        const municipality = typeof b === 'string' ? b : b?.municipality;
-        const lat = typeof b === 'object'
-          ? toNumber(b?.lat, toNumber(getBranchLat(r, municipality), null))
-          : toNumber(getBranchLat(r, municipality), null);
-        const lng = typeof b === 'object'
-          ? toNumber(b?.lng, toNumber(getBranchLng(r, municipality), null))
-          : toNumber(getBranchLng(r, municipality), null);
+      safeArray(r?.branches).forEach(branch => {
+        if (!branch) return;
 
-        if (lat === null || lng === null) return;
+        const municipality =
+          typeof branch === 'string' ? branch : branch?.municipality || '';
+        const branchName =
+          typeof branch === 'object'
+            ? (branch?.branchName || municipality || 'Branch')
+            : municipality;
 
-        candidates.push({
-          lat,
-          lng,
-          branchName: typeof b === 'object'
-            ? (b?.branchName || municipality || 'Branch')
-            : municipality,
-          municipality: municipality || ''
-        });
+        const directLat = typeof branch === 'object' ? toNumber(branch?.lat, null) : null;
+        const directLng = typeof branch === 'object' ? toNumber(branch?.lng, null) : null;
+
+        if (directLat !== null && directLng !== null) {
+          addCandidate({
+            lat: directLat,
+            lng: directLng,
+            branchName,
+            municipality,
+            address: typeof branch === 'object' ? branch?.address || '' : '',
+            operatingHours: typeof branch === 'object'
+              ? (branch?.operatingHours || branch?.hours || r?.operatingHours || '')
+              : r?.operatingHours || '',
+            coordinateQuality: 'registered'
+          });
+          return;
+        }
+
+        const municipalityCoords = MUNICIPALITY_COORDINATES[normalizeMun(municipality)];
+        if (municipalityCoords) {
+          addCandidate({
+            lat: municipalityCoords.lat,
+            lng: municipalityCoords.lng,
+            branchName,
+            municipality,
+            address: typeof branch === 'object' ? branch?.address || '' : '',
+            operatingHours: typeof branch === 'object'
+              ? (branch?.operatingHours || branch?.hours || r?.operatingHours || '')
+              : r?.operatingHours || '',
+            coordinateQuality: 'municipality-estimate'
+          });
+        }
       });
 
-      if (!candidates.length) {
-        const fallbackLat = toNumber(getBranchLat(r, localConstraints.location || null), null);
-        const fallbackLng = toNumber(getBranchLng(r, localConstraints.location || null), null);
-        if (fallbackLat !== null && fallbackLng !== null) {
-          candidates.push({
-            lat: fallbackLat,
-            lng: fallbackLng,
-            branchName: localConstraints.location || r?.municipality || 'Registered location',
-            municipality: localConstraints.location || r?.municipality || ''
+      if (!candidates.length && r?.municipality) {
+        const municipalityCoords = MUNICIPALITY_COORDINATES[normalizeMun(r.municipality)];
+        if (municipalityCoords) {
+          addCandidate({
+            lat: municipalityCoords.lat,
+            lng: municipalityCoords.lng,
+            branchName: r.municipality,
+            municipality: r.municipality,
+            address: r?.address || '',
+            operatingHours: r?.operatingHours || '',
+            coordinateQuality: 'municipality-estimate'
           });
         }
       }
 
       const ranked = candidates
-        .map(c => ({
-          ...c,
-          distanceKm: calculateHaversineKm(originLat, originLng, c.lat, c.lng)
+        .map(candidate => ({
+          ...candidate,
+          distanceKm: calculateHaversineKm(originLat, originLng, candidate.lat, candidate.lng)
         }))
-        .filter(c => Number.isFinite(c.distanceKm))
-        .sort((a, b) => a.distanceKm - b.distanceKm);
+        .filter(candidate => Number.isFinite(candidate.distanceKm))
+        .sort((a, b) => {
+          if (a.distanceKm !== b.distanceKm) return a.distanceKm - b.distanceKm;
+          if (a.coordinateQuality !== b.coordinateQuality) {
+            return a.coordinateQuality === 'registered' ? -1 : 1;
+          }
+          return normalize(a.branchName).localeCompare(normalize(b.branchName));
+        });
 
-      return ranked[0] || { distanceKm: null, branchName: '', municipality: '' };
+      return ranked[0] || {
+        distanceKm: null, branchName: '', municipality: '', address: '',
+        operatingHours: '', lat: null, lng: null, coordinateQuality: 'unknown'
+      };
     };
 
     const restaurantRecommendationProfile = (r) => {
@@ -4643,10 +4878,18 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         municipalities.some(m => normalize(m) === normalize(localConstraints.location));
 
       const mentionedRecently = recentMentionedRestaurantIds.has(restaurantId);
-      const hoursFit = registeredHoursFit(r);
 
       const nearestBranch = nearestRegisteredBranchInfo(r);
       const distanceKm = nearestBranch.distanceKm;
+
+      const hoursFit =
+        localConstraints.asksCurrentLocation && nearestBranch?.operatingHours
+          ? registeredHoursFit({
+              ...r,
+              operatingHours: nearestBranch.operatingHours,
+              branches: []
+            })
+          : registeredHoursFit(r);
 
       const bestDishMatch = stats.matchingDishes[0]?.tokenScore || 0;
       const hasRequestedDishMatch =
@@ -4978,9 +5221,13 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       const lng = toNumber(a?.lng, null);
       if (lat === null || lng === null) return null;
 
+      const originLat = toNumber(kasaupLocationOrigin?.lat, null);
+      const originLng = toNumber(kasaupLocationOrigin?.lng, null);
+      if (originLat === null || originLng === null) return null;
+
       const distance = calculateHaversineKm(
-        toNumber(userLocation?.lat, 15.03),
-        toNumber(userLocation?.lng, 120.68),
+        originLat,
+        originLng,
         lat,
         lng
       );
@@ -5127,6 +5374,14 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         // Explicit city/location should not leak recommendations from elsewhere.
         if (localConstraints.location && !p.explicitLocationMatch) return false;
 
+        if (localConstraints.asksCurrentLocation) {
+          if (!Number.isFinite(p.distanceKm)) return false;
+          if (
+            Number.isFinite(localConstraints.nearbyRadiusKm) &&
+            p.distanceKm > localConstraints.nearbyRadiusKm
+          ) return false;
+        }
+
         // For follow-up ranking, stay inside the restaurants just discussed when
         // we can identify them from the preceding Kasaup response.
         if (restaurantRecommendationFollowUp && !p.mentionedRecently) {
@@ -5173,19 +5428,17 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         return p.score > -50;
       })
       .sort((a, b) => {
-        // If affordability is the user's ranking question, actual registered
-        // menu prices outrank generic profile completeness.
-        if (/\b(?:cheap|cheaper|cheapest|affordable|lowest price|mura|murang)\b/i.test(userMsg)) {
-          const ap = a.stats.minPrice ?? Infinity;
-          const bp = b.stats.minPrice ?? Infinity;
-          if (ap !== bp) return ap - bp;
-        }
-
-        // For "near me" requests, distance should be the primary ordering.
+        // For "near me", geography is the primary ordering.
         if (localConstraints.asksCurrentLocation) {
           const ad = Number.isFinite(a.distanceKm) ? a.distanceKm : Infinity;
           const bd = Number.isFinite(b.distanceKm) ? b.distanceKm : Infinity;
           if (ad !== bd) return ad - bd;
+        }
+
+        if (/\b(?:cheap|cheaper|cheapest|affordable|lowest price|mura|murang)\b/i.test(userMsg)) {
+          const ap = a.stats.minPrice ?? Infinity;
+          const bp = b.stats.minPrice ?? Infinity;
+          if (ap !== bp) return ap - bp;
         }
 
         if (b.score !== a.score) return b.score - a.score;
@@ -5194,7 +5447,9 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       });
 
     const recommendationSingleChoice =
-      /\b(?:which one|which restaurant|cheapest one|the cheapest one|closest one|best restaurant|best place|pick one|choose one)\b/i.test(userMsg) ||
+      localConstraints.asksNearestOnly ||
+      /\b(?:which one|which restaurant|cheapest one|the cheapest one|closest one|nearest one|best restaurant|best place|pick one|choose one)\b/i.test(userMsg) ||
+      /\b(?:what|which)\s+(?:restaurant|place to eat|kainan)\s+(?:is\s+)?(?:closest|nearest)\b/i.test(userMsg) ||
       /\b(?:recommend|suggest)\s+(?:me\s+)?(?:a|one)\s+(?:restaurant|place|kainan)\b/i.test(userMsg);
 
     const recommendationResultLimit = Math.max(
@@ -5219,6 +5474,14 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         if (localConstraints.location && !profile.municipalityMatch) return false;
 
         if (requestedAttractionCategories.length && !profile.categoryMatch) return false;
+
+        if (localConstraints.asksCurrentLocation || localConstraints.asksAttractionNearby) {
+          if (!Number.isFinite(profile.distanceKm)) return false;
+          if (
+            Number.isFinite(localConstraints.nearbyRadiusKm) &&
+            profile.distanceKm > localConstraints.nearbyRadiusKm
+          ) return false;
+        }
 
         if (attractionRecommendationFollowUp && !profile.recentlyMentioned) return false;
 
@@ -5254,6 +5517,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       });
 
     const attractionSingleChoice =
+      localConstraints.asksNearestOnly ||
       /\b(?:which one|closest one|nearest one|best one|top one|pick one|choose one|recommend one|suggest one)\b/i.test(userMsg) ||
       /\b(?:recommend|suggest)\s+(?:me\s+)?(?:a|one)\s+(?:tourist spot|attraction|destination|place|pasyalan)\b/i.test(userMsg);
 
@@ -6467,6 +6731,15 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         : filteredDishes.slice();
 
     const directDishCandidates = directDishCandidatesBase
+      .filter(item => {
+        if (!localConstraints.asksCurrentLocation) return true;
+
+        const profile = restaurantProfileMap.get(item?.restaurant);
+        if (!Number.isFinite(profile?.distanceKm)) return false;
+
+        return !Number.isFinite(localConstraints.nearbyRadiusKm) ||
+          profile.distanceKm <= localConstraints.nearbyRadiusKm;
+      })
       .slice()
       .sort((a, b) => {
         const priceA = toNumber(a?.dish?.price, null);
@@ -6479,6 +6752,15 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           const pa = priceA === null ? Infinity : priceA;
           const pb = priceB === null ? Infinity : priceB;
           if (pa !== pb) return pa - pb;
+        }
+
+        // After explicit cheapest intent, "near me" is distance-first.
+        if (localConstraints.asksCurrentLocation) {
+          const distanceA = restaurantProfileMap.get(a?.restaurant)?.distanceKm;
+          const distanceB = restaurantProfileMap.get(b?.restaurant)?.distanceKm;
+          const da = Number.isFinite(distanceA) ? distanceA : Infinity;
+          const db = Number.isFinite(distanceB) ? distanceB : Infinity;
+          if (da !== db) return da - db;
         }
 
         // Calorie-constrained dish queries prefer the lighter known option.
@@ -6508,9 +6790,20 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       const price = toNumber(d?.price, null);
       const kcal = toNumber(d?.nutrition?.calories, null);
 
+      const restaurantProfile = restaurantProfileMap.get(r);
+      const nearbyDistance =
+        localConstraints.asksCurrentLocation && Number.isFinite(restaurantProfile?.distanceKm)
+          ? `${restaurantProfile.distanceKm.toFixed(1)} km away`
+          : null;
+      const nearestMunicipality =
+        localConstraints.asksCurrentLocation
+          ? restaurantProfile?.nearestBranch?.municipality || null
+          : null;
+
       const meta = [
         r?.name || 'Registered restaurant',
-        r?.municipality || null,
+        nearestMunicipality || r?.municipality || null,
+        nearbyDistance,
         price !== null ? `₱${price}` : 'price not registered',
         kcal !== null ? `${kcal} kcal` : null
       ].filter(Boolean).join(' • ');
@@ -6542,8 +6835,9 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       /\b(?:what about|how about|tell me more|more about|details?|info|information|what is it|what's it|what is that|what's that|kwento pa|ano yan|ano iyon)\b/i.test(userMsg);
 
     const calculatePlaceDistanceKm = (item, kind) => {
-      const originLat = toNumber(userLocation?.lat, 15.03);
-      const originLng = toNumber(userLocation?.lng, 120.68);
+      const originLat = toNumber(kasaupLocationOrigin?.lat, null);
+      const originLng = toNumber(kasaupLocationOrigin?.lng, null);
+      if (originLat === null || originLng === null) return null;
 
       if (kind === 'attraction') {
         const lat = toNumber(item?.lat, null);
@@ -6594,14 +6888,25 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
     const formatRestaurantFollowUpDetail = (r) => {
       const municipalities = getRestaurantMunicipalities(r);
+      const nearbyProfile = restaurantProfileMap.get(r);
+      const nearbyBranch =
+        localConstraints.asksCurrentLocation
+          ? nearbyProfile?.nearestBranch || null
+          : null;
+
       const targetMunicipality =
+        nearbyBranch?.municipality ||
         localConstraints.location ||
         municipalities[0] ||
         r?.municipality ||
         'Pampanga';
 
-      const address = getBranchAddressForMunicipality(r, targetMunicipality);
-      const hours = getBranchOperatingHours(r, targetMunicipality);
+      const address =
+        nearbyBranch?.address ||
+        getBranchAddressForMunicipality(r, targetMunicipality);
+      const hours =
+        nearbyBranch?.operatingHours ||
+        getBranchOperatingHours(r, targetMunicipality);
       const menu = safeArray(r?.menu);
       const priced = menu
         .map(d => ({ dish: d, price: toNumber(d?.price, null) }))
@@ -6609,14 +6914,22 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         .sort((a, b) => a.price - b.price);
 
       const lines = [
-        `• **Area:** ${municipalities.join(', ') || r?.municipality || 'Pampanga'}`
+        localConstraints.asksCurrentLocation && nearbyBranch
+          ? `• **Nearest branch area:** ${targetMunicipality}`
+          : `• **Area:** ${municipalities.join(', ') || r?.municipality || 'Pampanga'}`
       ];
 
+      if (localConstraints.asksCurrentLocation && nearbyBranch?.branchName) {
+        lines.push(`• **Nearest branch/location:** ${nearbyBranch.branchName}`);
+      }
       if (address) lines.push(`• **Address:** ${address}`);
       if (hours) lines.push(`• **Registered hours:** ${hours}`);
 
       if (followUpAsksHours && localConstraints.asksToday) {
-        const hoursFit = registeredHoursFit(r);
+        const hoursFit =
+          localConstraints.asksCurrentLocation && nearbyBranch?.operatingHours
+            ? registeredHoursFit({ ...r, operatingHours: nearbyBranch.operatingHours, branches: [] })
+            : registeredHoursFit(r);
         if (hoursFit.known && hoursFit.fits) {
           lines.push(`• **Current-time check:** the registered hours cover the current time.`);
         } else if (hoursFit.known && !hoursFit.fits) {
@@ -6641,7 +6954,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       if (followUpAsksDistance) {
         const distance = calculatePlaceDistanceKm(r, 'restaurant');
         if (Number.isFinite(distance)) {
-          lines.push(`• **Approx. straight-line distance:** ${distance.toFixed(1)} km`);
+          lines.push(`• **Approx. straight-line distance from ${distanceOriginLabel}:** ${distance.toFixed(1)} km`);
         }
       }
 
@@ -6698,7 +7011,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       if (followUpAsksDistance) {
         const distance = calculatePlaceDistanceKm(a, 'attraction');
         if (Number.isFinite(distance)) {
-          lines.push(`• **Approx. straight-line distance:** ${distance.toFixed(1)} km`);
+          lines.push(`• **Approx. straight-line distance from ${distanceOriginLabel}:** ${distance.toFixed(1)} km`);
         }
       }
 
@@ -6859,7 +7172,8 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           const best = ranked[0];
           const icon = kind === 'restaurant' ? '🍴' : '🗺️';
           return `${icon} **Closest from the places we were discussing**\n\n` +
-            `**${best.item.name}** — approximately **${best.distanceKm.toFixed(1)} km** away by straight-line distance from your Kanyamanan start point.`;
+            `**${best.item.name}** — approximately **${best.distanceKm.toFixed(1)} km** away by straight-line distance from ${distanceOriginLabel}.` +
+            (localConstraints.asksCurrentLocation ? nearMeDistanceNote : '');
         }
       }
 
@@ -7015,8 +7329,38 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       return null;
     };
 
+    const resolveRestaurantForNearby = (restaurant) => {
+      if (!restaurant || !localConstraints.asksCurrentLocation) return restaurant;
+
+      const profile = restaurantProfileMap.get(restaurant);
+      const nearest = profile?.nearestBranch;
+      if (!nearest || !Number.isFinite(nearest.distanceKm)) return null;
+
+      if (
+        Number.isFinite(localConstraints.nearbyRadiusKm) &&
+        nearest.distanceKm > localConstraints.nearbyRadiusKm
+      ) return null;
+
+      return {
+        ...restaurant,
+        municipality: nearest.municipality || restaurant.municipality,
+        address: nearest.address || restaurant.address,
+        operatingHours: nearest.operatingHours || restaurant.operatingHours,
+        lat: nearest.lat,
+        lng: nearest.lng,
+        selectedBranchName: nearest.branchName || nearest.municipality || restaurant.municipality,
+        kasaupDistanceKm: nearest.distanceKm,
+        kasaupCoordinateQuality: nearest.coordinateQuality
+      };
+    };
+
     const planningRestaurants = allRestaurants
-      .map(r => ({ original: r, resolved: resolveRestaurantForLocation(r, targetLocation) }))
+      .map(r => ({
+        original: r,
+        resolved: localConstraints.asksCurrentLocation
+          ? resolveRestaurantForNearby(r)
+          : resolveRestaurantForLocation(r, targetLocation)
+      }))
       .filter(x => x.resolved)
       .map(({ original, resolved }) => {
         const availableDishes = safeArray(original?.menu)
@@ -7049,6 +7393,12 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         };
       })
       .sort((a, b) => {
+        if (localConstraints.asksCurrentLocation) {
+          const ad = toNumber(a?.restaurant?.kasaupDistanceKm, Infinity);
+          const bd = toNumber(b?.restaurant?.kasaupDistanceKm, Infinity);
+          if (ad !== bd) return ad - bd;
+        }
+
         if (a.dishKnown !== b.dishKnown) return a.dishKnown ? -1 : 1;
         const aPrice = toNumber(a.dish?.price, Infinity);
         const bPrice = toNumber(b.dish?.price, Infinity);
@@ -7122,6 +7472,14 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         restaurant: compactRestaurant(x.restaurant),
         dish: compactDish(x.dish)
       })),
+      nearbyContext: {
+        requested: Boolean(localConstraints.asksCurrentLocation),
+        detectedLocationAvailable: Boolean(kasaupLocationIsDetected),
+        radiusKm: toNumber(localConstraints.nearbyRadiusKm, null),
+        distanceBasis: kasaupLocationIsDetected
+          ? 'detected browser location; straight-line distance'
+          : 'Kanyamanan start point'
+      },
       dietaryConstraints: {
         exclusions: safeArray(localConstraints.exclusionTerms),
         allergies: safeArray(localConstraints.allergyTerms),
@@ -7177,6 +7535,7 @@ QUALITY BAR:
 - For calculations, show the arithmetic.
 - For budgets, preserve whether the user stated a TOTAL budget or a PER-PERSON budget. Never divide a per-person amount again. For group planning, use the supplied group-size and total/per-person ceilings.
 - For dietary constraints, use registered dish name/ingredient/allergen data conservatively. Never call an item allergy-safe, certified vegan/vegetarian, or halal-certified unless that certification is explicitly stored. For allergies, mention that cross-contact and complete recipes are not available and the user should verify with the restaurant.
+- For "near me", "nearby", "closest to me", and radius requests, use the supplied detected-location context. Never describe the default San Fernando start point as the user's current location. Distances in local Kasaup ranking are straight-line estimates unless a road-route result is explicitly supplied.
 - For comparisons, compare the requested entities rather than giving unrelated recommendations.
 - For "what should I eat?" style prompts, rank choices and explain the trade-off.
 - For "why" or educational questions, explain the reasoning in plain language.
@@ -7220,6 +7579,102 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 `.trim();
 
     const localAnswer = () => {
+      if (localConstraints.asksCurrentLocation && !kasaupLocationIsDetected) {
+        const radiusText = Number.isFinite(localConstraints.nearbyRadiusKm)
+          ? ` within ${localConstraints.nearbyRadiusKm} km`
+          : '';
+
+        return `📍 **I need your current location for “near me” results${radiusText}.**\n\n` +
+          `${kasaupLocationIssue || 'I could not access a detected browser location.'} ` +
+          `I won't treat the default San Fernando start point as your real position.\n\n` +
+          `Enable browser location access and try again, or name a city/municipality such as “restaurants in San Fernando.”`;
+      }
+
+      const genericNearMeDiscovery =
+        localConstraints.asksCurrentLocation &&
+        !localConstraints.asksRestaurantList &&
+        !localConstraints.asksDishList &&
+        !localConstraints.asksAttraction &&
+        !localConstraints.asksActivities &&
+        !localConstraints.asksRoute &&
+        !localConstraints.asksAction;
+
+      if (genericNearMeDiscovery) {
+        const nearbyRestaurants = recommendationCandidateProfiles.slice(0, 3);
+        const nearbyAttractions = attractionCandidateProfiles.slice(0, 3);
+
+        if (localConstraints.asksNearestOnly) {
+          const nearestPlaces = [
+            ...nearbyRestaurants.map(profile => ({
+              kind: 'restaurant',
+              name: profile.restaurant?.name || 'Registered restaurant',
+              municipality: profile.nearestBranch?.municipality || profile.restaurant?.municipality || 'Pampanga',
+              distanceKm: profile.distanceKm,
+              branchName: profile.nearestBranch?.branchName || '',
+              locationEstimate: profile.nearestBranch?.coordinateQuality === 'municipality-estimate'
+            })),
+            ...nearbyAttractions.map(profile => ({
+              kind: 'attraction',
+              name: profile.attraction?.name || 'Registered attraction',
+              municipality: profile.attraction?.municipality || 'Pampanga',
+              distanceKm: profile.distanceKm,
+              branchName: '',
+              locationEstimate: false
+            }))
+          ]
+            .filter(place => Number.isFinite(place.distanceKm))
+            .sort((a, b) => a.distanceKm - b.distanceKm);
+
+          if (nearestPlaces.length) {
+            const nearest = nearestPlaces[0];
+            const icon = nearest.kind === 'restaurant' ? '🍴' : '🗺️';
+            const branchText = nearest.branchName && normalize(nearest.branchName) !== normalize(nearest.municipality)
+              ? `\n• **Nearest branch/location:** ${nearest.branchName}`
+              : '';
+            const estimateText = nearest.locationEstimate
+              ? `\n• **Location quality:** municipality-level estimate because exact branch coordinates are not registered`
+              : '';
+
+            return `${icon} **Closest registered place near you**\n\n` +
+              `**${nearest.name}** — ${nearest.municipality}\n` +
+              `• **Approx. straight-line distance:** ${nearest.distanceKm.toFixed(1)} km` +
+              branchText +
+              estimateText +
+              nearMeDistanceNote;
+          }
+        }
+
+        const restaurantLines = nearbyRestaurants.map((profile, index) => {
+          const nearest = profile.nearestBranch || {};
+          const place = nearest.municipality || profile.restaurant?.municipality || 'Pampanga';
+          const branch = nearest.branchName && normalize(nearest.branchName) !== normalize(place)
+            ? ` • ${nearest.branchName}`
+            : '';
+          const quality = nearest.coordinateQuality === 'municipality-estimate'
+            ? ' • location estimate'
+            : '';
+          return `${index + 1}. **${profile.restaurant?.name || 'Registered restaurant'}** — ${place}${branch} • **${profile.distanceKm.toFixed(1)} km**${quality}`;
+        });
+
+        const attractionLines = nearbyAttractions.map((profile, index) =>
+          `${index + 1}. **${profile.attraction?.name || 'Registered attraction'}** — ${profile.attraction?.municipality || 'Pampanga'} • **${profile.distanceKm.toFixed(1)} km**`
+        );
+
+        const sections = [];
+        if (restaurantLines.length) sections.push(`🍴 **Nearby restaurants**\n${restaurantLines.join('\n')}`);
+        if (attractionLines.length) sections.push(`🗺️ **Nearby attractions**\n${attractionLines.join('\n')}`);
+
+        if (!sections.length) {
+          const radiusText = Number.isFinite(localConstraints.nearbyRadiusKm)
+            ? ` within ${localConstraints.nearbyRadiusKm} km`
+            : '';
+          return `📍 **Near-me results**\n\nI couldn't find a registered restaurant or attraction${radiusText} with usable location data.`;
+        }
+
+        return `📍 **Closest registered places near you**\n\n${sections.join('\n\n')}` +
+          nearMeDistanceNote;
+      }
+
       if (actionResults.length) {
         const tripForSummary = actionLoadedSavedTrip ? safeArray(activeTrip) : actionWorkingTrip;
         const tripLines = tripForSummary
@@ -7533,7 +7988,8 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
           return `${heading}\n\n` +
             cheapestMatches.map((x, i) => formatDirectDishLine(x, i)).join('\n') +
-            `\n\n_Price ranking uses the menu prices currently registered in Kanyamanan._`;
+            `\n\n_Price ranking uses the menu prices currently registered in Kanyamanan._` +
+            (localConstraints.asksCurrentLocation ? nearMeDistanceNote : '');
         }
 
         // Budget / normal dish recommendation:
@@ -7602,21 +8058,23 @@ ${JSON.stringify(updatedMessages.slice(-8))}
               ? `\n\n_🥗 Applied dietary filter: ${dietaryConstraintLabel}._`
               : '') +
             (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '') +
-            `\n\n_These results use registered menu-item prices, not restaurant $/$$/$$$ tiers._`;
+            `\n\n_These results use registered menu-item prices, not restaurant $/$$/$$$ tiers._` +
+            (localConstraints.asksCurrentLocation ? nearMeDistanceNote : '');
         }
 
         // General dish lookup.
         const generalDishMatches = directDishCandidates.slice(0, 12);
         if (generalDishMatches.length) {
-          return `🍽️ **Matching registered dishes**\n\n` +
+          return `🍽️ **${localConstraints.asksCurrentLocation ? 'Registered dishes near you' : 'Matching registered dishes'}**\n\n` +
             generalDishMatches.map((x, i) => formatDirectDishLine(x, i)).join('\n') +
             (hasActiveDietaryConstraint() && dietaryConstraintLabel
               ? `\n\n_🥗 Applied dietary filter: ${dietaryConstraintLabel}._`
               : '') +
-            (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '');
+            (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '') +
+            (localConstraints.asksCurrentLocation ? nearMeDistanceNote : '');
         }
 
-        return `🍽️ **Matching registered dishes**\n\nNo matching registered dishes were found for this request.` +
+        return `🍽️ **${localConstraints.asksCurrentLocation ? 'Registered dishes near you' : 'Matching registered dishes'}**\n\nNo matching registered dishes were found for this request.` +
           (hasActiveDietaryConstraint()
             ? `\n\n_Kasaup did not guess around missing dietary data; try relaxing a constraint or ask about a specific dish._`
             : '') +
@@ -7641,7 +8099,14 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         if (!profiles.length) {
           const locationText = localConstraints.location
             ? ` in **${localConstraints.location}**`
-            : '';
+            : (
+                localConstraints.asksCurrentLocation &&
+                Number.isFinite(localConstraints.nearbyRadiusKm)
+                  ? ` within **${localConstraints.nearbyRadiusKm} km** of your detected location`
+                  : localConstraints.asksCurrentLocation
+                    ? ` near your detected location`
+                    : ''
+              );
           const budgetText = budgetContext.amount !== null
             ? ` within the interpreted **${budgetContextLabel}**`
             : '';
@@ -7672,7 +8137,11 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             const branchLabel = profile.nearestBranch?.branchName
               ? ` (${profile.nearestBranch.branchName})`
               : '';
-            reasons.push(`nearest registered branch${branchLabel} is about ${profile.distanceKm.toFixed(1)} km away`);
+            const estimateLabel =
+              profile.nearestBranch?.coordinateQuality === 'municipality-estimate'
+                ? ' using a municipality-level location estimate'
+                : '';
+            reasons.push(`nearest branch/location${branchLabel} is about ${profile.distanceKm.toFixed(1)} km away${estimateLabel}`);
           }
 
           if (profile.hoursFit?.known && profile.hoursFit?.fits && profile.hoursFit?.label) {
@@ -7745,13 +8214,24 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             : '';
 
           const municipalityLabel =
-            localConstraints.location ||
-            getRestaurantMunicipalities(r).join(', ') ||
-            r?.municipality ||
-            'Pampanga';
+            localConstraints.asksCurrentLocation
+              ? (profile.nearestBranch?.municipality || r?.municipality || 'Pampanga')
+              : (
+                  localConstraints.location ||
+                  getRestaurantMunicipalities(r).join(', ') ||
+                  r?.municipality ||
+                  'Pampanga'
+                );
+
+          const nearestBranchLine =
+            localConstraints.asksCurrentLocation && profile.nearestBranch
+              ? `\n   📍 **Nearest branch/location:** ${profile.nearestBranch.branchName || municipalityLabel}` +
+                (profile.nearestBranch.address ? ` • ${profile.nearestBranch.address}` : '')
+              : '';
 
           return `${index + 1}. **${r.name}** — ${municipalityLabel}\n` +
             `   **Why it fits:** ${reasons.slice(0, 3).join('; ')}.` +
+            nearestBranchLine +
             featuredLine;
         };
 
@@ -7777,10 +8257,16 @@ ${JSON.stringify(updatedMessages.slice(-8))}
               (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '')
             : '';
 
+        const nearbyNote =
+          localConstraints.asksCurrentLocation
+            ? nearMeDistanceNote
+            : '';
+
         return `${heading}\n\n` +
           profiles.map(formatRecommendation).join('\n\n') +
           budgetNote +
           dietaryNote +
+          nearbyNote +
           scopeNote +
           rankingNote;
       }
@@ -7842,7 +8328,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                localConstraints.asksAttractionNearby ||
                /\b(?:closest|nearest|how far|distance)\b/i.test(userMsg)) &&
               Number.isFinite(profile.distanceKm)) {
-            lines.push(`• **Approx. straight-line distance from your Kanyamanan start point:** ${profile.distanceKm.toFixed(1)} km`);
+            lines.push(`• **Approx. straight-line distance from ${distanceOriginLabel}:** ${profile.distanceKm.toFixed(1)} km`);
           }
 
           if (localConstraints.asksHours && localConstraints.asksToday) {
@@ -7875,7 +8361,14 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         if (!profiles.length) {
           const locationText = localConstraints.location
             ? ` in **${localConstraints.location}**`
-            : '';
+            : (
+                localConstraints.asksCurrentLocation &&
+                Number.isFinite(localConstraints.nearbyRadiusKm)
+                  ? ` within **${localConstraints.nearbyRadiusKm} km** of your detected location`
+                  : localConstraints.asksCurrentLocation
+                    ? ` near your detected location`
+                    : ''
+              );
           const categoryText = requestedAttractionCategories.length
             ? ` matching **${requestedAttractionCategories.map(x => x.label).join(', ')}**`
             : '';
@@ -7904,7 +8397,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                localConstraints.asksCurrentLocation ||
                /\b(?:closest|nearest)\b/i.test(userMsg)) &&
               Number.isFinite(profile.distanceKm)) {
-            reasons.push(`about ${profile.distanceKm.toFixed(1)} km from your Kanyamanan start point`);
+            reasons.push(`about ${profile.distanceKm.toFixed(1)} km from ${distanceOriginLabel}`);
           }
 
           if (localConstraints.asksHours && localConstraints.asksToday) {
@@ -7965,6 +8458,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
         return `${heading}\n\n` +
           profiles.map(formatAttractionRecommendation).join('\n\n') +
+          (localConstraints.asksCurrentLocation ? nearMeDistanceNote : '') +
           followUpNote +
           rankingNote;
       }
@@ -8022,7 +8516,10 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           unknownText +
           budgetStopWarning +
           (toNumber(plan.stopCount) ? `\nRequested: ${plan.stopCount} stop(s).` : '') +
-          (targetLocation ? `\nArea: ${targetLocation}.` : '');
+          (targetLocation ? `\nArea: ${targetLocation}.` : '') +
+          (localConstraints.asksCurrentLocation
+            ? `\n📍 Stops are ranked from ${distanceOriginLabel} using nearest registered branch/location coordinates.` + nearMeDistanceNote
+            : '');
       }
 
       if (plan.purineConcern || localConstraints.asksPurine) {
