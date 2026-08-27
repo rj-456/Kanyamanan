@@ -3789,11 +3789,11 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       );
 
       const dishHeading =
-        /\b(?:registered dishes|registered dishes at|matching dishes|dish recommendations|food options|cheapest registered dish|cheapest registered dishes|cheapest from the dishes|lowest-calorie option from those dishes|here are some relevant registered food options)\b/i.test(leadLine);
+        /\b(?:registered dishes|registered dishes at|matching dishes|dish recommendations|dish comparison|food options|cheapest registered dish|cheapest registered dishes|cheapest from the dishes|lowest-calorie option from those dishes|here are some relevant registered food options)\b/i.test(leadLine);
       const attractionHeading =
-        /\b(?:tourist attraction|attraction recommendations|places you may want to explore|top attraction match|registered attraction)\b/i.test(leadLine);
+        /\b(?:tourist attraction|attraction recommendations|attraction comparison|places you may want to explore|top attraction match|registered attraction)\b/i.test(leadLine);
       const restaurantHeading =
-        /\b(?:restaurant recommendations|top restaurant match|matching restaurants|registered restaurants|restaurant details?|cheapest menu starting point from those restaurants|most affordable restaurant from those restaurants|lowest meal-like registered starting price from those restaurants|here are some relevant registered restaurants)\b/i.test(leadLine);
+        /\b(?:restaurant recommendations|restaurant comparison|top restaurant match|matching restaurants|registered restaurants|restaurant details?|cheapest menu starting point from those restaurants|most affordable restaurant from those restaurants|lowest meal-like registered starting price from those restaurants|here are some relevant registered restaurants)\b/i.test(leadLine);
 
       // Detail answers often contain both a restaurant name and a dish name.
       // Field-label cues are therefore stronger than simple entity-count ties.
@@ -3839,11 +3839,74 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         }
       }
 
-      const primaryItems =
+      let primaryItems =
         primaryKind === 'restaurant' ? restaurantsInOrder :
         primaryKind === 'attraction' ? attractionsInOrder :
         primaryKind === 'dish' ? dishesInOrder :
         [];
+
+      // Criterion comparisons emit an explicit "**Result:** **Entity**" line.
+      // Make that winning entity the next singular follow-up subject while
+      // retaining every compared entity in restaurants/attractions/dishes.
+      // A generic trade-off comparison has no named Result and therefore keeps
+      // the full comparison set as the active frame.
+      const comparisonResultLine = messageText
+        .split('\n')
+        .map(line => String(line || '').trim())
+        .find(line => /\*\*(?:result|best fit|winner)\s*:\*\*/i.test(line)) || '';
+
+      if (comparisonResultLine && primaryKind) {
+        const resultBoldLabels = [...comparisonResultLine.matchAll(/\*\*([^*\n]+)\*\*/g)]
+          .map(match => normalize(match?.[1] || '').replace(/^(?:result|best fit|winner)\s*:$/, '').trim())
+          .filter(Boolean);
+
+        if (primaryKind === 'restaurant') {
+          const winners = restaurantsInOrder.filter(r =>
+            resultBoldLabels.includes(normalize(r?.name || ''))
+          );
+          if (winners.length === 1) primaryItems = [winners[0]];
+        }
+
+        if (primaryKind === 'attraction') {
+          const winners = attractionsInOrder.filter(a =>
+            resultBoldLabels.includes(normalize(a?.name || ''))
+          );
+          if (winners.length === 1) primaryItems = [winners[0]];
+        }
+
+        if (primaryKind === 'dish') {
+          let winners = dishesInOrder.filter(item =>
+            resultBoldLabels.includes(normalize(item?.dish?.name || ''))
+          );
+
+          const resultRestaurantNames = restaurantsInOrder
+            .map(r => normalize(r?.name || ''))
+            .filter(name => resultBoldLabels.includes(name));
+
+          if (winners.length > 1 && resultRestaurantNames.length) {
+            const restaurantScoped = winners.filter(item =>
+              resultRestaurantNames.includes(normalize(item?.restaurant?.name || ''))
+            );
+            if (restaurantScoped.length) winners = restaurantScoped;
+          }
+
+          const resultPriceMatch = comparisonResultLine.match(
+            /(?:₱|php\s*)\s*([0-9][0-9,]*(?:\.[0-9]+)?)/i
+          );
+          const resultPrice = resultPriceMatch?.[1]
+            ? toNumber(resultPriceMatch[1], null)
+            : null;
+
+          if (winners.length > 1 && resultPrice !== null) {
+            const priceScoped = winners.filter(item =>
+              toNumber(item?.dish?.price, null) === resultPrice
+            );
+            if (priceScoped.length) winners = priceScoped;
+          }
+
+          if (winners.length === 1) primaryItems = [winners[0]];
+        }
+      }
 
       return {
         text: messageText,
@@ -3884,7 +3947,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     })();
 
     const followUpReferenceLanguage =
-      /\b(?:it|that|this|those|these|there|then|also|another|other|same|one|ones|them|they|first|second|third|fourth|fifth|sixth|last|next|previous|former|latter|that one|this one|the one|which one|what about|how about|what if|instead|tell me more|more about|what else|and what|and the)\b/i.test(userMsg) ||
+      /\b(?:it|that|this|those|these|there|then|also|another|other|same|one|ones|them|they|first|second|third|fourth|fifth|sixth|last|next|previous|former|latter|that one|this one|the one|which one|which is|which has|which fits|which stays|which opens|which closes|which of|what about|how about|what if|instead|tell me more|more about|what else|and what|and the)\b/i.test(userMsg) ||
       /\b(?:yan|iyan|iyon|ito|yun|yung|yong|doon|diyan|dyan|pangalawa|pangatlo|una|huli|magkano|nasaan|saan yan|ano pa|kwento pa)\b/i.test(userMsg);
 
     const shortFollowUpRefinement =
@@ -3898,7 +3961,17 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       (followUpReferenceLanguage || shortFollowUpRefinement);
 
     const followUpComparisonLanguage =
-      /\b(?:which one|which is|cheaper|cheapest|closest|nearest|lowest|highest|best of|most affordable|least expensive|lowest calorie|lightest|pinakamura|pinakamalapit)\b/i.test(userMsg);
+      /\b(?:which one|which is|which has|which fits|which stays|which opens|which closes|which of|cheaper|cheapest|closer|closest|nearest|nearer|lowest|highest|best of|most affordable|least expensive|lowest calorie|lower calorie|fewer calories|fewest calories|lightest|opens earlier|open earlier|closes later|stays open later|open later|more vegetarian options|more vegan options|more dietary options|more menu options|more dishes|fits? my budget|fits? our budget|fits? my diet|fits? our diet|pinakamura|pinakamalapit)\b/i.test(userMsg);
+
+    // Dedicated comparison signal for the final Kasaup comparison batch.
+    // This catches natural criterion questions without hijacking standalone
+    // queries such as "Which restaurant is closest in Porac?" when no
+    // comparison set/named pair actually exists.
+    const comparisonSignal =
+      Boolean(localConstraints.asksComparison) ||
+      /\b(?:which|what)\b.{0,90}\b(?:cheaper|cheapest|closer|closest|nearest|nearer|fewer calories|fewest calories|lower calorie|lowest calorie|lighter|opens earlier|open earlier|closes later|stays open later|open later)\b/i.test(userMsg) ||
+      /\b(?:which|what)\b.{0,90}\b(?:more|fewer|fewest)\b.{0,70}\b(?:options|dishes|menu items|calories)\b/i.test(userMsg) ||
+      /\bwhich\b.{0,70}\bfits?\b.{0,70}\b(?:budget|diet|dietary|restriction|allergy|allergies)\b/i.test(userMsg);
 
     const referenceFrameForFollowUp = (() => {
       if (!recentReferenceFrames.length) return null;
@@ -4293,7 +4366,11 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       localConstraints.asksRestaurantList ||
       localConstraints.asksDishList ||
       localConstraints.asksRoute ||
-      localConstraints.asksRecommendation;
+      localConstraints.asksRecommendation ||
+      (
+        comparisonSignal &&
+        /\b(?:diet|dietary|restriction|allergy|allergies|allergic|vegetarian|vegan|pescatarian|halal|pork[- ]free|no pork|without pork|gluten[- ]free|dairy[- ]free|shellfish|purine|gout)\b/i.test(userMsg)
+      );
 
     const applyDietaryContext = (info) => {
       if (!info || !info.hasConstraint) return;
@@ -7274,6 +7351,1150 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       return null;
     };
 
+
+    // ============================================================
+    // COMPARISON QUESTIONS ENGINE (Final Travel Kasaup improvement)
+    // ============================================================
+    // Comparisons are deliberately grounded in registered Kanyamanan data:
+    // - Restaurants: meaningful menu affordability, menu counts, dietary/budget
+    //   fit, registered hours, calories, and detected-location distance.
+    // - Dishes: registered price/calories, dietary/budget fit, serving restaurant,
+    //   and nearby restaurant distance.
+    // - Attractions: registered municipality/type/hours/price level/free text,
+    //   and detected-location distance.
+    //
+    // No ratings, popularity, service-quality claims, or unsupported "best"
+    // judgments are invented.
+    const comparisonRestaurantMentions = orderedCatalogMentions(
+      userMsg,
+      allRestaurants,
+      r => r?.name || '',
+      r => r?.id || normalize(r?.name || '')
+    );
+
+    const comparisonAttractionMentions = orderedCatalogMentions(
+      userMsg,
+      allAttractions,
+      a => a?.name || '',
+      a => a?.id || normalize(a?.name || '')
+    );
+
+    const comparisonReferenceFrame =
+      referenceFrameForFollowUp?.primaryKind
+        ? referenceFrameForFollowUp
+        : latestReferenceFrame;
+
+    const collectComparisonOrdinalIndices = (frameLength = 0) => {
+      const q = normalize(userMsg);
+      const found = [];
+      const specs = [
+        [0, /\b(?:first|1st|number 1|#1)\b/g],
+        [1, /\b(?:second|2nd|number 2|#2)\b/g],
+        [2, /\b(?:third|3rd|number 3|#3)\b/g],
+        [3, /\b(?:fourth|4th|number 4|#4)\b/g],
+        [4, /\b(?:fifth|5th|number 5|#5)\b/g],
+        [5, /\b(?:sixth|6th|number 6|#6)\b/g],
+        [6, /\b(?:seventh|7th|number 7|#7)\b/g],
+        [7, /\b(?:eighth|8th|number 8|#8)\b/g],
+        [8, /\b(?:ninth|9th|number 9|#9)\b/g],
+        [9, /\b(?:tenth|10th|number 10|#10)\b/g],
+        [10, /\b(?:eleventh|11th|number 11|#11)\b/g],
+        [11, /\b(?:twelfth|12th|number 12|#12)\b/g],
+        [12, /\b(?:thirteenth|13th|number 13|#13)\b/g],
+        [13, /\b(?:fourteenth|14th|number 14|#14)\b/g],
+        [14, /\b(?:fifteenth|15th|number 15|#15)\b/g]
+      ];
+
+      specs.forEach(([index, regex]) => {
+        for (const match of q.matchAll(regex)) {
+          found.push({ index, position: match.index ?? 0 });
+        }
+      });
+
+      for (const match of q.matchAll(/\b(?:last|the last)\b/g)) {
+        found.push({
+          index: frameLength > 0 ? frameLength - 1 : -1,
+          position: match.index ?? 0
+        });
+      }
+
+      const ordered = found
+        .filter(x => x.index >= 0)
+        .sort((a, b) => a.position - b.position)
+        .map(x => x.index);
+
+      return unique(ordered.map(String)).map(Number);
+    };
+
+    const resolveDirectDishComparisonMentions = () => {
+      const q = normalize(userMsg);
+      if (!q) return { items: [], ambiguousNames: [] };
+
+      const dishNameMap = new Map();
+      safeArray(allDishes).forEach(item => {
+        const name = normalize(item?.dish?.name || '');
+        if (!name) return;
+        if (!dishNameMap.has(name)) dishNameMap.set(name, []);
+        dishNameMap.get(name).push(item);
+      });
+
+      const mentionSpans = [];
+      dishNameMap.forEach((items, name) => {
+        const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const startsWithWord = /^[a-z0-9_]/i.test(name);
+        const endsWithWord = /[a-z0-9_]$/i.test(name);
+        const regex = new RegExp(
+          `${startsWithWord ? '\\b' : ''}${escaped}${endsWithWord ? '\\b' : ''}`,
+          'gi'
+        );
+
+        for (const match of q.matchAll(regex)) {
+          mentionSpans.push({
+            name,
+            items,
+            start: match.index ?? 0,
+            end: (match.index ?? 0) + String(match[0] || '').length
+          });
+        }
+      });
+
+      // Prefer the longest exact dish phrase when names overlap at the same
+      // position (e.g. "Sisig Silog" should win over the nested word "Sisig").
+      mentionSpans.sort((a, b) => {
+        if (a.start !== b.start) return a.start - b.start;
+        return (b.end - b.start) - (a.end - a.start);
+      });
+
+      const accepted = [];
+      mentionSpans.forEach(span => {
+        const overlaps = accepted.some(existing =>
+          span.start < existing.end && span.end > existing.start
+        );
+        if (!overlaps) accepted.push(span);
+      });
+
+      const explicitRestaurantKeys = new Set(
+        comparisonRestaurantMentions
+          .map(r => String(r?.id || normalize(r?.name || '')))
+          .filter(Boolean)
+      );
+
+      const contextDishes = safeArray(comparisonReferenceFrame?.dishes);
+      const selected = [];
+      const seen = new Set();
+      const ambiguousNames = [];
+
+      const dishKey = item =>
+        `${item?.restaurant?.id || normalize(item?.restaurant?.name || '')}::` +
+        `${item?.dish?.id || normalize(item?.dish?.name || '')}::` +
+        `${toNumber(item?.dish?.price, '')}`;
+
+      accepted.forEach(span => {
+        let candidates = safeArray(span.items).slice();
+
+        if (explicitRestaurantKeys.size) {
+          const scoped = candidates.filter(item =>
+            explicitRestaurantKeys.has(
+              String(item?.restaurant?.id || normalize(item?.restaurant?.name || ''))
+            )
+          );
+          if (scoped.length) candidates = scoped;
+        }
+
+        if (candidates.length > 1 && contextDishes.length) {
+          const contextScoped = candidates.filter(candidate =>
+            contextDishes.some(contextItem =>
+              (
+                candidate?.dish?.id &&
+                contextItem?.dish?.id &&
+                String(candidate.dish.id) === String(contextItem.dish.id) &&
+                normalize(candidate?.restaurant?.name || '') === normalize(contextItem?.restaurant?.name || '')
+              ) ||
+              (
+                normalize(candidate?.dish?.name || '') === normalize(contextItem?.dish?.name || '') &&
+                normalize(candidate?.restaurant?.name || '') === normalize(contextItem?.restaurant?.name || '') &&
+                toNumber(candidate?.dish?.price, null) === toNumber(contextItem?.dish?.price, null)
+              )
+            )
+          );
+
+          if (contextScoped.length) candidates = contextScoped;
+        }
+
+        if (candidates.length === 1) {
+          const key = dishKey(candidates[0]);
+          if (!seen.has(key)) {
+            seen.add(key);
+            selected.push(candidates[0]);
+          }
+          return;
+        }
+
+        if (candidates.length > 1) {
+          const display = candidates[0]?.dish?.name || span.name;
+          if (!ambiguousNames.includes(display)) ambiguousNames.push(display);
+        }
+      });
+
+      return { items: selected, ambiguousNames };
+    };
+
+    const directDishComparisonResolution = resolveDirectDishComparisonMentions();
+
+    const comparisonCriteria = (() => {
+      const criteria = [];
+
+      if (/\b(?:cheaper|cheapest|less expensive|least expensive|more affordable|most affordable|lower price|lowest price|price|cost)\b/i.test(userMsg)) {
+        criteria.push('price');
+      }
+
+      if (/\b(?:closer|closest|nearest|nearer|distance|how far)\b/i.test(userMsg)) {
+        criteria.push('distance');
+      }
+
+      if (/\b(?:fewer calories|fewest calories|lower calories?|lowest calories?|lower calorie|lowest calorie|lighter|lightest)\b/i.test(userMsg)) {
+        criteria.push('calories');
+      }
+
+      if (/\b(?:opens? earlier|open earlier|earlier opening|earliest opening)\b/i.test(userMsg)) {
+        criteria.push('opens-earlier');
+      }
+
+      if (/\b(?:closes? later|stays? open later|open later|later closing|latest closing)\b/i.test(userMsg)) {
+        criteria.push('closes-later');
+      }
+
+      const mentionsDiet =
+        Boolean(rawDietaryInfo?.hasConstraint) ||
+        /\b(?:diet|dietary|restriction|allergy|allergies|allergic|vegetarian|vegan|pescatarian|halal|pork[- ]free|no pork|without pork|gluten[- ]free|dairy[- ]free|shellfish|purine|gout)\b/i.test(userMsg);
+
+      if (
+        mentionsDiet &&
+        /\b(?:fit|fits|better|more|option|options|suitable|candidate|candidates|which|compare)\b/i.test(userMsg)
+      ) {
+        criteria.push('dietary');
+      }
+
+      if (
+        budgetContext.perPersonLimit !== null &&
+        /\b(?:budget|afford|affordable|under|below|within|spend|peso|pesos|php|₱)\b/i.test(userMsg)
+      ) {
+        criteria.push('budget');
+      }
+
+      if (
+        /\b(?:more|larger|bigger)\b.{0,40}\b(?:menu|dishes|menu items|items)\b/i.test(userMsg) &&
+        !criteria.includes('budget') &&
+        !criteria.includes('dietary')
+      ) {
+        criteria.push('menu-count');
+      }
+
+      return unique(criteria);
+    })();
+
+    const comparisonIsGenericBetter =
+      comparisonCriteria.length === 0 &&
+      /\b(?:which is better|which one is better|better one|best between|which should i choose|which should we choose)\b/i.test(userMsg);
+
+    const comparisonHasExplicitCommand =
+      /\b(?:compare|comparison|versus|vs\.?|difference|better|best between)\b/i.test(userMsg);
+
+    const getComparisonTargetScope = () => {
+      if (!comparisonSignal) return null;
+
+      const frame = comparisonReferenceFrame;
+      const frameItems = safeArray(frame?.primaryItems);
+      const ordinalIndices = collectComparisonOrdinalIndices(frameItems.length);
+
+      if (ordinalIndices.length >= 2) {
+        if (!frame?.primaryKind || !frameItems.length) {
+          return {
+            clarification:
+              `⚖️ **Comparison needs a recent result list**\n\n` +
+              `I can compare positions such as “the first and third” after Kasaup has shown a restaurant, dish, or attraction list.`
+          };
+        }
+
+        const invalid = ordinalIndices.some(index => index < 0 || index >= frameItems.length);
+        if (invalid) {
+          return {
+            clarification:
+              `⚖️ **Comparison position is out of range**\n\n` +
+              `The latest ${frame.primaryKind} list has ${frameItems.length} item${frameItems.length === 1 ? '' : 's'}. Choose positions inside that list.`
+          };
+        }
+
+        return {
+          kind: frame.primaryKind,
+          items: ordinalIndices.map(index => frameItems[index]),
+          source: 'ordinal'
+        };
+      }
+
+      const restaurantCount = comparisonRestaurantMentions.length;
+      const attractionCount = comparisonAttractionMentions.length;
+      const dishCount = directDishComparisonResolution.items.length;
+
+      if (restaurantCount >= 2 && attractionCount === 0) {
+        return {
+          kind: 'restaurant',
+          items: comparisonRestaurantMentions,
+          source: 'named'
+        };
+      }
+
+      if (attractionCount >= 2 && restaurantCount === 0) {
+        return {
+          kind: 'attraction',
+          items: comparisonAttractionMentions,
+          source: 'named'
+        };
+      }
+
+      if (
+        dishCount >= 2 &&
+        restaurantCount < 2 &&
+        attractionCount < 2 &&
+        !directDishComparisonResolution.ambiguousNames.length
+      ) {
+        return {
+          kind: 'dish',
+          items: directDishComparisonResolution.items,
+          source: 'named'
+        };
+      }
+
+      if (restaurantCount > 0 && attractionCount > 0 && comparisonHasExplicitCommand) {
+        return {
+          clarification:
+            `⚖️ **These are different kinds of Kanyamanan places**\n\n` +
+            `One target is a restaurant and another is an attraction. I won't invent a single “better” score across different entity types. ` +
+            `If you want, compare a shared measurable criterion such as distance or registered hours within the same type.`
+        };
+      }
+
+      if (
+        directDishComparisonResolution.ambiguousNames.length &&
+        comparisonHasExplicitCommand &&
+        restaurantCount < 2 &&
+        attractionCount < 2
+      ) {
+        return {
+          clarification:
+            `⚖️ **Dish comparison needs a more specific reference**\n\n` +
+            `I found multiple registered menu entries for **${directDishComparisonResolution.ambiguousNames.slice(0, 3).join(', ')}**. ` +
+            `Use positions from a displayed menu (for example, “compare the first and third”) or include the restaurant and exact price so I don't guess between duplicate dishes.`
+        };
+      }
+
+      if (
+        frame?.primaryKind &&
+        frameItems.length > 1 &&
+        (
+          isFollowUpQuery ||
+          /\b(?:these|those|them|both|which|compare|comparison)\b/i.test(userMsg)
+        )
+      ) {
+        const asksExactlyTwo =
+          /\b(?:these two|those two|the two|both of them|both)\b/i.test(userMsg);
+
+        if (asksExactlyTwo && frameItems.length !== 2) {
+          return {
+            clarification:
+              `⚖️ **Which two should I compare?**\n\n` +
+              `The latest ${frame.primaryKind} result contains ${frameItems.length} items. Say something like **“compare the first and third.”**`
+          };
+        }
+
+        return {
+          kind: frame.primaryKind,
+          items: frameItems,
+          source: 'conversation'
+        };
+      }
+
+      if (comparisonHasExplicitCommand) {
+        return {
+          clarification:
+            `⚖️ **Tell me what to compare**\n\n` +
+            `Name two registered restaurants, dishes, or attractions, or first ask Kasaup for a list and then say something like **“compare the first and third.”**`
+        };
+      }
+
+      return null;
+    };
+
+    const parseComparisonHoursWindow = (value) => {
+      const raw = String(value || '').trim();
+      if (!raw) return { known: false, open: null, close: null, closeComparable: null };
+
+      const match = raw.match(
+        /(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?)\s*(?:-|–|—|to)\s*(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?)/i
+      );
+      if (!match) return { known: false, open: null, close: null, closeComparable: null };
+
+      const open = parseClockMinutes(match[1]);
+      const close = parseClockMinutes(match[2]);
+      if (open === null || close === null) {
+        return { known: false, open: null, close: null, closeComparable: null };
+      }
+
+      return {
+        known: true,
+        open,
+        close,
+        closeComparable: close <= open ? close + 24 * 60 : close
+      };
+    };
+
+    const comparisonLocationForRestaurants =
+      localConstraints.location ||
+      recentRestaurantRequest?.constraints?.location ||
+      null;
+
+    const buildRestaurantComparisonProfile = (restaurant) => {
+      const stats = restaurantMenuStats(restaurant);
+      const menu = safeArray(restaurant?.menu);
+      const rawPriced = safeArray(stats?.safeMenu)
+        .filter(d => toNumber(d?.price, null) !== null)
+        .slice()
+        .sort((a, b) => toNumber(a?.price, Infinity) - toNumber(b?.price, Infinity));
+
+      const mealStarter = safeArray(stats?.mealLikePricedMenu)[0] || null;
+      const starterDish = mealStarter || rawPriced[0] || null;
+      const starterPrice = toNumber(starterDish?.price, null);
+
+      const targetMunicipality = (() => {
+        const municipalities = getRestaurantMunicipalities(restaurant);
+        if (
+          comparisonLocationForRestaurants &&
+          municipalities.some(m => normalize(m) === normalize(comparisonLocationForRestaurants))
+        ) {
+          return comparisonLocationForRestaurants;
+        }
+        return restaurant?.municipality || municipalities[0] || null;
+      })();
+
+      const hours = getBranchOperatingHours(restaurant, targetMunicipality);
+      const hoursWindow = parseComparisonHoursWindow(hours);
+
+      const calorieCandidates = safeArray(stats?.safeMenu)
+        .filter(d =>
+          getBudgetDishQuality(d, null) > 0 &&
+          toNumber(d?.nutrition?.calories, null) !== null
+        )
+        .slice()
+        .sort((a, b) =>
+          toNumber(a?.nutrition?.calories, Infinity) -
+          toNumber(b?.nutrition?.calories, Infinity)
+        );
+
+      const lowestCalorieDish = calorieCandidates[0] || null;
+      const lowestCalories = toNumber(lowestCalorieDish?.nutrition?.calories, null);
+
+      const budgetCandidates =
+        budgetContext.perPersonLimit === null
+          ? []
+          : (
+              budgetContext.itemCeiling
+                ? safeArray(stats?.menuForBudget)
+                : (
+                    safeArray(stats?.mealMenuForBudget).length
+                      ? safeArray(stats?.mealMenuForBudget)
+                      : safeArray(stats?.menuForBudget)
+                  )
+            );
+
+      const distanceKm =
+        kasaupLocationIsDetected
+          ? calculatePlaceDistanceKm(restaurant, 'restaurant')
+          : null;
+
+      const nearbyProfile = restaurantProfileMap.get(restaurant);
+      const locationQuality =
+        localConstraints.asksCurrentLocation
+          ? nearbyProfile?.nearestBranch?.coordinateQuality || ''
+          : '';
+
+      return {
+        item: restaurant,
+        kind: 'restaurant',
+        name: restaurant?.name || 'Registered restaurant',
+        municipality:
+          targetMunicipality ||
+          getRestaurantMunicipalities(restaurant).join(', ') ||
+          restaurant?.municipality ||
+          'Pampanga',
+        stats,
+        menuCount: menu.length,
+        starterDish,
+        starterPrice,
+        usedMealLikePrice: Boolean(mealStarter),
+        dietaryCount: hasActiveDietaryConstraint() ? safeArray(stats?.safeMenu).length : null,
+        dietaryUnknownCount: toNumber(stats?.dietaryUnknownCount, 0),
+        budgetCount: budgetContext.perPersonLimit !== null ? budgetCandidates.length : null,
+        lowestCalorieDish,
+        lowestCalories,
+        hours,
+        hoursWindow,
+        distanceKm,
+        locationQuality
+      };
+    };
+
+    const buildDishComparisonProfile = (item) => {
+      const dish = item?.dish || {};
+      const restaurant = item?.restaurant || {};
+      const dietaryFit = hasActiveDietaryConstraint()
+        ? evaluateDishDietaryFit(restaurant, dish)
+        : null;
+
+      const price = toNumber(dish?.price, null);
+      const calories = toNumber(dish?.nutrition?.calories, null);
+      const budgetLimit = budgetContext.perPersonLimit;
+      const budgetFits =
+        budgetLimit === null || price === null
+          ? null
+          : price <= budgetLimit;
+
+      const distanceKm =
+        kasaupLocationIsDetected
+          ? calculatePlaceDistanceKm(restaurant, 'restaurant')
+          : null;
+
+      return {
+        item,
+        kind: 'dish',
+        name: dish?.name || 'Registered dish',
+        restaurantName: restaurant?.name || 'Registered restaurant',
+        municipality: restaurant?.municipality || 'Pampanga',
+        price,
+        calories,
+        dietaryFit,
+        budgetFits,
+        budgetLimit,
+        distanceKm
+      };
+    };
+
+    const getAttractionComparisonPrice = (attraction) => {
+      const rank = attractionPriceRank(attraction);
+      const textValue = getAttractionText(attraction);
+
+      if (rank === 0) {
+        return { known: true, rank: 0, label: 'Registered as free admission / no entrance fee' };
+      }
+
+      if (rank >= 1 && rank <= 3) {
+        return {
+          known: true,
+          rank,
+          label: `Registered price level ${String(attraction?.priceTier || '').trim()}`
+        };
+      }
+
+      return { known: false, rank: null, label: 'Price/admission level not registered' };
+    };
+
+    const buildAttractionComparisonProfile = (attraction) => {
+      const hours = String(attraction?.operatingHours || '').trim();
+      const price = getAttractionComparisonPrice(attraction);
+      const distanceKm =
+        kasaupLocationIsDetected
+          ? calculatePlaceDistanceKm(attraction, 'attraction')
+          : null;
+
+      return {
+        item: attraction,
+        kind: 'attraction',
+        name: attraction?.name || 'Registered attraction',
+        municipality: attraction?.municipality || 'Pampanga',
+        type: attraction?.type || attraction?.category || '',
+        hours,
+        hoursWindow: parseComparisonHoursWindow(hours),
+        price,
+        distanceKm
+      };
+    };
+
+    const comparisonDisplayName = (profile) =>
+      profile?.kind === 'dish'
+        ? `${profile?.name || 'Registered dish'} at ${profile?.restaurantName || 'Registered restaurant'}`
+        : profile?.name || 'Registered place';
+
+    const comparisonResultEntityMarkdown = (profile) =>
+      profile?.kind === 'dish'
+        ? `**${profile?.name || 'Registered dish'}** at **${profile?.restaurantName || 'Registered restaurant'}**`
+        : `**${profile?.name || 'Registered place'}**`;
+
+    const makeNumericComparisonResult = ({
+      key,
+      label,
+      profiles,
+      getValue,
+      direction = 'min',
+      formatValue
+    }) => {
+      const entries = profiles.map(profile => ({
+        profile,
+        value: getValue(profile)
+      }));
+
+      const known = entries.filter(entry => Number.isFinite(entry.value));
+      const missing = entries.filter(entry => !Number.isFinite(entry.value));
+
+      if (known.length < 2) {
+        return {
+          key,
+          label,
+          winner: null,
+          tied: [],
+          ranked: known,
+          missing,
+          note: `Not enough registered ${label.toLowerCase()} data to determine a winner.`
+        };
+      }
+
+      known.sort((a, b) =>
+        direction === 'max'
+          ? b.value - a.value
+          : a.value - b.value
+      );
+
+      const bestValue = known[0].value;
+      const tied = known.filter(entry => Math.abs(entry.value - bestValue) < 1e-9);
+      const winner =
+        missing.length === 0 && tied.length === 1
+          ? tied[0].profile
+          : null;
+
+      return {
+        key,
+        label,
+        winner,
+        tied: tied.map(entry => entry.profile),
+        ranked: known,
+        missing,
+        bestValue,
+        formatValue,
+        note:
+          missing.length > 0
+            ? `Some compared items are missing registered ${label.toLowerCase()} data, so I won't declare a definitive winner.`
+            : tied.length > 1
+              ? `There is a tie on ${label.toLowerCase()}.`
+              : ''
+      };
+    };
+
+    const formatComparisonCriterionValue = (profile, criterion) => {
+      if (criterion === 'price') {
+        if (profile.kind === 'restaurant') {
+          return profile.starterPrice !== null
+            ? `${formatPeso(profile.starterPrice)}${profile.starterDish?.name ? ` (${profile.starterDish.name})` : ''}`
+            : 'price not registered';
+        }
+        if (profile.kind === 'dish') {
+          return profile.price !== null ? formatPeso(profile.price) : 'price not registered';
+        }
+        return profile.price?.label || 'price/admission level not registered';
+      }
+
+      if (criterion === 'distance') {
+        return Number.isFinite(profile.distanceKm)
+          ? `${profile.distanceKm.toFixed(1)} km straight-line`
+          : 'distance unavailable';
+      }
+
+      if (criterion === 'calories') {
+        if (profile.kind === 'restaurant') {
+          return profile.lowestCalories !== null
+            ? `${profile.lowestCalories} kcal${profile.lowestCalorieDish?.name ? ` (${profile.lowestCalorieDish.name})` : ''}`
+            : 'calories not registered for a meal-like option';
+        }
+        if (profile.kind === 'dish') {
+          return profile.calories !== null ? `${profile.calories} kcal` : 'calories not registered';
+        }
+        return 'not applicable';
+      }
+
+      if (criterion === 'opens-earlier' || criterion === 'closes-later') {
+        return profile.hours || 'hours not registered';
+      }
+
+      if (criterion === 'dietary') {
+        if (profile.kind === 'restaurant') {
+          return `${profile.dietaryCount ?? 0} registered option${profile.dietaryCount === 1 ? '' : 's'} pass the active dietary screen`;
+        }
+
+        if (profile.kind === 'dish') {
+          if (!profile.dietaryFit) return 'no active dietary screen';
+          if (profile.dietaryFit.unknownForStrictConstraint) {
+            return 'cannot be confirmed from the registered ingredient/allergen metadata';
+          }
+          return profile.dietaryFit.passes
+            ? 'passes the active registered-text dietary screen'
+            : `does not pass the active dietary screen${profile.dietaryFit.violations?.length ? ` (${profile.dietaryFit.violations.join(', ')})` : ''}`;
+        }
+
+        return 'not applicable';
+      }
+
+      if (criterion === 'budget') {
+        if (profile.kind === 'restaurant') {
+          return profile.budgetCount !== null
+            ? `${profile.budgetCount} registered option${profile.budgetCount === 1 ? '' : 's'} within ${budgetContextLabel}`
+            : 'budget comparison unavailable';
+        }
+
+        if (profile.kind === 'dish') {
+          if (profile.price === null || profile.budgetLimit === null) return 'budget comparison unavailable';
+          return `${profile.budgetFits ? 'fits' : 'does not fit'} ${budgetContextLabel} • ${formatPeso(profile.price)}`;
+        }
+
+        return 'exact budget fit cannot be calculated from attraction price levels';
+      }
+
+      if (criterion === 'menu-count') {
+        return profile.kind === 'restaurant'
+          ? `${profile.menuCount} registered menu item${profile.menuCount === 1 ? '' : 's'}`
+          : 'not applicable';
+      }
+
+      return '';
+    };
+
+    const buildComparisonAnswer = () => {
+      if (!comparisonSignal) return null;
+
+      const scope = getComparisonTargetScope();
+      if (!scope) return null;
+      if (scope.clarification) return scope.clarification;
+
+      const kind = scope.kind;
+      const rawItems = safeArray(scope.items);
+
+      const seenTargets = new Set();
+      const items = rawItems.filter(item => {
+        const key =
+          kind === 'dish'
+            ? `${item?.restaurant?.id || normalize(item?.restaurant?.name || '')}::${item?.dish?.id || normalize(item?.dish?.name || '')}::${toNumber(item?.dish?.price, '')}`
+            : String(item?.id || normalize(item?.name || ''));
+
+        if (!key || seenTargets.has(key)) return false;
+        seenTargets.add(key);
+        return true;
+      });
+
+      if (items.length < 2) {
+        return `⚖️ **Comparison needs at least two choices**\n\n` +
+          `I only resolved ${items.length || 'no'} unambiguous registered ${kind || 'item'} target${items.length === 1 ? '' : 's'}. ` +
+          `Name two choices or use positions from a recent Kasaup list.`;
+      }
+
+      if (comparisonCriteria.length === 0 && items.length > 4) {
+        return `⚖️ **Choose up to four items for a detailed comparison**\n\n` +
+          `The active ${kind} list contains ${items.length} items. Use positions such as **“compare the first and third”** so the comparison stays readable and precise.`;
+      }
+
+      const profiles =
+        kind === 'restaurant'
+          ? items.map(buildRestaurantComparisonProfile)
+          : kind === 'dish'
+            ? items.map(buildDishComparisonProfile)
+            : items.map(buildAttractionComparisonProfile);
+
+      const unsupported = [];
+      const criterionResults = [];
+
+      comparisonCriteria.forEach(criterion => {
+        if (criterion === 'price') {
+          if (kind === 'restaurant') {
+            criterionResults.push(makeNumericComparisonResult({
+              key: criterion,
+              label: 'Meaningful registered starting price',
+              profiles,
+              getValue: profile => profile.starterPrice,
+              direction: 'min'
+            }));
+          } else if (kind === 'dish') {
+            criterionResults.push(makeNumericComparisonResult({
+              key: criterion,
+              label: 'Registered dish price',
+              profiles,
+              getValue: profile => profile.price,
+              direction: 'min'
+            }));
+          } else {
+            criterionResults.push(makeNumericComparisonResult({
+              key: criterion,
+              label: 'Registered attraction price level',
+              profiles,
+              getValue: profile => profile.price?.known ? profile.price.rank : null,
+              direction: 'min'
+            }));
+          }
+          return;
+        }
+
+        if (criterion === 'distance') {
+          if (!kasaupLocationIsDetected) {
+            unsupported.push(
+              `I need a detected current location before I can compare which ${kind === 'dish' ? 'dish-serving restaurant is' : 'place is'} closer.`
+            );
+            return;
+          }
+
+          criterionResults.push(makeNumericComparisonResult({
+            key: criterion,
+            label: 'Straight-line distance',
+            profiles,
+            getValue: profile => profile.distanceKm,
+            direction: 'min'
+          }));
+          return;
+        }
+
+        if (criterion === 'calories') {
+          if (kind === 'attraction') {
+            unsupported.push('Calories are not a meaningful attraction comparison.');
+            return;
+          }
+
+          criterionResults.push(makeNumericComparisonResult({
+            key: criterion,
+            label: kind === 'restaurant'
+              ? 'Lowest registered meal-like calorie value'
+              : 'Registered calories',
+            profiles,
+            getValue: profile =>
+              kind === 'restaurant'
+                ? profile.lowestCalories
+                : profile.calories,
+            direction: 'min'
+          }));
+          return;
+        }
+
+        if (criterion === 'opens-earlier') {
+          if (kind === 'dish') {
+            unsupported.push('Opening hours belong to the restaurant, not to an individual dish.');
+            return;
+          }
+
+          criterionResults.push(makeNumericComparisonResult({
+            key: criterion,
+            label: 'Registered opening time',
+            profiles,
+            getValue: profile => profile.hoursWindow?.known ? profile.hoursWindow.open : null,
+            direction: 'min'
+          }));
+          return;
+        }
+
+        if (criterion === 'closes-later') {
+          if (kind === 'dish') {
+            unsupported.push('Closing hours belong to the restaurant, not to an individual dish.');
+            return;
+          }
+
+          criterionResults.push(makeNumericComparisonResult({
+            key: criterion,
+            label: 'Registered closing time',
+            profiles,
+            getValue: profile => profile.hoursWindow?.known ? profile.hoursWindow.closeComparable : null,
+            direction: 'max'
+          }));
+          return;
+        }
+
+        if (criterion === 'dietary') {
+          if (kind === 'attraction') {
+            unsupported.push('Dietary fit applies to food/restaurants, not attractions.');
+            return;
+          }
+
+          if (!hasActiveDietaryConstraint()) {
+            unsupported.push('No dietary restriction is active for this comparison. State the restriction you want me to use.');
+            return;
+          }
+
+          if (kind === 'restaurant') {
+            criterionResults.push(makeNumericComparisonResult({
+              key: criterion,
+              label: 'Registered dietary-fit option count',
+              profiles,
+              getValue: profile => profile.dietaryCount,
+              direction: 'max'
+            }));
+          } else {
+            criterionResults.push(makeNumericComparisonResult({
+              key: criterion,
+              label: 'Registered dietary fit',
+              profiles,
+              getValue: profile => {
+                if (!profile.dietaryFit) return null;
+                if (profile.dietaryFit.unknownForStrictConstraint) return null;
+                return profile.dietaryFit.passes ? 1 : 0;
+              },
+              direction: 'max'
+            }));
+          }
+          return;
+        }
+
+        if (criterion === 'budget') {
+          if (budgetContext.perPersonLimit === null) {
+            unsupported.push('I need a usable budget amount before I can compare budget fit.');
+            return;
+          }
+
+          if (kind === 'attraction') {
+            unsupported.push('Exact attraction budget fit cannot be calculated because Kanyamanan stores price/free metadata rather than reliable numeric admission fees for every attraction.');
+            return;
+          }
+
+          if (kind === 'restaurant') {
+            criterionResults.push(makeNumericComparisonResult({
+              key: criterion,
+              label: 'Registered options within budget',
+              profiles,
+              getValue: profile => profile.budgetCount,
+              direction: 'max'
+            }));
+          } else {
+            criterionResults.push(makeNumericComparisonResult({
+              key: criterion,
+              label: 'Budget fit',
+              profiles,
+              getValue: profile => {
+                if (profile.price === null || profile.budgetLimit === null) return null;
+                // Any fitting dish outranks a non-fitting dish; among dishes with
+                // the same fit status, the lower registered price is better.
+                return profile.budgetFits
+                  ? 1_000_000 - profile.price
+                  : -profile.price;
+              },
+              direction: 'max'
+            }));
+          }
+          return;
+        }
+
+        if (criterion === 'menu-count') {
+          if (kind !== 'restaurant') {
+            unsupported.push('Menu-size comparison applies to restaurants.');
+            return;
+          }
+
+          criterionResults.push(makeNumericComparisonResult({
+            key: criterion,
+            label: 'Registered menu size',
+            profiles,
+            getValue: profile => profile.menuCount,
+            direction: 'max'
+          }));
+        }
+      });
+
+      const overview = comparisonCriteria.length === 0;
+      const heading =
+        kind === 'restaurant'
+          ? '⚖️ **Restaurant comparison**'
+          : kind === 'dish'
+            ? '⚖️ **Dish comparison**'
+            : '⚖️ **Attraction comparison**';
+
+      const shouldShowCriterion = criterion =>
+        overview || comparisonCriteria.includes(criterion);
+
+      const profileBlocks = profiles.slice(0, 5).map((profile, index) => {
+        const lines = [];
+
+        if (kind === 'restaurant') {
+          lines.push(`**${index + 1}. ${profile.name}**`);
+          lines.push(`• **Area used:** ${profile.municipality}`);
+
+          if (shouldShowCriterion('price') || shouldShowCriterion('budget')) {
+            lines.push(
+              profile.starterPrice !== null
+                ? `• **Meaningful registered menu start:** ${formatPeso(profile.starterPrice)}${profile.starterDish?.name ? ` — ${profile.starterDish.name}` : ''}${profile.usedMealLikePrice ? '' : ' (raw registered-price fallback)'}`
+                : `• **Meaningful registered menu start:** not available`
+            );
+          }
+
+          if (overview || shouldShowCriterion('menu-count')) {
+            lines.push(`• **Registered menu items:** ${profile.menuCount}`);
+          }
+
+          if (overview || shouldShowCriterion('opens-earlier') || shouldShowCriterion('closes-later')) {
+            lines.push(`• **Registered hours:** ${profile.hours || 'not registered'}`);
+          }
+
+          if (shouldShowCriterion('dietary')) {
+            lines.push(`• **Dietary fit:** ${formatComparisonCriterionValue(profile, 'dietary')}`);
+          }
+
+          if (shouldShowCriterion('budget')) {
+            lines.push(`• **Budget fit:** ${formatComparisonCriterionValue(profile, 'budget')}`);
+          }
+
+          if (shouldShowCriterion('calories')) {
+            lines.push(`• **Lowest registered meal-like calorie value:** ${formatComparisonCriterionValue(profile, 'calories')}`);
+          }
+
+          if (shouldShowCriterion('distance')) {
+            lines.push(`• **Distance:** ${formatComparisonCriterionValue(profile, 'distance')}`);
+            if (profile.locationQuality === 'municipality-estimate') {
+              lines.push(`• **Distance quality:** municipality-level estimate because exact branch coordinates are not registered`);
+            }
+          }
+        }
+
+        if (kind === 'dish') {
+          lines.push(`**${index + 1}. ${profile.name}** — ${profile.restaurantName} • ${profile.municipality}`);
+
+          if (overview || shouldShowCriterion('price') || shouldShowCriterion('budget')) {
+            lines.push(`• **Registered price:** ${profile.price !== null ? formatPeso(profile.price) : 'not registered'}`);
+          }
+
+          if (overview || shouldShowCriterion('calories')) {
+            lines.push(`• **Registered calories:** ${profile.calories !== null ? `${profile.calories} kcal` : 'not registered'}`);
+          }
+
+          if (shouldShowCriterion('dietary')) {
+            lines.push(`• **Dietary fit:** ${formatComparisonCriterionValue(profile, 'dietary')}`);
+          }
+
+          if (shouldShowCriterion('budget')) {
+            lines.push(`• **Budget fit:** ${formatComparisonCriterionValue(profile, 'budget')}`);
+          }
+
+          if (shouldShowCriterion('distance')) {
+            lines.push(`• **Serving-restaurant distance:** ${formatComparisonCriterionValue(profile, 'distance')}`);
+          }
+        }
+
+        if (kind === 'attraction') {
+          lines.push(`**${index + 1}. ${profile.name}**`);
+          lines.push(`• **Area:** ${profile.municipality}`);
+          if (profile.type) lines.push(`• **Type:** ${profile.type}`);
+
+          if (overview || shouldShowCriterion('price')) {
+            lines.push(`• **Registered price/admission:** ${profile.price?.label || 'not registered'}`);
+          }
+
+          if (overview || shouldShowCriterion('opens-earlier') || shouldShowCriterion('closes-later')) {
+            lines.push(`• **Registered hours:** ${profile.hours || 'not registered'}`);
+          }
+
+          if (shouldShowCriterion('distance')) {
+            lines.push(`• **Distance:** ${formatComparisonCriterionValue(profile, 'distance')}`);
+          }
+        }
+
+        return lines.join('\n');
+      });
+
+      const resultLines = [];
+
+      if (overview) {
+        if (comparisonIsGenericBetter) {
+          resultLines.push(
+            `**Result:** No single “better” choice can be proven from the registered data alone. ` +
+            `Use a measurable criterion such as price, calories, distance, registered hours, budget fit, or dietary fit.`
+          );
+        } else {
+          resultLines.push(
+            `**Result:** This is a registered-data trade-off comparison; I won't invent a rating or popularity winner.`
+          );
+        }
+      } else {
+        criterionResults.forEach(result => {
+          const leader = result.winner;
+          if (leader) {
+            const leaderEntry = result.ranked.find(entry => entry.profile === leader);
+            const valueText = formatComparisonCriterionValue(leader, result.key);
+            resultLines.push(
+              `• **${result.label}:** ${comparisonResultEntityMarkdown(leader)} leads with ${valueText}.`
+            );
+          } else if (result.tied?.length > 1 && !result.missing?.length) {
+            resultLines.push(
+              `• **${result.label}:** tie between ${result.tied.map(comparisonResultEntityMarkdown).join(' and ')}.`
+            );
+          } else {
+            const missingNames = safeArray(result.missing)
+              .map(entry => comparisonDisplayName(entry.profile))
+              .filter(Boolean);
+
+            resultLines.push(
+              `• **${result.label}:** ${result.note || 'No definitive winner.'}` +
+              (missingNames.length ? ` Missing/unknown for: ${missingNames.join(', ')}.` : '')
+            );
+          }
+        });
+
+        const decisiveWinners = criterionResults
+          .map(result => result.winner)
+          .filter(Boolean);
+
+        const allCriteriaDecisive =
+          criterionResults.length > 0 &&
+          decisiveWinners.length === criterionResults.length;
+
+        const winnerKeys = unique(
+          decisiveWinners.map(profile =>
+            profile.kind === 'dish'
+              ? `${profile.item?.restaurant?.id || normalize(profile.restaurantName)}::${profile.item?.dish?.id || normalize(profile.name)}::${profile.price}`
+              : String(profile.item?.id || normalize(profile.name))
+          )
+        );
+
+        if (allCriteriaDecisive && winnerKeys.length === 1) {
+          const overallWinner = decisiveWinners[0];
+          resultLines.unshift(
+            `**Result:** ${comparisonResultEntityMarkdown(overallWinner)} is the strongest fit for the criterion${criterionResults.length === 1 ? '' : 'a'} you asked about.`
+          );
+        } else if (criterionResults.length > 1) {
+          resultLines.unshift(
+            `**Result:** No single option wins every requested criterion; the registered data shows a trade-off.`
+          );
+        } else if (criterionResults.length === 1 && !criterionResults[0].winner) {
+          resultLines.unshift(
+            `**Result:** I can't declare one definitive winner from the currently registered data.`
+          );
+        }
+      }
+
+      const unsupportedText = unsupported.length
+        ? `\n\n${unsupported.map(note => `⚠️ ${note}`).join('\n')}`
+        : '';
+
+      const scopeNote =
+        profiles.length > 5
+          ? `\n\n_Compared all ${profiles.length} active ${kind} choices; the detailed view above shows the first 5._`
+          : '';
+
+      const groundingNote =
+        kind === 'restaurant'
+          ? `\n\n_Comparison uses registered menu prices, menu data, hours, dietary/budget screening, and straight-line distance when available—not ratings or live popularity._`
+          : kind === 'dish'
+            ? `\n\n_Comparison uses registered dish/menu data. Dietary results are conservative screens, not allergy-safe, vegan/vegetarian, or halal certification._`
+            : `\n\n_Comparison uses registered attraction fields. Missing admission prices are not treated as free, and distances are straight-line estimates when a detected location is available._`;
+
+      return `${heading}\n\n${profileBlocks.join('\n\n')}\n\n${resultLines.join('\n')}${unsupportedText}${scopeNote}${groundingNote}` +
+        (
+          comparisonCriteria.includes('dietary') && dietaryCautionNote
+            ? `\n\n${dietaryCautionNote}`
+            : ''
+        ) +
+        (
+          comparisonCriteria.includes('distance') && localConstraints.asksCurrentLocation
+            ? nearMeDistanceNote
+            : ''
+        );
+    };
+
     const formatRestaurantFollowUpDetail = (r) => {
       const municipalities = getRestaurantMunicipalities(r);
       const nearbyProfile = restaurantProfileMap.get(r);
@@ -7977,7 +9198,7 @@ QUALITY BAR:
 - For budgets, preserve whether the user stated a TOTAL budget or a PER-PERSON budget. Never divide a per-person amount again. For group planning, use the supplied group-size and total/per-person ceilings.
 - For dietary constraints, use registered dish name/ingredient/allergen data conservatively. Never call an item allergy-safe, certified vegan/vegetarian, or halal-certified unless that certification is explicitly stored. For allergies, mention that cross-contact and complete recipes are not available and the user should verify with the restaurant.
 - For "near me", "nearby", "closest to me", and radius requests, use the supplied detected-location context. Never describe the default San Fernando start point as the user's current location. Distances in local Kasaup ranking are straight-line estimates unless a road-route result is explicitly supplied.
-- For comparisons, compare the requested entities rather than giving unrelated recommendations.
+- For comparisons, compare the requested registered entities rather than giving unrelated recommendations. Prefer measurable Kanyamanan evidence such as meaningful menu prices, dish prices/calories, registered hours, dietary/budget fit, attraction price/free metadata, and straight-line distance when a detected location is available. Do not invent ratings, popularity, service quality, or a subjective winner; if the user only asks which is "better", explain the registered-data trade-off.
 - If a prompt asks for restaurants and mentions dishes only as a condition (for example, "restaurants with dishes under ₱300" or "restaurants that serve sisig"), return restaurants rather than converting the request into a dish list or a previous restaurant's menu.
 - For "what should I eat?" style prompts, rank choices and explain the trade-off.
 - For "why" or educational questions, explain the reasoning in plain language.
@@ -8030,6 +9251,11 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           `${kasaupLocationIssue || 'I could not access a detected browser location.'} ` +
           `I won't treat the default San Fernando start point as your real position.\n\n` +
           `Enable browser location access and try again, or name a city/municipality such as “restaurants in San Fernando.”`;
+      }
+
+      const groundedComparisonAnswer = buildComparisonAnswer();
+      if (groundedComparisonAnswer) {
+        return groundedComparisonAnswer;
       }
 
       const genericNearMeDiscovery =
@@ -9074,9 +10300,14 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         !localConstraints.asksComparison &&
         !localDraftIsGeneric;
 
+      const hasGroundedComparisonAnswer =
+        comparisonSignal &&
+        /^⚖️/u.test(String(localDraft || '').trim());
+
       const shouldUseGemini =
         useGeminiForKasaup &&
         !hasGroundedAttractionAnswer &&
+        !hasGroundedComparisonAnswer &&
         (explicitAIDepth || localDraftIsGeneric);
 
       let botResponse = localDraft;
