@@ -3533,6 +3533,30 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       .map(m => m?.text || '')
       .join(' ');
 
+    // Conversation-frame catalog matching must use whole entity phrases.
+    // Plain substring matching is unsafe for short establishment names:
+    //   restaurant "CHOPS" must NOT match the dish word "Chopsuey".
+    //   restaurant "ACE" must NOT match a longer unrelated word containing "ace".
+    //
+    // This helper keeps punctuation inside registered names exact while requiring
+    // word boundaries around the beginning/end of the normalized entity name.
+    const findWholeCatalogMentionPosition = (normalizedText, normalizedName) => {
+      const haystack = String(normalizedText || '');
+      const needle = String(normalizedName || '').trim();
+      if (!haystack || !needle) return -1;
+
+      const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const startsWithWord = /^[a-z0-9_]/i.test(needle);
+      const endsWithWord = /[a-z0-9_]$/i.test(needle);
+      const pattern =
+        `${startsWithWord ? '\\b' : ''}` +
+        `${escaped}` +
+        `${endsWithWord ? '\\b' : ''}`;
+
+      const match = haystack.match(new RegExp(pattern, 'i'));
+      return match && Number.isFinite(match.index) ? match.index : -1;
+    };
+
     const orderedCatalogMentions = (messageText, catalog, getName, getKey) => {
       const normalizedText = normalize(messageText);
       const found = safeArray(catalog)
@@ -3540,7 +3564,9 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           const name = normalize(getName(item));
           return {
             item,
-            position: name ? normalizedText.indexOf(name) : -1
+            position: name
+              ? findWholeCatalogMentionPosition(normalizedText, name)
+              : -1
           };
         })
         .filter(x => x.position >= 0)
@@ -3554,6 +3580,48 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         seen.add(key);
         ordered.push(item);
       });
+      return ordered;
+    };
+
+    // Kasaup's restaurant recommendation/detail outputs put the restaurant name
+    // itself in **bold**. Prefer those exact structured labels when available.
+    // This is stronger than scanning narrative/menu text, where a dish such as
+    // "Pork Chops" could otherwise look like a mention of restaurant "CHOPS".
+    const orderedExactBoldCatalogMentions = (messageText, catalog, getName, getKey) => {
+      const sourceText = String(messageText || '');
+      const boldFragments = [...sourceText.matchAll(/\*\*([^*\n]+)\*\*/g)]
+        .map(match => ({
+          normalized: normalize(match?.[1] || ''),
+          position: Number.isFinite(match?.index) ? match.index : 0
+        }))
+        .filter(x => x.normalized);
+
+      if (!boldFragments.length) return [];
+
+      const exactNameMap = new Map();
+      safeArray(catalog).forEach(item => {
+        const name = normalize(getName(item));
+        if (!name) return;
+        if (!exactNameMap.has(name)) exactNameMap.set(name, []);
+        exactNameMap.get(name).push(item);
+      });
+
+      const ordered = [];
+      const seen = new Set();
+
+      boldFragments
+        .slice()
+        .sort((a, b) => a.position - b.position)
+        .forEach(fragment => {
+          const matches = safeArray(exactNameMap.get(fragment.normalized));
+          matches.forEach(item => {
+            const key = String(getKey(item) || '');
+            if (!key || seen.has(key)) return;
+            seen.add(key);
+            ordered.push(item);
+          });
+        });
+
       return ordered;
     };
 
@@ -3685,12 +3753,21 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       const messageText = String(message?.text || '');
       const normalizedText = normalize(messageText);
 
-      const restaurantsInOrder = orderedCatalogMentions(
+      const exactBoldRestaurantsInOrder = orderedExactBoldCatalogMentions(
         messageText,
         allRestaurants,
         r => r?.name || '',
         r => r?.id || normalize(r?.name || '')
       );
+
+      const restaurantsInOrder = exactBoldRestaurantsInOrder.length
+        ? exactBoldRestaurantsInOrder
+        : orderedCatalogMentions(
+            messageText,
+            allRestaurants,
+            r => r?.name || '',
+            r => r?.id || normalize(r?.name || '')
+          );
 
       const attractionsInOrder = orderedCatalogMentions(
         messageText,
@@ -3716,7 +3793,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       const attractionHeading =
         /\b(?:tourist attraction|attraction recommendations|places you may want to explore|top attraction match|registered attraction)\b/i.test(leadLine);
       const restaurantHeading =
-        /\b(?:restaurant recommendations|top restaurant match|matching restaurants|registered restaurants|restaurant details?|cheapest menu starting point from those restaurants|here are some relevant registered restaurants)\b/i.test(leadLine);
+        /\b(?:restaurant recommendations|top restaurant match|matching restaurants|registered restaurants|restaurant details?|cheapest menu starting point from those restaurants|most affordable restaurant from those restaurants|lowest meal-like registered starting price from those restaurants|here are some relevant registered restaurants)\b/i.test(leadLine);
 
       // Detail answers often contain both a restaurant name and a dish name.
       // Field-label cues are therefore stronger than simple entity-count ties.
@@ -7450,22 +7527,65 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         }
 
         if (kind === 'restaurant') {
+          // Keep restaurant-comparison semantics consistent with the main
+          // recommendation engine. Do not let plain rice, drinks, add-ons,
+          // suspicious ultra-low rows, or other non-meal entries define the
+          // "cheapest restaurant" when better registered meal evidence exists.
           const ranked = items
             .map(r => {
-              const prices = safeArray(r?.menu)
-                .map(d => toNumber(d?.price, null))
-                .filter(Number.isFinite)
-                .sort((a, b) => a - b);
-              return { restaurant: r, minPrice: prices[0] ?? null };
+              const stats = restaurantMenuStats(r);
+              const mealStarter = safeArray(stats?.mealLikePricedMenu)[0] || null;
+              const rawPricedMenu = safeArray(stats?.safeMenu)
+                .filter(d => toNumber(d?.price, null) !== null)
+                .slice()
+                .sort((a, b) =>
+                  toNumber(a?.price, Infinity) - toNumber(b?.price, Infinity)
+                );
+              const rawStarter = rawPricedMenu[0] || null;
+
+              const comparisonDish = mealStarter || rawStarter;
+              const comparisonPrice =
+                toNumber(stats?.affordabilityPrice, null) ??
+                toNumber(comparisonDish?.price, null);
+
+              return {
+                restaurant: r,
+                comparisonDish,
+                comparisonPrice,
+                usedMealLikeEvidence: Boolean(mealStarter)
+              };
             })
-            .filter(x => x.minPrice !== null)
-            .sort((a, b) => a.minPrice - b.minPrice);
+            .filter(x => x.comparisonPrice !== null)
+            .sort((a, b) => {
+              if (a.comparisonPrice !== b.comparisonPrice) {
+                return a.comparisonPrice - b.comparisonPrice;
+              }
+
+              // If two restaurants have the same starting price, prefer one
+              // backed by a meal-like row rather than a raw fallback.
+              if (a.usedMealLikeEvidence !== b.usedMealLikeEvidence) {
+                return a.usedMealLikeEvidence ? -1 : 1;
+              }
+
+              return normalize(a.restaurant?.name || '')
+                .localeCompare(normalize(b.restaurant?.name || ''));
+            });
 
           if (ranked.length) {
             const best = ranked[0];
-            return `💸 **Cheapest menu starting point from those restaurants**\n\n` +
-              `**${best.restaurant.name}** — registered menu items start at **₱${best.minPrice}**.\n\n` +
-              `_This compares actual registered menu-item prices from the restaurants Kasaup just showed._`;
+            const dishName = String(best.comparisonDish?.name || '').trim();
+
+            if (best.usedMealLikeEvidence) {
+              return `💸 **Most affordable restaurant from those restaurants**\n\n` +
+                `**${best.restaurant.name}** — its lowest meal-like registered option used for this comparison is ` +
+                `${dishName ? `**${dishName}** at ` : ''}**₱${best.comparisonPrice}**.\n\n` +
+                `_Kasaup compares meaningful registered menu prices when possible, rather than letting plain rice, drinks, add-ons, or suspicious ultra-low rows define the whole restaurant._`;
+            }
+
+            return `💸 **Most affordable restaurant from those restaurants**\n\n` +
+              `**${best.restaurant.name}** — the available registered menu data starts at **₱${best.comparisonPrice}**` +
+              `${dishName ? ` for **${dishName}**` : ''}.\n\n` +
+              `_No clearly meal-like registered starting item was available for this comparison, so Kasaup used the lowest usable registered menu price as a fallback._`;
           }
         }
 
