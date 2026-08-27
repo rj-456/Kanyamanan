@@ -6440,11 +6440,16 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         matches.push({ index: length - 1, position: pos >= 0 ? pos : raw.length });
       }
 
-      return unique(
-        matches
-          .sort((a, b) => a.position - b.position)
-          .map(x => x.index)
-      );
+      // Ordinal indices are zero-based, so index 0 ("first") is valid.
+      // Do not pass numeric indices through the generic unique() helper,
+      // because unique() filters falsy values and would remove 0.
+      return [
+        ...new Set(
+          matches
+            .sort((a, b) => a.position - b.position)
+            .map(x => x.index)
+        )
+      ];
     };
 
     const resolveRecentReferences = (rawText, { allowAll = true } = {}) => {
@@ -6741,7 +6746,12 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
     if (swapAction && !replaceAction && !clearAction && !loadAction) {
       const tripRefs = resolveTripReferences(userMsg);
-      const indices = unique(tripRefs.indices);
+      // Preserve index 0 ("first") while de-duplicating swap targets.
+      const indices = [
+        ...new Set(
+          safeArray(tripRefs.indices).filter(index => Number.isInteger(index))
+        )
+      ];
 
       if (indices.length >= 2) {
         const [a, b] = indices.slice(0, 2);
@@ -8920,11 +8930,18 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         const choices = items
           .slice(0, 5)
           .map((item, index) => {
-            const name =
-              kind === 'dish'
-                ? item?.dish?.name
-                : item?.name;
-            return `${index + 1}. ${name || `Option ${index + 1}`}`;
+            if (kind === 'dish') {
+              const name = item?.dish?.name || `Option ${index + 1}`;
+              const restaurantName = item?.restaurant?.name || '';
+              const price = toNumber(item?.dish?.price, null);
+
+              return `${index + 1}. **${name}**` +
+                (restaurantName ? ` — **${restaurantName}**` : '') +
+                (price !== null ? ` • **₱${price}**` : '');
+            }
+
+            const name = item?.name || `Option ${index + 1}`;
+            return `${index + 1}. **${name}**`;
           })
           .join('\n');
 
@@ -9253,7 +9270,49 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           `Enable browser location access and try again, or name a city/municipality such as “restaurants in San Fernando.”`;
       }
 
-      const groundedComparisonAnswer = buildComparisonAnswer();
+      // A normal displayed menu already has a dedicated single-dish follow-up
+      // path. Run that path before the formal comparison engine for classic
+      // criterion questions, so:
+      //
+      //   menu -> "Which one has the fewest calories?" -> one selected dish
+      //        -> "How much is it?" -> that exact dish
+      //
+      // Formal comparison remains active after an explicit comparison response
+      // such as "Compare the first and third."
+      const latestFrameLeadLine = normalize(
+        String(latestReferenceFrame?.text || '')
+          .split('\n')
+          .map(line => String(line || '').trim())
+          .find(Boolean) || ''
+      );
+
+      const latestFrameIsFormalComparison =
+        /\b(?:dish comparison|restaurant comparison|attraction comparison)\b/i.test(
+          latestFrameLeadLine
+        );
+
+      const classicDishCriterionFollowUp =
+        isFollowUpQuery &&
+        referenceFrameForFollowUp?.primaryKind === 'dish' &&
+        safeArray(referenceFrameForFollowUp?.primaryItems).length > 1 &&
+        !latestFrameIsFormalComparison &&
+        !comparisonHasExplicitCommand &&
+        /\b(?:cheaper|cheapest|lowest price|least expensive|most affordable|lowest calorie|fewest calories|fewer calories|lightest|lower calorie)\b/i.test(userMsg);
+
+      if (classicDishCriterionFollowUp) {
+        const classicDishFollowUpAnswer = buildConversationFollowUpAnswer();
+        if (classicDishFollowUpAnswer) {
+          return classicDishFollowUpAnswer;
+        }
+      }
+
+      // A fresh explicit restaurant search (for example "What is the cheapest
+      // restaurant option in Porac?") is not a comparison of an older frame.
+      const groundedComparisonAnswer =
+        freshRestaurantSearch
+          ? null
+          : buildComparisonAnswer();
+
       if (groundedComparisonAnswer) {
         return groundedComparisonAnswer;
       }
