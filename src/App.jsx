@@ -1607,9 +1607,13 @@ function App() {
   // ============================================================
   const [chatMessages, setChatMessages] = useState([
     {
-      sender: 'bot',
-      text: "Mekeni, mangan tana! Welcome to Kanyamanan-Kasaup (Culinary Assistant). Kumusta po? I can help you alamin ang recipe ingredients, itinerary stops, and optimize your trip here in Pampanga!",
-    }
+  sender: 'bot',
+  text: `Mekeni, mangan tana! 👋 Welcome to Kanyamanan-Kasaup!
+
+Need help deciding where to eat, what to try, where to go, or how to plan your Pampanga trip? I can help you check restaurants and dishes, explore attractions, compare options, manage your itinerary, watch your budget and dietary needs, and find places near you.
+
+So, where do we start? 😊`,
+}
   ]);
   const [chatInput, setChatInput] = useState('');
   const [isBotTyping, setIsBotTyping] = useState(false);
