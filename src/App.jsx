@@ -596,6 +596,7 @@ function App() {
   const [selectedDetailBranch, setSelectedDetailBranch] = useState(null);
   const [activeDish, setActiveDish] = useState(null);
   const [drawerDishSearch, setDrawerDishSearch] = useState('');
+  const [itineraryDishSearch, setItineraryDishSearch] = useState('');
   const [cvUploadedMeal, setCvUploadedMeal] = useState(null);
   const [isCVProcessing, setIsCVProcessing] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -15975,7 +15976,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
                       {/* Card 3: Dynamic Menu Isolation per Restaurant Stop */}
                       <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-5 shadow-sm">
-                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
                           <div>
                             <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0 flex items-center gap-2">
                               <span>🍽️</span> Active Itinerary Menus &amp; Portion Builder
@@ -15988,15 +15989,41 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                             </span>
                           </div>
 
-                          {activeTripMetrics.totalDishesCount > 0 && (
-                            <button
-                              type="button"
-                              onClick={handleClearAllDishSelections}
-                              className="text-[10px] font-bold text-terracotta dark:text-orange-400 hover:underline cursor-pointer"
-                            >
-                              Reset All Portions
-                            </button>
-                          )}
+                          <div className="flex items-center gap-2 w-full sm:w-auto">
+                            {/* Itinerary Dish Search Bar */}
+                            {restaurantStops.length > 0 && (
+                              <div className="relative flex-1 sm:w-56">
+                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-charcoal-light dark:text-gray-400 pointer-events-none" />
+                                <input
+                                  type="text"
+                                  placeholder="Search dishes..."
+                                  value={itineraryDishSearch}
+                                  onChange={(e) => setItineraryDishSearch(e.target.value)}
+                                  className="w-full pl-8 pr-7 py-1.5 text-xs bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg text-charcoal dark:text-gray-200 placeholder-charcoal-light/60 focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-all shadow-2xs font-medium"
+                                />
+                                {itineraryDishSearch && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setItineraryDishSearch('')}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-charcoal-light hover:text-charcoal dark:hover:text-white rounded-full transition-colors cursor-pointer"
+                                    title="Clear search"
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            )}
+
+                            {activeTripMetrics.totalDishesCount > 0 && (
+                              <button
+                                type="button"
+                                onClick={handleClearAllDishSelections}
+                                className="text-[10px] font-bold text-terracotta dark:text-orange-400 hover:underline cursor-pointer whitespace-nowrap"
+                              >
+                                Reset All Portions
+                              </button>
+                            )}
+                          </div>
                         </div>
 
                         {restaurantStops.length === 0 ? (
@@ -16031,6 +16058,16 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                               const stopId = res.id;
                               const stopBreakdown = activeTripMetrics.perStopBreakdown.find(b => b.stopId === stopId);
 
+                              const matchingDishes = (res.menu || []).filter(dish => {
+                                if (!itineraryDishSearch.trim()) return true;
+                                const q = itineraryDishSearch.toLowerCase().trim();
+                                return (dish.name || '').toLowerCase().includes(q) ||
+                                  (dish.ingredients || '').toLowerCase().includes(q) ||
+                                  (dish.allergens || '').toLowerCase().includes(q) ||
+                                  (dish.healthIndicators || '').toLowerCase().includes(q) ||
+                                  String(dish.price || '').includes(q);
+                              });
+
                               return (
                                 <div
                                   key={res.id}
@@ -16063,193 +16100,94 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                                   </div>
 
                                   {/* Menu Items List */}
-                                  <div className="space-y-3">
-                                    {(res.menu || []).map((dish, dIdx) => {
-                                      const isDefaultFirst = dIdx === 0;
-                                      const dishTotalQty = getDishTotalQty(stopId, dish.id, isDefaultFirst);
-                                      const isSelected = dishTotalQty > 0;
-                                      const dishCals = Number(dish.nutrition?.calories) || Number(dish.calories) || 300;
-                                      const dishProt = Number(dish.nutrition?.protein) || Number(dish.protein) || 15;
-                                      const dishCarbs = Number(dish.nutrition?.carbs) || Number(dish.carbs) || 25;
-                                      const dishFat = Number(dish.nutrition?.fat) || Number(dish.fat) || 12;
+                                  {matchingDishes.length === 0 ? (
+                                    <div className="p-4 text-center bg-white dark:bg-[#1E1B18] rounded-xl border border-[#E9E5DE] dark:border-[#282420] text-xs text-charcoal-light dark:text-gray-400">
+                                      No dishes matching "{itineraryDishSearch}" found at {res.name}.
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-3">
+                                      {matchingDishes.map((dish, dIdx) => {
+                                        const isDefaultFirst = dIdx === 0;
+                                        const dishCals = Number(dish.nutrition?.calories) || Number(dish.calories) || 300;
+                                        const dishProt = Number(dish.nutrition?.protein) || Number(dish.protein) || 15;
+                                        const dishCarbs = Number(dish.nutrition?.carbs) || Number(dish.carbs) || 25;
+                                        const dishFat = Number(dish.nutrition?.fat) || Number(dish.fat) || 12;
 
-                                      return (
-                                        <div
-                                          key={dish.id}
-                                          className={`p-3.5 rounded-xl border transition-all space-y-3 ${isSelected
-                                            ? 'bg-white dark:bg-[#1E1B18] border-emerald-500/40 dark:border-emerald-500/50 shadow-xs'
-                                            : 'bg-white/60 dark:bg-[#181614] border-[#E9E5DE] dark:border-[#282420] opacity-85 hover:opacity-100'
-                                            }`}
-                                        >
-                                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                                            {/* Dish Info */}
-                                            <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                                              {dish.image && (
-                                                <img
-                                                  src={dish.image}
-                                                  alt={dish.name}
-                                                  className="w-12 h-12 rounded-lg object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0"
-                                                />
+                                        return (
+                                          <div
+                                            key={dish.id}
+                                            className={`p-3.5 rounded-xl border transition-all space-y-3 ${getDishTotalQty(stopId, dish.id, isDefaultFirst) > 0
+                                              ? 'bg-white dark:bg-[#1E1B18] border-emerald-500/40 dark:border-emerald-500/50 shadow-xs'
+                                              : 'bg-white/60 dark:bg-[#181614] border-[#E9E5DE] dark:border-[#282420] opacity-85 hover:opacity-100'
+                                              }`}
+                                          >
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                                              <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                                                {dish.image && (
+                                                  <img src={dish.image} alt={dish.name} className="w-12 h-12 rounded-lg object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0" />
+                                                )}
+                                                <div className="min-w-0">
+                                                  <div className="flex items-center gap-1.5">
+                                                    <strong className="text-xs font-black text-charcoal dark:text-white truncate">{dish.name}</strong>
+                                                    <span className="text-xs font-extrabold text-terracotta dark:text-orange-400 shrink-0">₱{dish.price}</span>
+                                                  </div>
+                                                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                                    <span className="text-[9px] font-black bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 px-1.5 py-0.2 rounded">🔥 {dishCals} kcal</span>
+                                                    <span className="text-[9px] font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded">🥩 {dishProt}g P</span>
+                                                    <span className="text-[9px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 px-1.5 py-0.2 rounded">🌾 {dishCarbs}g C</span>
+                                                    <span className="text-[9px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-300 px-1.5 py-0.2 rounded">🧈 {dishFat}g F</span>
+                                                  </div>
+                                                </div>
+                                              </div>
+
+                                              {/* Quantity Adjusters */}
+                                              {isSolo ? (
+                                                <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                                                  <div className="flex items-center border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] p-0.5 shadow-2xs">
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => handleSetDishQuantity(stopId, dish.id, 'solo', Math.max(0, getDishQtyFor(stopId, dish.id, 'solo', isDefaultFirst) - 1))}
+                                                      className="w-7 h-7 rounded-lg bg-white dark:bg-[#201D1A] hover:bg-[#E9E5DE] text-charcoal dark:text-white font-black text-xs flex items-center justify-center cursor-pointer transition-colors border border-[#E9E5DE]"
+                                                    >
+                                                      -
+                                                    </button>
+                                                    <span className="w-8 text-center text-xs font-black text-charcoal dark:text-white">
+                                                      {getDishQtyFor(stopId, dish.id, 'solo', isDefaultFirst)}
+                                                    </span>
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => handleSetDishQuantity(stopId, dish.id, 'solo', getDishQtyFor(stopId, dish.id, 'solo', isDefaultFirst) + 1)}
+                                                      className="w-7 h-7 rounded-lg bg-terracotta hover:bg-terracotta-dark text-white font-black text-xs flex items-center justify-center cursor-pointer transition-colors"
+                                                    >
+                                                      +
+                                                    </button>
+                                                  </div>
+                                                </div>
+                                              ) : (
+                                                <div className="pt-2.5 border-t border-[#E9E5DE]/80 dark:border-[#2E2A24] space-y-2 w-full sm:w-auto">
+                                                  <div className="flex flex-wrap items-center gap-2">
+                                                    {groupMembers.map((m, mIdx) => {
+                                                      const mQty = getDishQtyFor(stopId, dish.id, m.id, isDefaultFirst && mIdx === 0);
+                                                      return (
+                                                        <div key={m.id} className="flex items-center gap-1.5 px-2 py-1 rounded-xl border bg-[#FAF8F5] border-[#E9E5DE] text-[11px]">
+                                                          <span className="truncate max-w-[60px]">{m.name}:</span>
+                                                          <div className="flex items-center gap-1">
+                                                            <button type="button" onClick={() => handleSetDishQuantity(stopId, dish.id, m.id, Math.max(0, mQty - 1))} className="w-5 h-5 rounded bg-white border border-[#E9E5DE]">-</button>
+                                                            <span className="w-4 text-center font-black">{mQty}</span>
+                                                            <button type="button" onClick={() => handleSetDishQuantity(stopId, dish.id, m.id, mQty + 1)} className="w-5 h-5 rounded bg-terracotta text-white">+</button>
+                                                          </div>
+                                                        </div>
+                                                      );
+                                                    })}
+                                                  </div>
+                                                </div>
                                               )}
-                                              <div className="min-w-0">
-                                                <div className="flex items-center gap-1.5">
-                                                  <strong className="text-xs font-black text-charcoal dark:text-white truncate">
-                                                    {dish.name}
-                                                  </strong>
-                                                  <span className="text-xs font-extrabold text-terracotta dark:text-orange-400 shrink-0">
-                                                    ₱{dish.price}
-                                                  </span>
-                                                  {dishTotalQty > 0 && (
-                                                    <span className="text-[9px] font-black bg-terracotta/10 text-terracotta dark:text-orange-300 px-1.5 py-0.2 rounded-md">
-                                                      {dishTotalQty} total
-                                                    </span>
-                                                  )}
-                                                </div>
-
-                                                <p className="text-[10px] text-charcoal-light dark:text-gray-400 m-0 truncate mt-0.5">
-                                                  {dish.ingredients || 'Authentic Kapampangan heirloom ingredients'}
-                                                </p>
-
-                                                {/* Nutrition Badges */}
-                                                <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                                                  <span className="text-[9px] font-black bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 px-1.5 py-0.2 rounded">
-                                                    🔥 {dishCals} kcal
-                                                  </span>
-                                                  <span className="text-[9px] font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded">
-                                                    🥩 {dishProt}g P
-                                                  </span>
-                                                  <span className="text-[9px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 px-1.5 py-0.2 rounded">
-                                                    🌾 {dishCarbs}g C
-                                                  </span>
-                                                  <span className="text-[9px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-300 px-1.5 py-0.2 rounded">
-                                                    🧈 {dishFat}g F
-                                                  </span>
-                                                  {dish.healthIndicators && (
-                                                    <span className="text-[9px] font-black bg-purple-500/10 text-purple-700 dark:text-purple-300 px-1.5 py-0.2 rounded">
-                                                      ✨ {dish.healthIndicators}
-                                                    </span>
-                                                  )}
-                                                  {dish.allergens && (
-                                                    <span className="text-[9px] font-bold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded">
-                                                      ⚠️ {dish.allergens}
-                                                    </span>
-                                                  )}
-                                                </div>
-                                              </div>
                                             </div>
-
-                                            {/* Quantity Stepper in Solo Mode */}
-                                            {isSolo && (
-                                              <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                                                <div className="flex items-center border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] p-0.5 shadow-2xs">
-                                                  <button
-                                                    type="button"
-                                                    onClick={() => handleSetDishQuantity(stopId, dish.id, 'solo', Math.max(0, getDishQtyFor(stopId, dish.id, 'solo', isDefaultFirst) - 1))}
-                                                    className="w-7 h-7 rounded-lg bg-white dark:bg-[#201D1A] hover:bg-[#E9E5DE] dark:hover:bg-[#2A2622] text-charcoal dark:text-white font-black text-xs flex items-center justify-center cursor-pointer transition-colors border border-[#E9E5DE] dark:border-[#2E2A24]"
-                                                    title="Decrease serving"
-                                                  >
-                                                    -
-                                                  </button>
-                                                  <span className="w-8 text-center text-xs font-black text-charcoal dark:text-white">
-                                                    {getDishQtyFor(stopId, dish.id, 'solo', isDefaultFirst)}
-                                                  </span>
-                                                  <button
-                                                    type="button"
-                                                    onClick={() => handleSetDishQuantity(stopId, dish.id, 'solo', getDishQtyFor(stopId, dish.id, 'solo', isDefaultFirst) + 1)}
-                                                    className="w-7 h-7 rounded-lg bg-terracotta hover:bg-terracotta-dark text-white font-black text-xs flex items-center justify-center cursor-pointer transition-colors shadow-2xs"
-                                                    title="Add serving"
-                                                  >
-                                                    +
-                                                  </button>
-                                                </div>
-                                              </div>
-                                            )}
                                           </div>
-
-                                          {/* Multi-Customer Allocation Row (Group Mode) */}
-                                          {!isSolo && (
-                                            <div className="pt-2.5 border-t border-[#E9E5DE]/80 dark:border-[#2E2A24] space-y-2">
-                                              <div className="flex items-center justify-between text-[10px] font-bold text-charcoal-light dark:text-gray-400 uppercase tracking-wider">
-                                                <span>Portion Allocation for Diners:</span>
-                                                <span className="text-terracotta font-black">
-                                                  Subtotal: ₱{dishTotalQty * dish.price} ({dishTotalQty * dishCals} kcal)
-                                                </span>
-                                              </div>
-
-                                              <div className="flex flex-wrap items-center gap-2">
-                                                {/* Per Member Stepper Chips */}
-                                                {groupMembers.map((m, mIdx) => {
-                                                  const mQty = getDishQtyFor(stopId, dish.id, m.id, isDefaultFirst && mIdx === 0);
-                                                  return (
-                                                    <div
-                                                      key={m.id}
-                                                      className={`flex items-center gap-1.5 px-2 py-1 rounded-xl border text-[11px] transition-all ${mQty > 0
-                                                        ? 'bg-amber-500/10 border-amber-400 text-charcoal dark:text-white font-black'
-                                                        : 'bg-[#FAF8F5] dark:bg-[#161412] border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal-light dark:text-gray-400'
-                                                        }`}
-                                                    >
-                                                      <span className="truncate max-w-[80px]" title={m.name}>
-                                                        P{mIdx + 1} ({m.name}):
-                                                      </span>
-                                                      <div className="flex items-center gap-1">
-                                                        <button
-                                                          type="button"
-                                                          onClick={() => handleSetDishQuantity(stopId, dish.id, m.id, Math.max(0, mQty - 1))}
-                                                          className="w-5 h-5 rounded bg-white dark:bg-[#201D1A] hover:bg-[#E9E5DE] text-charcoal dark:text-white flex items-center justify-center font-black text-xs cursor-pointer border border-[#E9E5DE] dark:border-[#2E2A24]"
-                                                        >
-                                                          -
-                                                        </button>
-                                                        <span className="w-4 text-center font-black">{mQty}</span>
-                                                        <button
-                                                          type="button"
-                                                          onClick={() => handleSetDishQuantity(stopId, dish.id, m.id, mQty + 1)}
-                                                          className="w-5 h-5 rounded bg-terracotta hover:bg-terracotta-dark text-white flex items-center justify-center font-black text-xs cursor-pointer"
-                                                        >
-                                                          +
-                                                        </button>
-                                                      </div>
-                                                    </div>
-                                                  );
-                                                })}
-
-                                                {/* Shared Table Plate Stepper */}
-                                                {(() => {
-                                                  const sharedQty = getDishQtyFor(stopId, dish.id, 'shared', isDefaultFirst);
-                                                  return (
-                                                    <div
-                                                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-[11px] transition-all ${sharedQty > 0
-                                                        ? 'bg-emerald-500/15 border-emerald-500 text-[#2C5E3B] dark:text-emerald-300 font-black'
-                                                        : 'bg-[#FAF8F5] dark:bg-[#161412] border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal-light dark:text-gray-400'
-                                                        }`}
-                                                    >
-                                                      <span>👥 Table Shared:</span>
-                                                      <div className="flex items-center gap-1">
-                                                        <button
-                                                          type="button"
-                                                          onClick={() => handleSetDishQuantity(stopId, dish.id, 'shared', Math.max(0, sharedQty - 1))}
-                                                          className="w-5 h-5 rounded bg-white dark:bg-[#201D1A] hover:bg-[#E9E5DE] text-charcoal dark:text-white flex items-center justify-center font-black text-xs cursor-pointer border border-[#E9E5DE] dark:border-[#2E2A24]"
-                                                        >
-                                                          -
-                                                        </button>
-                                                        <span className="w-4 text-center font-black">{sharedQty}</span>
-                                                        <button
-                                                          type="button"
-                                                          onClick={() => handleSetDishQuantity(stopId, dish.id, 'shared', sharedQty + 1)}
-                                                          className="w-5 h-5 rounded bg-[#2C5E3B] hover:bg-[#20452B] text-white flex items-center justify-center font-black text-xs cursor-pointer"
-                                                        >
-                                                          +
-                                                        </button>
-                                                      </div>
-                                                    </div>
-                                                  );
-                                                })()}
-                                              </div>
-                                            </div>
-                                          )}
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
                                 </div>
                               );
                             })}
