@@ -58,6 +58,7 @@ import {
   subscribeToUserItineraries,
   saveUserProfileToCloud
 } from './firebase';
+import Tesseract from 'tesseract.js';
 import {
   fetchDjangoRestaurants,
   updateDjangoRestaurant,
@@ -396,12 +397,12 @@ function App() {
     };
   }, []);
 
-  // Dark Mode / Light Mode state
+  // Dark Mode / Light Mode state - Automatic Light Mode by default
   const [isDarkMode, setIsDarkMode] = useState(() => {
     try {
       const saved = localStorage.getItem('kanyamanan_theme');
       if (saved) return saved === 'dark';
-      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      return false; // Default to Light Mode automatically
     } catch (e) {
       return false;
     }
@@ -926,7 +927,16 @@ function App() {
       return () => unsub();
     }
   }, []);
-  const [adminBranches, setAdminBranches] = useState([]);
+  const [adminBranches, setAdminBranches] = useState([
+    {
+      branchName: 'Restaurant Branch #1',
+      municipality: 'City of San Fernando',
+      address: '',
+      operatingHours: '09:00 AM - 09:00 PM',
+      lat: 15.0300,
+      lng: 120.6800
+    }
+  ]);
 
   // Photo URL input states
   const [resPhotoUrlInput, setResPhotoUrlInput] = useState('');
@@ -936,6 +946,7 @@ function App() {
   const [aiRawMenuText, setAiRawMenuText] = useState('');
   const [aiMenuImage, setAiMenuImage] = useState(null);
   const [isAiScanning, setIsAiScanning] = useState(false);
+  const [aiOcrProgress, setAiOcrProgress] = useState(0);
 
   // Trip Completion & Celebration States
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
@@ -10880,22 +10891,28 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
     // Populate branches array
     if (Array.isArray(res.branches) && res.branches.length > 0) {
-      setAdminBranches(res.branches.map(b => ({
-        branchName: b.branchName || b.name || `${res.name} (${b.municipality || 'Main'}) Branch`,
-        municipality: b.municipality || res.municipality || 'City of San Fernando',
-        address: b.address || res.address || '',
-        operatingHours: b.operatingHours || res.operatingHours || '09:00 AM - 09:00 PM',
-        lat: b.lat || res.lat || 15.0300,
-        lng: b.lng || res.lng || 120.6800
-      })));
+      setAdminBranches(res.branches.map(b => {
+        const bMun = b.municipality || res.municipality || 'City of San Fernando';
+        const defaultCoord = MUNICIPALITY_COORDINATES[bMun] || { lat: 15.0300, lng: 120.6800 };
+        return {
+          branchName: b.branchName || b.name || `${res.name} (${bMun}) Branch`,
+          municipality: bMun,
+          address: b.address || res.address || '',
+          operatingHours: b.operatingHours || res.operatingHours || '09:00 AM - 09:00 PM',
+          lat: Number(b.lat) && !isNaN(Number(b.lat)) ? Number(b.lat) : defaultCoord.lat,
+          lng: Number(b.lng) && !isNaN(Number(b.lng)) ? Number(b.lng) : defaultCoord.lng
+        };
+      }));
     } else {
+      const bMun = res.municipality || 'City of San Fernando';
+      const defaultCoord = MUNICIPALITY_COORDINATES[bMun] || { lat: 15.0300, lng: 120.6800 };
       setAdminBranches([{
         branchName: `${res.name} (Main Branch)`,
-        municipality: res.municipality || 'City of San Fernando',
+        municipality: bMun,
         address: res.address || '',
         operatingHours: res.operatingHours || '09:00 AM - 09:00 PM',
-        lat: res.lat || 15.0300,
-        lng: res.lng || 120.6800
+        lat: Number(res.lat) && !isNaN(Number(res.lat)) ? Number(res.lat) : defaultCoord.lat,
+        lng: Number(res.lng) && !isNaN(Number(res.lng)) ? Number(res.lng) : defaultCoord.lng
       }]);
     }
 
@@ -10941,88 +10958,290 @@ ${JSON.stringify(updatedMessages.slice(-8))}
   };
 
 
-  // Free AI Menu OCR & Intelligent Text Organizer Engine
-  const handleAiAnalyzeMenu = () => {
+  // High-Contrast Image Preprocessor for Difficult / Low-Contrast Menu Photos
+  const preprocessMenuImage = (imageDataUrl) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          // Scale up small or low-res images for superior OCR clarity
+          let scale = 1;
+          if (img.width < 1200) {
+            scale = Math.min(2.5, 1600 / img.width);
+          }
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const d = imgData.data;
+
+          // Adaptive Grayscale + High-Contrast Binarization
+          for (let i = 0; i < d.length; i += 4) {
+            const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+            // Boost contrast to make faint/colored text pop against dark/light backgrounds
+            let contrast = (gray - 128) * 1.5 + 128;
+            if (contrast < 0) contrast = 0;
+            if (contrast > 255) contrast = 255;
+
+            d[i] = contrast;
+            d[i + 1] = contrast;
+            d[i + 2] = contrast;
+          }
+
+          ctx.putImageData(imgData, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        } catch (e) {
+          resolve(imageDataUrl);
+        }
+      };
+      img.onerror = () => resolve(imageDataUrl);
+      img.src = imageDataUrl;
+    });
+  };
+
+  // Free Cloud AI OCR Engine (OCR.space Free API)
+  const runCloudAiOcr = async (imageDataUrl) => {
+    try {
+      const formData = new FormData();
+      formData.append('base64Image', imageDataUrl);
+      formData.append('language', 'eng');
+      formData.append('isOverlayRequired', 'false');
+      formData.append('isTable', 'true');
+      formData.append('scale', 'true');
+      formData.append('detectOrientation', 'true');
+
+      const response = await fetch('https://api.ocr.space/parse/image', {
+        method: 'POST',
+        headers: {
+          'apikey': 'K88574744288957' // Free Public OCR API Key
+        },
+        body: formData
+      });
+
+      if (!response.ok) return null;
+      const data = await response.json();
+      if (data && data.ParsedResults && data.ParsedResults.length > 0) {
+        return data.ParsedResults[0].ParsedText || '';
+      }
+      return null;
+    } catch (e) {
+      console.warn("Cloud OCR API unreachable, switching to local OCR:", e);
+      return null;
+    }
+  };
+
+  // Free AI Menu OCR & Intelligent Text Organizer Engine (Powered by Dual Cloud AI OCR + Tesseract.js)
+  const handleAiAnalyzeMenu = async () => {
     if (!aiRawMenuText.trim() && !aiMenuImage) {
       alert("Please upload a menu image or paste raw menu text to let AI scan and organize it for you!");
       return;
     }
 
     setIsAiScanning(true);
+    setAiOcrProgress(10);
 
-    setTimeout(() => {
+    try {
       let rawText = aiRawMenuText.trim();
 
-      // Default fallback simulated text if user uploaded an image without typing text
-      if (!rawText && aiMenuImage) {
-        rawText = `Special Pork Sisig ₱280 - Pork mask, calamansi, chili, onion
-Crispy Liempo Kare-Kare ₱390 - Pork liempo, peanut sauce, vegetables
-Kapampangan Bringhe ₱220 - Sticky rice, coconut milk, chicken, egg
-Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
+      // If an image was uploaded and no manual text, run Dual AI OCR
+      if (aiMenuImage && !rawText) {
+        setAiOcrProgress(30);
+        // 1. Try High-Precision Cloud AI OCR
+        const cloudText = await runCloudAiOcr(aiMenuImage);
+        if (cloudText && cloudText.trim().length > 5) {
+          rawText = cloudText.trim();
+          setAiOcrProgress(90);
+        } else {
+          // 2. Fallback to Local Tesseract OCR with Canvas Preprocessing
+          setAiOcrProgress(40);
+          const enhancedImage = await preprocessMenuImage(aiMenuImage);
+          const ocrResult = await Tesseract.recognize(enhancedImage, 'eng', {
+            logger: (m) => {
+              if (m.status === 'recognizing text' && typeof m.progress === 'number') {
+                setAiOcrProgress(40 + Math.round(m.progress * 50));
+              }
+            }
+          });
+          rawText = (ocrResult?.data?.text || '').trim();
+        }
       }
 
-      // Intelligent regex parsing line by line
-      const lines = rawText.split(/\r?\n|,|;/).map(l => l.trim()).filter(Boolean);
+      if (!rawText || rawText.length < 4) {
+        alert("⚠️ No readable text was detected in the uploaded image.\n\nPlease upload a clear, focused photo of a menu board, printed price list, or flyer (or paste menu text in Option 2).");
+        return;
+      }
+
+      // Authentic Food & Culinary Keywords Dictionary
+      const FOOD_KEYWORDS = [
+        'sisig', 'adobo', 'sinigang', 'kare', 'inasal', 'lechon', 'liempo', 'bagnet',
+        'bulalo', 'kaldereta', 'menudo', 'afritada', 'mechado', 'bistek', 'tapa', 'tocino', 'longganisa',
+        'bringhe', 'tamales', 'tibok', 'halo', 'ube', 'flan', 'turon', 'bilao', 'camaro', 'betute', 'tid-tad',
+        'pancit', 'palabok', 'lugaw', 'arroz', 'goto', 'mami', 'lomi', 'batchoy', 'soup', 'stew',
+        'chicken', 'pork', 'beef', 'fish', 'bangus', 'tilapia', 'salmon', 'tuna', 'shrimp', 'prawn', 'crab', 'squid', 'calamares',
+        'crispy', 'fried', 'grilled', 'roasted', 'smoked', 'steamed', 'baked', 'bbq', 'barbecue', 'platter',
+        'rice', 'sinangag', 'curry', 'pasta', 'spaghetti', 'carbonara', 'pizza', 'burger', 'sandwich', 'wings',
+        'salad', 'pinakbet', 'laing', 'chopsuey', 'chop suey', 'gulay', 'tofu', 'tokwa', 'chicharon',
+        'shake', 'juice', 'tea', 'iced tea', 'coffee', 'latte', 'cooler', 'beer', 'soda', 'coke', 'dessert', 'combo', 'set', 'meal', 'serving'
+      ];
+
+      // Non-food UI, System, Address, and Metadata blocklist
+      const NON_FOOD_BLOCKLIST = [
+        'portal', 'admin', 'kanyamanan', 'system', 'database', 'dashboard', 'settings', 'username', 'password',
+        'address', 'pampanga', 'highway', 'street', 'barangay', 'san fernando', 'angeles', 'city', 'municipality',
+        'contact', 'phone', 'telephone', 'hotline', 'tel', 'email', 'facebook', 'instagram', 'wifi', 'welcome',
+        'thank you', 'receipt', 'invoice', 'table', 'cashier', 'subtotal', 'vat', 'tax', 'total', 'change',
+        'terms', 'conditions', 'copyright', 'rights reserved', 'version', 'app', 'download', 'login', 'logout',
+        'register', 'sign in', 'sign up', 'button', 'photo', 'upload', 'choose file', 'image', 'preview', 'logo'
+      ];
+
+      // Split raw text and clean
+      const cleanedText = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      const rawLines = cleanedText
+        .split('\n')
+        .map(l => l.trim())
+        .filter(l => l.length >= 2);
+
+      // Smart multi-line pairing (combine dish on line i with price on line i+1 if standalone number)
+      const lines = [];
+      for (let i = 0; i < rawLines.length; i++) {
+        const cur = rawLines[i];
+        const next = rawLines[i + 1];
+        if (next && /^(?:₱|P|PHP|Php|php)?\s*\d{2,4}(?:\.\d{2})?$/.test(next) && !/\d{2,4}/.test(cur)) {
+          lines.push(`${cur} ${next}`);
+          i++; // skip next line as it is consumed
+        } else {
+          lines.push(cur);
+        }
+      }
+
       const parsedDishes = [];
 
-      lines.forEach((line, index) => {
-        // Extract Price (e.g. ₱250, P250, 250.00, ₱ 180)
-        const priceMatch = line.match(/(?:₱|P|PHP)?\s*(\d{2,4}(?:\.\d{2})?)/i);
-        const price = priceMatch ? priceMatch[1] : (150 + index * 50).toString();
+      for (const line of lines) {
+        const lowerLine = line.toLowerCase();
 
-        // Extract Dish Name (remove price from string)
-        let name = line.replace(/(?:₱|P|PHP)?\s*\d{2,4}(?:\.\d{2})?/gi, '').replace(/[-–—]/g, ' ').trim();
-        if (!name || name.length < 3) {
-          name = `Heritage Dish #${index + 1}`;
+        // 1. Skip lines dominated by non-food UI / System / Contact words
+        const isBlocklisted = NON_FOOD_BLOCKLIST.some(word => lowerLine.includes(word));
+        if (isBlocklisted) continue;
+
+        // 2. Must have at least 3 alphabetic letters
+        const lettersCount = (line.match(/[a-zA-Z]/g) || []).length;
+        if (lettersCount < 3) continue;
+
+        // 3. Extract Price Pattern (e.g. ₱250, P250, PHP 300, 250.00, 180, etc.)
+        let price = '';
+        const priceMatch = line.match(/(?:₱|P|PHP|Php|php)?\s*(\d{2,4}(?:\.\d{2})?)/i);
+        if (priceMatch) {
+          price = priceMatch[1];
         }
 
-        // Infer Ingredients, Allergens, and Calories based on dish name keywords
-        const lowerName = line.toLowerCase();
-        let ingredients = 'Local spices, onions, native herbs';
-        let allergens = 'None';
-        let calories = '450';
+        // 4. Strict Validation: Line MUST have an explicit price OR recognizable food term
+        const hasFoodKeyword = FOOD_KEYWORDS.some(term => lowerLine.includes(term));
+        const hasExplicitPrice = Boolean(priceMatch);
 
-        if (lowerName.includes('sisig') || lowerName.includes('pork') || lowerName.includes('liempo')) {
-          ingredients = 'Grilled pork mask, ear, calamansi, chili, onion, chicken liver';
+        // If it has NO price AND NO food keyword, it is a random line from a non-menu image -> REJECT
+        if (!hasExplicitPrice && !hasFoodKeyword) {
+          continue;
+        }
+
+        // 5. Clean Dish Name (remove price, leader dots, dashes, numbering)
+        let dishName = line
+          .replace(/(?:₱|P|PHP|Php|php)\s*\d{2,4}(?:\.\d{2})?/gi, '')
+          .replace(/\b\d{2,4}(?:\.\d{2})?\b/g, '')
+          .replace(/^[0-9]+[.)\-]\s*/, '') // Remove leading numbers like "1.", "2)"
+          .replace(/[._\-–—]{2,}/g, ' ') // Remove leader dots "...." or "----"
+          .trim();
+
+        // Extract sub-ingredients if line has a separator like '-' or ':'
+        let extractedIngredients = '';
+        if (dishName.includes(' - ') || dishName.includes(' : ') || dishName.includes('—') || dishName.includes('–')) {
+          const parts = dishName.split(/ - | : |—|–/);
+          if (parts.length >= 2) {
+            dishName = parts[0].trim();
+            extractedIngredients = parts.slice(1).join(', ').trim();
+          }
+        }
+
+        // Clean punctuation from borders
+        dishName = dishName.replace(/^[^a-zA-Z0-9(]+|[^a-zA-Z0-9)]+$/g, '').trim();
+
+        // Must have legitimate name length
+        if (dishName.length < 3 || dishName.length > 70) continue;
+
+        // 6. Infer Ingredients, Allergens, and Calories based on authentic dish name words
+        const lowerCombined = (dishName + ' ' + extractedIngredients).toLowerCase();
+        let ingredients = extractedIngredients || 'Traditional Kapampangan heritage seasoning, garlic, onions, native herbs';
+        let allergens = 'None';
+        let calories = '350';
+
+        if (lowerCombined.includes('sisig') || lowerCombined.includes('pork') || lowerCombined.includes('liempo') || lowerCombined.includes('lechon') || lowerCombined.includes('bagnet') || lowerCombined.includes('baboy')) {
+          if (!extractedIngredients) ingredients = 'Grilled pork mask, calamansi, chili, onions, authentic spices';
           allergens = 'Contains Pork';
-          calories = '680';
-        } else if (lowerName.includes('kare') || lowerName.includes('peanut')) {
-          ingredients = 'Beef tripe, pork belly, savory peanut butter sauce, eggplant, string beans, bagoong';
-          allergens = 'Contains Peanuts, Crustaceans/Shrimp Paste (Bagoong)';
-          calories = '750';
-        } else if (lowerName.includes('bringhe') || lowerName.includes('rice')) {
-          ingredients = 'Glutinous rice, coconut milk, chicken, boiled egg, bell peppers, turmeric';
-          allergens = 'Contains Eggs';
-          calories = '580';
-        } else if (lowerName.includes('halo') || lowerName.includes('dessert') || lowerName.includes('flan') || lowerName.includes('milk')) {
-          ingredients = 'Shaved ice, evaporated milk, ube halaya, saba banana, sweetened beans, leche flan';
-          allergens = 'Contains Dairy, Soy';
+          calories = '650';
+        } else if (lowerCombined.includes('kare') || lowerCombined.includes('peanut')) {
+          if (!extractedIngredients) ingredients = 'Beef tripe/meat, rich peanut sauce, string beans, eggplant, bagoong';
+          allergens = 'Contains Peanuts, Shellfish/Shrimp Paste (Bagoong)';
+          calories = '720';
+        } else if (lowerCombined.includes('chicken') || lowerCombined.includes('inasal') || lowerCombined.includes('manok') || lowerCombined.includes('wings')) {
+          if (!extractedIngredients) ingredients = 'Fresh chicken, lemongrass, garlic, annatto oil';
+          allergens = 'Contains Poultry';
           calories = '420';
-        } else if (lowerName.includes('fish') || lowerName.includes('shrimp') || lowerName.includes('seafood') || lowerName.includes('hison')) {
-          ingredients = 'Fresh catch seafood, citrus, garlic, ginger, local greens';
-          allergens = 'Contains Shellfish / Fish';
+        } else if (lowerCombined.includes('beef') || lowerCombined.includes('bulalo') || lowerCombined.includes('kaldereta') || lowerCombined.includes('bistek') || lowerCombined.includes('baka') || lowerCombined.includes('steak')) {
+          if (!extractedIngredients) ingredients = 'Tender beef, marrow, native broth, local spices';
+          allergens = 'Contains Beef';
+          calories = '680';
+        } else if (lowerCombined.includes('fish') || lowerCombined.includes('shrimp') || lowerCombined.includes('prawn') || lowerCombined.includes('crab') || lowerCombined.includes('bangus') || lowerCombined.includes('tilapia') || lowerCombined.includes('seafood') || lowerCombined.includes('squid') || lowerCombined.includes('calamares')) {
+          if (!extractedIngredients) ingredients = 'Fresh seafood, citrus, garlic, ginger, local vegetables';
+          allergens = 'Contains Seafood / Shellfish';
+          calories = '360';
+        } else if (lowerCombined.includes('bringhe') || lowerCombined.includes('rice') || lowerCombined.includes('sinangag')) {
+          if (!extractedIngredients) ingredients = 'Glutinous rice, coconut milk, turmeric, bell pepper, boiled egg';
+          allergens = 'Contains Eggs';
+          calories = '520';
+        } else if (lowerCombined.includes('halo') || lowerCombined.includes('dessert') || lowerCombined.includes('flan') || lowerCombined.includes('tibok') || lowerCombined.includes('ube') || lowerCombined.includes('shake') || lowerCombined.includes('turon')) {
+          if (!extractedIngredients) ingredients = 'Carabao milk, ube, sweetened beans, shaved ice, leche flan';
+          allergens = 'Contains Dairy';
           calories = '380';
+        } else if (lowerCombined.includes('pancit') || lowerCombined.includes('noodle') || lowerCombined.includes('pasta') || lowerCombined.includes('lumpia') || lowerCombined.includes('palabok')) {
+          if (!extractedIngredients) ingredients = 'Noodles, mixed vegetables, native seasoning, garlic';
+          allergens = 'Contains Gluten / Wheat';
+          calories = '410';
+        } else if (lowerCombined.includes('gulay') || lowerCombined.includes('pinakbet') || lowerCombined.includes('salad') || lowerCombined.includes('vegetable') || lowerCombined.includes('laing')) {
+          if (!extractedIngredients) ingredients = 'Fresh local vegetables, squash, okra, string beans, tomatoes';
+          allergens = 'Vegetarian / Plant-Based';
+          calories = '220';
         }
 
         parsedDishes.push({
-          name: name.charAt(0).toUpperCase() + name.slice(1),
-          price: price,
+          name: dishName.charAt(0).toUpperCase() + dishName.slice(1),
+          price: price || '180',
           ingredients: ingredients,
           allergens: allergens,
           calories: calories,
           image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80'
         });
-      });
+      }
 
       if (parsedDishes.length > 0) {
         setAdminDishes(parsedDishes);
-        alert(`🎉 AI successfully scanned and organized ${parsedDishes.length} menu items into your signature catalog with prices, ingredients, and allergen warnings!`);
+        alert(`🎉 AI OCR successfully detected and organized ${parsedDishes.length} menu items from your image/text into the dish catalog!`);
       } else {
-        alert("AI could not extract dish items. Please try pasting clearer menu text.");
+        alert("⚠️ No food menu items or priced dishes were detected in the uploaded image.\n\nPlease upload a clear photo of a restaurant menu board, printed price list, or flyer (or paste the menu items in Option 2).");
       }
-
+    } catch (err) {
+      console.error("AI OCR Error:", err);
+      alert("⚠️ OCR scanning encountered an error. Please ensure the image is clear or paste the menu text directly into Option 2.");
+    } finally {
       setIsAiScanning(false);
-    }, 1200);
+      setAiOcrProgress(0);
+    }
   };
 
   const handleSaveAdminListing = (e) => {
@@ -11072,7 +11291,14 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
     if (adminEditingId) {
       const originalRes = restaurants.find(r => r.id === adminEditingId);
 
-      const updatedBranches = adminBranches.length > 0 ? adminBranches.map((b, idx) => {
+      const updatedBranches = (adminBranches.length > 0 ? adminBranches : [{
+        branchName: `${nameToSave} (Main Branch)`,
+        municipality: adminForm.municipality || 'City of San Fernando',
+        address: adminForm.address || '',
+        operatingHours: adminForm.operatingHours || '09:00 AM - 09:00 PM',
+        lat: 15.0300,
+        lng: 120.6800
+      }]).map((b, idx) => {
         const mun = b.municipality || adminForm.municipality || 'City of San Fernando';
         const defaultCoord = MUNICIPALITY_COORDINATES[mun] || { lat: 15.0300, lng: 120.6800 };
         return {
@@ -11083,18 +11309,24 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           lat: Number(b.lat) && !isNaN(Number(b.lat)) ? Number(b.lat) : defaultCoord.lat,
           lng: Number(b.lng) && !isNaN(Number(b.lng)) ? Number(b.lng) : defaultCoord.lng
         };
-      }) : (originalRes ? originalRes.branches : []);
+      });
 
       const primaryBranch = updatedBranches && updatedBranches[0];
+      const primaryMun = primaryBranch?.municipality || adminForm.municipality || originalRes?.municipality || 'City of San Fernando';
+      const defaultCoord = MUNICIPALITY_COORDINATES[primaryMun] || { lat: 15.0300, lng: 120.6800 };
+      const primaryLat = primaryBranch?.lat && !isNaN(Number(primaryBranch.lat)) ? Number(primaryBranch.lat) : defaultCoord.lat;
+      const primaryLng = primaryBranch?.lng && !isNaN(Number(primaryBranch.lng)) ? Number(primaryBranch.lng) : defaultCoord.lng;
 
       const updatedResObj = {
         ...(originalRes || {}),
         id: adminEditingId,
         name: nameToSave,
-        municipality: primaryBranch?.municipality || adminForm.municipality || originalRes?.municipality || 'City of San Fernando',
+        municipality: primaryMun,
         operatingHours: primaryBranch?.operatingHours || adminForm.operatingHours || originalRes?.operatingHours || '09:00 AM - 09:00 PM',
         priceTier: adminForm.priceTier || originalRes?.priceTier || '$',
         address: primaryBranch?.address || adminForm.address || originalRes?.address || '',
+        lat: primaryLat,
+        lng: primaryLng,
         image: adminForm.image || (adminForm.images && adminForm.images[0]) || originalRes?.image || '',
         images: adminForm.images && adminForm.images.length > 0 ? adminForm.images : (adminForm.image ? [adminForm.image] : originalRes?.images || []),
         description: adminForm.description || originalRes?.description || 'Kapampangan Restaurant in Pampanga',
@@ -11237,7 +11469,16 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
           operatingHours: '09:00 AM - 09:00 PM', priceTier: '$$',
           address: '', image: '', images: [], description: '', username: '', password: ''
         });
-        setAdminBranches([]);
+        setAdminBranches([
+          {
+            branchName: 'Restaurant Branch #1',
+            municipality: 'City of San Fernando',
+            address: '',
+            operatingHours: '09:00 AM - 09:00 PM',
+            lat: 15.0300,
+            lng: 120.6800
+          }
+        ]);
         setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
 
         alert(`📋 Profile Changes Submitted!\n\nYour profile modifications for "${nameToSave}" have been submitted for administrator vetting. You can monitor its status under "My Change Requests Status & History" in your owner panel.`);
@@ -11278,46 +11519,65 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
         operatingHours: '09:00 AM - 09:00 PM', priceTier: '$$',
         address: '', image: '', images: [], description: '', username: '', password: ''
       });
-      setAdminBranches([]);
+      setAdminBranches([
+        {
+          branchName: 'Restaurant Branch #1',
+          municipality: 'City of San Fernando',
+          address: '',
+          operatingHours: '09:00 AM - 09:00 PM',
+          lat: 15.0300,
+          lng: 120.6800
+        }
+      ]);
       setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
 
       alert(`✅ Update Saved!\n\nThe restaurant information for "${nameToSave}" has been successfully updated and published live.`);
       return;
     } else {
-      const defaultCoord = { lat: 15.0300, lng: 120.6800 };
-      if (adminForm.municipality === 'Angeles City') {
-        defaultCoord.lat = 15.1441; defaultCoord.lng = 120.5887;
-      } else if (adminForm.municipality === 'Guagua') {
-        defaultCoord.lat = 14.9701; defaultCoord.lng = 120.6300;
-      } else if (adminForm.municipality === 'Bacolor') {
-        defaultCoord.lat = 15.0002; defaultCoord.lng = 120.6500;
-      }
+      const updatedBranches = (adminBranches.length > 0 ? adminBranches : [{
+        branchName: `${nameToSave} (Main Branch)`,
+        municipality: adminForm.municipality || 'City of San Fernando',
+        address: adminForm.address || '',
+        operatingHours: adminForm.operatingHours || '09:00 AM - 09:00 PM',
+        lat: 15.0300,
+        lng: 120.6800
+      }]).map((b, idx) => {
+        const mun = b.municipality || adminForm.municipality || 'City of San Fernando';
+        const defaultCoord = MUNICIPALITY_COORDINATES[mun] || { lat: 15.0300, lng: 120.6800 };
+        return {
+          branchName: (b.branchName || `${nameToSave} Branch #${idx + 1}`).trim(),
+          municipality: mun,
+          address: (b.address || '').trim() || `${mun}, Pampanga`,
+          operatingHours: (b.operatingHours || adminForm.operatingHours || '09:00 AM - 09:00 PM').trim(),
+          lat: Number(b.lat) && !isNaN(Number(b.lat)) ? Number(b.lat) : defaultCoord.lat,
+          lng: Number(b.lng) && !isNaN(Number(b.lng)) ? Number(b.lng) : defaultCoord.lng
+        };
+      });
+
+      const primaryBranch = updatedBranches[0];
+      const primaryMun = primaryBranch?.municipality || adminForm.municipality || 'City of San Fernando';
+      const defaultCoord = MUNICIPALITY_COORDINATES[primaryMun] || { lat: 15.0300, lng: 120.6800 };
+      const primaryLat = primaryBranch?.lat && !isNaN(Number(primaryBranch.lat)) ? Number(primaryBranch.lat) : defaultCoord.lat;
+      const primaryLng = primaryBranch?.lng && !isNaN(Number(primaryBranch.lng)) ? Number(primaryBranch.lng) : defaultCoord.lng;
 
       const newRes = {
         id: 'res-' + Date.now(),
-        name: adminForm.name,
-        municipality: adminForm.municipality,
-        operatingHours: adminForm.operatingHours,
-        priceTier: adminForm.priceTier,
-        lat: defaultCoord.lat + (Math.random() - 0.5) * 0.02,
-        lng: defaultCoord.lng + (Math.random() - 0.5) * 0.02,
+        name: nameToSave,
+        municipality: primaryMun,
+        operatingHours: primaryBranch?.operatingHours || adminForm.operatingHours || '09:00 AM - 09:00 PM',
+        priceTier: adminForm.priceTier || '$$',
+        lat: primaryLat,
+        lng: primaryLng,
         categories: ['🏛️ Ancestral Kitchen'],
-        description: adminForm.description,
-        address: adminForm.address || `Barangay San Jose, ${adminForm.municipality}, Pampanga`,
-        image: adminForm.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80',
+        description: adminForm.description || 'Kapampangan Restaurant in Pampanga',
+        address: (primaryBranch?.address || adminForm.address || `${primaryMun}, Pampanga`).trim(),
+        image: adminForm.image || (adminForm.images && adminForm.images[0]) || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80',
         images: adminForm.images && adminForm.images.length > 0 ? adminForm.images : [
           adminForm.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80'
         ],
-        branches: adminBranches.length > 0 ? adminBranches : [{
-          branchName: `${adminForm.name} (Main Branch)`,
-          municipality: adminForm.municipality,
-          address: adminForm.address || `Barangay San Jose, ${adminForm.municipality}`,
-          operatingHours: adminForm.operatingHours,
-          lat: defaultCoord.lat,
-          lng: defaultCoord.lng
-        }],
-        username: adminForm.username || 'owner',
-        password: adminForm.password || 'password123',
+        branches: updatedBranches,
+        username: usernameToSave,
+        password: passwordToSave,
         occupancy: [10, 20, 30, 60, 90, 80, 50, 40, 60, 80, 90, 70, 40, 20, 10],
         menu: formattedMenu.length > 0 ? formattedMenu : [
           {
@@ -11354,7 +11614,16 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
       operatingHours: '09:00 AM - 09:00 PM', priceTier: '$',
       address: '', image: '', images: [], description: '', username: '', password: ''
     });
-    setAdminBranches([]);
+    setAdminBranches([
+      {
+        branchName: 'Restaurant Branch #1',
+        municipality: 'City of San Fernando',
+        address: '',
+        operatingHours: '09:00 AM - 09:00 PM',
+        lat: 15.0300,
+        lng: 120.6800
+      }
+    ]);
     setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
   };
 
@@ -12251,15 +12520,18 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         <button
                           type="button"
                           onClick={() => {
+                            const nextIdx = adminBranches.length + 1;
+                            const defaultMun = adminBranches[0]?.municipality || adminForm.municipality || 'City of San Fernando';
+                            const defaultCoord = MUNICIPALITY_COORDINATES[defaultMun] || { lat: 15.0300, lng: 120.6800 };
                             setAdminBranches([
                               ...adminBranches,
                               {
-                                branchName: `${adminForm.name || 'Restaurant'} Branch #${adminBranches.length + 1}`,
-                                municipality: adminForm.municipality || 'City of San Fernando',
+                                branchName: `${adminForm.name || 'Restaurant'} Branch #${nextIdx}`,
+                                municipality: defaultMun,
                                 address: '',
                                 operatingHours: adminForm.operatingHours || '09:00 AM - 09:00 PM',
-                                lat: 15.0300,
-                                lng: 120.6800
+                                lat: defaultCoord.lat,
+                                lng: defaultCoord.lng
                               }
                             ]);
                           }}
@@ -12313,12 +12585,18 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                     updated[bIdx] = {
                                       ...updated[bIdx],
                                       municipality: mun,
-                                      lat: updated[bIdx].lat || coords.lat,
-                                      lng: updated[bIdx].lng || coords.lng
+                                      lat: coords.lat,
+                                      lng: coords.lng
                                     };
                                     setAdminBranches(updated);
+                                    if (bIdx === 0) {
+                                      setAdminForm(prev => ({
+                                        ...prev,
+                                        municipality: mun
+                                      }));
+                                    }
                                   }}
-                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] font-bold"
+                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] font-bold cursor-pointer"
                                 >
                                   {MUNICIPALITIES.map(mun => (
                                     <option key={mun} value={mun}>{mun}</option>
@@ -12332,9 +12610,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   placeholder="e.g. 08:00 AM - 09:00 PM"
                                   value={branch.operatingHours || '09:00 AM - 09:00 PM'}
                                   onChange={(e) => {
+                                    const val = e.target.value;
                                     const updated = [...adminBranches];
-                                    updated[bIdx] = { ...updated[bIdx], operatingHours: e.target.value };
+                                    updated[bIdx] = { ...updated[bIdx], operatingHours: val };
                                     setAdminBranches(updated);
+                                    if (bIdx === 0) {
+                                      setAdminForm(prev => ({ ...prev, operatingHours: val }));
+                                    }
                                   }}
                                   className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] font-semibold"
                                 />
@@ -12346,9 +12628,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                   placeholder="e.g. MacArthur Highway, Del Pilar"
                                   value={branch.address || ''}
                                   onChange={(e) => {
+                                    const val = e.target.value;
                                     const updated = [...adminBranches];
-                                    updated[bIdx] = { ...updated[bIdx], address: e.target.value };
+                                    updated[bIdx] = { ...updated[bIdx], address: val };
                                     setAdminBranches(updated);
+                                    if (bIdx === 0) {
+                                      setAdminForm(prev => ({ ...prev, address: val }));
+                                    }
                                   }}
                                   className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5]"
                                 />
@@ -12408,7 +12694,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                     type="number"
                                     step="any"
                                     placeholder="e.g. 15.0320"
-                                    value={branch.lat !== undefined ? branch.lat : 15.0300}
+                                    value={branch.lat !== undefined ? branch.lat : (MUNICIPALITY_COORDINATES[branch.municipality]?.lat || 15.0300)}
                                     onChange={(e) => {
                                       const updated = [...adminBranches];
                                       updated[bIdx] = { ...updated[bIdx], lat: parseFloat(e.target.value) || 0 };
@@ -12423,7 +12709,7 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                     type="number"
                                     step="any"
                                     placeholder="e.g. 120.6860"
-                                    value={branch.lng !== undefined ? branch.lng : 120.6800}
+                                    value={branch.lng !== undefined ? branch.lng : (MUNICIPALITY_COORDINATES[branch.municipality]?.lng || 120.6800)}
                                     onChange={(e) => {
                                       const updated = [...adminBranches];
                                       updated[bIdx] = { ...updated[bIdx], lng: parseFloat(e.target.value) || 0 };
@@ -12541,9 +12827,13 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                         type="button"
                         disabled={isAiScanning}
                         onClick={handleAiAnalyzeMenu}
-                        className="w-full py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                        className="w-full py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-75"
                       >
-                        {isAiScanning ? "🤖 AI Scanning & Organizing Menu Items..." : "✨ Analyze & Auto-Organize Menu with AI"}
+                        {isAiScanning ? (
+                          <span>🤖 {aiOcrProgress > 0 ? `AI OCR Scanning & Reading Menu (${aiOcrProgress}%)...` : "AI OCR Initializing Engine..."}</span>
+                        ) : (
+                          <span>✨ Analyze & Auto-Organize Menu with AI OCR</span>
+                        )}
                       </button>
                     </div>
 
@@ -12682,6 +12972,16 @@ Traditional Halo-Halo ₱150 - Shaved ice, milk, sweetened fruits, flan`;
                                 operatingHours: '09:00 AM - 09:00 PM', priceTier: '$$',
                                 address: '', image: '', images: [], description: ''
                               });
+                              setAdminBranches([
+                                {
+                                  branchName: 'Restaurant Branch #1',
+                                  municipality: 'City of San Fernando',
+                                  address: '',
+                                  operatingHours: '09:00 AM - 09:00 PM',
+                                  lat: 15.0300,
+                                  lng: 120.6800
+                                }
+                              ]);
                               setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
                             }}
                             className="px-4 py-2 border border-[#E9E5DE] rounded-xl text-xs font-bold text-charcoal hover:bg-[#FAF8F5] cursor-pointer"
