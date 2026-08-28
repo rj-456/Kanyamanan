@@ -16830,9 +16830,34 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                   )}
                 </div>
               </div>
-              <button onClick={() => { setSelectedRestaurant(null); setActiveDish(null); setCvUploadedMeal(null); }} className="p-2 text-charcoal-light hover:text-charcoal rounded-full hover:bg-ivory">
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const muns = getRestaurantMunicipalities(selectedRestaurant);
+                    const targetRes = selectedRestaurant;
+                    setSelectedRestaurant(null);
+                    setActiveDish(null);
+                    setCvUploadedMeal(null);
+                    if (muns.length > 1) {
+                      setBranchSelectTarget(targetRes);
+                    } else {
+                      handleAddToItinerary(targetRes);
+                      alert(`✓ Added "${targetRes.name}" to active trip itinerary queue!`);
+                    }
+                  }}
+                  className="px-3.5 sm:px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-bold rounded-xl shadow-sm hover:shadow transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
+                >
+                  <span>➕</span> Add to Trip
+                </button>
+                <button
+                  onClick={() => { setSelectedRestaurant(null); setActiveDish(null); setCvUploadedMeal(null); }}
+                  className="p-2 text-charcoal-light hover:text-charcoal rounded-full hover:bg-ivory cursor-pointer"
+                  title="Close"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
 
             {/* Body */}
