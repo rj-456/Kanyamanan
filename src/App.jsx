@@ -12272,7 +12272,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                     />
                   </div>
                   <span className="block text-[9px] text-gray-400 font-semibold italic">
-                    💡 Super Admin Demo Credentials: Use username "admin" and password "admin123"
+                    💡 System Admin Demo Credentials: Use username "admin" and password "admin123"
                   </span>
                 </div>
               ) : (
@@ -12350,7 +12350,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                   </h1>
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-terracotta/20 text-[#FB923C] border border-terracotta/35">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#FB923C] animate-pulse"></span>
-                    {adminRole === 'superadmin' ? 'Super Admin' : 'Merchant Owner'}
+                    {adminRole === 'superadmin' ? 'System Admin' : 'Merchant Owner'}
                   </span>
                 </div>
                 <p className="text-[11px] text-gray-400 font-medium tracking-normal mt-0.5 m-0 truncate">
