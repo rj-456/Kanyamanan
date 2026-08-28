@@ -595,6 +595,7 @@ function App() {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [selectedDetailBranch, setSelectedDetailBranch] = useState(null);
   const [activeDish, setActiveDish] = useState(null);
+  const [drawerDishSearch, setDrawerDishSearch] = useState('');
   const [cvUploadedMeal, setCvUploadedMeal] = useState(null);
   const [isCVProcessing, setIsCVProcessing] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -16952,52 +16953,120 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                 </div>
               </div>
 
-              {/* Digital Menu Table */}
+              {/* Digital Menu Table with Real-Time Dish Search */}
               <div className="space-y-3">
-                <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider">
-                  The Digital Menu Table (Click to deconstruct ingredients)
-                </h3>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
+                  <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-1.5">
+                    <span>🍽️</span> The Digital Menu Table
+                    {selectedRestaurant.menu && (
+                      <span className="text-[10px] text-charcoal-light font-normal lowercase">
+                        ({selectedRestaurant.menu.filter(d => {
+                          if (!drawerDishSearch.trim()) return true;
+                          const q = drawerDishSearch.toLowerCase().trim();
+                          return (d.name || '').toLowerCase().includes(q) ||
+                            (d.ingredients || '').toLowerCase().includes(q) ||
+                            (d.allergens || '').toLowerCase().includes(q) ||
+                            String(d.price || '').includes(q);
+                        }).length} of {selectedRestaurant.menu.length} items)
+                      </span>
+                    )}
+                  </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {selectedRestaurant.menu.map(dish => (
-                    <div
-                      key={dish.id}
-                      onClick={() => setActiveDish(dish)}
-                      className={`p-3 rounded-xl border transition-all text-left cursor-pointer flex gap-3 items-center ${activeDish?.id === dish.id ? 'bg-terracotta/5 border-terracotta shadow-sm' : 'bg-white border-[#E9E5DE]'}`}
-                    >
-                      {dish.image && (
-                        <div
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setZoomedDishImg(dish.image);
-                          }}
-                          className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-[#E9E5DE] cursor-zoom-in hover:opacity-90 transition-opacity relative group/dishimg"
-                          title="Click to zoom image"
+                  {/* Menu Dish Search Input Bar */}
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-charcoal-light pointer-events-none" />
+                    <input
+                      type="text"
+                      placeholder="Search menu dishes, ingredients..."
+                      value={drawerDishSearch}
+                      onChange={(e) => setDrawerDishSearch(e.target.value)}
+                      className="w-full pl-8 pr-7 py-1.5 text-xs bg-white border border-[#E9E5DE] rounded-lg text-charcoal placeholder-charcoal-light/60 focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-all shadow-2xs font-medium"
+                    />
+                    {drawerDishSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setDrawerDishSearch('')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-charcoal-light hover:text-charcoal rounded-full transition-colors cursor-pointer"
+                        title="Clear search"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {(() => {
+                  const filteredMenu = (selectedRestaurant.menu || []).filter(dish => {
+                    if (!drawerDishSearch.trim()) return true;
+                    const q = drawerDishSearch.toLowerCase().trim();
+                    return (dish.name || '').toLowerCase().includes(q) ||
+                      (dish.ingredients || '').toLowerCase().includes(q) ||
+                      (dish.allergens || '').toLowerCase().includes(q) ||
+                      (dish.healthIndicators || '').toLowerCase().includes(q) ||
+                      String(dish.price || '').includes(q);
+                  });
+
+                  if (filteredMenu.length === 0) {
+                    return (
+                      <div className="p-6 text-center bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl space-y-2">
+                        <span className="text-2xl block">🔍</span>
+                        <p className="text-xs font-bold text-charcoal">
+                          No dishes found matching "{drawerDishSearch}"
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setDrawerDishSearch('')}
+                          className="px-3 py-1 bg-terracotta text-white rounded-lg text-[10px] font-bold hover:bg-terracotta-dark transition-colors cursor-pointer"
                         >
-                          <img
-                            src={dish.image}
-                            alt={dish.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-charcoal/20 opacity-0 group-hover/dishimg:opacity-100 flex items-center justify-center transition-opacity text-white text-[10px] font-bold">
-                            🔍
+                          Clear Search Filter
+                        </button>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {filteredMenu.map(dish => (
+                        <div
+                          key={dish.id}
+                          onClick={() => setActiveDish(dish)}
+                          className={`p-3 rounded-xl border transition-all text-left cursor-pointer flex gap-3 items-center ${activeDish?.id === dish.id ? 'bg-terracotta/5 border-terracotta shadow-sm' : 'bg-white border-[#E9E5DE] hover:border-terracotta/40'}`}
+                        >
+                          {dish.image && (
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setZoomedDishImg(dish.image);
+                              }}
+                              className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-[#E9E5DE] cursor-zoom-in hover:opacity-90 transition-opacity relative group/dishimg"
+                              title="Click to zoom image"
+                            >
+                              <img
+                                src={dish.image}
+                                alt={dish.name}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 bg-charcoal/20 opacity-0 group-hover/dishimg:opacity-100 flex items-center justify-center transition-opacity text-white text-[10px] font-bold">
+                                🔍
+                              </div>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex justify-between items-start gap-1">
+                              <strong className="text-xs font-extrabold text-charcoal truncate block">{dish.name}</strong>
+                              <span className="text-xs font-black text-bananaleaf shrink-0">₱{dish.price}</span>
+                            </div>
+
+                            <div className="flex items-center justify-between text-[9px] text-charcoal-light mt-2 pt-2 border-t border-[#FAF8F5]">
+                              <span>Caloric: <b>{dish.nutrition?.calories || 450} kcal</b></span>
+                              <span className="text-terracotta font-bold">Deconstruct →</span>
+                            </div>
                           </div>
                         </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start gap-1">
-                          <strong className="text-xs font-extrabold text-charcoal truncate block">{dish.name}</strong>
-                          <span className="text-xs font-black text-bananaleaf shrink-0">₱{dish.price}</span>
-                        </div>
-
-                        <div className="flex items-center justify-between text-[9px] text-charcoal-light mt-2 pt-2 border-t border-[#FAF8F5]">
-                          <span>Caloric: <b>{dish.nutrition.calories} kcal</b></span>
-                          <span className="text-terracotta font-bold">Deconstruct →</span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
               </div>
 
               {/* Automated Menu Ingredient Deconstructor Widget */}
