@@ -17138,32 +17138,13 @@ ${JSON.stringify(updatedMessages.slice(-8))}
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-2 justify-end pt-4 border-t border-[#E9E5DE]">
+              <div className="flex justify-end pt-4 border-t border-[#E9E5DE]">
                 <button
                   type="button"
                   onClick={() => { setSelectedRestaurant(null); setActiveDish(null); setCvUploadedMeal(null); }}
-                  className="px-4 py-2 border border-[#E9E5DE] rounded-xl text-xs font-semibold text-charcoal hover:bg-[#FAF8F5]"
+                  className="px-5 py-2.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-xs font-bold text-charcoal hover:bg-[#F2EFE9] transition-colors cursor-pointer"
                 >
                   Close Detail
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const muns = getRestaurantMunicipalities(selectedRestaurant);
-                    const targetRes = selectedRestaurant;
-                    setSelectedRestaurant(null);
-                    setActiveDish(null);
-                    setCvUploadedMeal(null);
-                    if (muns.length > 1) {
-                      setBranchSelectTarget(targetRes);
-                    } else {
-                      handleAddToItinerary(targetRes);
-                      alert(`✓ Added "${targetRes.name}" to active trip itinerary queue!`);
-                    }
-                  }}
-                  className="px-5 py-2 bg-terracotta text-white rounded-xl text-xs font-bold hover:bg-terracotta-dark shadow"
-                >
-                  Add to Trip Itinerary
                 </button>
               </div>
 
