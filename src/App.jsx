@@ -597,6 +597,7 @@ function App() {
   const [activeDish, setActiveDish] = useState(null);
   const [drawerDishSearch, setDrawerDishSearch] = useState('');
   const [itineraryDishSearch, setItineraryDishSearch] = useState('');
+  const [stopSearchQueries, setStopSearchQueries] = useState({});
   const [cvUploadedMeal, setCvUploadedMeal] = useState(null);
   const [isCVProcessing, setIsCVProcessing] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -16057,15 +16058,15 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                             {restaurantStops.map((res, stopIdx) => {
                               const stopId = res.id;
                               const stopBreakdown = activeTripMetrics.perStopBreakdown.find(b => b.stopId === stopId);
+                              const currentStopQuery = (stopSearchQueries[stopId] || itineraryDishSearch || '').toLowerCase().trim();
 
                               const matchingDishes = (res.menu || []).filter(dish => {
-                                if (!itineraryDishSearch.trim()) return true;
-                                const q = itineraryDishSearch.toLowerCase().trim();
-                                return (dish.name || '').toLowerCase().includes(q) ||
-                                  (dish.ingredients || '').toLowerCase().includes(q) ||
-                                  (dish.allergens || '').toLowerCase().includes(q) ||
-                                  (dish.healthIndicators || '').toLowerCase().includes(q) ||
-                                  String(dish.price || '').includes(q);
+                                if (!currentStopQuery) return true;
+                                return (dish.name || '').toLowerCase().includes(currentStopQuery) ||
+                                  (dish.ingredients || '').toLowerCase().includes(currentStopQuery) ||
+                                  (dish.allergens || '').toLowerCase().includes(currentStopQuery) ||
+                                  (dish.healthIndicators || '').toLowerCase().includes(currentStopQuery) ||
+                                  String(dish.price || '').includes(currentStopQuery);
                               });
 
                               return (
@@ -16074,7 +16075,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                                   className="bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl p-4 space-y-3.5 shadow-2xs"
                                 >
                                   {/* Restaurant Header */}
-                                  <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 dark:border-[#2E2A24] pb-2.5">
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#E9E5DE]/80 dark:border-[#2E2A24] pb-2.5 gap-2">
                                     <div className="flex items-center gap-2.5 min-w-0">
                                       <span className="w-6 h-6 rounded-full bg-terracotta text-white font-black text-[10px] flex items-center justify-center shrink-0">
                                         {stopIdx + 1}
@@ -16089,20 +16090,54 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                                       </div>
                                     </div>
 
-                                    <div className="text-right shrink-0">
-                                      <span className="text-[9px] font-bold text-charcoal-light dark:text-gray-400 block uppercase">
-                                        Stop Total
-                                      </span>
-                                      <strong className="text-xs font-black text-[#2C5E3B] dark:text-emerald-400">
-                                        {stopBreakdown?.calories || 0} kcal • ₱{stopBreakdown?.cost || 0}
-                                      </strong>
+                                    <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                                      <div className="text-right shrink-0">
+                                        <span className="text-[9px] font-bold text-charcoal-light dark:text-gray-400 block uppercase">
+                                          Stop Total
+                                        </span>
+                                        <strong className="text-xs font-black text-[#2C5E3B] dark:text-emerald-400">
+                                          {stopBreakdown?.calories || 0} kcal • ₱{stopBreakdown?.cost || 0}
+                                        </strong>
+                                      </div>
                                     </div>
+                                  </div>
+
+                                  {/* Dedicated Search Bar for this Stop */}
+                                  <div className="relative w-full">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-charcoal-light pointer-events-none" />
+                                    <input
+                                      type="text"
+                                      placeholder={`Search ${res.name} dishes (e.g. Sisig, Soup, Rice, Drinks)...`}
+                                      value={stopSearchQueries[stopId] || ''}
+                                      onChange={(e) => setStopSearchQueries(prev => ({ ...prev, [stopId]: e.target.value }))}
+                                      className="w-full pl-8.5 pr-8 py-2 text-xs bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-charcoal dark:text-gray-200 placeholder-charcoal-light/60 focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-all shadow-2xs font-medium"
+                                    />
+                                    {stopSearchQueries[stopId] && (
+                                      <button
+                                        type="button"
+                                        onClick={() => setStopSearchQueries(prev => ({ ...prev, [stopId]: '' }))}
+                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-charcoal-light hover:text-charcoal rounded-full transition-colors cursor-pointer"
+                                        title="Clear search"
+                                      >
+                                        <X className="h-3.5 w-3.5" />
+                                      </button>
+                                    )}
                                   </div>
 
                                   {/* Menu Items List */}
                                   {matchingDishes.length === 0 ? (
-                                    <div className="p-4 text-center bg-white dark:bg-[#1E1B18] rounded-xl border border-[#E9E5DE] dark:border-[#282420] text-xs text-charcoal-light dark:text-gray-400">
-                                      No dishes matching "{itineraryDishSearch}" found at {res.name}.
+                                    <div className="p-4 text-center bg-white dark:bg-[#1E1B18] rounded-xl border border-[#E9E5DE] dark:border-[#282420] text-xs text-charcoal-light dark:text-gray-400 space-y-2">
+                                      <p>No dishes matching "{stopSearchQueries[stopId] || itineraryDishSearch}" found at {res.name}.</p>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setStopSearchQueries(prev => ({ ...prev, [stopId]: '' }));
+                                          setItineraryDishSearch('');
+                                        }}
+                                        className="px-3 py-1 bg-terracotta text-white rounded-lg text-[10px] font-bold hover:bg-terracotta-dark transition-colors cursor-pointer"
+                                      >
+                                        Clear Search
+                                      </button>
                                     </div>
                                   ) : (
                                     <div className="space-y-3">
