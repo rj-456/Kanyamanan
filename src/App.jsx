@@ -36,7 +36,8 @@ import {
   Sun,
   Moon,
   Users,
-  UserPlus
+  UserPlus,
+  Loader2
 } from 'lucide-react';
 import {
   PRESEEDED_RESTAURANTS,
@@ -950,6 +951,13 @@ function App() {
   const [aiMenuImage, setAiMenuImage] = useState(null);
   const [isAiScanning, setIsAiScanning] = useState(false);
   const [aiOcrProgress, setAiOcrProgress] = useState(0);
+
+  // Free AI Tourist Attraction Document & Image Scanner States
+  const [aiAttractionRawText, setAiAttractionRawText] = useState('');
+  const [aiAttractionFile, setAiAttractionFile] = useState(null);
+  const [aiAttractionFileName, setAiAttractionFileName] = useState('');
+  const [isAiAttractionScanning, setIsAiAttractionScanning] = useState(false);
+  const [aiAttractionProgress, setAiAttractionProgress] = useState(0);
 
   // Trip Completion & Celebration States
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false);
@@ -11343,6 +11351,149 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     }
   };
 
+  // Free AI Tourist Attraction Document & Image Scanner (AI OCR & Intelligent Extractor)
+  const handleAiAnalyzeAttraction = async () => {
+    if (!aiAttractionRawText.trim() && !aiAttractionFile) {
+      alert("Please upload a document/image (PDF, Flyer, Photo) or paste attraction information to let AI scan and organize it for you!");
+      return;
+    }
+
+    setIsAiAttractionScanning(true);
+    setAiAttractionProgress(15);
+
+    try {
+      let rawText = aiAttractionRawText.trim();
+      let attachedImage = null;
+
+      if (aiAttractionFile) {
+        setAiAttractionProgress(30);
+
+        const isImage = aiAttractionFile.startsWith('data:image/');
+        const isText = aiAttractionFile.startsWith('data:text/');
+
+        if (isImage) {
+          attachedImage = aiAttractionFile;
+          // Run Dual AI OCR on Image
+          const cloudText = await runCloudAiOcr(aiAttractionFile);
+          if (cloudText && cloudText.trim().length > 10) {
+            rawText = (rawText ? rawText + '\n\n' : '') + cloudText.trim();
+            setAiAttractionProgress(85);
+          } else {
+            setAiAttractionProgress(50);
+            const enhancedImage = await preprocessMenuImage(aiAttractionFile);
+            const { createWorker } = await import('tesseract.js');
+            const worker = await createWorker('eng');
+            const ret = await worker.recognize(enhancedImage);
+            await worker.terminate();
+            if (ret && ret.data && ret.data.text) {
+              rawText = (rawText ? rawText + '\n\n' : '') + ret.data.text.trim();
+            }
+          }
+        } else if (isText) {
+          try {
+            const base64Data = aiAttractionFile.split(',')[1];
+            const decoded = atob(base64Data);
+            rawText = (rawText ? rawText + '\n\n' : '') + decoded;
+          } catch (e) {
+            console.warn("Error decoding text file", e);
+          }
+        } else {
+          // PDF / Document
+          const cloudText = await runCloudAiOcr(aiAttractionFile);
+          if (cloudText && cloudText.trim().length > 10) {
+            rawText = (rawText ? rawText + '\n\n' : '') + cloudText.trim();
+          }
+        }
+      }
+
+      setAiAttractionProgress(90);
+
+      if (!rawText || rawText.trim().length < 5) {
+        alert("⚠️ Could not detect readable text in the document. Please ensure the file is clear or paste text directly.");
+        return;
+      }
+
+      // Intelligent NLP Entity Extractor
+      const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      const lower = rawText.toLowerCase();
+
+      // 1. Detect Municipality
+      let detectedMun = 'City of San Fernando';
+      for (const mun of MUNICIPALITIES) {
+        if (lower.includes(mun.toLowerCase())) {
+          detectedMun = mun;
+          break;
+        }
+      }
+
+      // 2. Detect Name
+      let detectedName = '';
+      for (const l of lines) {
+        const lLower = l.toLowerCase();
+        if (l.length >= 3 && l.length <= 80 && !lLower.startsWith('address') && !lLower.startsWith('location') && !lLower.startsWith('category') && !lLower.startsWith('pampanga') && !lLower.startsWith('gps') && !lLower.startsWith('http') && !lLower.startsWith('latitude')) {
+          detectedName = l.replace(/^[^a-zA-Z0-9(]+|[^a-zA-Z0-9)]+$/g, '').trim();
+          if (lLower.includes('church') || lLower.includes('park') || lLower.includes('falls') || lLower.includes('museum') || lLower.includes('sanctuary') || lLower.includes('parish') || lLower.includes('eco') || lLower.includes('shrine') || lLower.includes('cathedral') || lLower.includes('bale')) {
+            break;
+          }
+        }
+      }
+
+      // 3. Detect Category / Type
+      let detectedType = '🏛️ Historic Parish Church';
+      if (lower.includes('nature') || lower.includes('park') || lower.includes('falls') || lower.includes('trail') || lower.includes('mountain') || lower.includes('river') || lower.includes('eco') || lower.includes('garden') || lower.includes('ecotourism') || lower.includes('farm')) {
+        detectedType = '🌲 Nature / Ecotourism';
+      } else if (lower.includes('museum') || lower.includes('gallery') || lower.includes('ancestral') || lower.includes('heritage house') || lower.includes('mansion') || lower.includes('artifacts')) {
+        detectedType = '🎨 Heritage Museum';
+      } else if (lower.includes('artisan') || lower.includes('workshop') || lower.includes('lantern') || lower.includes('pottery') || lower.includes('craft') || lower.includes('woodcarv')) {
+        detectedType = '🏺 Artisan Workshop';
+      } else if (lower.includes('monument') || lower.includes('landmark') || lower.includes('plaza') || lower.includes('bridge') || lower.includes('shrine') || lower.includes('arch')) {
+        detectedType = '📍 Cultural Landmark';
+      }
+
+      // 4. Detect Address
+      let detectedAddress = `${detectedMun}, Pampanga`;
+      const addrLine = lines.find(l => /barangay|brgy|street|st\.|highway|road|poblacion|avenue|sitio/i.test(l));
+      if (addrLine) {
+        detectedAddress = addrLine.replace(/^(?:address|location|exact address)\s*[:\-]\s*/i, '').trim();
+      }
+
+      // 5. GPS Coordinates
+      const coordMatch = rawText.match(/(\d{1,2}\.\d{4,8})\s*[,°\s]\s*(\d{2,3}\.\d{4,8})/);
+      const defaultCoord = MUNICIPALITY_COORDINATES[detectedMun] || { lat: 15.0300, lng: 120.6800 };
+      const detectedLat = coordMatch ? parseFloat(coordMatch[1]) : defaultCoord.lat;
+      const detectedLng = coordMatch ? parseFloat(coordMatch[2]) : defaultCoord.lng;
+
+      // 6. Descriptions
+      const descParagraphs = lines.filter(l => l.length > 30 && !/^(?:address|location|gps|category|type|barangay|brgy|lat|lng)/i.test(l) && !l.toLowerCase().includes('http') && l !== detectedName);
+      const detectedDesc = descParagraphs[0] || `Iconic ${detectedMun} tourist destination celebrating the vibrant heritage and natural wonders of Pampanga.`;
+      const detectedDetails = descParagraphs[1] || `Key architectural features, guided cultural highlights, and scenic visitor experiences located in ${detectedMun}.`;
+
+      // Populate Admin Attraction Form
+      setAdminAttractionForm(prev => ({
+        ...prev,
+        name: detectedName || prev.name || 'New Tourist Destination',
+        municipality: detectedMun,
+        type: detectedType,
+        address: detectedAddress,
+        lat: detectedLat,
+        lng: detectedLng,
+        description: detectedDesc,
+        details: detectedDetails,
+        image: attachedImage || prev.image || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=800&q=80',
+        images: attachedImage ? [attachedImage, ...(prev.images || [])] : prev.images
+      }));
+
+      setAiAttractionProgress(100);
+      alert(`🎉 AI successfully organized tourist destination details for "${detectedName || 'New Tourist Destination'}" in ${detectedMun}!\n\n• Category: ${detectedType}\n• Coordinates: ${detectedLat}, ${detectedLng}\n• Address: ${detectedAddress}\n\nReview the populated fields below and click "Save & Publish Destination".`);
+    } catch (err) {
+      console.error("AI Attraction Extractor Error:", err);
+      alert("⚠️ Encountered an error analyzing the document. Please verify the document or paste text directly.");
+    } finally {
+      setIsAiAttractionScanning(false);
+      setAiAttractionProgress(0);
+    }
+  };
+
   const handleSaveAdminListing = (e) => {
     if (e && e.preventDefault) e.preventDefault();
 
@@ -13620,6 +13771,126 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                       Editing Destination Mode
                     </span>
                   )}
+                </div>
+
+                {/* ── AI Tourist Attraction Document & Image Smart Organizer ── */}
+                <div className="p-4 bg-[#FAF8F5] border border-terracotta/25 rounded-2xl space-y-3.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E9E5DE] pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="w-7 h-7 rounded-lg bg-terracotta text-white flex items-center justify-center font-black text-sm shrink-0">
+                        ✨
+                      </span>
+                      <div>
+                        <h4 className="text-xs font-black text-charcoal m-0 flex items-center gap-1.5">
+                          AI Attraction Document &amp; Image Organizer (100% Free)
+                        </h4>
+                        <span className="text-[10px] text-charcoal-light block">
+                          Upload a photo, flyer, brochure, PDF, or paste text. AI will automatically extract the name, municipality, category, GPS coordinates, address, and descriptions!
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full shrink-0">
+                      ⚡ Free Client &amp; Cloud AI OCR
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {/* Option 1: File Upload (Image, PDF, Document) */}
+                    <div className="p-3 bg-white border border-[#E9E5DE] rounded-xl space-y-2">
+                      <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
+                        📄 Option 1: Upload Document / PDF / Image
+                      </label>
+                      <div className="relative border-2 border-dashed border-[#E9E5DE] hover:border-terracotta/50 rounded-xl p-3 text-center transition-colors">
+                        <input
+                          type="file"
+                          accept="image/*,.pdf,.txt"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setAiAttractionFileName(file.name);
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setAiAttractionFile(reader.result);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                        />
+                        <div className="space-y-1">
+                          <span className="text-xl block">📂</span>
+                          <span className="text-xs font-bold text-charcoal block truncate">
+                            {aiAttractionFileName || "Click or Drag & Drop Image, PDF, or Flyer"}
+                          </span>
+                          <span className="text-[9px] text-charcoal-light block">
+                            Supports JPG, PNG, WEBP, PDF, TXT
+                          </span>
+                        </div>
+                      </div>
+                      {aiAttractionFile && (
+                        <div className="flex items-center justify-between text-[10px] text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg">
+                          <span className="truncate font-bold">✓ Attached: {aiAttractionFileName}</span>
+                          <button
+                            type="button"
+                            onClick={() => { setAiAttractionFile(null); setAiAttractionFileName(''); }}
+                            className="text-rose-600 font-black hover:underline ml-2 cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Option 2: Paste Raw Document Text */}
+                    <div className="p-3 bg-white border border-[#E9E5DE] rounded-xl space-y-2">
+                      <label className="block text-[10px] font-black text-charcoal uppercase tracking-wider">
+                        📝 Option 2: Paste Information / Tourism Article
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={aiAttractionRawText}
+                        onChange={(e) => setAiAttractionRawText(e.target.value)}
+                        placeholder="Paste landmark details, Wikipedia excerpt, or tourism office bulletin here..."
+                        className="w-full p-2.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-xs text-charcoal focus:outline-none focus:ring-1 focus:ring-terracotta resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Scan Button & Progress Bar */}
+                  <div className="space-y-2 pt-1">
+                    <button
+                      type="button"
+                      disabled={isAiAttractionScanning || (!aiAttractionFile && !aiAttractionRawText.trim())}
+                      onClick={handleAiAnalyzeAttraction}
+                      className={`w-full py-2.5 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm ${isAiAttractionScanning
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : (!aiAttractionFile && !aiAttractionRawText.trim())
+                          ? 'bg-[#E9E5DE] text-charcoal-light cursor-not-allowed'
+                          : 'bg-terracotta hover:bg-terracotta-dark text-white active:scale-99'
+                        }`}
+                    >
+                      {isAiAttractionScanning ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>AI OCR &amp; Smart Entity Extractor in Progress... {aiAttractionProgress}%</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>✨</span>
+                          <span>Auto-Organize Attraction with AI (Free Scan)</span>
+                        </>
+                      )}
+                    </button>
+
+                    {isAiAttractionScanning && (
+                      <div className="w-full bg-[#E9E5DE] rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-terracotta h-1.5 rounded-full transition-all duration-300"
+                          style={{ width: `${aiAttractionProgress}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <form onSubmit={handleSaveAdminAttraction} className="space-y-4 text-xs">
