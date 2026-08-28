@@ -17067,45 +17067,122 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                 })()}
               </div>
 
-              {/* Automated Menu Ingredient Deconstructor Widget */}
+              {/* Interactive Ingredient Deconstructor Modal (Instant popup - no scrolling needed) */}
               {activeDish && (
-                <div className="p-4 bg-terracotta/5 border border-terracotta/20 rounded-xl space-y-3 animate-slide-up text-xs">
-                  <div className="flex justify-between items-start border-b border-[#E9E5DE] pb-2">
-                    <h4 className="text-xs font-black text-charcoal">
-                      Ingredient Deconstructor: <span className="text-terracotta">{activeDish.name}</span>
-                    </h4>
-                    <button onClick={() => setActiveDish(null)} className="text-xs font-bold text-charcoal-light hover:text-charcoal">
-                      Close
+                <div
+                  className="fixed inset-0 z-[95] flex items-center justify-center bg-charcoal/70 backdrop-blur-xs p-4 animate-fade-in"
+                  onClick={() => setActiveDish(null)}
+                >
+                  <div
+                    className="relative max-w-md w-full bg-white dark:bg-[#1E1B18] rounded-2xl shadow-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 animate-scale-up text-xs"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Modal Header */}
+                    <div className="flex justify-between items-start border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
+                      <div className="min-w-0 flex-1 pr-2">
+                        <span className="text-[10px] font-black text-terracotta uppercase tracking-wider block">
+                          🔬 Ingredient & Nutrition Deconstructor
+                        </span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <h3 className="text-sm font-black text-charcoal dark:text-white truncate">
+                            {activeDish.name}
+                          </h3>
+                          <span className="text-xs font-black text-bananaleaf shrink-0">
+                            ₱{activeDish.price}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActiveDish(null)}
+                        className="w-7 h-7 rounded-full bg-[#FAF8F5] dark:bg-[#2A2622] hover:bg-[#E9E5DE] text-charcoal dark:text-white flex items-center justify-center font-bold text-xs transition-colors cursor-pointer shrink-0"
+                        title="Close"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    {/* Dish Image & Ingredients */}
+                    <div className="flex items-start gap-3">
+                      {activeDish.image && (
+                        <img
+                          src={activeDish.image}
+                          alt={activeDish.name}
+                          className="w-16 h-16 rounded-xl object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0"
+                        />
+                      )}
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <strong className="text-[10px] font-black uppercase text-charcoal-light block">
+                          Raw Components:
+                        </strong>
+                        <p className="text-xs text-charcoal dark:text-gray-200 leading-relaxed m-0">
+                          {activeDish.ingredients || 'Traditional Kapampangan heritage seasoning, native herbs, garlic, onions.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Allergen & Health Indicator Banners */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div className="p-2.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 rounded-xl space-y-0.5">
+                        <span className="text-[9px] font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider block">
+                          Allergen Advisory
+                        </span>
+                        <p className="text-xs font-black text-rose-800 dark:text-rose-300 m-0">
+                          {activeDish.allergens || 'None'}
+                        </p>
+                      </div>
+
+                      <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 rounded-xl space-y-0.5">
+                        <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">
+                          Health Indicator
+                        </span>
+                        <p className="text-xs font-black text-emerald-800 dark:text-emerald-300 m-0">
+                          {activeDish.healthIndicators || 'Moderate Calorie Profile'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Nutritional Breakdown Matrix */}
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider block">
+                        Nutritional Matrix Breakdown
+                      </span>
+                      <div className="grid grid-cols-4 gap-2 text-center text-[10px]">
+                        <div className="bg-[#FAF8F5] dark:bg-[#161412] p-2 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
+                          <span className="block text-xs font-black text-charcoal dark:text-white">
+                            {activeDish.nutrition?.calories || 450}
+                          </span>
+                          <span className="text-[8px] text-charcoal-light">kcal</span>
+                        </div>
+                        <div className="bg-[#FAF8F5] dark:bg-[#161412] p-2 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
+                          <span className="block text-xs font-black text-blue-600 dark:text-blue-400">
+                            {activeDish.nutrition?.protein || 20}g
+                          </span>
+                          <span className="text-[8px] text-charcoal-light">Protein</span>
+                        </div>
+                        <div className="bg-[#FAF8F5] dark:bg-[#161412] p-2 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
+                          <span className="block text-xs font-black text-amber-600 dark:text-amber-400">
+                            {activeDish.nutrition?.carbs || 40}g
+                          </span>
+                          <span className="text-[8px] text-charcoal-light">Carbs</span>
+                        </div>
+                        <div className="bg-[#FAF8F5] dark:bg-[#161412] p-2 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
+                          <span className="block text-xs font-black text-rose-600 dark:text-rose-400">
+                            {activeDish.nutrition?.fat || 15}g
+                          </span>
+                          <span className="text-[8px] text-charcoal-light">Lipids</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Close Button */}
+                    <button
+                      type="button"
+                      onClick={() => setActiveDish(null)}
+                      className="w-full py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-98"
+                    >
+                      Close Deconstruction
                     </button>
-                  </div>
-
-                  <div className="space-y-2 text-charcoal">
-                    <p><b>Raw Components:</b> {activeDish.ingredients}</p>
-
-                    {/* Allergen Banners */}
-                    <div className="p-2.5 bg-white border border-[#E9E5DE] rounded-lg space-y-1 text-xs">
-                      <p className="text-xs font-bold text-terracotta">{activeDish.allergens}</p>
-                      <p className="text-[10px] text-charcoal-light font-semibold">{activeDish.healthIndicators}</p>
-                    </div>
-
-                    <div className="grid grid-cols-4 gap-2 text-center text-[10px] pt-1">
-                      <div className="bg-white p-2 rounded border border-[#E9E5DE] font-bold">
-                        <span className="block text-xs font-extrabold text-charcoal">{activeDish.nutrition.calories}</span>
-                        Calories
-                      </div>
-                      <div className="bg-white p-2 rounded border border-[#E9E5DE] font-bold">
-                        <span className="block text-xs font-extrabold text-charcoal">{activeDish.nutrition.protein}g</span>
-                        Protein
-                      </div>
-                      <div className="bg-white p-2 rounded border border-[#E9E5DE] font-bold">
-                        <span className="block text-xs font-extrabold text-charcoal">{activeDish.nutrition.carbs}g</span>
-                        Carbs
-                      </div>
-                      <div className="bg-white p-2 rounded border border-[#E9E5DE] font-bold">
-                        <span className="block text-xs font-extrabold text-charcoal">{activeDish.nutrition.fat}g</span>
-                        Lipids
-                      </div>
-                    </div>
                   </div>
                 </div>
               )}
