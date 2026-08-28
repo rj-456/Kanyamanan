@@ -11656,6 +11656,35 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       const primaryLat = primaryBranch?.lat && !isNaN(Number(primaryBranch.lat)) ? Number(primaryBranch.lat) : defaultCoord.lat;
       const primaryLng = primaryBranch?.lng && !isNaN(Number(primaryBranch.lng)) ? Number(primaryBranch.lng) : defaultCoord.lng;
 
+      const generateOccupancyCurve = (priceTier = '$$', dishes = []) => {
+        let base = [10, 20, 35, 65, 92, 85, 50, 40, 55, 78, 94, 75, 45, 20, 10];
+        const dishNames = (dishes || []).map(d => (d.name || '').toLowerCase()).join(' ');
+
+        if (dishNames.includes('halo') || dishNames.includes('coffee') || dishNames.includes('cake') || dishNames.includes('dessert') || dishNames.includes('palabok')) {
+          base[6] = Math.min(85, base[6] + 25);
+          base[7] = Math.min(85, base[7] + 30);
+          base[8] = Math.min(85, base[8] + 20);
+        }
+
+        if (dishNames.includes('sisig') || dishNames.includes('bbq') || dishNames.includes('beer') || dishNames.includes('pata') || dishNames.includes('grill')) {
+          base[11] = Math.min(95, base[11] + 15);
+          base[12] = Math.min(90, base[12] + 25);
+          base[13] = Math.min(75, base[13] + 30);
+          base[14] = Math.min(60, base[14] + 25);
+        }
+
+        if (priceTier === '$$$' || priceTier === '$$$$') {
+          base[0] = 5;
+          base[1] = 5;
+          base[2] = 15;
+          base[10] = 95;
+          base[11] = 95;
+          base[12] = 85;
+        }
+
+        return base.map(v => Math.max(5, Math.min(98, v + (Math.floor(Math.random() * 7) - 3))));
+      };
+
       const newRes = {
         id: 'res-' + Date.now(),
         name: nameToSave,
@@ -11674,7 +11703,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         branches: updatedBranches,
         username: usernameToSave,
         password: passwordToSave,
-        occupancy: [10, 20, 30, 60, 90, 80, 50, 40, 60, 80, 90, 70, 40, 20, 10],
+        occupancy: generateOccupancyCurve(adminForm.priceTier, formattedMenu),
         menu: formattedMenu.length > 0 ? formattedMenu : [
           {
             id: 'm-default',
