@@ -13782,15 +13782,15 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                       </span>
                       <div>
                         <h4 className="text-xs font-black text-charcoal m-0 flex items-center gap-1.5">
-                          AI Attraction Document &amp; Image Organizer (100% Free)
+                          AI Attraction Document &amp; Image Organizer
                         </h4>
                         <span className="text-[10px] text-charcoal-light block">
-                          Upload a photo, flyer, brochure, PDF, or paste text. AI will automatically extract the name, municipality, category, GPS coordinates, address, and descriptions!
+                          Upload a photo, flyer, brochure, PDF, or paste text. AI will automatically extract the name, municipality, category, GPS coordinates, address, and descriptions.
                         </span>
                       </div>
                     </div>
                     <span className="text-[9px] font-black text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full shrink-0">
-                      ⚡ Free Client &amp; Cloud AI OCR
+                      ⚡ AI OCR Engine
                     </span>
                   </div>
 
@@ -13877,7 +13877,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                       ) : (
                         <>
                           <span>✨</span>
-                          <span>Auto-Organize Attraction with AI (Free Scan)</span>
+                          <span>Auto-Organize Attraction with AI</span>
                         </>
                       )}
                     </button>
