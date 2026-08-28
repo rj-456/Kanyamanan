@@ -11079,6 +11079,67 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         return;
       }
 
+      // Curated authentic high-res food photo lookup for Kapampangan & Filipino dishes
+      const DISH_PHOTO_MAP = {
+        'sisig': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+        'pork sisig': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+        'crispy pata': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'pata': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'bbq': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
+        'pork bbq': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
+        'liempo': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'lechon kawali': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'lechon': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'bulalo': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
+        'sinigang': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
+        'salmon': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
+        'salmon belly': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
+        'salmon head': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
+        'miso': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
+        'hipon': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
+        'shrimp': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
+        'shrimp roll': 'https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=600&q=80',
+        'tempura': 'https://images.unsplash.com/photo-1581184953963-d15972933db1?auto=format&fit=crop&w=600&q=80',
+        'tahong': 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80',
+        'baked tahong': 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80',
+        'garlic': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
+        'butter garlic': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
+        'bulaklak': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'bale': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'pinakbet': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+        'chopsuey': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+        'leche flan': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80',
+        'flan': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80',
+        'pancit': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
+        'palabok': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
+        'canton': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
+        'guisado': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
+        'bihon': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
+        'chicken': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
+        'inasal': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
+        'wing': 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&w=600&q=80',
+        'legs': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
+        'tail': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
+        'kare': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'bringhe': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
+        'rice': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
+        'halo': 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80',
+        'hotdog': 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&w=600&q=80',
+        'coke': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80',
+        'royal': 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=600&q=80',
+        'sprite': 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=600&q=80',
+        'drink': 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80',
+        'water': 'https://images.unsplash.com/photo-1559839914-ba2a0f0d2c49?auto=format&fit=crop&w=600&q=80'
+      };
+
+      const getRealDishPhoto = (dishName) => {
+        const lower = dishName.toLowerCase();
+        for (const [key, url] of Object.entries(DISH_PHOTO_MAP)) {
+          if (lower.includes(key)) return url;
+        }
+        return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+      };
+
       // Authentic Food & Culinary Keywords Dictionary
       const FOOD_KEYWORDS = [
         'sisig', 'adobo', 'sinigang', 'kare', 'inasal', 'lechon', 'liempo', 'bagnet',
@@ -11089,7 +11150,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         'crispy', 'fried', 'grilled', 'roasted', 'smoked', 'steamed', 'baked', 'bbq', 'barbecue', 'platter',
         'rice', 'sinangag', 'curry', 'pasta', 'spaghetti', 'carbonara', 'pizza', 'burger', 'sandwich', 'wings',
         'salad', 'pinakbet', 'laing', 'chopsuey', 'chop suey', 'gulay', 'tofu', 'tokwa', 'chicharon',
-        'shake', 'juice', 'tea', 'iced tea', 'coffee', 'latte', 'cooler', 'beer', 'soda', 'coke', 'dessert', 'combo', 'set', 'meal', 'serving'
+        'shake', 'juice', 'tea', 'iced tea', 'coffee', 'latte', 'cooler', 'beer', 'soda', 'coke', 'royal', 'sprite', 'water', 'dessert', 'combo', 'set', 'meal', 'serving'
       ];
 
       // Non-food UI, System, Address, and Metadata blocklist
@@ -11109,11 +11170,23 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         .map(l => l.trim())
         .filter(l => l.length >= 2);
 
+      // Multi-column line splitter: If a line contains 2 items (e.g. ROYAL 1.5 98.00 S. MISO- SALMON HEAD 172.00)
+      const splitLines = [];
+      for (const line of rawLines) {
+        // Check if multiple prices or section keywords exist in one line
+        const parts = line.split(/(?<=\d{1,4}(?:\.\d{2})?)\s+(?=[A-Z])/);
+        if (parts.length > 1) {
+          parts.forEach(p => splitLines.push(p.trim()));
+        } else {
+          splitLines.push(line);
+        }
+      }
+
       // Smart multi-line pairing (combine dish on line i with price on line i+1 if standalone number)
       const lines = [];
-      for (let i = 0; i < rawLines.length; i++) {
-        const cur = rawLines[i];
-        const next = rawLines[i + 1];
+      for (let i = 0; i < splitLines.length; i++) {
+        const cur = splitLines[i];
+        const next = splitLines[i + 1];
         if (next && /^(?:₱|P|PHP|Php|php)?\s*\d{2,4}(?:\.\d{2})?$/.test(next) && !/\d{2,4}/.test(cur)) {
           lines.push(`${cur} ${next}`);
           i++; // skip next line as it is consumed
@@ -11135,9 +11208,11 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         const lettersCount = (line.match(/[a-zA-Z]/g) || []).length;
         if (lettersCount < 3) continue;
 
-        // 3. Extract Price Pattern (e.g. ₱250, P250, PHP 300, 250.00, 180, etc.)
+        // 3. Extract Price Pattern at end of line (e.g. ₱250, P250, PHP 300, 250.00, 180, etc.)
         let price = '';
-        const priceMatch = line.match(/(?:₱|P|PHP|Php|php)?\s*(\d{2,4}(?:\.\d{2})?)/i);
+        const endPriceMatch = line.match(/(?:₱|P|PHP|Php|php)?\s*(\d{1,4}(?:\.\d{2})?)\s*$/i);
+        const generalPriceMatch = line.match(/(?:₱|P|PHP|Php|php)\s*(\d{1,4}(?:\.\d{2})?)/i);
+        const priceMatch = endPriceMatch || generalPriceMatch;
         if (priceMatch) {
           price = priceMatch[1];
         }
@@ -11151,12 +11226,26 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           continue;
         }
 
-        // 5. Clean Dish Name (remove price, leader dots, dashes, numbering)
+        // 5. Clean Dish Name & Expand Abbreviations
         let dishName = line
-          .replace(/(?:₱|P|PHP|Php|php)\s*\d{2,4}(?:\.\d{2})?/gi, '')
-          .replace(/\b\d{2,4}(?:\.\d{2})?\b/g, '')
-          .replace(/^[0-9]+[.)\-]\s*/, '') // Remove leading numbers like "1.", "2)"
-          .replace(/[._\-–—]{2,}/g, ' ') // Remove leader dots "...." or "----"
+          .replace(new RegExp('(?:₱|P|PHP|Php|php)?\\s*\\d{1,4}(?:\\.\\d{2})?\\s*$', 'gi'), '')
+          .replace(new RegExp('^[Ff]\\d+[-–—\\s.]*', 'g'), '') // Remove F1, F2 prefixes
+          .replace(new RegExp('^[0-9]+[.)\\-]\\s*', 'g'), '') // Remove leading numbers like "1.", "2)"
+          .replace(new RegExp('^IN CAN\\s+', 'i'), '')
+          .replace(new RegExp('\\s+IN CAN\\s*$', 'i'), ' (In Can)')
+          .replace(new RegExp('POLORDER|PCLORDER|PC\\/ORDER|PC ORDER', 'gi'), 'pcs')
+          .replace(new RegExp('\\bTOUCH\\b', 'gi'), '')
+          .replace(new RegExp('S\\.\\s*MISO[\\s:-]*', 'gi'), 'Sinigang sa Miso ')
+          .replace(new RegExp('B\\.\\s*TAHONG', 'gi'), 'Baked Tahong')
+          .replace(new RegExp('B\\.\\s*GARLIC[\\s:-]*', 'gi'), 'Butter Garlic ')
+          .replace(new RegExp('C\\.\\s*TAIL', 'gi'), 'Chicken Tail')
+          .replace(new RegExp('C\\.\\s*WING', 'gi'), 'Chicken Wing')
+          .replace(new RegExp('C\\.\\s*LEGS', 'gi'), 'Chicken Legs')
+          .replace(new RegExp('C\\.\\s*BULAKLAK[\\s:-]*', 'gi'), 'Chicharon Bulaklak ')
+          .replace(new RegExp('C\\.\\s*BALE[\\s:-]*', 'gi'), 'Chicharon Bale ')
+          .replace(new RegExp('[–—-]\\s*(\\d{2,4})\\s*g\\.?', 'gi'), ' ($1g)')
+          .replace(new RegExp('[–—-]\\s*g\\.?', 'gi'), '')
+          .replace(new RegExp('[._–—]{2,}', 'g'), ' ')
           .trim();
 
         // Extract sub-ingredients if line has a separator like '-' or ':'
@@ -11172,8 +11261,11 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         // Clean punctuation from borders
         dishName = dishName.replace(/^[^a-zA-Z0-9(]+|[^a-zA-Z0-9)]+$/g, '').trim();
 
+        // Format casing
+        dishName = dishName.replace(/\b\w+/g, txt => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase());
+
         // Must have legitimate name length
-        if (dishName.length < 3 || dishName.length > 70) continue;
+        if (dishName.length < 2 || dishName.length > 70) continue;
 
         // 6. Infer Ingredients, Allergens, and Calories based on authentic dish name words
         const lowerCombined = (dishName + ' ' + extractedIngredients).toLowerCase();
@@ -11181,7 +11273,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         let allergens = 'None';
         let calories = '350';
 
-        if (lowerCombined.includes('sisig') || lowerCombined.includes('pork') || lowerCombined.includes('liempo') || lowerCombined.includes('lechon') || lowerCombined.includes('bagnet') || lowerCombined.includes('baboy')) {
+        if (lowerCombined.includes('sisig') || lowerCombined.includes('pork') || lowerCombined.includes('liempo') || lowerCombined.includes('lechon') || lowerCombined.includes('bagnet') || lowerCombined.includes('baboy') || lowerCombined.includes('bulaklak') || lowerCombined.includes('bale')) {
           if (!extractedIngredients) ingredients = 'Grilled pork mask, calamansi, chili, onions, authentic spices';
           allergens = 'Contains Pork';
           calories = '650';
@@ -11189,7 +11281,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           if (!extractedIngredients) ingredients = 'Beef tripe/meat, rich peanut sauce, string beans, eggplant, bagoong';
           allergens = 'Contains Peanuts, Shellfish/Shrimp Paste (Bagoong)';
           calories = '720';
-        } else if (lowerCombined.includes('chicken') || lowerCombined.includes('inasal') || lowerCombined.includes('manok') || lowerCombined.includes('wings')) {
+        } else if (lowerCombined.includes('chicken') || lowerCombined.includes('inasal') || lowerCombined.includes('manok') || lowerCombined.includes('wing') || lowerCombined.includes('leg') || lowerCombined.includes('tail') || lowerCombined.includes('chix')) {
           if (!extractedIngredients) ingredients = 'Fresh chicken, lemongrass, garlic, annatto oil';
           allergens = 'Contains Poultry';
           calories = '420';
@@ -11197,7 +11289,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           if (!extractedIngredients) ingredients = 'Tender beef, marrow, native broth, local spices';
           allergens = 'Contains Beef';
           calories = '680';
-        } else if (lowerCombined.includes('fish') || lowerCombined.includes('shrimp') || lowerCombined.includes('prawn') || lowerCombined.includes('crab') || lowerCombined.includes('bangus') || lowerCombined.includes('tilapia') || lowerCombined.includes('seafood') || lowerCombined.includes('squid') || lowerCombined.includes('calamares')) {
+        } else if (lowerCombined.includes('fish') || lowerCombined.includes('shrimp') || lowerCombined.includes('prawn') || lowerCombined.includes('crab') || lowerCombined.includes('bangus') || lowerCombined.includes('tilapia') || lowerCombined.includes('seafood') || lowerCombined.includes('squid') || lowerCombined.includes('calamares') || lowerCombined.includes('tahong') || lowerCombined.includes('salmon') || lowerCombined.includes('hipon') || lowerCombined.includes('tempura')) {
           if (!extractedIngredients) ingredients = 'Fresh seafood, citrus, garlic, ginger, local vegetables';
           allergens = 'Contains Seafood / Shellfish';
           calories = '360';
@@ -11209,29 +11301,33 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           if (!extractedIngredients) ingredients = 'Carabao milk, ube, sweetened beans, shaved ice, leche flan';
           allergens = 'Contains Dairy';
           calories = '380';
-        } else if (lowerCombined.includes('pancit') || lowerCombined.includes('noodle') || lowerCombined.includes('pasta') || lowerCombined.includes('lumpia') || lowerCombined.includes('palabok')) {
+        } else if (lowerCombined.includes('pancit') || lowerCombined.includes('noodle') || lowerCombined.includes('pasta') || lowerCombined.includes('lumpia') || lowerCombined.includes('palabok') || lowerCombined.includes('canton') || lowerCombined.includes('bihon') || lowerCombined.includes('guisado')) {
           if (!extractedIngredients) ingredients = 'Noodles, mixed vegetables, native seasoning, garlic';
           allergens = 'Contains Gluten / Wheat';
           calories = '410';
-        } else if (lowerCombined.includes('gulay') || lowerCombined.includes('pinakbet') || lowerCombined.includes('salad') || lowerCombined.includes('vegetable') || lowerCombined.includes('laing')) {
+        } else if (lowerCombined.includes('gulay') || lowerCombined.includes('pinakbet') || lowerCombined.includes('salad') || lowerCombined.includes('vegetable') || lowerCombined.includes('laing') || lowerCombined.includes('chopsuey')) {
           if (!extractedIngredients) ingredients = 'Fresh local vegetables, squash, okra, string beans, tomatoes';
           allergens = 'Vegetarian / Plant-Based';
           calories = '220';
+        } else if (lowerCombined.includes('coke') || lowerCombined.includes('royal') || lowerCombined.includes('sprite') || lowerCombined.includes('water') || lowerCombined.includes('drink')) {
+          ingredients = 'Refreshing chilled beverage';
+          allergens = 'None';
+          calories = '140';
         }
 
         parsedDishes.push({
-          name: dishName.charAt(0).toUpperCase() + dishName.slice(1),
-          price: price || '180',
+          name: dishName,
+          price: price || '150',
           ingredients: ingredients,
           allergens: allergens,
           calories: calories,
-          image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80'
+          image: getRealDishPhoto(dishName)
         });
       }
 
       if (parsedDishes.length > 0) {
         setAdminDishes(parsedDishes);
-        alert(`🎉 AI OCR successfully detected and organized ${parsedDishes.length} menu items from your image/text into the dish catalog!`);
+        alert(`🎉 AI OCR successfully detected and organized ${parsedDishes.length} menu items from your image/text into the dish catalog with matching authentic photos!`);
       } else {
         alert("⚠️ No food menu items or priced dishes were detected in the uploaded image.\n\nPlease upload a clear photo of a restaurant menu board, printed price list, or flyer (or paste the menu items in Option 2).");
       }
