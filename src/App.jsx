@@ -37,7 +37,8 @@ import {
   Moon,
   Users,
   UserPlus,
-  Loader2
+  Loader2,
+  Download
 } from 'lucide-react';
 import {
   PRESEEDED_RESTAURANTS,
