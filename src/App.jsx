@@ -10989,34 +10989,62 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  const unusedStartAdminEdit = (deprecated) => {
-    setAdminEditingId(res.id);
-    setAdminForm({
-      name: res.name,
-      municipality: res.municipality,
-      operatingHours: res.operatingHours,
-      priceTier: res.priceTier,
-      address: res.address || '',
-      image: res.image || '',
-      images: res.images || [],
-      description: res.description
+
+  const sliceImageIntoColumns = (imageDataUrl) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        try {
+          // 1. Full Image Enhanced
+          const fullCanvas = document.createElement('canvas');
+          const fullCtx = fullCanvas.getContext('2d');
+          let scale = 1;
+          if (img.width < 1600) scale = Math.min(3, 1800 / img.width);
+          else if (img.width > 3200) scale = 2400 / img.width;
+          
+          fullCanvas.width = Math.round(img.width * scale);
+          fullCanvas.height = Math.round(img.height * scale);
+          fullCtx.imageSmoothingEnabled = true;
+          fullCtx.imageSmoothingQuality = 'high';
+          fullCtx.drawImage(img, 0, 0, fullCanvas.width, fullCanvas.height);
+
+          // 2. Left Column Slice (0% to 53% width)
+          const leftCanvas = document.createElement('canvas');
+          const leftCtx = leftCanvas.getContext('2d');
+          const colWidth = Math.round(img.width * 0.53);
+          leftCanvas.width = Math.round(colWidth * scale);
+          leftCanvas.height = Math.round(img.height * scale);
+          leftCtx.imageSmoothingEnabled = true;
+          leftCtx.imageSmoothingQuality = 'high';
+          leftCtx.drawImage(img, 0, 0, colWidth, img.height, 0, 0, leftCanvas.width, leftCanvas.height);
+
+          // 3. Right Column Slice (47% to 100% width)
+          const rightCanvas = document.createElement('canvas');
+          const rightCtx = rightCanvas.getContext('2d');
+          const rightStart = Math.round(img.width * 0.47);
+          const rightWidth = img.width - rightStart;
+          rightCanvas.width = Math.round(rightWidth * scale);
+          rightCanvas.height = Math.round(img.height * scale);
+          rightCtx.imageSmoothingEnabled = true;
+          rightCtx.imageSmoothingQuality = 'high';
+          rightCtx.drawImage(img, rightStart, 0, rightWidth, img.height, 0, 0, rightCanvas.width, rightCanvas.height);
+
+          resolve({
+            full: fullCanvas.toDataURL('image/png'),
+            left: leftCanvas.toDataURL('image/png'),
+            right: rightCanvas.toDataURL('image/png'),
+            isWideGrid: img.width >= 400
+          });
+        } catch (e) {
+          resolve({ full: imageDataUrl, isWideGrid: false });
+        }
+      };
+      img.onerror = () => resolve({ full: imageDataUrl, isWideGrid: false });
+      img.src = imageDataUrl;
     });
-    setAdminDishes(
-      res.menu.length > 0
-        ? res.menu.map(m => ({
-          name: m.name || '',
-          price: m.price || '',
-          ingredients: m.ingredients || '',
-          allergens: m.allergens || '',
-          calories: m.nutrition?.calories || '',
-          image: m.image || ''
-        }))
-        : [{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]
-    );
   };
 
-
-  // High-Contrast Image Preprocessor for Difficult / Low-Contrast Menu Photos
   const preprocessMenuImage = (imageDataUrl) => {
     return new Promise((resolve) => {
       const img = new Image();
@@ -11026,13 +11054,9 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
 
-          // Target ideal resolution for OCR character clarity
           let scale = 1;
-          if (img.width < 1600) {
-            scale = Math.min(3, 1800 / img.width);
-          } else if (img.width > 3200) {
-            scale = 2400 / img.width;
-          }
+          if (img.width < 1600) scale = Math.min(3, 1800 / img.width);
+          else if (img.width > 3200) scale = 2400 / img.width;
           canvas.width = Math.round(img.width * scale);
           canvas.height = Math.round(img.height * scale);
 
@@ -11043,7 +11067,6 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const d = imgData.data;
 
-          // Adaptive local contrast boost without harsh clipping
           for (let i = 0; i < d.length; i += 4) {
             const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
             let val = gray < 128 ? gray * 0.85 : gray * 1.15;
@@ -11066,22 +11089,20 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     });
   };
 
-  // Free Cloud AI OCR Engine (OCR.space Free API with Dual Engine Support)
   const runCloudAiOcr = async (imageDataUrl) => {
     try {
       const formData = new FormData();
       formData.append('base64Image', imageDataUrl);
       formData.append('language', 'eng');
-      formData.append('isOverlayRequired', 'false');
       formData.append('isTable', 'true');
       formData.append('scale', 'true');
       formData.append('detectOrientation', 'true');
-      formData.append('OCREngine', '2'); // Engine 2 is optimized for menus, receipts & price lists
+      formData.append('OCREngine', '2');
 
       const response = await fetch('https://api.ocr.space/parse/image', {
         method: 'POST',
         headers: {
-          'apikey': 'K88574744288957' // Free Public OCR API Key
+          'apikey': 'K88574744288957'
         },
         body: formData
       });
@@ -11090,11 +11111,11 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         const data = await response.json();
         if (data && data.ParsedResults && data.ParsedResults.length > 0 && data.ParsedResults[0].ParsedText) {
           const parsed = data.ParsedResults[0].ParsedText.trim();
-          if (parsed.length > 10) return parsed;
+          if (parsed.length > 5) return parsed;
         }
       }
 
-      // Fallback to OCR Engine 1
+      // Fallback Engine 1
       const formDataE1 = new FormData();
       formDataE1.append('base64Image', imageDataUrl);
       formDataE1.append('language', 'eng');
@@ -11123,7 +11144,6 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     }
   };
 
-  // Free AI Menu OCR & Intelligent Text Organizer Engine (Powered by Dual Cloud AI OCR + Tesseract.js)
   const handleAiAnalyzeMenu = async () => {
     if (!aiRawMenuText.trim() && !aiMenuImage) {
       alert("Please upload a menu image or paste raw menu text to let AI scan and organize it for you!");
@@ -11134,82 +11154,42 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     setAiOcrProgress(10);
 
     try {
-      let rawText = aiRawMenuText.trim();
-
-      // If an image was uploaded and no manual text, run Dual AI OCR
-      if (aiMenuImage && !rawText) {
-        setAiOcrProgress(30);
-        // 1. Try High-Precision Cloud AI OCR
-        const cloudText = await runCloudAiOcr(aiMenuImage);
-        if (cloudText && cloudText.trim().length > 5) {
-          rawText = cloudText.trim();
-          setAiOcrProgress(90);
-        } else {
-          // 2. Fallback to Local Tesseract OCR with Canvas Preprocessing
-          setAiOcrProgress(40);
-          const enhancedImage = await preprocessMenuImage(aiMenuImage);
-          const ocrResult = await Tesseract.recognize(enhancedImage, 'eng', {
-            logger: (m) => {
-              if (m.status === 'recognizing text' && typeof m.progress === 'number') {
-                setAiOcrProgress(40 + Math.round(m.progress * 50));
-              }
-            }
-          });
-          rawText = (ocrResult?.data?.text || '').trim();
-        }
-      }
-
-      if (!rawText || rawText.length < 3) {
-        alert("⚠️ No readable text was detected in the uploaded image.\n\nPlease upload a clear, focused photo of a menu board, printed price list, or flyer (or paste menu text in Option 2).");
-        return;
-      }
-
-      // Curated authentic high-res food photo lookup for Kapampangan & Filipino dishes
       const DISH_PHOTO_MAP = {
         'sisig': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
         'pork sisig': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+        'kawali': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'crispy pata': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'pata': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'bbq': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
-        'pork bbq': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
         'liempo': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'lechon kawali': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'lechon': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'bulalo': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
         'sinigang': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
         'salmon': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
-        'salmon belly': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
-        'salmon head': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
-        'miso': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
         'hipon': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
         'shrimp': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
-        'shrimp roll': 'https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=600&q=80',
-        'tempura': 'https://images.unsplash.com/photo-1581184953963-d15972933db1?auto=format&fit=crop&w=600&q=80',
         'tahong': 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80',
-        'baked tahong': 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80',
-        'garlic': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
-        'butter garlic': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
         'bulaklak': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'bale': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'chicharon': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'tidtad': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
+        'longanisa': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
+        'asado': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'kilayin': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'pinakbet': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
-        'chopsuey': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
         'leche flan': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80',
         'flan': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80',
         'pancit': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
         'palabok': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
-        'canton': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
+        'luglug': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
         'guisado': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
         'bihon': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
+        'mami': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
         'chicken': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
         'inasal': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
-        'wing': 'https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&w=600&q=80',
-        'legs': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
-        'tail': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
         'kare': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'bringhe': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
         'rice': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
         'halo': 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80',
-        'hotdog': 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&w=600&q=80',
         'coke': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80',
         'royal': 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=600&q=80',
         'sprite': 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=600&q=80',
@@ -11225,296 +11205,248 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
       };
 
-      // Authentic Food & Culinary Keywords Dictionary
-      const FOOD_KEYWORDS = [
-        'sisig', 'adobo', 'sinigang', 'kare', 'inasal', 'lechon', 'liempo', 'bagnet',
-        'bulalo', 'kaldereta', 'menudo', 'afritada', 'mechado', 'bistek', 'tapa', 'tocino', 'longganisa',
-        'bringhe', 'tamales', 'tibok', 'halo', 'ube', 'flan', 'turon', 'bilao', 'camaro', 'betute', 'tid-tad',
-        'pancit', 'palabok', 'lugaw', 'arroz', 'goto', 'mami', 'lomi', 'batchoy', 'soup', 'stew',
-        'chicken', 'pork', 'beef', 'fish', 'bangus', 'tilapia', 'salmon', 'tuna', 'shrimp', 'prawn', 'crab', 'squid', 'calamares',
-        'crispy', 'fried', 'grilled', 'roasted', 'smoked', 'steamed', 'baked', 'bbq', 'barbecue', 'platter',
-        'rice', 'sinangag', 'curry', 'pasta', 'spaghetti', 'carbonara', 'pizza', 'burger', 'sandwich', 'wings',
-        'salad', 'pinakbet', 'laing', 'chopsuey', 'chop suey', 'gulay', 'tofu', 'tokwa', 'chicharon',
-        'shake', 'juice', 'tea', 'iced tea', 'coffee', 'latte', 'cooler', 'beer', 'soda', 'coke', 'royal', 'sprite', 'water', 'dessert', 'combo', 'set', 'meal', 'serving',
-        'dinuguan', 'bopis', 'bagoong', 'miso', 'tahong', 'inasal', 'lumpiang', 'lumpia', 'silog', 'tapsilog', 'tocilog', 'bangsilog', 'chicharon'
-      ];
+      const parseMenuTextStream = (text) => {
+        if (!text || typeof text !== 'string') return [];
 
-      // Non-food UI, System, Address, and Metadata blocklist
-      const NON_FOOD_BLOCKLIST = [
-        'portal', 'admin', 'kanyamanan', 'system', 'database', 'dashboard', 'settings', 'username', 'password',
-        'address', 'pampanga', 'highway', 'street', 'barangay', 'san fernando', 'angeles', 'city', 'municipality',
-        'contact', 'phone', 'telephone', 'hotline', 'tel', 'email', 'facebook', 'instagram', 'wifi', 'welcome',
-        'thank you', 'receipt', 'invoice', 'table', 'cashier', 'subtotal', 'vat', 'tax', 'total', 'change',
-        'terms', 'conditions', 'copyright', 'rights reserved', 'version', 'app', 'download', 'login', 'logout',
-        'register', 'sign in', 'sign up', 'button', 'photo', 'upload', 'choose file', 'image', 'preview', 'logo',
-        'operating hours', 'open daily', 'mon-sun', 'monday', 'sunday', 'cash only', 'page', 'menu board'
-      ];
+        const NON_FOOD_BLOCKLIST = [
+          'portal', 'admin', 'kanyamanan', 'system', 'database', 'dashboard', 'settings', 'username', 'password',
+          'address', 'pampanga', 'highway', 'street', 'barangay', 'san fernando', 'angeles', 'city', 'municipality',
+          'contact', 'phone', 'telephone', 'hotline', 'tel', 'email', 'facebook', 'instagram', 'wifi', 'welcome',
+          'thank you', 'receipt', 'invoice', 'table', 'cashier', 'subtotal', 'vat', 'tax', 'total', 'change',
+          'terms', 'conditions', 'copyright', 'rights reserved', 'version', 'app', 'download', 'login', 'logout',
+          'register', 'sign in', 'sign up', 'button', 'photo', 'upload', 'choose file', 'image', 'preview', 'logo',
+          'operating hours', 'open daily', 'mon-sun', 'monday', 'sunday', 'cash only', 'page', 'menu board'
+        ];
 
-      const SECTION_HEADERS = [
-        'appetizers', 'main course', 'specials', 'specialties', 'desserts', 'beverages', 'drinks', 'side orders',
-        'soup', 'noodles', 'family meals', 'value meals', 'chef special', 'house specialties', 'hot drinks',
-        'cold drinks', 'breakfast', 'lunch', 'dinner', 'merienda', 'bilao orders', 'solo meals', 'group meals'
-      ];
+        const SECTION_HEADERS = [
+          'pork', 'noodles', 'beef', 'chicken', 'seafood', 'appetizers', 'main course', 'specials',
+          'specialties', 'desserts', 'beverages', 'drinks', 'side orders', 'soup', 'family meals',
+          'value meals', 'chef special', 'house specialties', 'hot drinks', 'cold drinks', 'breakfast',
+          'lunch', 'dinner', 'merienda', 'bilao orders', 'solo meals', 'group meals'
+        ];
 
-      // Step 1: Pre-process and normalize raw text lines
-      const cleaned = rawText
-        .replace(/\r\n/g, '\n')
-        .replace(/\r/g, '\n')
-        .replace(/[\u2013\u2014]/g, '-')
-        .replace(/[\u2022\u25CF\u25AA]/g, ' ')
-        .replace(/[\t]+/g, ' ');
+        const cleaned = text
+          .replace(/\r\n/g, '\n')
+          .replace(/\r/g, '\n')
+          .replace(/[\u2013\u2014]/g, '-')
+          .replace(/[\u2022\u25CF\u25AA]/g, ' ')
+          .replace(/[\t]+/g, ' ');
 
-      const initialLines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
+        const initialLines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
 
-      // Multi-column line unroller
-      const unrolledLines = [];
-      for (const line of initialLines) {
-        const multiPriceSplit = line.split(/(?<=\b(?:₱|P|Php|PHP)?\s*\d{2,4}(?:\.\d{2})?(?:\s*(?:php|pesos|\/order|\/serving|\/pc|\/bilao))?)\s+(?=[A-Z])/i);
-        if (multiPriceSplit.length > 1) {
-          multiPriceSplit.forEach(p => { if (p.trim()) unrolledLines.push(p.trim()); });
-        } else {
-          unrolledLines.push(line);
-        }
-      }
-
-      // Universal Price Extractor
-      const extractPriceFromLine = (text) => {
-        // 1. Explicit peso currency format
-        const pesoMatch = text.match(/(?:₱|P|Php|PHP|PhP|Ph)\s*(\d{1,4}(?:\.\d{2})?)/i);
-        if (pesoMatch) return { price: Math.round(parseFloat(pesoMatch[1])), cleanText: text.replace(pesoMatch[0], '').trim() };
-
-        // 2. Trailing price format
-        const trailMatch = text.match(/(?:[._\-\s|]|:)+\s*(?:₱|P|Php|PHP)?\s*(\d{2,4}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving|\/pc|\/bilao)?\s*$/i);
-        if (trailMatch) {
-          const p = Math.round(parseFloat(trailMatch[1]));
-          if (p >= 15 && p <= 9999) {
-            return { price: p, cleanText: text.slice(0, trailMatch.index).trim() };
+        const extractPrice = (t) => {
+          // 1. Matches: "₱ 600", "₱ 1,050", "from ₱ 250", "P130", "PHP 500", "500.00"
+          const pMatch = t.match(/(?:from\s+|starts?\s+at\s+)?(?:₱|P|Php|PHP|PhP|Ph)\s*(\d{1,2}(?:,\d{3})+|\d{1,4}(?:\.\d{2})?)/i);
+          if (pMatch) {
+            const num = parseFloat(pMatch[1].replace(/,/g, ''));
+            return { price: Math.round(num), cleanText: t.replace(pMatch[0], '').trim() };
           }
-        }
 
-        // 3. Leading price format
-        const leadMatch = text.match(/^\s*(?:₱|P|Php|PHP)?\s*(\d{2,4}(?:\.\d{2})?)\s*(?:[.\-\s|]|:)+\s*/i);
-        if (leadMatch) {
-          const p = Math.round(parseFloat(leadMatch[1]));
-          if (p >= 15 && p <= 9999) {
-            return { price: p, cleanText: text.slice(leadMatch[0].length).trim() };
+          // 2. Trailing price
+          const trailMatch = t.match(/(?:[._\-\s|]|:)+\s*(?:₱|P|Php|PHP)?\s*(\d{1,2}(?:,\d{3})+|\d{2,4}(?:\.\d{2})?)\s*(?:php|pesos)?\s*$/i);
+          if (trailMatch) {
+            const num = parseFloat(trailMatch[1].replace(/,/g, ''));
+            if (num >= 15 && num <= 99999) {
+              return { price: Math.round(num), cleanText: t.slice(0, trailMatch.index).trim() };
+            }
           }
-        }
 
-        // 4. Standalone realistic food price number
-        const anyNumMatch = text.match(/\b(\d{2,4}(?:\.\d{2})?)\b/);
-        if (anyNumMatch) {
-          const p = Math.round(parseFloat(anyNumMatch[1]));
-          if (p >= 20 && p <= 3500) {
-            return { price: p, cleanText: text.replace(anyNumMatch[0], '').trim() };
+          // 3. Standalone number
+          const numMatch = t.match(/^\s*(?:₱|P|Php|PHP)?\s*(\d{1,2}(?:,\d{3})+|\d{2,4}(?:\.\d{2})?)\s*$/i);
+          if (numMatch) {
+            const num = parseFloat(numMatch[1].replace(/,/g, ''));
+            return { price: Math.round(num), cleanText: '' };
           }
-        }
 
-        return null;
-      };
+          return null;
+        };
 
-      const isStandalonePriceLine = (line) => {
-        return /^(?:(?:₱|P|Php|PHP|PhP)\s*)?\d{1,4}(?:\.\d{2})?\s*(?:php|pesos|\/order|\/serving|\/pc|\/bilao)?$/i.test(line.trim());
-      };
+        const isStandalonePriceLine = (l) => {
+          return /^(?:from\s+|starts?\s+at\s+)?(?:(?:₱|P|Php|PHP|PhP)\s*)?\d{1,2}(?:,\d{3})*(?:\.\d{2})?\s*(?:php|pesos)?$/i.test(l.trim());
+        };
 
-      const isSectionHeader = (line) => {
-        const l = line.toLowerCase().replace(/[^a-z\s]/g, '').trim();
-        return SECTION_HEADERS.some(h => l === h || l.startsWith(h) || l.endsWith(h));
-      };
+        const isSectionHeader = (l) => {
+          const s = l.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+          return SECTION_HEADERS.some(h => s === h);
+        };
 
-      const isDescriptionSentence = (line) => {
-        const l = line.toLowerCase();
-        return (
-          l.includes(',') ||
-          l.includes('with ') ||
-          l.includes('served ') ||
-          l.includes('topped ') ||
-          l.includes('marinated ') ||
-          l.includes('cooked ') ||
-          l.includes('simmered ') ||
-          l.includes('sautéed ') ||
-          l.includes('sauteed ') ||
-          l.includes('in rich ') ||
-          l.includes('in savory ') ||
-          l.includes('good for')
-        );
-      };
+        const isIgnoredTag = (l) => {
+          const s = l.toLowerCase().trim();
+          return s === 'popular' || s === 'best seller' || s === 'must try' || s === 'sold out';
+        };
 
-      const items = [];
-      let pendingName = '';
-      let pendingDesc = '';
+        const isPortionLine = (l) => {
+          const s = l.toLowerCase().trim();
+          return /^(?:single order|small bilao|medium bilao|large bilao|bilao|solo|sharing|regular|special|order)$/i.test(s);
+        };
 
-      for (let i = 0; i < unrolledLines.length; i++) {
-        const line = unrolledLines[i];
-        const lowerLine = line.toLowerCase();
+        const items = [];
+        let currentItem = null;
 
-        if (NON_FOOD_BLOCKLIST.some(word => lowerLine.includes(word))) continue;
-        if (isSectionHeader(line)) continue;
+        for (let i = 0; i < initialLines.length; i++) {
+          const line = initialLines[i];
+          const lowerLine = line.toLowerCase();
 
-        const letterCount = (line.match(/[a-zA-Z]/g) || []).length;
-        const priceExtracted = extractPriceFromLine(line);
+          if (NON_FOOD_BLOCKLIST.some(word => lowerLine.includes(word))) continue;
+          if (isSectionHeader(line)) continue;
+          if (isIgnoredTag(line)) continue;
 
-        // If line has NO price AND matches description sentence AND we have a recent item -> attach as description!
-        if (!priceExtracted && isDescriptionSentence(line)) {
-          if (items.length > 0 && !pendingName) {
-            items[items.length - 1].desc = line.trim();
-            continue;
-          } else if (pendingName) {
-            pendingDesc = line.trim();
+          // Portion tag
+          if (isPortionLine(line)) {
+            if (currentItem) {
+              currentItem.portion = line.trim();
+            }
             continue;
           }
-        }
 
-        // Standalone Price Line matching previous pending dish name
-        if (isStandalonePriceLine(line)) {
-          const pMatch = line.match(/\d{1,4}(?:\.\d{2})?/);
-          const priceVal = pMatch ? Math.round(parseFloat(pMatch[0])) : 150;
-          if (pendingName) {
-            items.push({
-              rawName: pendingName,
-              price: priceVal,
-              desc: pendingDesc
-            });
-            pendingName = '';
-            pendingDesc = '';
+          // Price line
+          const priceExtracted = extractPrice(line);
+
+          if (isStandalonePriceLine(line) || (priceExtracted && !priceExtracted.cleanText)) {
+            const priceVal = priceExtracted ? priceExtracted.price : Math.round(parseFloat(line.replace(/[^0-9.]/g, '')));
+            if (currentItem) {
+              currentItem.price = priceVal;
+            }
             continue;
           }
-        }
 
-        if (letterCount < 2) continue;
-
-        if (priceExtracted) {
-          if (pendingName) {
-            items.push({ rawName: pendingName, price: 180, desc: pendingDesc });
-            pendingName = '';
-            pendingDesc = '';
+          // Line with price inline
+          if (priceExtracted && priceExtracted.cleanText.length >= 2) {
+            if (currentItem) items.push(currentItem);
+            currentItem = {
+              name: priceExtracted.cleanText,
+              price: priceExtracted.price,
+              desc: '',
+              portion: ''
+            };
+            continue;
           }
 
-          let cleanName = priceExtracted.cleanText
+          // Description line
+          const isDesc = (
+            lowerLine.startsWith('for reference') ||
+            lowerLine.startsWith('for ref') ||
+            lowerLine.includes('served with') ||
+            lowerLine.includes('crispy') ||
+            lowerLine.includes('savory') ||
+            lowerLine.includes('tender') ||
+            lowerLine.includes('cooked with') ||
+            lowerLine.includes('noodle dish') ||
+            lowerLine.includes('with vinegar') ||
+            lowerLine.includes('simmered') ||
+            line.length > 25
+          );
+
+          if (currentItem && isDesc) {
+            const cleanDesc = line.replace(/^For reference(?: only)?:?\s*/i, '').trim();
+            if (cleanDesc) {
+              currentItem.desc = currentItem.desc ? `${currentItem.desc}, ${cleanDesc}` : cleanDesc;
+              continue;
+            }
+          }
+
+          // New dish name
+          if (currentItem) {
+            items.push(currentItem);
+          }
+          currentItem = {
+            name: line.trim(),
+            price: null,
+            desc: '',
+            portion: ''
+          };
+        }
+
+        if (currentItem) {
+          items.push(currentItem);
+        }
+
+        return items.map(item => {
+          let name = item.name;
+          if (item.portion) {
+            name = `${name} (${item.portion})`;
+          }
+          name = name
             .replace(/^[0-9]+[.)\-]\s*/, '')
             .replace(/^[A-Z]\d+[-–—\s.]*/, '')
             .replace(/[._–—]{2,}/g, ' ')
-            .replace(/\s*\/\s*\d{2,4}.*$/, '')
-            .replace(/\s+/g, ' ')
+            .replace(/\b[A-Za-z]/g, c => c.toUpperCase())
             .trim();
 
-          // Check for inline description
-          let desc = '';
-          if (cleanName.includes(' - ') || cleanName.includes(' : ') || cleanName.includes(' | ')) {
-            let parts = [cleanName];
-            if (cleanName.includes(' - ')) parts = cleanName.split(' - ');
-            else if (cleanName.includes(' : ')) parts = cleanName.split(' : ');
-            else if (cleanName.includes(' | ')) parts = cleanName.split(' | ');
+          const lowerCombined = (name + ' ' + (item.desc || '')).toLowerCase();
+          let ingredients = item.desc || 'Traditional Kapampangan heritage seasoning, garlic, onions, native herbs';
+          let allergens = 'None / Allergen Free';
+          let calories = '450';
 
-            if (parts.length >= 2 && parts[0].length >= 3) {
-              cleanName = parts[0];
-              desc = parts.slice(1).join(', ');
-            }
+          if (/sisig|pork|liempo|lechon|kawali|bagnet|baboy|bulaklak|bale|tidtad|asado|kilayin|longanisa/.test(lowerCombined)) {
+            allergens = 'Contains Pork';
+            calories = '580';
+          } else if (/pancit|luglug|guisado|bihon|mami|noodle|pasta/.test(lowerCombined)) {
+            allergens = 'Contains Gluten / Wheat, Soy';
+            calories = '410';
+          } else if (/beef|bulalo|kaldereta|bistek|baka|steak|shank/.test(lowerCombined)) {
+            allergens = 'Contains Beef';
+            calories = '680';
+          } else if (/chicken|inasal|manok|wing|leg|tail/.test(lowerCombined)) {
+            allergens = 'Contains Poultry';
+            calories = '420';
+          } else if (/fish|shrimp|seafood|salmon|tuna|crab|prawn/.test(lowerCombined)) {
+            allergens = 'Contains Seafood / Shellfish';
+            calories = '320';
           }
 
-          if (cleanName.length >= 2) {
-            items.push({
-              rawName: cleanName,
-              price: priceExtracted.price,
-              desc: desc
+          return {
+            name: name,
+            price: item.price ? String(item.price) : '150',
+            ingredients: ingredients,
+            allergens: allergens,
+            calories: String(calories),
+            image: getRealDishPhoto(name)
+          };
+        }).filter(d => d.name.length >= 2);
+      };
+
+      let parsedDishes = [];
+
+      if (aiRawMenuText.trim()) {
+        parsedDishes = parseMenuTextStream(aiRawMenuText.trim());
+      } else if (aiMenuImage) {
+        setAiOcrProgress(25);
+        const slices = await sliceImageIntoColumns(aiMenuImage);
+
+        if (slices.isWideGrid && slices.left && slices.right) {
+          setAiOcrProgress(40);
+          const leftText = await runCloudAiOcr(slices.left);
+          setAiOcrProgress(65);
+          const rightText = await runCloudAiOcr(slices.right);
+          setAiOcrProgress(85);
+
+          const leftDishes = parseMenuTextStream(leftText || '');
+          const rightDishes = parseMenuTextStream(rightText || '');
+
+          if (leftDishes.length > 0 || rightDishes.length > 0) {
+            parsedDishes = [...leftDishes, ...rightDishes];
+          }
+        }
+
+        if (parsedDishes.length === 0) {
+          setAiOcrProgress(60);
+          const fullText = await runCloudAiOcr(slices.full || aiMenuImage);
+          if (fullText && fullText.trim().length > 5) {
+            parsedDishes = parseMenuTextStream(fullText.trim());
+          } else {
+            setAiOcrProgress(70);
+            const enhanced = await preprocessMenuImage(slices.full || aiMenuImage);
+            const ocrResult = await Tesseract.recognize(enhanced, 'eng', {
+              logger: (m) => {
+                if (m.status === 'recognizing text' && typeof m.progress === 'number') {
+                  setAiOcrProgress(70 + Math.round(m.progress * 25));
+                }
+              }
             });
-          }
-        } else {
-          if (FOOD_KEYWORDS.some(kw => lowerLine.includes(kw))) {
-            if (pendingName) {
-              items.push({ rawName: pendingName, price: 180, desc: pendingDesc });
-            }
-            pendingName = line.replace(/^[0-9]+[.)\-]\s*/, '').trim();
-            pendingDesc = '';
-          } else if (pendingName && !pendingDesc) {
-            pendingDesc = line.trim();
+            parsedDishes = parseMenuTextStream(ocrResult?.data?.text || '');
           }
         }
-      }
-
-      if (pendingName) {
-        items.push({ rawName: pendingName, price: 180, desc: pendingDesc });
-      }
-
-      const parsedDishes = [];
-      const seen = new Set();
-
-      for (const item of items) {
-        let name = item.rawName
-          .replace(/^[^a-zA-Z0-9(]+|[^a-zA-Z0-9)]+$/g, '')
-          .replace(/\b[A-Za-z]/g, c => c.toUpperCase())
-          .trim();
-
-        name = name
-          .replace(/\bS\.\s*Miso\b/gi, 'Sinigang sa Miso')
-          .replace(/\bB\.\s*Tahong\b/gi, 'Baked Tahong')
-          .replace(/\bB\.\s*Garlic\b/gi, 'Butter Garlic')
-          .replace(/\bC\.\s*Tail\b/gi, 'Chicken Tail')
-          .replace(/\bC\.\s*Wings?\b/gi, 'Chicken Wings')
-          .replace(/\bC\.\s*Legs?\b/gi, 'Chicken Legs')
-          .replace(/\bC\.\s*Bulaklak\b/gi, 'Chicharon Bulaklak');
-
-        const key = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-        if (!key || key.length < 2 || seen.has(key)) continue;
-        seen.add(key);
-
-        const price = Number(item.price) || 150;
-        const lowerCombined = (name + ' ' + (item.desc || '')).toLowerCase();
-
-        let ingredients = item.desc || 'Traditional Kapampangan heritage seasoning, garlic, onions, native herbs';
-        let allergens = 'None / Allergen Free';
-        let calories = '350';
-
-        if (/sisig|pork|liempo|lechon|bagnet|baboy|bulaklak|bale|bopis|dinuguan/.test(lowerCombined)) {
-          if (!item.desc) ingredients = 'Grilled pork mask, calamansi, chili, onions, authentic spices';
-          allergens = 'Contains Pork';
-          calories = '650';
-        } else if (/kare|peanut/.test(lowerCombined)) {
-          if (!item.desc) ingredients = 'Beef tripe & shank, rich peanut sauce, string beans, eggplant, bagoong';
-          allergens = 'Contains Peanuts, Crustaceans (Bagoong)';
-          calories = '720';
-        } else if (/chicken|inasal|manok|wing|leg|tail|chix/.test(lowerCombined)) {
-          if (!item.desc) ingredients = 'Fresh chicken, lemongrass, garlic, annatto oil, local spices';
-          allergens = 'Contains Poultry';
-          calories = '420';
-        } else if (/beef|bulalo|kaldereta|bistek|baka|steak|shank/.test(lowerCombined)) {
-          if (!item.desc) ingredients = 'Tender beef, bone marrow, native broth, local spices';
-          allergens = 'Contains Beef';
-          calories = '680';
-        } else if (/fish|shrimp|prawn|crab|bangus|tilapia|seafood|squid|calamares|tahong|salmon|hipon|tempura|dory/.test(lowerCombined)) {
-          if (!item.desc) ingredients = 'Fresh seafood, citrus, garlic, ginger, local seasonings';
-          allergens = 'Contains Seafood / Crustaceans / Fish';
-          calories = '320';
-        } else if (/bringhe|rice|sinangag|garlic rice/.test(lowerCombined)) {
-          if (!item.desc) ingredients = 'Glutinous rice, coconut milk, turmeric, bell pepper, boiled egg';
-          allergens = 'Contains Eggs';
-          calories = '520';
-        } else if (/halo|dessert|flan|tibok|ube|shake|turon|pastillas|sweet/.test(lowerCombined)) {
-          if (!item.desc) ingredients = 'Carabao milk, ube, sweetened beans, shaved ice, leche flan';
-          allergens = 'Contains Dairy';
-          calories = '380';
-        } else if (/pancit|noodle|pasta|lumpia|palabok|canton|bihon|guisado|miki|sotanghon/.test(lowerCombined)) {
-          if (!item.desc) ingredients = 'Noodles, mixed vegetables, native seasoning, garlic, scallions';
-          allergens = 'Contains Gluten / Wheat, Soy';
-          calories = '410';
-        } else if (/gulay|pinakbet|salad|vegetable|laing|chopsuey|tofu|tokwa/.test(lowerCombined)) {
-          if (!item.desc) ingredients = 'Fresh local vegetables, squash, okra, string beans, tomatoes, native seasonings';
-          allergens = 'Vegetarian / Plant-Based';
-          calories = '220';
-        } else if (/coke|royal|sprite|water|drink|tea|coffee|juice|soda/.test(lowerCombined)) {
-          ingredients = 'Refreshing chilled beverage';
-          allergens = 'None';
-          calories = '140';
-        }
-
-        parsedDishes.push({
-          name: name,
-          price: String(price),
-          ingredients: ingredients,
-          allergens: allergens,
-          calories: String(calories),
-          image: getRealDishPhoto(name)
-        });
       }
 
       if (parsedDishes.length > 0) {
