@@ -489,13 +489,19 @@ function App() {
   // Local state restaurants database with 100% unique usernames & permanent frontend-backend persistence (Sorted Alphabetically A-Z)
   const [restaurants, setRestaurants] = useState(() => {
     let initialList = [];
+    let deletedIds = [];
+    try {
+      const savedDeleted = localStorage.getItem('kanyamanan_deleted_restaurants_ids');
+      if (savedDeleted) deletedIds = JSON.parse(savedDeleted) || [];
+    } catch (e) { }
+
     try {
       const saved = localStorage.getItem('kanyamanan_restaurants_db');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const sanitized = parsed.map((res, idx) => {
-            if (!res || typeof res !== 'object') return null;
+            if (!res || typeof res !== 'object' || deletedIds.includes(res.id)) return null;
             const preseeded = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === res.id || (p.name && res.name && p.name === res.name)));
             const menuToUse = (preseeded && Array.isArray(preseeded.menu) && (!Array.isArray(res.menu) || preseeded.menu.length > res.menu.length))
               ? preseeded.menu
@@ -516,9 +522,9 @@ function App() {
             };
           }).filter(Boolean);
 
-          // Append any newly added preseeded restaurants that aren't yet in cached localStorage
+          // Append any newly added preseeded restaurants that aren't deleted and not yet in cached localStorage
           (PRESEEDED_RESTAURANTS || []).forEach(pre => {
-            if (!pre || !pre.id) return;
+            if (!pre || !pre.id || deletedIds.includes(pre.id)) return;
             const exists = sanitized.some(r => r && (r.id === pre.id || (r.name && pre.name && r.name.toLowerCase() === pre.name.toLowerCase())));
             if (!exists) {
               sanitized.push({ ...pre });
@@ -540,7 +546,7 @@ function App() {
 
     if (initialList.length === 0) {
       const usedUsernames = new Set();
-      initialList = (PRESEEDED_RESTAURANTS || []).filter(Boolean).map((res, idx) => {
+      initialList = (PRESEEDED_RESTAURANTS || []).filter(pre => pre && pre.id && !deletedIds.includes(pre.id)).map((res, idx) => {
         let baseUser = res.username;
         if (!baseUser || baseUser === 'owner') {
           baseUser = (res.name || 'restaurant')
@@ -565,7 +571,7 @@ function App() {
       });
     }
 
-    return [...initialList].filter(Boolean).sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
+    return [...initialList].filter(r => r && r.id && !deletedIds.includes(r.id)).sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
   });
 
   // Persistent Tourist Attractions Database State with auto-healing error recovery
@@ -653,22 +659,23 @@ function App() {
     const syncDjangoData = async () => {
       try {
         const liveData = await fetchDjangoRestaurants();
+        let deletedIds = [];
+        try {
+          const savedDel = localStorage.getItem('kanyamanan_deleted_restaurants_ids');
+          if (savedDel) deletedIds = JSON.parse(savedDel) || [];
+        } catch (e) { }
+
         if (Array.isArray(liveData) && liveData.length > 0) {
-          const valid = liveData.filter(r => r && r.id);
+          const valid = liveData.filter(r => r && r.id && !deletedIds.includes(r.id));
           if (valid.length > 0) {
             setRestaurants(prev => {
               const liveDict = {};
               valid.forEach(r => { if (r && r.id) liveDict[r.id] = r; });
-              const currentList = Array.isArray(prev) && prev.length > 0 ? prev : (PRESEEDED_RESTAURANTS || []);
-              const merged = currentList.map(r => (r && r.id && liveDict[r.id]) || r).filter(Boolean);
+              const currentList = Array.isArray(prev) && prev.length > 0 ? prev.filter(r => r && r.id && !deletedIds.includes(r.id)) : [];
+              const merged = currentList.map(r => (r && r.id && liveDict[r.id]) || r).filter(r => r && !deletedIds.includes(r.id));
               valid.forEach(vr => {
-                if (vr && vr.id && !merged.some(m => m && (m.id === vr.id || (m.name && vr.name && m.name.toLowerCase() === vr.name.toLowerCase())))) {
+                if (vr && vr.id && !deletedIds.includes(vr.id) && !merged.some(m => m && (m.id === vr.id || (m.name && vr.name && m.name.toLowerCase() === vr.name.toLowerCase())))) {
                   merged.push(vr);
-                }
-              });
-              (PRESEEDED_RESTAURANTS || []).forEach(pre => {
-                if (pre && pre.id && !merged.some(m => m && (m.id === pre.id || (m.name && pre.name && m.name.toLowerCase() === pre.name.toLowerCase())))) {
-                  merged.push(pre);
                 }
               });
               try {
@@ -950,11 +957,17 @@ function App() {
     if (isFirebaseConfigured()) {
       const unsub = subscribeToRestaurants((cloudRestaurants) => {
         if (Array.isArray(cloudRestaurants) && cloudRestaurants.length > 0) {
+          let deletedIds = [];
+          try {
+            const savedDel = localStorage.getItem('kanyamanan_deleted_restaurants_ids');
+            if (savedDel) deletedIds = JSON.parse(savedDel) || [];
+          } catch (e) { }
+
           setRestaurants(prev => {
-            const safePrev = Array.isArray(prev) ? prev.filter(r => r && r.id) : [];
+            const safePrev = Array.isArray(prev) ? prev.filter(r => r && r.id && !deletedIds.includes(r.id)) : [];
             const cloudDict = {};
             cloudRestaurants.forEach(r => {
-              if (r && r.id) {
+              if (r && r.id && !deletedIds.includes(r.id)) {
                 const pre = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === r.id || (p.name && r.name && p.name.toLowerCase() === r.name.toLowerCase())));
                 const isValidImg = r.image && (r.image.startsWith('http') || r.image.startsWith('data:') || r.image.startsWith('/'));
                 const cleanedImg = isValidImg ? r.image : (pre?.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80');
@@ -966,9 +979,9 @@ function App() {
                 };
               }
             });
-            const merged = safePrev.map(r => (r && r.id && cloudDict[r.id]) || r).filter(Boolean);
+            const merged = safePrev.map(r => (r && r.id && cloudDict[r.id]) || r).filter(r => r && !deletedIds.includes(r.id));
             cloudRestaurants.forEach(cr => {
-              if (cr && cr.id && !merged.some(r => r && (r.id === cr.id || (r.name && cr.name && r.name.toLowerCase() === cr.name.toLowerCase())))) {
+              if (cr && cr.id && !deletedIds.includes(cr.id) && !merged.some(r => r && (r.id === cr.id || (r.name && cr.name && r.name.toLowerCase() === cr.name.toLowerCase())))) {
                 merged.push(cloudDict[cr.id] || cr);
               }
             });
@@ -12138,18 +12151,26 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
   const deleteRestaurant = (id) => {
     if (confirm("Are you sure you want to remove this Pampanga Heritage listing?")) {
+      try {
+        const savedDel = localStorage.getItem('kanyamanan_deleted_restaurants_ids');
+        const parsedDel = savedDel ? JSON.parse(savedDel) : [];
+        const updatedDeletedIds = Array.from(new Set([...(Array.isArray(parsedDel) ? parsedDel : []), id]));
+        localStorage.setItem('kanyamanan_deleted_restaurants_ids', JSON.stringify(updatedDeletedIds));
+      } catch (e) { }
+
       setRestaurants(prev => {
-        const next = prev.filter(r => r.id !== id);
+        const next = prev.filter(r => r && r.id !== id);
         try {
           localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(next));
         } catch (e) { }
         return next;
       });
-      setActiveTrip(prev => prev.filter(r => r.id !== id));
+      setActiveTrip(prev => prev.filter(r => r && r.id !== id));
       if (isFirebaseConfigured()) {
         deleteRestaurantFromCloud(id);
       }
       deleteDjangoRestaurant(id);
+      alert("Restaurant listing removed permanently.");
     }
   };
 
