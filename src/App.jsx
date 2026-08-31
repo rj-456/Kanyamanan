@@ -12175,6 +12175,51 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     }
   };
 
+  // 1-Click Database Export (JSON Download)
+  const handleExportDatabase = () => {
+    try {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(restaurants, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `kanyamanan_restaurants_backup_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      alert(`✅ Successfully exported all ${restaurants.length} restaurants as a JSON file! You can use this to sync to Vercel or backup your database.`);
+    } catch (e) {
+      alert("Error exporting database: " + e.message);
+    }
+  };
+
+  // 1-Click Database Import & Instant Cloud Sync
+  const handleImportDatabase = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (Array.isArray(imported) && imported.length > 0) {
+          setRestaurants(imported);
+          try {
+            localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(imported));
+          } catch (err) { }
+          if (isFirebaseConfigured()) {
+            imported.forEach(r => saveRestaurantToCloud(r));
+          }
+          imported.forEach(r => updateDjangoRestaurant(r.id, r));
+          alert(`🎉 Successfully imported ${imported.length} restaurants! All listings, custom photos, menus, and branches have been synced live to your database.`);
+        } else {
+          alert("⚠️ The selected JSON file does not contain a valid restaurant list.");
+        }
+      } catch (err) {
+        alert("⚠️ Failed to parse JSON file. Please ensure it is a valid Kanyamanan database export.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   const handleApproveApproval = (req, adminNote = '') => {
     if (!req) return;
 
@@ -12513,7 +12558,33 @@ ${JSON.stringify(updatedMessages.slice(-8))}
               </div>
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {/* 1-Click Export Database */}
+              <button
+                type="button"
+                onClick={handleExportDatabase}
+                className="px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 text-emerald-300 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 shrink-0"
+                title="Download full restaurants database backup as JSON"
+              >
+                <Download className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Export DB</span>
+              </button>
+
+              {/* 1-Click Import Database */}
+              <label
+                className="px-3 py-2 bg-amber-600/20 hover:bg-amber-600 border border-amber-500/40 text-amber-300 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 shrink-0"
+                title="Restore / Import restaurants database from JSON file"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Import DB</span>
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportDatabase}
+                  className="hidden"
+                />
+              </label>
+
               {/* Dark / Light Mode Toggle Button */}
               <button
                 type="button"
