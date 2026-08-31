@@ -502,23 +502,24 @@ function App() {
         if (Array.isArray(parsed) && parsed.length > 0) {
           const sanitized = parsed.map((res, idx) => {
             if (!res || typeof res !== 'object' || deletedIds.includes(res.id)) return null;
-            const preseeded = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === res.id || (p.name && res.name && p.name === res.name)));
-            const menuToUse = (preseeded && Array.isArray(preseeded.menu) && (!Array.isArray(res.menu) || preseeded.menu.length > res.menu.length))
-              ? preseeded.menu
-              : (Array.isArray(res.menu) && res.menu.length > 0 ? res.menu : (preseeded?.menu || [{ id: `menu-${idx}-0`, name: 'Signature Sisig', price: 250, ingredients: 'Grilled pork snout, calamansi, onions', allergens: 'Contains Pork', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80', healthIndicators: 'Moderate Calorie', nutrition: { calories: 450, protein: 25, carbs: 10, fat: 35 } }]));
+            const preseeded = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === res.id || (p.name && res.name && p.name.toLowerCase() === res.name.toLowerCase())));
+            const menuToUse = (Array.isArray(res.menu) && res.menu.length > 0)
+              ? res.menu
+              : (preseeded?.menu || [{ id: `menu-${idx}-0`, name: 'Signature Sisig', price: 250, ingredients: 'Grilled pork snout, calamansi, onions', allergens: 'Contains Pork', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80', healthIndicators: 'Moderate Calorie', nutrition: { calories: 450, protein: 25, carbs: 10, fat: 35 } }]);
 
             return {
+              ...(preseeded || {}),
               ...res,
-              id: res.id || `res-${Date.now()}-${idx}`,
-              name: res.name || `Kapampangan Restaurant #${idx + 1}`,
-              municipality: res.municipality || 'City of San Fernando',
-              corridor: res.corridor || 'MacArthur Highway Line',
-              operatingHours: res.operatingHours || '09:00 AM - 09:00 PM',
-              priceTier: res.priceTier || '$',
+              id: res.id || preseeded?.id || `res-${Date.now()}-${idx}`,
+              name: res.name || preseeded?.name || `Kapampangan Restaurant #${idx + 1}`,
+              municipality: res.municipality || preseeded?.municipality || 'City of San Fernando',
+              corridor: res.corridor || preseeded?.corridor || 'MacArthur Highway Line',
+              operatingHours: res.operatingHours || preseeded?.operatingHours || '09:00 AM - 09:00 PM',
+              priceTier: res.priceTier || preseeded?.priceTier || '$',
               branches: Array.isArray(res.branches) && res.branches.length > 0 ? res.branches : (preseeded?.branches || [{ branchName: `${res.name || 'Restaurant'} (Main Branch)`, municipality: res.municipality || 'City of San Fernando', address: res.address || 'Pampanga', operatingHours: res.operatingHours || '09:00 AM - 09:00 PM', lat: res.lat || 15.0300, lng: res.lng || 120.6800 }]),
               menu: menuToUse,
-              username: res.username || `${(res.name || 'res').toLowerCase().replace(/[^a-z0-9]/g, '_')}_owner`,
-              password: res.password || 'password123'
+              username: res.username || preseeded?.username || `${(res.name || 'res').toLowerCase().replace(/[^a-z0-9]/g, '_')}_owner`,
+              password: res.password || preseeded?.password || 'password123'
             };
           }).filter(Boolean);
 
