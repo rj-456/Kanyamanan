@@ -954,12 +954,22 @@ function App() {
             const safePrev = Array.isArray(prev) ? prev.filter(r => r && r.id) : [];
             const cloudDict = {};
             cloudRestaurants.forEach(r => {
-              if (r && r.id) cloudDict[r.id] = r;
+              if (r && r.id) {
+                const pre = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === r.id || (p.name && r.name && p.name.toLowerCase() === r.name.toLowerCase())));
+                const isValidImg = r.image && (r.image.startsWith('http') || r.image.startsWith('data:') || r.image.startsWith('/'));
+                const cleanedImg = isValidImg ? r.image : (pre?.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80');
+                cloudDict[r.id] = {
+                  ...r,
+                  image: cleanedImg,
+                  images: Array.isArray(r.images) && r.images.length > 0 ? r.images : [cleanedImg],
+                  municipality: r.municipality || pre?.municipality || 'City of San Fernando'
+                };
+              }
             });
             const merged = safePrev.map(r => (r && r.id && cloudDict[r.id]) || r).filter(Boolean);
             cloudRestaurants.forEach(cr => {
-              if (cr && cr.id && !merged.some(r => r && r.id === cr.id)) {
-                merged.push(cr);
+              if (cr && cr.id && !merged.some(r => r && (r.id === cr.id || (r.name && cr.name && r.name.toLowerCase() === cr.name.toLowerCase())))) {
+                merged.push(cloudDict[cr.id] || cr);
               }
             });
             try {
