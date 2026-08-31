@@ -12559,33 +12559,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap">
-              {/* 1-Click Export Database */}
-              <button
-                type="button"
-                onClick={handleExportDatabase}
-                className="px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600 border border-emerald-500/40 text-emerald-300 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 shrink-0"
-                title="Download full restaurants database backup as JSON"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Export DB</span>
-              </button>
-
-              {/* 1-Click Import Database */}
-              <label
-                className="px-3 py-2 bg-amber-600/20 hover:bg-amber-600 border border-amber-500/40 text-amber-300 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95 shrink-0"
-                title="Restore / Import restaurants database from JSON file"
-              >
-                <Upload className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Import DB</span>
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleImportDatabase}
-                  className="hidden"
-                />
-              </label>
-
+            <div className="flex items-center gap-3 flex-wrap">
               {/* Dark / Light Mode Toggle Button */}
               <button
                 type="button"
