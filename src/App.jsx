@@ -11026,10 +11026,12 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
 
-          // Scale up small or low-res images for superior OCR clarity
+          // Target ideal resolution for OCR character clarity
           let scale = 1;
-          if (img.width < 1200) {
-            scale = Math.min(2.5, 1600 / img.width);
+          if (img.width < 1600) {
+            scale = Math.min(3, 1800 / img.width);
+          } else if (img.width > 3200) {
+            scale = 2400 / img.width;
           }
           canvas.width = Math.round(img.width * scale);
           canvas.height = Math.round(img.height * scale);
@@ -11041,17 +11043,16 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const d = imgData.data;
 
-          // Adaptive Grayscale + High-Contrast Binarization
+          // Adaptive local contrast boost without harsh clipping
           for (let i = 0; i < d.length; i += 4) {
             const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-            // Boost contrast to make faint/colored text pop against dark/light backgrounds
-            let contrast = (gray - 128) * 1.5 + 128;
-            if (contrast < 0) contrast = 0;
-            if (contrast > 255) contrast = 255;
+            let val = gray < 128 ? gray * 0.85 : gray * 1.15;
+            if (val > 255) val = 255;
+            if (val < 0) val = 0;
 
-            d[i] = contrast;
-            d[i + 1] = contrast;
-            d[i + 2] = contrast;
+            d[i] = val;
+            d[i + 1] = val;
+            d[i + 2] = val;
           }
 
           ctx.putImageData(imgData, 0, 0);
@@ -11065,7 +11066,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     });
   };
 
-  // Free Cloud AI OCR Engine (OCR.space Free API)
+  // Free Cloud AI OCR Engine (OCR.space Free API with Dual Engine Support)
   const runCloudAiOcr = async (imageDataUrl) => {
     try {
       const formData = new FormData();
@@ -11075,6 +11076,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       formData.append('isTable', 'true');
       formData.append('scale', 'true');
       formData.append('detectOrientation', 'true');
+      formData.append('OCREngine', '2'); // Engine 2 is optimized for menus, receipts & price lists
 
       const response = await fetch('https://api.ocr.space/parse/image', {
         method: 'POST',
@@ -11084,10 +11086,35 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         body: formData
       });
 
-      if (!response.ok) return null;
-      const data = await response.json();
-      if (data && data.ParsedResults && data.ParsedResults.length > 0) {
-        return data.ParsedResults[0].ParsedText || '';
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.ParsedResults && data.ParsedResults.length > 0 && data.ParsedResults[0].ParsedText) {
+          const parsed = data.ParsedResults[0].ParsedText.trim();
+          if (parsed.length > 10) return parsed;
+        }
+      }
+
+      // Fallback to OCR Engine 1
+      const formDataE1 = new FormData();
+      formDataE1.append('base64Image', imageDataUrl);
+      formDataE1.append('language', 'eng');
+      formDataE1.append('isTable', 'true');
+      formDataE1.append('scale', 'true');
+      formDataE1.append('OCREngine', '1');
+
+      const respE1 = await fetch('https://api.ocr.space/parse/image', {
+        method: 'POST',
+        headers: {
+          'apikey': 'K88574744288957'
+        },
+        body: formDataE1
+      });
+
+      if (respE1.ok) {
+        const dataE1 = await respE1.json();
+        if (dataE1 && dataE1.ParsedResults && dataE1.ParsedResults.length > 0) {
+          return dataE1.ParsedResults[0].ParsedText || '';
+        }
       }
       return null;
     } catch (e) {
@@ -11132,7 +11159,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         }
       }
 
-      if (!rawText || rawText.length < 4) {
+      if (!rawText || rawText.length < 3) {
         alert("⚠️ No readable text was detected in the uploaded image.\n\nPlease upload a clear, focused photo of a menu board, printed price list, or flyer (or paste menu text in Option 2).");
         return;
       }
@@ -11191,7 +11218,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       };
 
       const getRealDishPhoto = (dishName) => {
-        const lower = dishName.toLowerCase();
+        const lower = (dishName || '').toLowerCase();
         for (const [key, url] of Object.entries(DISH_PHOTO_MAP)) {
           if (lower.includes(key)) return url;
         }
@@ -11208,7 +11235,8 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         'crispy', 'fried', 'grilled', 'roasted', 'smoked', 'steamed', 'baked', 'bbq', 'barbecue', 'platter',
         'rice', 'sinangag', 'curry', 'pasta', 'spaghetti', 'carbonara', 'pizza', 'burger', 'sandwich', 'wings',
         'salad', 'pinakbet', 'laing', 'chopsuey', 'chop suey', 'gulay', 'tofu', 'tokwa', 'chicharon',
-        'shake', 'juice', 'tea', 'iced tea', 'coffee', 'latte', 'cooler', 'beer', 'soda', 'coke', 'royal', 'sprite', 'water', 'dessert', 'combo', 'set', 'meal', 'serving'
+        'shake', 'juice', 'tea', 'iced tea', 'coffee', 'latte', 'cooler', 'beer', 'soda', 'coke', 'royal', 'sprite', 'water', 'dessert', 'combo', 'set', 'meal', 'serving',
+        'dinuguan', 'bopis', 'bagoong', 'miso', 'tahong', 'inasal', 'lumpiang', 'lumpia', 'silog', 'tapsilog', 'tocilog', 'bangsilog', 'chicharon'
       ];
 
       // Non-food UI, System, Address, and Metadata blocklist
@@ -11218,168 +11246,274 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         'contact', 'phone', 'telephone', 'hotline', 'tel', 'email', 'facebook', 'instagram', 'wifi', 'welcome',
         'thank you', 'receipt', 'invoice', 'table', 'cashier', 'subtotal', 'vat', 'tax', 'total', 'change',
         'terms', 'conditions', 'copyright', 'rights reserved', 'version', 'app', 'download', 'login', 'logout',
-        'register', 'sign in', 'sign up', 'button', 'photo', 'upload', 'choose file', 'image', 'preview', 'logo'
+        'register', 'sign in', 'sign up', 'button', 'photo', 'upload', 'choose file', 'image', 'preview', 'logo',
+        'operating hours', 'open daily', 'mon-sun', 'monday', 'sunday', 'cash only', 'page', 'menu board'
       ];
 
-      // Split raw text and clean
-      const cleanedText = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-      const rawLines = cleanedText
-        .split('\n')
-        .map(l => l.trim())
-        .filter(l => l.length >= 2);
+      const SECTION_HEADERS = [
+        'appetizers', 'main course', 'specials', 'specialties', 'desserts', 'beverages', 'drinks', 'side orders',
+        'soup', 'noodles', 'family meals', 'value meals', 'chef special', 'house specialties', 'hot drinks',
+        'cold drinks', 'breakfast', 'lunch', 'dinner', 'merienda', 'bilao orders', 'solo meals', 'group meals'
+      ];
 
-      // Multi-column line splitter: If a line contains 2 items (e.g. ROYAL 1.5 98.00 S. MISO- SALMON HEAD 172.00)
-      const splitLines = [];
-      for (const line of rawLines) {
-        // Check if multiple prices or section keywords exist in one line
-        const parts = line.split(/(?<=\d{1,4}(?:\.\d{2})?)\s+(?=[A-Z])/);
-        if (parts.length > 1) {
-          parts.forEach(p => splitLines.push(p.trim()));
+      // Step 1: Pre-process and normalize raw text lines
+      const cleaned = rawText
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/[\u2013\u2014]/g, '-')
+        .replace(/[\u2022\u25CF\u25AA]/g, ' ')
+        .replace(/[\t]+/g, ' ');
+
+      const initialLines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
+
+      // Multi-column line unroller
+      const unrolledLines = [];
+      for (const line of initialLines) {
+        const multiPriceSplit = line.split(/(?<=\b(?:₱|P|Php|PHP)?\s*\d{2,4}(?:\.\d{2})?(?:\s*(?:php|pesos|\/order|\/serving|\/pc|\/bilao))?)\s+(?=[A-Z])/i);
+        if (multiPriceSplit.length > 1) {
+          multiPriceSplit.forEach(p => { if (p.trim()) unrolledLines.push(p.trim()); });
         } else {
-          splitLines.push(line);
+          unrolledLines.push(line);
         }
       }
 
-      // Smart multi-line pairing (combine dish on line i with price on line i+1 if standalone number)
-      const lines = [];
-      for (let i = 0; i < splitLines.length; i++) {
-        const cur = splitLines[i];
-        const next = splitLines[i + 1];
-        if (next && /^(?:₱|P|PHP|Php|php)?\s*\d{2,4}(?:\.\d{2})?$/.test(next) && !/\d{2,4}/.test(cur)) {
-          lines.push(`${cur} ${next}`);
-          i++; // skip next line as it is consumed
-        } else {
-          lines.push(cur);
-        }
-      }
+      // Universal Price Extractor
+      const extractPriceFromLine = (text) => {
+        // 1. Explicit peso currency format
+        const pesoMatch = text.match(/(?:₱|P|Php|PHP|PhP|Ph)\s*(\d{1,4}(?:\.\d{2})?)/i);
+        if (pesoMatch) return { price: Math.round(parseFloat(pesoMatch[1])), cleanText: text.replace(pesoMatch[0], '').trim() };
 
-      const parsedDishes = [];
-
-      for (const line of lines) {
-        const lowerLine = line.toLowerCase();
-
-        // 1. Skip lines dominated by non-food UI / System / Contact words
-        const isBlocklisted = NON_FOOD_BLOCKLIST.some(word => lowerLine.includes(word));
-        if (isBlocklisted) continue;
-
-        // 2. Must have at least 3 alphabetic letters
-        const lettersCount = (line.match(/[a-zA-Z]/g) || []).length;
-        if (lettersCount < 3) continue;
-
-        // 3. Extract Price Pattern at end of line (e.g. ₱250, P250, PHP 300, 250.00, 180, etc.)
-        let price = '';
-        const endPriceMatch = line.match(/(?:₱|P|PHP|Php|php)?\s*(\d{1,4}(?:\.\d{2})?)\s*$/i);
-        const generalPriceMatch = line.match(/(?:₱|P|PHP|Php|php)\s*(\d{1,4}(?:\.\d{2})?)/i);
-        const priceMatch = endPriceMatch || generalPriceMatch;
-        if (priceMatch) {
-          price = priceMatch[1];
-        }
-
-        // 4. Strict Validation: Line MUST have an explicit price OR recognizable food term
-        const hasFoodKeyword = FOOD_KEYWORDS.some(term => lowerLine.includes(term));
-        const hasExplicitPrice = Boolean(priceMatch);
-
-        // If it has NO price AND NO food keyword, it is a random line from a non-menu image -> REJECT
-        if (!hasExplicitPrice && !hasFoodKeyword) {
-          continue;
-        }
-
-        // 5. Clean Dish Name & Expand Abbreviations
-        let dishName = line
-          .replace(new RegExp('(?:₱|P|PHP|Php|php)?\\s*\\d{1,4}(?:\\.\\d{2})?\\s*$', 'gi'), '')
-          .replace(new RegExp('^[Ff]\\d+[-–—\\s.]*', 'g'), '') // Remove F1, F2 prefixes
-          .replace(new RegExp('^[0-9]+[.)\\-]\\s*', 'g'), '') // Remove leading numbers like "1.", "2)"
-          .replace(new RegExp('^IN CAN\\s+', 'i'), '')
-          .replace(new RegExp('\\s+IN CAN\\s*$', 'i'), ' (In Can)')
-          .replace(new RegExp('POLORDER|PCLORDER|PC\\/ORDER|PC ORDER', 'gi'), 'pcs')
-          .replace(new RegExp('\\bTOUCH\\b', 'gi'), '')
-          .replace(new RegExp('S\\.\\s*MISO[\\s:-]*', 'gi'), 'Sinigang sa Miso ')
-          .replace(new RegExp('B\\.\\s*TAHONG', 'gi'), 'Baked Tahong')
-          .replace(new RegExp('B\\.\\s*GARLIC[\\s:-]*', 'gi'), 'Butter Garlic ')
-          .replace(new RegExp('C\\.\\s*TAIL', 'gi'), 'Chicken Tail')
-          .replace(new RegExp('C\\.\\s*WING', 'gi'), 'Chicken Wing')
-          .replace(new RegExp('C\\.\\s*LEGS', 'gi'), 'Chicken Legs')
-          .replace(new RegExp('C\\.\\s*BULAKLAK[\\s:-]*', 'gi'), 'Chicharon Bulaklak ')
-          .replace(new RegExp('C\\.\\s*BALE[\\s:-]*', 'gi'), 'Chicharon Bale ')
-          .replace(new RegExp('[–—-]\\s*(\\d{2,4})\\s*g\\.?', 'gi'), ' ($1g)')
-          .replace(new RegExp('[–—-]\\s*g\\.?', 'gi'), '')
-          .replace(new RegExp('[._–—]{2,}', 'g'), ' ')
-          .trim();
-
-        // Extract sub-ingredients if line has a separator like '-' or ':'
-        let extractedIngredients = '';
-        if (dishName.includes(' - ') || dishName.includes(' : ') || dishName.includes('—') || dishName.includes('–')) {
-          const parts = dishName.split(/ - | : |—|–/);
-          if (parts.length >= 2) {
-            dishName = parts[0].trim();
-            extractedIngredients = parts.slice(1).join(', ').trim();
+        // 2. Trailing price format
+        const trailMatch = text.match(/(?:[._\-\s|]|:)+\s*(?:₱|P|Php|PHP)?\s*(\d{2,4}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving|\/pc|\/bilao)?\s*$/i);
+        if (trailMatch) {
+          const p = Math.round(parseFloat(trailMatch[1]));
+          if (p >= 15 && p <= 9999) {
+            return { price: p, cleanText: text.slice(0, trailMatch.index).trim() };
           }
         }
 
-        // Clean punctuation from borders
-        dishName = dishName.replace(/^[^a-zA-Z0-9(]+|[^a-zA-Z0-9)]+$/g, '').trim();
+        // 3. Leading price format
+        const leadMatch = text.match(/^\s*(?:₱|P|Php|PHP)?\s*(\d{2,4}(?:\.\d{2})?)\s*(?:[.\-\s|]|:)+\s*/i);
+        if (leadMatch) {
+          const p = Math.round(parseFloat(leadMatch[1]));
+          if (p >= 15 && p <= 9999) {
+            return { price: p, cleanText: text.slice(leadMatch[0].length).trim() };
+          }
+        }
 
-        // Format casing
-        dishName = dishName.replace(/\b\w+/g, txt => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase());
+        // 4. Standalone realistic food price number
+        const anyNumMatch = text.match(/\b(\d{2,4}(?:\.\d{2})?)\b/);
+        if (anyNumMatch) {
+          const p = Math.round(parseFloat(anyNumMatch[1]));
+          if (p >= 20 && p <= 3500) {
+            return { price: p, cleanText: text.replace(anyNumMatch[0], '').trim() };
+          }
+        }
 
-        // Must have legitimate name length
-        if (dishName.length < 2 || dishName.length > 70) continue;
+        return null;
+      };
 
-        // 6. Infer Ingredients, Allergens, and Calories based on authentic dish name words
-        const lowerCombined = (dishName + ' ' + extractedIngredients).toLowerCase();
-        let ingredients = extractedIngredients || 'Traditional Kapampangan heritage seasoning, garlic, onions, native herbs';
-        let allergens = 'None';
+      const isStandalonePriceLine = (line) => {
+        return /^(?:(?:₱|P|Php|PHP|PhP)\s*)?\d{1,4}(?:\.\d{2})?\s*(?:php|pesos|\/order|\/serving|\/pc|\/bilao)?$/i.test(line.trim());
+      };
+
+      const isSectionHeader = (line) => {
+        const l = line.toLowerCase().replace(/[^a-z\s]/g, '').trim();
+        return SECTION_HEADERS.some(h => l === h || l.startsWith(h) || l.endsWith(h));
+      };
+
+      const isDescriptionSentence = (line) => {
+        const l = line.toLowerCase();
+        return (
+          l.includes(',') ||
+          l.includes('with ') ||
+          l.includes('served ') ||
+          l.includes('topped ') ||
+          l.includes('marinated ') ||
+          l.includes('cooked ') ||
+          l.includes('simmered ') ||
+          l.includes('sautéed ') ||
+          l.includes('sauteed ') ||
+          l.includes('in rich ') ||
+          l.includes('in savory ') ||
+          l.includes('good for')
+        );
+      };
+
+      const items = [];
+      let pendingName = '';
+      let pendingDesc = '';
+
+      for (let i = 0; i < unrolledLines.length; i++) {
+        const line = unrolledLines[i];
+        const lowerLine = line.toLowerCase();
+
+        if (NON_FOOD_BLOCKLIST.some(word => lowerLine.includes(word))) continue;
+        if (isSectionHeader(line)) continue;
+
+        const letterCount = (line.match(/[a-zA-Z]/g) || []).length;
+        const priceExtracted = extractPriceFromLine(line);
+
+        // If line has NO price AND matches description sentence AND we have a recent item -> attach as description!
+        if (!priceExtracted && isDescriptionSentence(line)) {
+          if (items.length > 0 && !pendingName) {
+            items[items.length - 1].desc = line.trim();
+            continue;
+          } else if (pendingName) {
+            pendingDesc = line.trim();
+            continue;
+          }
+        }
+
+        // Standalone Price Line matching previous pending dish name
+        if (isStandalonePriceLine(line)) {
+          const pMatch = line.match(/\d{1,4}(?:\.\d{2})?/);
+          const priceVal = pMatch ? Math.round(parseFloat(pMatch[0])) : 150;
+          if (pendingName) {
+            items.push({
+              rawName: pendingName,
+              price: priceVal,
+              desc: pendingDesc
+            });
+            pendingName = '';
+            pendingDesc = '';
+            continue;
+          }
+        }
+
+        if (letterCount < 2) continue;
+
+        if (priceExtracted) {
+          if (pendingName) {
+            items.push({ rawName: pendingName, price: 180, desc: pendingDesc });
+            pendingName = '';
+            pendingDesc = '';
+          }
+
+          let cleanName = priceExtracted.cleanText
+            .replace(/^[0-9]+[.)\-]\s*/, '')
+            .replace(/^[A-Z]\d+[-–—\s.]*/, '')
+            .replace(/[._–—]{2,}/g, ' ')
+            .replace(/\s*\/\s*\d{2,4}.*$/, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+          // Check for inline description
+          let desc = '';
+          if (cleanName.includes(' - ') || cleanName.includes(' : ') || cleanName.includes(' | ')) {
+            let parts = [cleanName];
+            if (cleanName.includes(' - ')) parts = cleanName.split(' - ');
+            else if (cleanName.includes(' : ')) parts = cleanName.split(' : ');
+            else if (cleanName.includes(' | ')) parts = cleanName.split(' | ');
+
+            if (parts.length >= 2 && parts[0].length >= 3) {
+              cleanName = parts[0];
+              desc = parts.slice(1).join(', ');
+            }
+          }
+
+          if (cleanName.length >= 2) {
+            items.push({
+              rawName: cleanName,
+              price: priceExtracted.price,
+              desc: desc
+            });
+          }
+        } else {
+          if (FOOD_KEYWORDS.some(kw => lowerLine.includes(kw))) {
+            if (pendingName) {
+              items.push({ rawName: pendingName, price: 180, desc: pendingDesc });
+            }
+            pendingName = line.replace(/^[0-9]+[.)\-]\s*/, '').trim();
+            pendingDesc = '';
+          } else if (pendingName && !pendingDesc) {
+            pendingDesc = line.trim();
+          }
+        }
+      }
+
+      if (pendingName) {
+        items.push({ rawName: pendingName, price: 180, desc: pendingDesc });
+      }
+
+      const parsedDishes = [];
+      const seen = new Set();
+
+      for (const item of items) {
+        let name = item.rawName
+          .replace(/^[^a-zA-Z0-9(]+|[^a-zA-Z0-9)]+$/g, '')
+          .replace(/\b[A-Za-z]/g, c => c.toUpperCase())
+          .trim();
+
+        name = name
+          .replace(/\bS\.\s*Miso\b/gi, 'Sinigang sa Miso')
+          .replace(/\bB\.\s*Tahong\b/gi, 'Baked Tahong')
+          .replace(/\bB\.\s*Garlic\b/gi, 'Butter Garlic')
+          .replace(/\bC\.\s*Tail\b/gi, 'Chicken Tail')
+          .replace(/\bC\.\s*Wings?\b/gi, 'Chicken Wings')
+          .replace(/\bC\.\s*Legs?\b/gi, 'Chicken Legs')
+          .replace(/\bC\.\s*Bulaklak\b/gi, 'Chicharon Bulaklak');
+
+        const key = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!key || key.length < 2 || seen.has(key)) continue;
+        seen.add(key);
+
+        const price = Number(item.price) || 150;
+        const lowerCombined = (name + ' ' + (item.desc || '')).toLowerCase();
+
+        let ingredients = item.desc || 'Traditional Kapampangan heritage seasoning, garlic, onions, native herbs';
+        let allergens = 'None / Allergen Free';
         let calories = '350';
 
-        if (lowerCombined.includes('sisig') || lowerCombined.includes('pork') || lowerCombined.includes('liempo') || lowerCombined.includes('lechon') || lowerCombined.includes('bagnet') || lowerCombined.includes('baboy') || lowerCombined.includes('bulaklak') || lowerCombined.includes('bale')) {
-          if (!extractedIngredients) ingredients = 'Grilled pork mask, calamansi, chili, onions, authentic spices';
+        if (/sisig|pork|liempo|lechon|bagnet|baboy|bulaklak|bale|bopis|dinuguan/.test(lowerCombined)) {
+          if (!item.desc) ingredients = 'Grilled pork mask, calamansi, chili, onions, authentic spices';
           allergens = 'Contains Pork';
           calories = '650';
-        } else if (lowerCombined.includes('kare') || lowerCombined.includes('peanut')) {
-          if (!extractedIngredients) ingredients = 'Beef tripe/meat, rich peanut sauce, string beans, eggplant, bagoong';
-          allergens = 'Contains Peanuts, Shellfish/Shrimp Paste (Bagoong)';
+        } else if (/kare|peanut/.test(lowerCombined)) {
+          if (!item.desc) ingredients = 'Beef tripe & shank, rich peanut sauce, string beans, eggplant, bagoong';
+          allergens = 'Contains Peanuts, Crustaceans (Bagoong)';
           calories = '720';
-        } else if (lowerCombined.includes('chicken') || lowerCombined.includes('inasal') || lowerCombined.includes('manok') || lowerCombined.includes('wing') || lowerCombined.includes('leg') || lowerCombined.includes('tail') || lowerCombined.includes('chix')) {
-          if (!extractedIngredients) ingredients = 'Fresh chicken, lemongrass, garlic, annatto oil';
+        } else if (/chicken|inasal|manok|wing|leg|tail|chix/.test(lowerCombined)) {
+          if (!item.desc) ingredients = 'Fresh chicken, lemongrass, garlic, annatto oil, local spices';
           allergens = 'Contains Poultry';
           calories = '420';
-        } else if (lowerCombined.includes('beef') || lowerCombined.includes('bulalo') || lowerCombined.includes('kaldereta') || lowerCombined.includes('bistek') || lowerCombined.includes('baka') || lowerCombined.includes('steak')) {
-          if (!extractedIngredients) ingredients = 'Tender beef, marrow, native broth, local spices';
+        } else if (/beef|bulalo|kaldereta|bistek|baka|steak|shank/.test(lowerCombined)) {
+          if (!item.desc) ingredients = 'Tender beef, bone marrow, native broth, local spices';
           allergens = 'Contains Beef';
           calories = '680';
-        } else if (lowerCombined.includes('fish') || lowerCombined.includes('shrimp') || lowerCombined.includes('prawn') || lowerCombined.includes('crab') || lowerCombined.includes('bangus') || lowerCombined.includes('tilapia') || lowerCombined.includes('seafood') || lowerCombined.includes('squid') || lowerCombined.includes('calamares') || lowerCombined.includes('tahong') || lowerCombined.includes('salmon') || lowerCombined.includes('hipon') || lowerCombined.includes('tempura')) {
-          if (!extractedIngredients) ingredients = 'Fresh seafood, citrus, garlic, ginger, local vegetables';
-          allergens = 'Contains Seafood / Shellfish';
-          calories = '360';
-        } else if (lowerCombined.includes('bringhe') || lowerCombined.includes('rice') || lowerCombined.includes('sinangag')) {
-          if (!extractedIngredients) ingredients = 'Glutinous rice, coconut milk, turmeric, bell pepper, boiled egg';
+        } else if (/fish|shrimp|prawn|crab|bangus|tilapia|seafood|squid|calamares|tahong|salmon|hipon|tempura|dory/.test(lowerCombined)) {
+          if (!item.desc) ingredients = 'Fresh seafood, citrus, garlic, ginger, local seasonings';
+          allergens = 'Contains Seafood / Crustaceans / Fish';
+          calories = '320';
+        } else if (/bringhe|rice|sinangag|garlic rice/.test(lowerCombined)) {
+          if (!item.desc) ingredients = 'Glutinous rice, coconut milk, turmeric, bell pepper, boiled egg';
           allergens = 'Contains Eggs';
           calories = '520';
-        } else if (lowerCombined.includes('halo') || lowerCombined.includes('dessert') || lowerCombined.includes('flan') || lowerCombined.includes('tibok') || lowerCombined.includes('ube') || lowerCombined.includes('shake') || lowerCombined.includes('turon')) {
-          if (!extractedIngredients) ingredients = 'Carabao milk, ube, sweetened beans, shaved ice, leche flan';
+        } else if (/halo|dessert|flan|tibok|ube|shake|turon|pastillas|sweet/.test(lowerCombined)) {
+          if (!item.desc) ingredients = 'Carabao milk, ube, sweetened beans, shaved ice, leche flan';
           allergens = 'Contains Dairy';
           calories = '380';
-        } else if (lowerCombined.includes('pancit') || lowerCombined.includes('noodle') || lowerCombined.includes('pasta') || lowerCombined.includes('lumpia') || lowerCombined.includes('palabok') || lowerCombined.includes('canton') || lowerCombined.includes('bihon') || lowerCombined.includes('guisado')) {
-          if (!extractedIngredients) ingredients = 'Noodles, mixed vegetables, native seasoning, garlic';
-          allergens = 'Contains Gluten / Wheat';
+        } else if (/pancit|noodle|pasta|lumpia|palabok|canton|bihon|guisado|miki|sotanghon/.test(lowerCombined)) {
+          if (!item.desc) ingredients = 'Noodles, mixed vegetables, native seasoning, garlic, scallions';
+          allergens = 'Contains Gluten / Wheat, Soy';
           calories = '410';
-        } else if (lowerCombined.includes('gulay') || lowerCombined.includes('pinakbet') || lowerCombined.includes('salad') || lowerCombined.includes('vegetable') || lowerCombined.includes('laing') || lowerCombined.includes('chopsuey')) {
-          if (!extractedIngredients) ingredients = 'Fresh local vegetables, squash, okra, string beans, tomatoes';
+        } else if (/gulay|pinakbet|salad|vegetable|laing|chopsuey|tofu|tokwa/.test(lowerCombined)) {
+          if (!item.desc) ingredients = 'Fresh local vegetables, squash, okra, string beans, tomatoes, native seasonings';
           allergens = 'Vegetarian / Plant-Based';
           calories = '220';
-        } else if (lowerCombined.includes('coke') || lowerCombined.includes('royal') || lowerCombined.includes('sprite') || lowerCombined.includes('water') || lowerCombined.includes('drink')) {
+        } else if (/coke|royal|sprite|water|drink|tea|coffee|juice|soda/.test(lowerCombined)) {
           ingredients = 'Refreshing chilled beverage';
           allergens = 'None';
           calories = '140';
         }
 
         parsedDishes.push({
-          name: dishName,
-          price: price || '150',
+          name: name,
+          price: String(price),
           ingredients: ingredients,
           allergens: allergens,
-          calories: calories,
-          image: getRealDishPhoto(dishName)
+          calories: String(calories),
+          image: getRealDishPhoto(name)
         });
       }
 
@@ -11501,7 +11635,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       let detectedAddress = `${detectedMun}, Pampanga`;
       const addrLine = lines.find(l => /barangay|brgy|street|st\.|highway|road|poblacion|avenue|sitio/i.test(l));
       if (addrLine) {
-        detectedAddress = addrLine.replace(/^(?:address|location|exact address)\s*[:\-]\s*/i, '').trim();
+        detectedAddress = addrLine.replace(/^(?:address|location|exact address)\s*(?::|-)\s*/i, '').trim();
       }
 
       // 5. GPS Coordinates
