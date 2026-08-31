@@ -654,10 +654,29 @@ function App() {
       try {
         const liveData = await fetchDjangoRestaurants();
         if (Array.isArray(liveData) && liveData.length > 0) {
-          setRestaurants(liveData);
-          try {
-            localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(liveData));
-          } catch (e) { }
+          const valid = liveData.filter(r => r && r.id);
+          if (valid.length > 0) {
+            setRestaurants(prev => {
+              const liveDict = {};
+              valid.forEach(r => { if (r && r.id) liveDict[r.id] = r; });
+              const currentList = Array.isArray(prev) && prev.length > 0 ? prev : (PRESEEDED_RESTAURANTS || []);
+              const merged = currentList.map(r => (r && r.id && liveDict[r.id]) || r).filter(Boolean);
+              valid.forEach(vr => {
+                if (vr && vr.id && !merged.some(m => m && (m.id === vr.id || (m.name && vr.name && m.name.toLowerCase() === vr.name.toLowerCase())))) {
+                  merged.push(vr);
+                }
+              });
+              (PRESEEDED_RESTAURANTS || []).forEach(pre => {
+                if (pre && pre.id && !merged.some(m => m && (m.id === pre.id || (m.name && pre.name && m.name.toLowerCase() === pre.name.toLowerCase())))) {
+                  merged.push(pre);
+                }
+              });
+              try {
+                localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(merged));
+              } catch (e) { }
+              return merged;
+            });
+          }
         }
         const liveRequests = await fetchDjangoChangeRequests();
         if (Array.isArray(liveRequests) && liveRequests.length > 0) {
