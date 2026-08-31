@@ -496,7 +496,7 @@ function App() {
         if (Array.isArray(parsed) && parsed.length > 0) {
           const sanitized = parsed.map((res, idx) => {
             if (!res || typeof res !== 'object') return null;
-            const preseeded = PRESEEDED_RESTAURANTS.find(p => p.id === res.id || p.name === res.name);
+            const preseeded = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === res.id || (p.name && res.name && p.name === res.name)));
             const menuToUse = (preseeded && Array.isArray(preseeded.menu) && (!Array.isArray(res.menu) || preseeded.menu.length > res.menu.length))
               ? preseeded.menu
               : (Array.isArray(res.menu) && res.menu.length > 0 ? res.menu : (preseeded?.menu || [{ id: `menu-${idx}-0`, name: 'Signature Sisig', price: 250, ingredients: 'Grilled pork snout, calamansi, onions', allergens: 'Contains Pork', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80', healthIndicators: 'Moderate Calorie', nutrition: { calories: 450, protein: 25, carbs: 10, fat: 35 } }]));
@@ -517,8 +517,9 @@ function App() {
           }).filter(Boolean);
 
           // Append any newly added preseeded restaurants that aren't yet in cached localStorage
-          PRESEEDED_RESTAURANTS.forEach(pre => {
-            const exists = sanitized.some(r => r.id === pre.id || r.name.toLowerCase() === pre.name.toLowerCase());
+          (PRESEEDED_RESTAURANTS || []).forEach(pre => {
+            if (!pre || !pre.id) return;
+            const exists = sanitized.some(r => r && (r.id === pre.id || (r.name && pre.name && r.name.toLowerCase() === pre.name.toLowerCase())));
             if (!exists) {
               sanitized.push({ ...pre });
             }
@@ -534,11 +535,12 @@ function App() {
       }
     } catch (e) {
       console.error("LocalStorage load error:", e);
+      try { localStorage.removeItem('kanyamanan_restaurants_db'); } catch (err) { }
     }
 
     if (initialList.length === 0) {
       const usedUsernames = new Set();
-      initialList = PRESEEDED_RESTAURANTS.map((res, idx) => {
+      initialList = (PRESEEDED_RESTAURANTS || []).filter(Boolean).map((res, idx) => {
         let baseUser = res.username;
         if (!baseUser || baseUser === 'owner') {
           baseUser = (res.name || 'restaurant')
@@ -563,7 +565,7 @@ function App() {
       });
     }
 
-    return [...initialList].sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
+    return [...initialList].filter(Boolean).sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
   });
 
   // Persistent Tourist Attractions Database State with auto-healing error recovery
@@ -911,10 +913,13 @@ function App() {
     if (isFirebaseConfigured()) {
       const unsub = subscribeToChangeRequests((cloudRequests) => {
         if (Array.isArray(cloudRequests) && cloudRequests.length > 0) {
-          setPendingApprovals(cloudRequests);
-          try {
-            localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(cloudRequests));
-          } catch (e) { }
+          const valid = cloudRequests.filter(r => r && (r.id || r.restaurantId));
+          if (valid.length > 0) {
+            setPendingApprovals(valid);
+            try {
+              localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(valid));
+            } catch (e) { }
+          }
         }
       });
       return () => unsub();
@@ -927,13 +932,14 @@ function App() {
       const unsub = subscribeToRestaurants((cloudRestaurants) => {
         if (Array.isArray(cloudRestaurants) && cloudRestaurants.length > 0) {
           setRestaurants(prev => {
+            const safePrev = Array.isArray(prev) ? prev.filter(r => r && r.id) : [];
             const cloudDict = {};
             cloudRestaurants.forEach(r => {
               if (r && r.id) cloudDict[r.id] = r;
             });
-            const merged = prev.map(r => cloudDict[r.id] || r);
+            const merged = safePrev.map(r => (r && r.id && cloudDict[r.id]) || r).filter(Boolean);
             cloudRestaurants.forEach(cr => {
-              if (cr && cr.id && !merged.some(r => r.id === cr.id)) {
+              if (cr && cr.id && !merged.some(r => r && r.id === cr.id)) {
                 merged.push(cr);
               }
             });
@@ -1709,7 +1715,13 @@ So, where do we start? 😊`,
   const [groupMembers, setGroupMembers] = useState(() => {
     try {
       const saved = localStorage.getItem('kanyamanan_group_members');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const valid = parsed.filter(m => m && typeof m === 'object' && m.id);
+          if (valid.length > 0) return valid;
+        }
+      }
     } catch (e) { }
     return [
       { id: 'p1', name: 'Person 1', calorieLimit: 2200, dietaryGoal: 'Standard' },
