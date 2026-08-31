@@ -11245,34 +11245,30 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         const initialLines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
 
         const extractPrice = (t) => {
-          // 1. Matches: "₱ 600", "₱ 1,050", "from ₱ 250", "P130", "PHP 500", "500.00"
-          const pMatch = t.match(/(?:from\s+|starts?\s+at\s+)?(?:₱|P|Php|PHP|PhP|Ph)\s*(\d{1,2}(?:,\d{3})+|\d{1,4}(?:\.\d{2})?)/i);
+          const cleaned = t.replace(/[₱\u20B1]/g, 'P').trim();
+
+          // 1. Standalone or trailing price matching "P 650", "P650", "from P 250", "P 1,050", "650", "Php 650", "P. 650"
+          const pMatch = cleaned.match(/(?:from\s+|starts?\s+at\s+)?(?:P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(\d{1,2}(?:,\d{3})+|\d{1,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving)?$/i);
           if (pMatch) {
             const num = parseFloat(pMatch[1].replace(/,/g, ''));
-            return { price: Math.round(num), cleanText: t.replace(pMatch[0], '').trim() };
+            const textWithoutPrice = cleaned.slice(0, pMatch.index).trim();
+            return { price: Math.round(num), cleanText: textWithoutPrice };
           }
 
-          // 2. Trailing price
-          const trailMatch = t.match(/(?:[._\-\s|]|:)+\s*(?:₱|P|Php|PHP)?\s*(\d{1,2}(?:,\d{3})+|\d{2,4}(?:\.\d{2})?)\s*(?:php|pesos)?\s*$/i);
-          if (trailMatch) {
-            const num = parseFloat(trailMatch[1].replace(/,/g, ''));
-            if (num >= 15 && num <= 99999) {
-              return { price: Math.round(num), cleanText: t.slice(0, trailMatch.index).trim() };
-            }
-          }
-
-          // 3. Standalone number
-          const numMatch = t.match(/^\s*(?:₱|P|Php|PHP)?\s*(\d{1,2}(?:,\d{3})+|\d{2,4}(?:\.\d{2})?)\s*$/i);
-          if (numMatch) {
-            const num = parseFloat(numMatch[1].replace(/,/g, ''));
-            return { price: Math.round(num), cleanText: '' };
+          // 2. Inline trailing price "Dish Name - P650"
+          const inlineMatch = cleaned.match(/(?:[._\-\s|]|:)+\s*(?:P|Php|PHP)?\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*$/i);
+          if (inlineMatch) {
+            const num = parseFloat(inlineMatch[1].replace(/,/g, ''));
+            const textWithoutPrice = cleaned.slice(0, inlineMatch.index).trim();
+            return { price: Math.round(num), cleanText: textWithoutPrice };
           }
 
           return null;
         };
 
         const isStandalonePriceLine = (l) => {
-          return /^(?:from\s+|starts?\s+at\s+)?(?:(?:₱|P|Php|PHP|PhP)\s*)?\d{1,2}(?:,\d{3})*(?:\.\d{2})?\s*(?:php|pesos)?$/i.test(l.trim());
+          const cleaned = l.replace(/[₱\u20B1]/g, 'P').trim();
+          return /^(?:from\s+|starts?\s+at\s+)?(?:P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(?:\d{1,2}(?:,\d{3})+|\d{1,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving)?$/i.test(cleaned);
         };
 
         const isSectionHeader = (l) => {
@@ -11309,10 +11305,11 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             continue;
           }
 
-          // Price line
+          // Price line (standalone price like "P 650", "₱ 650", "650")
           const priceExtracted = extractPrice(line);
+          const isPurePrice = isStandalonePriceLine(line) || (priceExtracted && !priceExtracted.cleanText);
 
-          if (isStandalonePriceLine(line) || (priceExtracted && !priceExtracted.cleanText)) {
+          if (isPurePrice) {
             const priceVal = priceExtracted ? priceExtracted.price : Math.round(parseFloat(line.replace(/[^0-9.]/g, '')));
             if (currentItem) {
               currentItem.price = priceVal;
@@ -11320,7 +11317,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             continue;
           }
 
-          // Line with price inline
+          // Line with price inline ("Dish Name P650")
           if (priceExtracted && priceExtracted.cleanText.length >= 2) {
             if (currentItem) items.push(currentItem);
             currentItem = {
@@ -11336,10 +11333,13 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           const isDesc = (
             lowerLine.startsWith('for reference') ||
             lowerLine.startsWith('for ref') ||
+            lowerLine.startsWith('tender') ||
+            lowerLine.startsWith('crispy') ||
+            lowerLine.startsWith('savory') ||
+            lowerLine.startsWith('rich and') ||
+            lowerLine.startsWith('golden') ||
+            lowerLine.includes('seasoned') ||
             lowerLine.includes('served with') ||
-            lowerLine.includes('crispy') ||
-            lowerLine.includes('savory') ||
-            lowerLine.includes('tender') ||
             lowerLine.includes('cooked with') ||
             lowerLine.includes('noodle dish') ||
             lowerLine.includes('with vinegar') ||
@@ -11353,6 +11353,15 @@ ${JSON.stringify(updatedMessages.slice(-8))}
               currentItem.desc = currentItem.desc ? `${currentItem.desc}, ${cleanDesc}` : cleanDesc;
               continue;
             }
+          }
+
+          // Safety check: Never treat standalone price line as a dish name
+          if (/^(?:P|₱|Php|PHP|Ph)?\.?\s*\d+/i.test(line.trim())) {
+            const fallbackPrice = Math.round(parseFloat(line.replace(/[^0-9.]/g, '')));
+            if (currentItem && fallbackPrice) {
+              currentItem.price = fallbackPrice;
+            }
+            continue;
           }
 
           // New dish name
