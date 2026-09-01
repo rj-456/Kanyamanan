@@ -515,7 +515,8 @@ function App() {
     "Ocampo-Lansang Turrones & Cafe",
     "Santo Tomas Palayok Kitchen",
     "Bala Kayu Silogan Atbp.",
-    "Sasmuan Coastal Seafood & Cafe"
+    "Sasmuan Coastal Seafood & Cafe",
+    "Guagua Kusina Matua"
   ].map(s => s.toLowerCase().trim());
 
   const isLegacyPreseeded = (res) => {
@@ -537,8 +538,8 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v4_clean_dataset') {
-        localStorage.setItem('kanyamanan_db_version', 'v4_clean_dataset');
+      if (dbVersion !== 'v5_clean_dataset') {
+        localStorage.setItem('kanyamanan_db_version', 'v5_clean_dataset');
         localStorage.removeItem('kanyamanan_restaurants_db');
       }
     } catch (_) {}
