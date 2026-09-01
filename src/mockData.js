@@ -1,34 +1,46 @@
 // High-Fidelity Pre-seeded Culinary Database for Pampanga (Kanyamanan Core)
 
 export const TRAVEL_CORRIDORS = [
-  { id: 'NLEX', name: 'NLEX Corridor', route: 'North Luzon Expressway' },
-  { id: 'MacArthur', name: 'MacArthur Highway Line', route: 'MacArthur Highway' },
-  { id: 'JASA', name: 'Jose Abad Santos Avenue (JASA) Line', route: 'Jose Abad Santos Avenue' }
+  {
+    "id": "NLEX",
+    "name": "NLEX Corridor",
+    "route": "North Luzon Expressway"
+  },
+  {
+    "id": "MacArthur",
+    "name": "MacArthur Highway Line",
+    "route": "MacArthur Highway"
+  },
+  {
+    "id": "JASA",
+    "name": "Jose Abad Santos Avenue (JASA) Line",
+    "route": "Jose Abad Santos Avenue"
+  }
 ];
 
 export const MUNICIPALITIES = [
-  'Angeles City',
-  'Apalit',
-  'Arayat',
-  'Bacolor',
-  'Candaba',
-  'City of San Fernando',
-  'Floridablanca',
-  'Guagua',
-  'Lubao',
-  'Mabalacat City',
-  'Macabebe',
-  'Magalang',
-  'Masantol',
-  'Mexico',
-  'Minalin',
-  'Porac',
-  'San Luis',
-  'San Simon',
-  'Santa Ana',
-  'Santa Rita',
-  'Santo Tomas',
-  'Sasmuan'
+  "Angeles City",
+  "Apalit",
+  "Arayat",
+  "Bacolor",
+  "Candaba",
+  "City of San Fernando",
+  "Floridablanca",
+  "Guagua",
+  "Lubao",
+  "Mabalacat City",
+  "Macabebe",
+  "Magalang",
+  "Masantol",
+  "Mexico",
+  "Minalin",
+  "Porac",
+  "San Luis",
+  "San Simon",
+  "Santa Ana",
+  "Santa Rita",
+  "Santo Tomas",
+  "Sasmuan"
 ];
 
 export const PRESEEDED_RESTAURANTS = [
@@ -5782,408 +5794,6 @@ export const PRESEEDED_RESTAURANTS = [
     ]
   },
   {
-    "id": "res-alviz-farm-santa-rita",
-    "name": "Alviz Farm Heritage Kitchen & Experience",
-    "municipality": "Santa Rita",
-    "corridor": "MacArthur Highway Line",
-    "operatingHours": "09:00 AM - 08:00 PM",
-    "priceTier": "$",
-    "lat": 15.002,
-    "lng": 120.614,
-    "categories": [
-      "🌿 Eco-Dining & Farm",
-      "🏛️ Heritage Institution"
-    ],
-    "description": "Famous Santa Rita heritage farm offering interactive Suman & Barquillos making workshops and an authentic Kapampangan fiesta buffet feast.",
-    "address": "Barangay San Agustin, Santa Rita, Pampanga",
-    "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Alviz Farm Santa Rita Main",
-        "municipality": "Santa Rita",
-        "address": "San Agustin, Santa Rita, Pampanga",
-        "operatingHours": "09:00 AM - 08:00 PM",
-        "lat": 15.002,
-        "lng": 120.614
-      }
-    ],
-    "username": "alvizfarm_owner",
-    "password": "password123",
-    "occupancy": [
-      20,
-      40,
-      65,
-      90,
-      95,
-      90,
-      65,
-      45,
-      65,
-      90,
-      95,
-      80,
-      50,
-      25,
-      10
-    ],
-    "menu": [
-      {
-        "id": "alviz-1",
-        "name": "Buro Platter with Fried Hito",
-        "price": 350,
-        "ingredients": "Fermented rice fish paste, fried catfish, fresh mustard leaves, eggplant",
-        "allergens": "Contains Fish",
-        "healthIndicators": "High Probiotics",
-        "nutrition": {
-          "calories": 420,
-          "protein": 32,
-          "carbs": 28,
-          "fat": 18
-        },
-        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        "id": "alviz-2",
-        "name": "Asadu Matua",
-        "price": 380,
-        "ingredients": "Traditional braised pork belly, calamansi, tomatoes, spices",
-        "allergens": "Contains Pork",
-        "healthIndicators": "Rich Heirloom",
-        "nutrition": {
-          "calories": 640,
-          "protein": 34,
-          "carbs": 14,
-          "fat": 50
-        },
-        "image": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        "id": "alviz-3",
-        "name": "Suman with Suklati Batirol",
-        "price": 120,
-        "ingredients": "Glutinous rice suman, rich cacao batirol hot chocolate",
-        "allergens": "Contains Dairy",
-        "healthIndicators": "Native Sweet",
-        "nutrition": {
-          "calories": 310,
-          "protein": 6,
-          "carbs": 48,
-          "fat": 10
-        },
-        "image": "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "apalit-lechon",
-    "name": "Apag Apalit Lechon & Grill",
-    "municipality": "Apalit",
-    "corridor": "MacArthur Highway Line",
-    "operatingHours": "09:00 AM - 09:00 PM",
-    "priceTier": "$$",
-    "lat": 14.9654,
-    "lng": 120.7602,
-    "categories": [
-      "🪵 Wood-Fired Traditional"
-    ],
-    "description": "Famous for Apalit-style charcoal spit-roasted pork with a rich liver gravy base, cooked over red clay brick ovens.",
-    "address": "Barangay San Nicolas, Apalit, Pampanga",
-    "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Apag Apalit Lechon & Grill (Main Branch)",
-        "municipality": "Apalit",
-        "address": "Barangay San Nicolas, Apalit, Pampanga",
-        "operatingHours": "09:00 AM - 09:00 PM",
-        "lat": 14.9654,
-        "lng": 120.7602
-      }
-    ],
-    "username": "apag_apalit_lechon___grill_owner",
-    "password": "password123",
-    "occupancy": [
-      10,
-      15,
-      30,
-      75,
-      90,
-      85,
-      50,
-      45,
-      60,
-      80,
-      90,
-      70,
-      40,
-      20,
-      10
-    ],
-    "menu": [
-      {
-        "id": "ap-lechon",
-        "name": "Apalit Charcoal Lechon Plate",
-        "price": 380,
-        "ingredients": "Whole roasted pig, lemongrass, garlic, native vinegar liver sauce",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork. Liver sauce contains Gluten.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fats and Purines.",
-        "nutrition": {
-          "calories": 690,
-          "protein": 38,
-          "carbs": 5,
-          "fat": 50
-        },
-        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        "id": "ap-alanganin",
-        "name": "Pancit Alanganin Apalit",
-        "price": 180,
-        "ingredients": "Local noodles, creamy pork bone marrow broth, dynamic cabbage, chicharon",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Gluten, Soy, and Pork.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Sodium. Carbohydrate dense.",
-        "nutrition": {
-          "calories": 510,
-          "protein": 20,
-          "carbs": 65,
-          "fat": 18
-        },
-        "image": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "abag-marangle-lubao",
-    "name": "Apag Marangle",
-    "municipality": "Lubao",
-    "corridor": "Jose Abad Santos Avenue (JASA) Line",
-    "operatingHours": "10:00 AM - 09:00 PM",
-    "priceTier": "$$",
-    "lat": 14.9452,
-    "lng": 120.5982,
-    "categories": [
-      "🪵 Wood-Fired Traditional"
-    ],
-    "description": "An eco-restaurant styled like a nipa hut over water, offering traditional farmer dishes cooked over fire and served in clay pots (palayok).",
-    "address": "Barangay Lourdes, Lubao, Pampanga",
-    "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Apag Marangle (Main Branch)",
-        "municipality": "Lubao",
-        "address": "Barangay Lourdes, Lubao, Pampanga",
-        "operatingHours": "10:00 AM - 09:00 PM",
-        "lat": 14.9452,
-        "lng": 120.5982
-      }
-    ],
-    "username": "apag_marangle_owner",
-    "password": "password123",
-    "occupancy": [
-      8,
-      15,
-      30,
-      65,
-      80,
-      60,
-      45,
-      50,
-      75,
-      85,
-      70,
-      50,
-      25,
-      10,
-      5
-    ],
-    "menu": [
-      {
-        "id": "am-pidpid",
-        "name": "Pidpid (Stuffed Catfish)",
-        "price": 390,
-        "ingredients": "Freshwater catfish, ground pork filling, lemongrass, ginger, vinegar basting",
-        "allergens": "⚠️ ALLERGEN WARNING: Fish and Pork allergen.",
-        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Lean Protein, healthy fish lipids (omega-3). Low Carb.",
-        "nutrition": {
-          "calories": 380,
-          "protein": 35,
-          "carbs": 5,
-          "fat": 22
-        },
-        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "res-apung-otings-floridablanca",
-    "name": "Apung Oting's Heritage Restaurant",
-    "municipality": "Floridablanca",
-    "corridor": "Mount Arayat Line",
-    "operatingHours": "10:00 AM - 09:00 PM",
-    "priceTier": "$",
-    "lat": 14.975,
-    "lng": 120.531,
-    "categories": [
-      "🏛️ Ancestral Kitchen",
-      "🔥 Heritage Sisig"
-    ],
-    "description": "Traditional Floridablanca ancestral kitchen celebrated for authentic heirloom Pork Sisig, Asadong Babi, and slow-cooked Bringhe.",
-    "address": "Barangay San Nicolas, Floridablanca, Pampanga",
-    "image": "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Apung Oting's Floridablanca Main",
-        "municipality": "Floridablanca",
-        "address": "Valdez, Floridablanca, Pampanga",
-        "operatingHours": "10:00 AM - 09:00 PM",
-        "lat": 14.975,
-        "lng": 120.531
-      }
-    ],
-    "username": "apung_oting_owner",
-    "password": "password123",
-    "occupancy": [
-      10,
-      20,
-      45,
-      75,
-      90,
-      85,
-      55,
-      35,
-      55,
-      75,
-      90,
-      70,
-      40,
-      20,
-      10
-    ],
-    "menu": [
-      {
-        "id": "oting-1",
-        "name": "Apung Oting's Pork Sisig",
-        "price": 240,
-        "ingredients": "Grilled pork snout, ears, calamansi, chili, onion",
-        "allergens": "Contains Pork",
-        "healthIndicators": "High Lipids",
-        "nutrition": {
-          "calories": 650,
-          "protein": 26,
-          "carbs": 6,
-          "fat": 58
-        },
-        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        "id": "oting-2",
-        "name": "Asadong Babi Matua",
-        "price": 280,
-        "ingredients": "Braised pork belly, kalamansi, tomatoes, soy reduction",
-        "allergens": "Contains Pork, Soy",
-        "healthIndicators": "Rich Flavor",
-        "nutrition": {
-          "calories": 590,
-          "protein": 30,
-          "carbs": 12,
-          "fat": 46
-        },
-        "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "magalang-kitchen",
-    "name": "Atching Lillian's Ancestral Kitchen",
-    "municipality": "Magalang",
-    "corridor": "NLEX Corridor",
-    "operatingHours": "10:00 AM - 05:00 PM",
-    "priceTier": "$$$$",
-    "lat": 15.2215,
-    "lng": 120.6612,
-    "categories": [
-      "🏛️ Ancestral Kitchen"
-    ],
-    "description": "The culinary shrine of Lillian Borromeo, Pampanga’s culinary historian. Offers pre-booked ancestral cooking demos and authentic pastillas.",
-    "address": "Barangay Santo Rosario, Magalang, Pampanga",
-    "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Atching Lillian's Ancestral Kitchen (Main Branch)",
-        "municipality": "Magalang",
-        "address": "Barangay Santo Rosario, Magalang, Pampanga",
-        "operatingHours": "10:00 AM - 05:00 PM",
-        "lat": 15.2215,
-        "lng": 120.6612
-      }
-    ],
-    "username": "atching_lillian_s_ancestral_kitchen_owner",
-    "password": "password123",
-    "occupancy": [
-      5,
-      5,
-      20,
-      80,
-      100,
-      100,
-      70,
-      40,
-      20,
-      10,
-      0,
-      0,
-      0,
-      0,
-      0
-    ],
-    "menu": [
-      {
-        "id": "ml-pistu",
-        "name": "Pistu (Heritage Egg Hash)",
-        "price": 380,
-        "ingredients": "Egg custard batter, minced beef, pork bits, raisins, peas, butter, native spices",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Eggs, Dairy, Beef, and Pork.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Cholesterol and Sodium.",
-        "nutrition": {
-          "calories": 490,
-          "protein": 32,
-          "carbs": 10,
-          "fat": 36
-        },
-        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
     "id": "candaba-b-farm-cafe",
     "name": "B Farm Cafe By Alexa's Kitchen",
     "municipality": "Candaba",
@@ -6358,90 +5968,6 @@ export const PRESEEDED_RESTAURANTS = [
     ]
   },
   {
-    "id": "res-bala-kayu-sasmuan",
-    "name": "Bala Kayu Silogan Atbp.",
-    "municipality": "Sasmuan",
-    "corridor": "MacArthur Highway Line",
-    "operatingHours": "06:00 AM - 08:00 PM",
-    "priceTier": "$",
-    "lat": 14.939,
-    "lng": 120.615,
-    "categories": [
-      "🍚 Rice Bowls & Silog",
-      "🏛️ Ancestral Kitchen"
-    ],
-    "description": "Budget-friendly Sasmuan silogan serving Combisilog, Lechon Kawali Ala Carte, and Special Pork & Tuna Sisig.",
-    "address": "Barangay Santo Rosario, Sasmuan, Pampanga",
-    "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Bala Kayu Sasmuan Main",
-        "municipality": "Sasmuan",
-        "address": "San Nicolas 2nd, Sasmuan, Pampanga",
-        "operatingHours": "06:00 AM - 08:00 PM",
-        "lat": 14.939,
-        "lng": 120.615
-      }
-    ],
-    "username": "balakayu_owner",
-    "password": "password123",
-    "occupancy": [
-      20,
-      40,
-      65,
-      85,
-      95,
-      80,
-      55,
-      35,
-      55,
-      80,
-      90,
-      70,
-      40,
-      20,
-      10
-    ],
-    "menu": [
-      {
-        "id": "balakayu-1",
-        "name": "Combisilog (Tapa & Tosino)",
-        "price": 68,
-        "ingredients": "Marinated beef tapa, sweet pork tocino, fried egg, garlic rice",
-        "allergens": "Contains Pork, Eggs",
-        "healthIndicators": "High Energy",
-        "nutrition": {
-          "calories": 520,
-          "protein": 24,
-          "carbs": 54,
-          "fat": 22
-        },
-        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        "id": "balakayu-2",
-        "name": "Special Pork & Tuna Sisig",
-        "price": 120,
-        "ingredients": "Sizzling pork and tuna flakes, calamansi, onions",
-        "allergens": "Contains Pork, Fish",
-        "healthIndicators": "High Protein",
-        "nutrition": {
-          "calories": 450,
-          "protein": 28,
-          "carbs": 8,
-          "fat": 34
-        },
-        "image": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
     "id": "san-fernando-bale-capampangan",
     "name": "Bale Capampangan",
     "municipality": "City of San Fernando",
@@ -6593,159 +6119,6 @@ export const PRESEEDED_RESTAURANTS = [
           "fat": 55
         },
         "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "res-bale-lubao",
-    "name": "Bale Lubao Heritage Kitchen",
-    "municipality": "Lubao",
-    "corridor": "MacArthur Highway Line",
-    "operatingHours": "10:00 AM - 09:00 PM",
-    "priceTier": "$",
-    "lat": 14.936,
-    "lng": 120.601,
-    "categories": [
-      "🏛️ Ancestral Kitchen",
-      "🐟 Local Seafood"
-    ],
-    "description": "Rustic heritage restaurant in Lubao serving signature Crispy Pata, Inihaw na Tilapia with Buro, and traditional Pancit Luglug.",
-    "address": "Barangay San Jose, Lubao, Pampanga",
-    "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Bale Lubao Main Branch",
-        "municipality": "Lubao",
-        "address": "San Nicolas 1st, Lubao, Pampanga",
-        "operatingHours": "10:00 AM - 09:00 PM",
-        "lat": 14.936,
-        "lng": 120.601
-      }
-    ],
-    "username": "balelubao_owner",
-    "password": "password123",
-    "occupancy": [
-      15,
-      25,
-      50,
-      80,
-      90,
-      85,
-      60,
-      40,
-      60,
-      80,
-      90,
-      75,
-      45,
-      20,
-      10
-    ],
-    "menu": [
-      {
-        "id": "balelubao-1",
-        "name": "Bale Lubao Crispy Pata",
-        "price": 580,
-        "ingredients": "Crispy deep fried pork knuckle, soy vinegar dip",
-        "allergens": "Contains Pork, Soy",
-        "healthIndicators": "High Lipids",
-        "nutrition": {
-          "calories": 920,
-          "protein": 55,
-          "carbs": 8,
-          "fat": 74
-        },
-        "image": "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        "id": "balelubao-2",
-        "name": "Inihaw na Tilapia with Buru",
-        "price": 240,
-        "ingredients": "Char-grilled tilapia fish, fermented rice fish paste, fresh veggies",
-        "allergens": "Contains Fish",
-        "healthIndicators": "High Protein",
-        "nutrition": {
-          "calories": 380,
-          "protein": 34,
-          "carbs": 14,
-          "fat": 18
-        },
-        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "res-bariotik-kitchen-floridablanca",
-    "name": "Bariotik Kitchen and Garden",
-    "municipality": "Floridablanca",
-    "corridor": "Mount Arayat Line",
-    "operatingHours": "10:00 AM - 08:30 PM",
-    "priceTier": "$",
-    "lat": 14.978,
-    "lng": 120.535,
-    "categories": [
-      "🌿 Eco-Dining & Farm",
-      "🍖 Buffet & Grill"
-    ],
-    "description": "Scenic farm garden buffet destination offering unlimited Kapampangan fiesta spreads, grilled specialties, and refreshing farm juices.",
-    "address": "Barangay Santo Rosario, Floridablanca, Pampanga",
-    "image": "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Bariotik Kitchen Floridablanca Main",
-        "municipality": "Floridablanca",
-        "address": "Bariotik Garden, Floridablanca, Pampanga",
-        "operatingHours": "10:00 AM - 08:30 PM",
-        "lat": 14.978,
-        "lng": 120.535
-      }
-    ],
-    "username": "bariotik_owner",
-    "password": "password123",
-    "occupancy": [
-      20,
-      35,
-      60,
-      85,
-      95,
-      90,
-      65,
-      40,
-      60,
-      85,
-      95,
-      80,
-      50,
-      25,
-      10
-    ],
-    "menu": [
-      {
-        "id": "bariotik-1",
-        "name": "Bariotik Unlimited Heritage Buffet",
-        "price": 349,
-        "ingredients": "Sisig, Lechon Kawali, Kare-Kare, Biringhe, Drinks",
-        "allergens": "Contains Pork, Peanuts, Eggs",
-        "healthIndicators": "Unlimited Feast",
-        "nutrition": {
-          "calories": 880,
-          "protein": 42,
-          "carbs": 65,
-          "fat": 50
-        },
-        "image": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=500&q=80"
       }
     ]
   },
@@ -17061,75 +16434,6 @@ export const PRESEEDED_RESTAURANTS = [
     ]
   },
   {
-    "id": "res-ernestos-santa-ana",
-    "name": "Ernesto's Kitchen & Bar",
-    "municipality": "Santa Ana",
-    "corridor": "Mount Arayat Line",
-    "operatingHours": "11:00 AM - 10:00 PM",
-    "priceTier": "$",
-    "lat": 15.097,
-    "lng": 120.769,
-    "categories": [
-      "🏛️ Ancestral Kitchen",
-      "🍖 Barbecue & Grill"
-    ],
-    "description": "Santa Ana's favorite dining kitchen famed for Ernesto's Signature Sisig, Sizzling Beef Tapa, and Crispy Pata.",
-    "address": "Barangay Sto. Niño, Santa Ana, Pampanga",
-    "image": "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Ernesto's Kitchen Santa Ana Main",
-        "municipality": "Santa Ana",
-        "address": "San Joaquin, Santa Ana, Pampanga",
-        "operatingHours": "11:00 AM - 10:00 PM",
-        "lat": 15.097,
-        "lng": 120.769
-      }
-    ],
-    "username": "ernestos_owner",
-    "password": "password123",
-    "occupancy": [
-      15,
-      25,
-      50,
-      75,
-      90,
-      85,
-      60,
-      35,
-      55,
-      75,
-      90,
-      70,
-      40,
-      20,
-      10
-    ],
-    "menu": [
-      {
-        "id": "ernesto-1",
-        "name": "Ernesto's Signature Sisig",
-        "price": 260,
-        "ingredients": "Crispy pork mask, chicken liver, calamansi, native chili",
-        "allergens": "Contains Pork",
-        "healthIndicators": "High Lipids",
-        "nutrition": {
-          "calories": 640,
-          "protein": 27,
-          "carbs": 6,
-          "fat": 56
-        },
-        "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
     "id": "res-erwins-sisigan-ningnangan-arayat",
     "name": "Erwin's Sisigan & Ningnangan",
     "municipality": "Arayat",
@@ -17790,90 +17094,6 @@ export const PRESEEDED_RESTAURANTS = [
     ]
   },
   {
-    "id": "res-fat-grille-santa-rita",
-    "name": "Fat Grille Restaurant",
-    "municipality": "Santa Rita",
-    "corridor": "MacArthur Highway Line",
-    "operatingHours": "11:00 AM - 10:00 PM",
-    "priceTier": "$",
-    "lat": 15.004,
-    "lng": 120.617,
-    "categories": [
-      "🍖 Barbecue & Grill",
-      "🔥 Heritage Sisig"
-    ],
-    "description": "Popular Santa Rita grill destination serving Crispy Pata, Crispy Ulo, Sizzling Sisig, and Lechon Kawali Kare-Kare.",
-    "address": "Barangay Lourdes, Santa Rita, Pampanga",
-    "image": "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Fat Grille Santa Rita Main",
-        "municipality": "Santa Rita",
-        "address": "San Vicente, Santa Rita, Pampanga",
-        "operatingHours": "11:00 AM - 10:00 PM",
-        "lat": 15.004,
-        "lng": 120.617
-      }
-    ],
-    "username": "fatgrille_owner",
-    "password": "password123",
-    "occupancy": [
-      15,
-      30,
-      55,
-      80,
-      95,
-      90,
-      65,
-      40,
-      65,
-      85,
-      95,
-      75,
-      45,
-      20,
-      10
-    ],
-    "menu": [
-      {
-        "id": "fatgrille-1",
-        "name": "Fat Grille Crispy Pata",
-        "price": 598,
-        "ingredients": "Crispy deep-fried pork knuckle with soy-vinegar garlic dip",
-        "allergens": "Contains Pork, Soy",
-        "healthIndicators": "High Lipids",
-        "nutrition": {
-          "calories": 950,
-          "protein": 58,
-          "carbs": 6,
-          "fat": 78
-        },
-        "image": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        "id": "fatgrille-2",
-        "name": "Sizzling Pork Sisig",
-        "price": 238,
-        "ingredients": "Chopped pork mask, ear, liver, calamansi, chili, onion",
-        "allergens": "Contains Pork",
-        "healthIndicators": "High Lipids",
-        "nutrition": {
-          "calories": 660,
-          "protein": 28,
-          "carbs": 5,
-          "fat": 59
-        },
-        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
     "id": "res-fhinas-panciteria-arayat",
     "name": "Fhinas Panciteria",
     "municipality": "Arayat",
@@ -18240,74 +17460,6 @@ export const PRESEEDED_RESTAURANTS = [
           "fat": 0
         },
         "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "floridablanca-sugar",
-    "name": "Floridablanca Sugar Trail Resto",
-    "municipality": "Floridablanca",
-    "corridor": "Jose Abad Santos Avenue (JASA) Line",
-    "operatingHours": "08:00 AM - 08:00 PM",
-    "priceTier": "$$",
-    "lat": 14.9752,
-    "lng": 120.5012,
-    "categories": [
-      "🪵 Wood-Fired Traditional"
-    ],
-    "description": "Celebrating Floridablanca’s agricultural history, this kitchen infuses heritage sugar-curing methods into wood-fired pork and sweet native puddings.",
-    "address": "Barangay San Agustin, Floridablanca, Pampanga",
-    "image": "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Floridablanca Sugar Trail Resto (Main Branch)",
-        "municipality": "Floridablanca",
-        "address": "Barangay San Agustin, Floridablanca, Pampanga",
-        "operatingHours": "08:00 AM - 08:00 PM",
-        "lat": 14.9752,
-        "lng": 120.5012
-      }
-    ],
-    "username": "floridablanca_sugar_trail_resto_owner",
-    "password": "password123",
-    "occupancy": [
-      10,
-      20,
-      40,
-      80,
-      95,
-      80,
-      50,
-      45,
-      60,
-      80,
-      85,
-      70,
-      40,
-      15,
-      5
-    ],
-    "menu": [
-      {
-        "id": "fl-tocino",
-        "name": "Sugar-Glazed Pork Tocino (Pindang)",
-        "price": 240,
-        "ingredients": "Pork loin slices, raw sugar cane juice, sea salt, garlic",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Sugars and Saturated Fats.",
-        "nutrition": {
-          "calories": 530,
-          "protein": 30,
-          "carbs": 28,
-          "fat": 32
-        },
-        "image": "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=500&q=80"
       }
     ]
   },
@@ -26912,89 +26064,6 @@ export const PRESEEDED_RESTAURANTS = [
     ]
   },
   {
-    "id": "bacolor-tamales",
-    "name": "Kusina San Guillermo",
-    "municipality": "Bacolor",
-    "corridor": "Jose Abad Santos Avenue (JASA) Line",
-    "operatingHours": "09:00 AM - 08:00 PM",
-    "priceTier": "$$",
-    "lat": 15.0003,
-    "lng": 120.6508,
-    "categories": [
-      "🏛️ Ancestral Kitchen"
-    ],
-    "description": "Located near the historic sunken church of Bacolor. Known for preserving the authentic pre-hispanic Pampanga Tamales recipe.",
-    "address": "Barangay San Jose, Bacolor, Pampanga",
-    "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Kusina San Guillermo (Main Branch)",
-        "municipality": "Bacolor",
-        "address": "Barangay San Jose, Bacolor, Pampanga",
-        "operatingHours": "09:00 AM - 08:00 PM",
-        "lat": 15.0003,
-        "lng": 120.6508
-      }
-    ],
-    "username": "kusina_san_guillermo_owner",
-    "password": "password123",
-    "occupancy": [
-      15,
-      30,
-      50,
-      85,
-      90,
-      70,
-      45,
-      55,
-      75,
-      85,
-      80,
-      55,
-      30,
-      10,
-      0
-    ],
-    "menu": [
-      {
-        "id": "ba-tamales",
-        "name": "Bacolor Tamales (Bobotu)",
-        "price": 150,
-        "ingredients": "Ground rice flour, coconut milk, peanut paste, chicken strips, salted duck egg",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Peanuts, Eggs, and Coconut.",
-        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Moderate Fats, Gluten-Free alternative meal.",
-        "nutrition": {
-          "calories": 380,
-          "protein": 14,
-          "carbs": 45,
-          "fat": 18
-        },
-        "image": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        "id": "ba-cookies",
-        "name": "Panecillos de San Nicolas",
-        "price": 200,
-        "ingredients": "Arrowroot starch, egg yolks, coconut milk, sugar, butter",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Eggs, Dairy, and Coconut.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Simple Sugars. Calorie-dense dessert.",
-        "nutrition": {
-          "calories": 280,
-          "protein": 4,
-          "carbs": 42,
-          "fat": 10
-        },
-        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
     "id": "res-1787666413358",
     "name": "Kuya Sizzlers Mexico",
     "municipality": "Mexico",
@@ -29158,89 +28227,6 @@ export const PRESEEDED_RESTAURANTS = [
     ]
   },
   {
-    "id": "san-fernando-lola-ima",
-    "name": "Lola Ima Buffet & Catering",
-    "municipality": "City of San Fernando",
-    "corridor": "MacArthur Highway Line",
-    "operatingHours": "10:30 AM - 09:00 PM",
-    "priceTier": "$",
-    "lat": 15.038,
-    "lng": 120.6855,
-    "categories": [
-      "🏛️ Ancestral Kitchen"
-    ],
-    "description": "Traditional Kapampangan buffet serving heritage stews, batchoy, ginataang kuhol snails, adobong balot, biringhe sticky rice, and house desserts.",
-    "address": "Barangay Lourdes, City of San Fernando, Pampanga",
-    "image": "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Lola Ima Buffet & Catering (Main Branch)",
-        "municipality": "City of San Fernando",
-        "address": "Barangay Lourdes, City of San Fernando, Pampanga",
-        "operatingHours": "10:30 AM - 09:00 PM",
-        "lat": 15.038,
-        "lng": 120.6855
-      }
-    ],
-    "username": "lolaima",
-    "password": "lolaima123",
-    "occupancy": [
-      15,
-      30,
-      55,
-      85,
-      95,
-      85,
-      65,
-      55,
-      75,
-      90,
-      95,
-      80,
-      50,
-      25,
-      10
-    ],
-    "menu": [
-      {
-        "id": "li-lunch-buffet",
-        "name": "Lola Ima Lunch Buffet Special",
-        "price": 315,
-        "ingredients": "Unlimited batchoy, corn soup, fish fillet, ginataang kuhol snails, pork kare-kare, pititchan chicharon, kaldereta ribs, rice, desserts & drinks",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Snails/Shellfish, Peanuts, and Soy.",
-        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Authentic Ancestral Kapampangan Buffet.",
-        "nutrition": {
-          "calories": 1080,
-          "protein": 52,
-          "carbs": 98,
-          "fat": 50
-        },
-        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        "id": "li-dinner-buffet",
-        "name": "Lola Ima Dinner Buffet Special",
-        "price": 349,
-        "ingredients": "Unlimited pork sisig, biringhe sticky rice, adobong balot, pork lengua, horno baked roast, sampelut, lelut mais, drinks",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Duck Eggs, Soy, and Glutinous Rice.",
-        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Premium Heritage Dinner Buffet Selection.",
-        "nutrition": {
-          "calories": 1180,
-          "protein": 58,
-          "carbs": 108,
-          "fat": 56
-        },
-        "image": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
     "id": "res-1787658130139",
     "name": "Lolaima Pampanga Cuisine",
     "municipality": "City of San Fernando",
@@ -29484,74 +28470,6 @@ export const PRESEEDED_RESTAURANTS = [
           "fat": 15
         },
         "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "mabalacat-bibingka",
-    "name": "Mabalacat Native Treats & Claypot",
-    "municipality": "Mabalacat City",
-    "corridor": "NLEX Corridor",
-    "operatingHours": "09:00 AM - 09:00 PM",
-    "priceTier": "$$",
-    "lat": 15.2212,
-    "lng": 120.5794,
-    "categories": [
-      "🪵 Wood-Fired Traditional"
-    ],
-    "description": "Specializes in coal-fired bibingka cake lined with charred banana leaves, offering a smoky, buttery bite.",
-    "address": "Barangay Sto. Niño, Mabalacat City, Pampanga",
-    "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Mabalacat Native Treats & Claypot (Main Branch)",
-        "municipality": "Mabalacat City",
-        "address": "Barangay Sto. Niño, Mabalacat City, Pampanga",
-        "operatingHours": "09:00 AM - 09:00 PM",
-        "lat": 15.2212,
-        "lng": 120.5794
-      }
-    ],
-    "username": "mabalacat_native_treats___claypot_owner",
-    "password": "password123",
-    "occupancy": [
-      10,
-      25,
-      40,
-      60,
-      75,
-      70,
-      55,
-      60,
-      70,
-      85,
-      90,
-      70,
-      40,
-      20,
-      10
-    ],
-    "menu": [
-      {
-        "id": "ma-bibingka",
-        "name": "Mabalacat Claypot Bibingka",
-        "price": 180,
-        "ingredients": "Rice galapong, carabao cheese, salted egg, butter, grated coconut",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Dairy, Eggs, and Coconut.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Carbohydrates and Sugars.",
-        "nutrition": {
-          "calories": 420,
-          "protein": 10,
-          "carbs": 58,
-          "fat": 16
-        },
-        "image": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=500&q=80"
       }
     ]
   },
@@ -30774,74 +29692,6 @@ export const PRESEEDED_RESTAURANTS = [
           "fat": 15
         },
         "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "macabebe-seafood",
-    "name": "Macabebe Delta Seafood Grill",
-    "municipality": "Macabebe",
-    "corridor": "MacArthur Highway Line",
-    "operatingHours": "09:00 AM - 09:00 PM",
-    "priceTier": "$$",
-    "lat": 14.9082,
-    "lng": 120.7121,
-    "categories": [
-      "🪵 Wood-Fired Traditional"
-    ],
-    "description": "Macabebe sits at the delta of the Pampanga River. This grill cooks fresh catches caught hourly by local fishermen.",
-    "address": "Barangay San Nicolas, Macabebe, Pampanga",
-    "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Macabebe Delta Seafood Grill (Main Branch)",
-        "municipality": "Macabebe",
-        "address": "Barangay San Nicolas, Macabebe, Pampanga",
-        "operatingHours": "09:00 AM - 09:00 PM",
-        "lat": 14.9082,
-        "lng": 120.7121
-      }
-    ],
-    "username": "macabebe_delta_seafood_grill_owner",
-    "password": "password123",
-    "occupancy": [
-      5,
-      10,
-      20,
-      65,
-      80,
-      85,
-      55,
-      40,
-      50,
-      75,
-      90,
-      80,
-      50,
-      20,
-      5
-    ],
-    "menu": [
-      {
-        "id": "mb-crabcakes",
-        "name": "Macabebe Blue Crab Cakes",
-        "price": 320,
-        "ingredients": "Fresh blue crab meat, garlic, native green onion, egg binder, flour breading",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Crustaceans, Gluten, and Eggs.",
-        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Rich in Zinc, High Lean Protein.",
-        "nutrition": {
-          "calories": 310,
-          "protein": 28,
-          "carbs": 12,
-          "fat": 15
-        },
-        "image": "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=500&q=80"
       }
     ]
   },
@@ -32100,74 +30950,6 @@ export const PRESEEDED_RESTAURANTS = [
           "carbs": 40,
           "fat": 15
         }
-      }
-    ]
-  },
-  {
-    "id": "masantol-crabs",
-    "name": "Masantol Mangrove Crab House",
-    "municipality": "Masantol",
-    "corridor": "MacArthur Highway Line",
-    "operatingHours": "10:00 AM - 10:00 PM",
-    "priceTier": "$$$",
-    "lat": 14.8987,
-    "lng": 120.7042,
-    "categories": [
-      "🪵 Wood-Fired Traditional"
-    ],
-    "description": "Located in the coastal mangrove swamps of Masantol. Famous for giant mud crabs stewed in traditional coconut vinegar.",
-    "address": "Barangay San Jose, Masantol, Pampanga",
-    "image": "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Masantol Mangrove Crab House (Main Branch)",
-        "municipality": "Masantol",
-        "address": "Barangay San Jose, Masantol, Pampanga",
-        "operatingHours": "10:00 AM - 10:00 PM",
-        "lat": 14.8987,
-        "lng": 120.7042
-      }
-    ],
-    "username": "masantol_mangrove_crab_house_owner",
-    "password": "password123",
-    "occupancy": [
-      0,
-      10,
-      20,
-      50,
-      75,
-      80,
-      60,
-      45,
-      55,
-      75,
-      95,
-      90,
-      65,
-      30,
-      10
-    ],
-    "menu": [
-      {
-        "id": "ms-crabs",
-        "name": "Masantol Buttered Mud Crabs",
-        "price": 650,
-        "ingredients": "Mangrove mud crabs, garlic butter, local chili, coconut vinegar reduction",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Crustaceans (Crabs) and Dairy.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Sodium. Rich in healthy marine lipids.",
-        "nutrition": {
-          "calories": 520,
-          "protein": 42,
-          "carbs": 6,
-          "fat": 34
-        },
-        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80"
       }
     ]
   },
@@ -33432,74 +32214,6 @@ export const PRESEEDED_RESTAURANTS = [
           "fat": 15
         },
         "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "minalin-eggs",
-    "name": "Minalin Egg Farm Cafe",
-    "municipality": "Minalin",
-    "corridor": "MacArthur Highway Line",
-    "operatingHours": "07:00 AM - 08:00 PM",
-    "priceTier": "$",
-    "lat": 14.9812,
-    "lng": 120.6903,
-    "categories": [
-      "🏛️ Ancestral Kitchen"
-    ],
-    "description": "Located in the egg capital of Central Luzon. Serves organic breakfasts highlighting local duck eggs and chicken layers.",
-    "address": "Barangay San Agustin, Minalin, Pampanga",
-    "image": "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Minalin Egg Farm Cafe (Main Branch)",
-        "municipality": "Minalin",
-        "address": "Barangay San Agustin, Minalin, Pampanga",
-        "operatingHours": "07:00 AM - 08:00 PM",
-        "lat": 14.9812,
-        "lng": 120.6903
-      }
-    ],
-    "username": "minalin_egg_farm_cafe_owner",
-    "password": "password123",
-    "occupancy": [
-      25,
-      45,
-      60,
-      70,
-      80,
-      65,
-      45,
-      50,
-      60,
-      75,
-      80,
-      50,
-      20,
-      5,
-      0
-    ],
-    "menu": [
-      {
-        "id": "mi-omelette",
-        "name": "Triple Salted Egg Omelette",
-        "price": 190,
-        "ingredients": "Salted duck eggs, fresh chicken eggs, tomatoes, red onions, garlic",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Eggs.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Sodium from salted curing process.",
-        "nutrition": {
-          "calories": 340,
-          "protein": 18,
-          "carbs": 5,
-          "fat": 26
-        },
-        "image": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=500&q=80"
       }
     ]
   },
@@ -36283,74 +34997,6 @@ export const PRESEEDED_RESTAURANTS = [
     ]
   },
   {
-    "id": "santa-rita-turrones",
-    "name": "Ocampo-Lansang Turrones & Cafe",
-    "municipality": "Santa Rita",
-    "corridor": "Jose Abad Santos Avenue (JASA) Line",
-    "operatingHours": "08:00 AM - 08:00 PM",
-    "priceTier": "$",
-    "lat": 15.0012,
-    "lng": 120.6125,
-    "categories": [
-      "🏛️ Ancestral Kitchen"
-    ],
-    "description": "The historic home of Santa Rita’s cashew turrones. The recipe utilizes wafer paper (oblato) wrapping unchanged since 1920.",
-    "address": "Barangay Santo Rosario, Santa Rita, Pampanga",
-    "image": "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Ocampo-Lansang Turrones & Cafe (Main Branch)",
-        "municipality": "Santa Rita",
-        "address": "Barangay Santo Rosario, Santa Rita, Pampanga",
-        "operatingHours": "08:00 AM - 08:00 PM",
-        "lat": 15.0012,
-        "lng": 120.6125
-      }
-    ],
-    "username": "ocampo_lansang_turrones___cafe_owner",
-    "password": "password123",
-    "occupancy": [
-      15,
-      25,
-      45,
-      70,
-      85,
-      70,
-      50,
-      60,
-      75,
-      80,
-      60,
-      40,
-      20,
-      10,
-      0
-    ],
-    "menu": [
-      {
-        "id": "sr-turrones",
-        "name": "Santa Rita Turrones de Casuy",
-        "price": 120,
-        "ingredients": "Cashew nuts, honey, egg whites, wafer paper wrapping",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Tree Nuts (Cashews) and Egg Whites.",
-        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Low Sodium. Natural fructose and healthy nut oils.",
-        "nutrition": {
-          "calories": 220,
-          "protein": 6,
-          "carbs": 24,
-          "fat": 12
-        },
-        "image": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
     "id": "san-fernando-pipanganan",
     "name": "Pipanganan Capampangan Restaurant & Catering",
     "municipality": "City of San Fernando",
@@ -36446,74 +35092,6 @@ export const PRESEEDED_RESTAURANTS = [
           "fat": 32
         },
         "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "porac-mountain",
-    "name": "Porac Mountain Grill & Indigenous Kitchen",
-    "municipality": "Porac",
-    "corridor": "Jose Abad Santos Avenue (JASA) Line",
-    "operatingHours": "08:00 AM - 06:00 PM",
-    "priceTier": "$$",
-    "lat": 15.0487,
-    "lng": 120.5281,
-    "categories": [
-      "🪵 Wood-Fired Traditional"
-    ],
-    "description": "Features ancestral culinary methods of the Aeta highlands. Cooked over open mountain pits using bamboo poles and wild honey.",
-    "address": "Barangay Del Pilar, Porac, Pampanga",
-    "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Porac Mountain Grill & Indigenous Kitchen (Main Branch)",
-        "municipality": "Porac",
-        "address": "Barangay Del Pilar, Porac, Pampanga",
-        "operatingHours": "08:00 AM - 06:00 PM",
-        "lat": 15.0487,
-        "lng": 120.5281
-      }
-    ],
-    "username": "porac_mountain_grill___indigenous_kitchen_owner",
-    "password": "password123",
-    "occupancy": [
-      5,
-      15,
-      30,
-      60,
-      80,
-      75,
-      40,
-      30,
-      45,
-      60,
-      75,
-      50,
-      20,
-      5,
-      0
-    ],
-    "menu": [
-      {
-        "id": "po-ribs",
-        "name": "Wild Honey Glazed Pork Ribs",
-        "price": 380,
-        "ingredients": "Pork ribs, mountain wild honey, ginger, calamansi glaze",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Sugars and Fat. Low Sodium.",
-        "nutrition": {
-          "calories": 610,
-          "protein": 32,
-          "carbs": 22,
-          "fat": 42
-        },
-        "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=500&q=80"
       }
     ]
   },
@@ -37818,346 +36396,6 @@ export const PRESEEDED_RESTAURANTS = [
           "protein": 20,
           "carbs": 40,
           "fat": 15
-        },
-        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "san-luis-river",
-    "name": "San Luis River Delta Eatery",
-    "municipality": "San Luis",
-    "corridor": "NLEX Corridor",
-    "operatingHours": "08:00 AM - 08:00 PM",
-    "priceTier": "$",
-    "lat": 15.0452,
-    "lng": 120.7901,
-    "categories": [
-      "🏛️ Ancestral Kitchen"
-    ],
-    "description": "San Luis is situated along the Pampanga River. This eatery is famous for sour guava broths and claypot river ducks.",
-    "address": "Barangay Lourdes, San Luis, Pampanga",
-    "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "San Luis River Delta Eatery (Main Branch)",
-        "municipality": "San Luis",
-        "address": "Barangay Lourdes, San Luis, Pampanga",
-        "operatingHours": "08:00 AM - 08:00 PM",
-        "lat": 15.0452,
-        "lng": 120.7901
-      }
-    ],
-    "username": "san_luis_river_delta_eatery_owner",
-    "password": "password123",
-    "occupancy": [
-      10,
-      20,
-      35,
-      65,
-      80,
-      70,
-      45,
-      50,
-      60,
-      75,
-      85,
-      65,
-      30,
-      10,
-      0
-    ],
-    "menu": [
-      {
-        "id": "sl-paksiw",
-        "name": "Paksiw na Bangus sa Bayabas",
-        "price": 210,
-        "ingredients": "Fresh milkfish, native guavas, vinegar, ginger, finger chilies",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Fish.",
-        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High in Vitamin C, healthy omega-3 fatty acids.",
-        "nutrition": {
-          "calories": 290,
-          "protein": 24,
-          "carbs": 10,
-          "fat": 16
-        },
-        "image": "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "san-simon-bulalo",
-    "name": "San Simon Expressway Diner",
-    "municipality": "San Simon",
-    "corridor": "NLEX Corridor",
-    "operatingHours": "24 Hours",
-    "priceTier": "$$",
-    "lat": 14.9991,
-    "lng": 120.7854,
-    "categories": [
-      "🪵 Wood-Fired Traditional"
-    ],
-    "description": "A 24/7 rest-stop diner near the San Simon NLEX exit. Known for hot wood-fire boiled beef shanks served in iron cauldrons.",
-    "address": "Barangay Sto. Niño, San Simon, Pampanga",
-    "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "San Simon Expressway Diner (Main Branch)",
-        "municipality": "San Simon",
-        "address": "Barangay Sto. Niño, San Simon, Pampanga",
-        "operatingHours": "24 Hours",
-        "lat": 14.9991,
-        "lng": 120.7854
-      }
-    ],
-    "username": "san_simon_expressway_diner_owner",
-    "password": "password123",
-    "occupancy": [
-      30,
-      40,
-      50,
-      70,
-      90,
-      85,
-      65,
-      60,
-      70,
-      80,
-      95,
-      90,
-      75,
-      60,
-      40
-    ],
-    "menu": [
-      {
-        "id": "ss-bulalo",
-        "name": "San Simon Sizzling Bulalo",
-        "price": 490,
-        "ingredients": "Beef shank, bone marrow, garlic mushroom gravy, green beans",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef. Gravy contains Gluten.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fat, High Cholesterol.",
-        "nutrition": {
-          "calories": 880,
-          "protein": 55,
-          "carbs": 10,
-          "fat": 68
-        },
-        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "santa-ana-claypot",
-    "name": "Santa Ana Claypot Grill",
-    "municipality": "Santa Ana",
-    "corridor": "NLEX Corridor",
-    "operatingHours": "09:00 AM - 09:00 PM",
-    "priceTier": "$$",
-    "lat": 15.0995,
-    "lng": 120.7698,
-    "categories": [
-      "🏛️ Ancestral Kitchen"
-    ],
-    "description": "Traditional slow-cooking in clay pot palayoks. Famous for serving turmeric-stained chicken rice on banana leaves.",
-    "address": "Barangay San Nicolas, Santa Ana, Pampanga",
-    "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Santa Ana Claypot Grill (Main Branch)",
-        "municipality": "Santa Ana",
-        "address": "Barangay San Nicolas, Santa Ana, Pampanga",
-        "operatingHours": "09:00 AM - 09:00 PM",
-        "lat": 15.0995,
-        "lng": 120.7698
-      }
-    ],
-    "username": "santa_ana_claypot_grill_owner",
-    "password": "password123",
-    "occupancy": [
-      10,
-      15,
-      30,
-      70,
-      85,
-      75,
-      45,
-      50,
-      60,
-      80,
-      90,
-      75,
-      40,
-      15,
-      0
-    ],
-    "menu": [
-      {
-        "id": "sn-bringhe",
-        "name": "Santa Ana Claypot Bringhe",
-        "price": 280,
-        "ingredients": "Glutinous rice, coconut milk, organic chicken, turmeric ginger, raisins",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Coconut. Traces of chicken.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Carbohydrates. Energy dense.",
-        "nutrition": {
-          "calories": 510,
-          "protein": 18,
-          "carbs": 66,
-          "fat": 18
-        },
-        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "santo-tomas-lechon",
-    "name": "Santo Tomas Palayok Kitchen",
-    "municipality": "Santo Tomas",
-    "corridor": "MacArthur Highway Line",
-    "operatingHours": "10:00 AM - 09:00 PM",
-    "priceTier": "$$",
-    "lat": 15.0118,
-    "lng": 120.7182,
-    "categories": [
-      "🏛️ Ancestral Kitchen"
-    ],
-    "description": "Santo Tomas is known for pottery and lechon. This kitchen combines both by cooking slow pork stews in native clay pots.",
-    "address": "Barangay San Jose, Santo Tomas, Pampanga",
-    "image": "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Santo Tomas Palayok Kitchen (Main Branch)",
-        "municipality": "Santo Tomas",
-        "address": "Barangay San Jose, Santo Tomas, Pampanga",
-        "operatingHours": "10:00 AM - 09:00 PM",
-        "lat": 15.0118,
-        "lng": 120.7182
-      }
-    ],
-    "username": "santo_tomas_palayok_kitchen_owner",
-    "password": "password123",
-    "occupancy": [
-      5,
-      10,
-      25,
-      70,
-      90,
-      80,
-      50,
-      45,
-      60,
-      80,
-      95,
-      80,
-      40,
-      20,
-      10
-    ],
-    "menu": [
-      {
-        "id": "st-sisig",
-        "name": "Santo Tomas Lechon Head Sisig",
-        "price": 310,
-        "ingredients": "Chopped lechon head, onions, calamansi, liver sauce seasoning",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork. Trace of poultry (liver).",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Cholesterol, High Saturated Fats.",
-        "nutrition": {
-          "calories": 790,
-          "protein": 40,
-          "carbs": 5,
-          "fat": 68
-        },
-        "image": "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
-    "id": "sasmuan-polvoron",
-    "name": "Sasmuan Coastal Seafood & Cafe",
-    "municipality": "Sasmuan",
-    "corridor": "Jose Abad Santos Avenue (JASA) Line",
-    "operatingHours": "09:00 AM - 08:00 PM",
-    "priceTier": "$",
-    "lat": 14.9381,
-    "lng": 120.6202,
-    "categories": [
-      "🏛️ Ancestral Kitchen"
-    ],
-    "description": "Located in coastal Sasmuan. Best known for combining fresh garlic butter prawns with classic Sasmuan toasted rice polvoron cakes.",
-    "address": "Barangay Santa Lucia, Sasmuan, Pampanga",
-    "image": "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Sasmuan Coastal Seafood & Cafe (Main Branch)",
-        "municipality": "Sasmuan",
-        "address": "Barangay Santa Lucia, Sasmuan, Pampanga",
-        "operatingHours": "09:00 AM - 08:00 PM",
-        "lat": 14.9381,
-        "lng": 120.6202
-      }
-    ],
-    "username": "sasmuan_coastal_seafood___cafe_owner",
-    "password": "password123",
-    "occupancy": [
-      10,
-      20,
-      35,
-      65,
-      80,
-      70,
-      50,
-      55,
-      65,
-      75,
-      80,
-      60,
-      30,
-      15,
-      0
-    ],
-    "menu": [
-      {
-        "id": "sa-shrimp",
-        "name": "Sasmuan Garlic Butter Shrimp",
-        "price": 340,
-        "ingredients": "Coastal brackish shrimp, butter, roasted garlic, native lime",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Crustaceans (Shrimp) and Dairy.",
-        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Protein, Low Carb, healthy minerals.",
-        "nutrition": {
-          "calories": 320,
-          "protein": 29,
-          "carbs": 4,
-          "fat": 20
         },
         "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
       }
@@ -45348,74 +43586,6 @@ export const PRESEEDED_RESTAURANTS = [
     ]
   },
   {
-    "id": "candaba-swamp",
-    "name": "Swamp Wild Duck Grill",
-    "municipality": "Candaba",
-    "corridor": "NLEX Corridor",
-    "operatingHours": "10:00 AM - 09:00 PM",
-    "priceTier": "$$$",
-    "lat": 15.0901,
-    "lng": 120.8245,
-    "categories": [
-      "🪵 Wood-Fired Traditional"
-    ],
-    "description": "An open-air dining lodge overlooking the Candaba wetlands. Specializes in smoked wild duck and wetland fish.",
-    "address": "Barangay Santa Lucia, Candaba, Pampanga",
-    "image": "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Swamp Wild Duck Grill (Main Branch)",
-        "municipality": "Candaba",
-        "address": "Barangay Santa Lucia, Candaba, Pampanga",
-        "operatingHours": "10:00 AM - 09:00 PM",
-        "lat": 15.0901,
-        "lng": 120.8245
-      }
-    ],
-    "username": "swamp_wild_duck_grill_owner",
-    "password": "password123",
-    "occupancy": [
-      0,
-      5,
-      15,
-      60,
-      85,
-      90,
-      60,
-      35,
-      45,
-      70,
-      90,
-      80,
-      45,
-      15,
-      0
-    ],
-    "menu": [
-      {
-        "id": "ca-itik",
-        "name": "Pinatisang Itik (Stewed Duck)",
-        "price": 420,
-        "ingredients": "Candaba wild duck, native fish sauce (patis), ginger, green chilis",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry and Fish Sauce (Seafood trace).",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Sodium. Rich lean protein source.",
-        "nutrition": {
-          "calories": 580,
-          "protein": 45,
-          "carbs": 3,
-          "fat": 42
-        },
-        "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
     "id": "res-1787683330813",
     "name": "Teresita's Grill",
     "municipality": "Mabalacat City",
@@ -51653,755 +49823,246 @@ export const PRESEEDED_RESTAURANTS = [
         "image": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=500&q=80"
       }
     ]
+  },
+  {
+    "id": "res-flori-danilos",
+    "name": "Danilo's Garden Restaurant",
+    "municipality": "Floridablanca",
+    "corridor": "Jose Abad Santos Avenue (JASA) Line",
+    "operatingHours": "08:00 AM - 09:00 PM",
+    "priceTier": "$$",
+    "lat": 14.9782,
+    "lng": 120.5218,
+    "categories": [
+      "🌿 Farm-to-Table",
+      "🍲 Heritage Specialists"
+    ],
+    "description": "Danilo's Garden Restaurant offers a soothing nature-inspired dining experience in Floridablanca with hearty native Kapampangan soups, sizzling specialties, and home-style noodle bilao.",
+    "address": "Valdez, Floridablanca, Pampanga",
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80"
+    ],
+    "branches": [
+      {
+        "branchName": "Danilo's Garden Restaurant - Main",
+        "municipality": "Floridablanca",
+        "address": "Valdez, Floridablanca, Pampanga",
+        "operatingHours": "08:00 AM - 09:00 PM",
+        "lat": 14.9782,
+        "lng": 120.5218
+      }
+    ],
+    "username": "danilos_owner",
+    "password": "danilos_admin",
+    "occupancy": [
+      10,
+      20,
+      35,
+      65,
+      85,
+      75,
+      45,
+      35,
+      55,
+      75,
+      85,
+      70,
+      35,
+      20,
+      10
+    ],
+    "menu": [
+      {
+        "id": "menu-danilos-palayok",
+        "name": "Sinigang Mix sa Palayok (Salmon Belly, Ulo & Hipon)",
+        "price": 895,
+        "ingredients": "Claypot simmered tamarind broth, Norwegian salmon belly, salmon head, fresh river shrimp, native vegetables",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Seafood, Fish (Salmon), Shellfish (Shrimp).",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Rich in Omega-3, Heart-Healthy Broth.",
+        "nutrition": {
+          "calories": 480,
+          "protein": 46,
+          "carbs": 14,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        "id": "menu-danilos-bulalo",
+        "name": "Special Beef Bulalo",
+        "price": 380,
+        "ingredients": "Slow-simmered beef shank with bone marrow, sweet corn on cob, pechay, peppercorns, savory broth",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef Marrow.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Protein, High Cholesterol Marrow.",
+        "nutrition": {
+          "calories": 650,
+          "protein": 48,
+          "carbs": 12,
+          "fat": 46
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        "id": "menu-danilos-hipon",
+        "name": "Sinigang na Hipon",
+        "price": 320,
+        "ingredients": "Fresh plump prawns, tamarind sour broth, water spinach (kangkong), radish, finger chilies",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish (Shrimp).",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Low Calorie, High Protein Seafood.",
+        "nutrition": {
+          "calories": 310,
+          "protein": 36,
+          "carbs": 10,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        "id": "menu-danilos-pancit",
+        "name": "Pansit Guisado",
+        "price": 295,
+        "ingredients": "Stir-fried bihon & canton noodles, sliced pork, shredded chicken, cabbage, carrots, calamansi",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Gluten / Wheat, Pork, Poultry, Soy.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Traditional Kapampangan Noodle Dish.",
+        "nutrition": {
+          "calories": 420,
+          "protein": 22,
+          "carbs": 62,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        "id": "menu-danilos-tofu",
+        "name": "Sizzling Tofu",
+        "price": 195,
+        "ingredients": "Crispy golden bean curd cubes, bell peppers, white onions, savory spiced mayonnaise dressing",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Soy, Egg (Mayonnaise).",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Vegetarian-Friendly Protein Option.",
+        "nutrition": {
+          "calories": 360,
+          "protein": 18,
+          "carbs": 16,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"
+      }
+    ]
+  },
+  {
+    "id": "res-flori-jilm5",
+    "name": "JILM 5 (JLM 5 Food Trays & Grill)",
+    "municipality": "Floridablanca",
+    "corridor": "Jose Abad Santos Avenue (JASA) Line",
+    "operatingHours": "09:00 AM - 08:30 PM",
+    "priceTier": "$$",
+    "lat": 14.9725,
+    "lng": 120.531,
+    "categories": [
+      "🍲 Heritage Specialists",
+      "🍢 Streetfood Masters"
+    ],
+    "description": "JLM 5 is a beloved family-style grill and catering specialist in Floridablanca, celebrated for mouthwatering party food trays, sizzling sisig, crispy bagnet kare-kare, and signature chicken wings.",
+    "address": "Poblacion, Floridablanca, Pampanga",
+    "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80"
+    ],
+    "branches": [
+      {
+        "branchName": "JLM 5 Grill - Main Floridablanca",
+        "municipality": "Floridablanca",
+        "address": "Poblacion, Floridablanca, Pampanga",
+        "operatingHours": "09:00 AM - 08:30 PM",
+        "lat": 14.9725,
+        "lng": 120.531
+      }
+    ],
+    "username": "jilm5_owner",
+    "password": "jilm5_admin",
+    "occupancy": [
+      15,
+      25,
+      45,
+      75,
+      90,
+      80,
+      50,
+      40,
+      60,
+      80,
+      90,
+      75,
+      35,
+      20,
+      10
+    ],
+    "menu": [
+      {
+        "id": "menu-jilm5-bagnetkare",
+        "name": "Bagnet Kare-Kare Food Tray (10-12 pax)",
+        "price": 1850,
+        "ingredients": "Crisp golden pork bagnet, rich peanut gravy, string beans, eggplant, banana heart, sautéed bagoong alamang",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Peanuts, Shellfish (Bagoong).",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Calorie Celebration Tray.",
+        "nutrition": {
+          "calories": 720,
+          "protein": 42,
+          "carbs": 20,
+          "fat": 54
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        "id": "menu-jilm5-ribs",
+        "name": "Babyback Ribs Food Tray (10-12 pax)",
+        "price": 2300,
+        "ingredients": "Tender slow-smoked pork baby back ribs glazed in hickory barbecue sauce",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Soy.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Protein Feast.",
+        "nutrition": {
+          "calories": 680,
+          "protein": 48,
+          "carbs": 24,
+          "fat": 44
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        "id": "menu-jilm5-sisigtray",
+        "name": "Pork Sisig Food Tray (10-12 pax)",
+        "price": 1750,
+        "ingredients": "Grilled minced pork mask, belly, chicken liver, calamansi, white onions, chili peppers",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Poultry (Liver), Soy.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Authentic Kapampangan Sisig Tray.",
+        "nutrition": {
+          "calories": 590,
+          "protein": 38,
+          "carbs": 6,
+          "fat": 46
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"
+      },
+      {
+        "id": "menu-jilm5-wings",
+        "name": "Honey Sriracha Chicken Wings (20 pcs)",
+        "price": 670,
+        "ingredients": "Crispy fried chicken wings tossed in sweet spicy honey sriracha glaze and sesame seeds",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry, Gluten / Wheat, Sesame.",
+        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Crowd Favorite Finger Food.",
+        "nutrition": {
+          "calories": 510,
+          "protein": 34,
+          "carbs": 22,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80"
+      }
+    ]
   }
-,
-  {
-  "id": "res-flori-apung-oting",
-  "name": "Apung Oting's Restaurant",
-  "municipality": "Floridablanca",
-  "corridor": "Jose Abad Santos Avenue (JASA) Line",
-  "operatingHours": "09:00 AM - 09:00 PM",
-  "priceTier": "$$",
-  "lat": 14.974,
-  "lng": 120.529,
-  "categories": [
-    "🏛️ Ancestral Kitchen",
-    "🍲 Heritage Specialists"
-  ],
-  "description": "Apung Oting's Restaurant is a celebrated Floridablanca culinary destination renowned for its ancestral Kapampangan recipes, crispy pata family sets, bibe kaldereta, ginataang suso, and traditional hearty home-cooked feasts.",
-  "address": "Jose Abad Santos Ave, Poblacion, Floridablanca, Pampanga",
-  "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-  "images": [
-    "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"
-  ],
-  "branches": [
-    {
-      "branchName": "Apung Oting's Restaurant - Main",
-      "municipality": "Floridablanca",
-      "address": "Jose Abad Santos Ave, Poblacion, Floridablanca, Pampanga",
-      "operatingHours": "09:00 AM - 09:00 PM",
-      "lat": 14.974,
-      "lng": 120.529
-    }
-  ],
-  "username": "apungoting_owner",
-  "password": "apungoting_admin",
-  "occupancy": [
-    15,
-    25,
-    40,
-    70,
-    95,
-    85,
-    50,
-    45,
-    65,
-    85,
-    90,
-    75,
-    40,
-    20,
-    10
-  ],
-  "menu": [
-    {
-      "id": "menu-oting-seta",
-      "name": "Set A Feast (Crispy Pata, Sisig, Chopsuey, Shanghai & Chaofan Rice)",
-      "price": 1599,
-      "ingredients": "Crispy Pata, Sizzling Pork Sisig, Chopsuey, Lumpiang Shanghai, Chaofan Fried Rice, 1.5L Coke",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Soy, Shellfish, Gluten.",
-      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Protein, Hearty Family Feast.",
-      "nutrition": {
-        "calories": 950,
-        "protein": 52,
-        "carbs": 65,
-        "fat": 48
-      },
-      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-oting-setb",
-      "name": "Set B Feast (Beef Bulalo, Kare-Kare Bagnet, Fried Hito with Buro Mangga)",
-      "price": 1699,
-      "ingredients": "Beef marrow bulalo, crispy bagnet kare-kare, fried hito, native buro with pickled mango, fish fillet, 5 cups steamed rice, Coke",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Beef Marrow, Pork, Peanuts, Fish, Fermented Buro.",
-      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Rich Kapampangan Delicacies.",
-      "nutrition": {
-        "calories": 920,
-        "protein": 55,
-        "carbs": 60,
-        "fat": 50
-      },
-      "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-oting-setc",
-      "name": "Set C Grand Feast (Crispy Pata, Kare-Kare Bagnet, Kalderetang Bibe, Pancit Canton)",
-      "price": 2000,
-      "ingredients": "Crispy pata, bagnet kare-kare, native duck kaldereta, chicharon fiesta, fish fillet, pancit canton, 5 cups rice, Coke",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Peanuts, Duck Meat, Gluten, Fish.",
-      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Grand Traditional Kapampangan Spread.",
-      "nutrition": {
-        "calories": 980,
-        "protein": 58,
-        "carbs": 70,
-        "fat": 52
-      },
-      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-oting-setd",
-      "name": "Set D Heritage Feast (Crispy Pata, Kalderetang Bibe, Ginataang Suso, Kare-Kare)",
-      "price": 1799,
-      "ingredients": "Crispy pata, braised duck kaldereta, freshwater snails in coconut cream, bagnet kare-kare, fish fillet, fried hito, 5 cups rice, Coke",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Duck Meat, Shellfish/Snails, Coconut, Peanuts.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Authentic Ancestral Kapampangan Specialty.",
-      "nutrition": {
-        "calories": 940,
-        "protein": 56,
-        "carbs": 58,
-        "fat": 49
-      },
-      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-oting-bibe",
-      "name": "Kalderetang Bibe (Native Duck Stew)",
-      "price": 580,
-      "ingredients": "Slow-braised native Candaba duck in rich tomato and liver sauce, bell peppers, native chili",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry/Duck, Soy.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Rich Kapampangan Game Meat Heritage.",
-      "nutrition": {
-        "calories": 560,
-        "protein": 42,
-        "carbs": 12,
-        "fat": 38
-      },
-      "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-oting-suso",
-      "name": "Ginataang Suso (River Snails in Spiced Coconut Milk)",
-      "price": 320,
-      "ingredients": "Fresh river snails (suso), rich coconut cream, ginger, garlic, finger chilies, kangkong leaves",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish/Snails and Coconut.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Mineral & Protein Native Delicacy.",
-      "nutrition": {
-        "calories": 340,
-        "protein": 24,
-        "carbs": 10,
-        "fat": 22
-      },
-      "image": "https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80"
-    }
-  ]
-},
-  {
-  "id": "res-flori-bariotik",
-  "name": "Bariotik Kitchen and Garden",
-  "municipality": "Floridablanca",
-  "corridor": "Jose Abad Santos Avenue (JASA) Line",
-  "operatingHours": "10:00 AM - 08:00 PM",
-  "priceTier": "$$",
-  "lat": 14.9685,
-  "lng": 120.5342,
-  "categories": [
-    "🌿 Farm-to-Table",
-    "🍲 Heritage Specialists"
-  ],
-  "description": "Bariotik Kitchen and Garden is a picturesque garden buffet restaurant in Floridablanca serving an all-you-can-eat spread of authentic Kapampangan native delicacies in a tranquil rustic ambiance.",
-  "address": "San Jose, Floridablanca, Pampanga",
-  "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-  "images": [
-    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80"
-  ],
-  "branches": [
-    {
-      "branchName": "Bariotik Kitchen and Garden - Main",
-      "municipality": "Floridablanca",
-      "address": "San Jose, Floridablanca, Pampanga",
-      "operatingHours": "10:00 AM - 08:00 PM",
-      "lat": 14.9685,
-      "lng": 120.5342
-    }
-  ],
-  "username": "bariotik_owner",
-  "password": "bariotik_admin",
-  "occupancy": [
-    20,
-    30,
-    50,
-    80,
-    100,
-    90,
-    60,
-    50,
-    70,
-    85,
-    90,
-    80,
-    45,
-    25,
-    15
-  ],
-  "menu": [
-    {
-      "id": "menu-bariotik-adult",
-      "name": "Regular Adult All-You-Can-Eat Heritage Buffet",
-      "price": 275,
-      "ingredients": "Unlimited access to traditional Kapampangan buffet line: Pork Sisig, Kare-Kare, Asado, Sinigang, Pancit Luglug, Rice & Desserts",
-      "allergens": "⚠️ ALLERGEN WARNING: May contain Pork, Peanuts, Seafood, Soy, Dairy.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Great Value All-You-Can-Eat Buffet.",
-      "nutrition": {
-        "calories": 850,
-        "protein": 48,
-        "carbs": 75,
-        "fat": 42
-      },
-      "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-bariotik-senior",
-      "name": "Senior Citizen / PWD Buffet Rate",
-      "price": 220,
-      "ingredients": "Full unlimited buffet spread discounted for Senior Citizens and PWD cardholders",
-      "allergens": "⚠️ ALLERGEN WARNING: May contain Pork, Peanuts, Seafood, Soy.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Special Discounted Heritage Buffet.",
-      "nutrition": {
-        "calories": 850,
-        "protein": 48,
-        "carbs": 75,
-        "fat": 42
-      },
-      "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-bariotik-kids",
-      "name": "Kids Buffet (Aged 5-7 Years Old)",
-      "price": 150,
-      "ingredients": "Unlimited buffet access tailored for young children (Kids 4 and below dine FREE)",
-      "allergens": "⚠️ ALLERGEN WARNING: May contain Pork, Dairy, Gluten.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Kid-Friendly Garden Dining.",
-      "nutrition": {
-        "calories": 500,
-        "protein": 25,
-        "carbs": 55,
-        "fat": 20
-      },
-      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
-    }
-  ]
-},
-  {
-  "id": "res-flori-danilos",
-  "name": "Danilo's Garden Restaurant",
-  "municipality": "Floridablanca",
-  "corridor": "Jose Abad Santos Avenue (JASA) Line",
-  "operatingHours": "08:00 AM - 09:00 PM",
-  "priceTier": "$$",
-  "lat": 14.9782,
-  "lng": 120.5218,
-  "categories": [
-    "🌿 Farm-to-Table",
-    "🍲 Heritage Specialists"
-  ],
-  "description": "Danilo's Garden Restaurant offers a soothing nature-inspired dining experience in Floridablanca with hearty native Kapampangan soups, sizzling specialties, and home-style noodle bilao.",
-  "address": "Valdez, Floridablanca, Pampanga",
-  "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80",
-  "images": [
-    "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80"
-  ],
-  "branches": [
-    {
-      "branchName": "Danilo's Garden Restaurant - Main",
-      "municipality": "Floridablanca",
-      "address": "Valdez, Floridablanca, Pampanga",
-      "operatingHours": "08:00 AM - 09:00 PM",
-      "lat": 14.9782,
-      "lng": 120.5218
-    }
-  ],
-  "username": "danilos_owner",
-  "password": "danilos_admin",
-  "occupancy": [
-    10,
-    20,
-    35,
-    65,
-    85,
-    75,
-    45,
-    35,
-    55,
-    75,
-    85,
-    70,
-    35,
-    20,
-    10
-  ],
-  "menu": [
-    {
-      "id": "menu-danilos-palayok",
-      "name": "Sinigang Mix sa Palayok (Salmon Belly, Ulo & Hipon)",
-      "price": 895,
-      "ingredients": "Claypot simmered tamarind broth, Norwegian salmon belly, salmon head, fresh river shrimp, native vegetables",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Seafood, Fish (Salmon), Shellfish (Shrimp).",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Rich in Omega-3, Heart-Healthy Broth.",
-      "nutrition": {
-        "calories": 480,
-        "protein": 46,
-        "carbs": 14,
-        "fat": 26
-      },
-      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-danilos-bulalo",
-      "name": "Special Beef Bulalo",
-      "price": 380,
-      "ingredients": "Slow-simmered beef shank with bone marrow, sweet corn on cob, pechay, peppercorns, savory broth",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Beef Marrow.",
-      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Protein, High Cholesterol Marrow.",
-      "nutrition": {
-        "calories": 650,
-        "protein": 48,
-        "carbs": 12,
-        "fat": 46
-      },
-      "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-danilos-hipon",
-      "name": "Sinigang na Hipon",
-      "price": 320,
-      "ingredients": "Fresh plump prawns, tamarind sour broth, water spinach (kangkong), radish, finger chilies",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish (Shrimp).",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Low Calorie, High Protein Seafood.",
-      "nutrition": {
-        "calories": 310,
-        "protein": 36,
-        "carbs": 10,
-        "fat": 12
-      },
-      "image": "https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-danilos-pancit",
-      "name": "Pansit Guisado",
-      "price": 295,
-      "ingredients": "Stir-fried bihon & canton noodles, sliced pork, shredded chicken, cabbage, carrots, calamansi",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Gluten / Wheat, Pork, Poultry, Soy.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Traditional Kapampangan Noodle Dish.",
-      "nutrition": {
-        "calories": 420,
-        "protein": 22,
-        "carbs": 62,
-        "fat": 12
-      },
-      "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-danilos-tofu",
-      "name": "Sizzling Tofu",
-      "price": 195,
-      "ingredients": "Crispy golden bean curd cubes, bell peppers, white onions, savory spiced mayonnaise dressing",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Soy, Egg (Mayonnaise).",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Vegetarian-Friendly Protein Option.",
-      "nutrition": {
-        "calories": 360,
-        "protein": 18,
-        "carbs": 16,
-        "fat": 26
-      },
-      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"
-    }
-  ]
-},
-  {
-  "id": "res-flori-jilm5",
-  "name": "JILM 5 (JLM 5 Food Trays & Grill)",
-  "municipality": "Floridablanca",
-  "corridor": "Jose Abad Santos Avenue (JASA) Line",
-  "operatingHours": "09:00 AM - 08:30 PM",
-  "priceTier": "$$",
-  "lat": 14.9725,
-  "lng": 120.531,
-  "categories": [
-    "🍲 Heritage Specialists",
-    "🍢 Streetfood Masters"
-  ],
-  "description": "JLM 5 is a beloved family-style grill and catering specialist in Floridablanca, celebrated for mouthwatering party food trays, sizzling sisig, crispy bagnet kare-kare, and signature chicken wings.",
-  "address": "Poblacion, Floridablanca, Pampanga",
-  "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
-  "images": [
-    "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80"
-  ],
-  "branches": [
-    {
-      "branchName": "JLM 5 Grill - Main Floridablanca",
-      "municipality": "Floridablanca",
-      "address": "Poblacion, Floridablanca, Pampanga",
-      "operatingHours": "09:00 AM - 08:30 PM",
-      "lat": 14.9725,
-      "lng": 120.531
-    }
-  ],
-  "username": "jilm5_owner",
-  "password": "jilm5_admin",
-  "occupancy": [
-    15,
-    25,
-    45,
-    75,
-    90,
-    80,
-    50,
-    40,
-    60,
-    80,
-    90,
-    75,
-    35,
-    20,
-    10
-  ],
-  "menu": [
-    {
-      "id": "menu-jilm5-bagnetkare",
-      "name": "Bagnet Kare-Kare Food Tray (10-12 pax)",
-      "price": 1850,
-      "ingredients": "Crisp golden pork bagnet, rich peanut gravy, string beans, eggplant, banana heart, sautéed bagoong alamang",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Peanuts, Shellfish (Bagoong).",
-      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Calorie Celebration Tray.",
-      "nutrition": {
-        "calories": 720,
-        "protein": 42,
-        "carbs": 20,
-        "fat": 54
-      },
-      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-jilm5-ribs",
-      "name": "Babyback Ribs Food Tray (10-12 pax)",
-      "price": 2300,
-      "ingredients": "Tender slow-smoked pork baby back ribs glazed in hickory barbecue sauce",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Soy.",
-      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Protein Feast.",
-      "nutrition": {
-        "calories": 680,
-        "protein": 48,
-        "carbs": 24,
-        "fat": 44
-      },
-      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-jilm5-sisigtray",
-      "name": "Pork Sisig Food Tray (10-12 pax)",
-      "price": 1750,
-      "ingredients": "Grilled minced pork mask, belly, chicken liver, calamansi, white onions, chili peppers",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Poultry (Liver), Soy.",
-      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Authentic Kapampangan Sisig Tray.",
-      "nutrition": {
-        "calories": 590,
-        "protein": 38,
-        "carbs": 6,
-        "fat": 46
-      },
-      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-jilm5-wings",
-      "name": "Honey Sriracha Chicken Wings (20 pcs)",
-      "price": 670,
-      "ingredients": "Crispy fried chicken wings tossed in sweet spicy honey sriracha glaze and sesame seeds",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry, Gluten / Wheat, Sesame.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Crowd Favorite Finger Food.",
-      "nutrition": {
-        "calories": 510,
-        "protein": 34,
-        "carbs": 22,
-        "fat": 32
-      },
-      "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80"
-    }
-  ]
-},
-  {
-  "id": "res-flori-kabigtings",
-  "name": "Kabigting's Halo-Halo (Floridablanca)",
-  "municipality": "Floridablanca",
-  "corridor": "Jose Abad Santos Avenue (JASA) Line",
-  "operatingHours": "08:00 AM - 07:30 PM",
-  "priceTier": "$",
-  "lat": 14.9755,
-  "lng": 120.528,
-  "categories": [
-    "🏛️ Ancestral Kitchen",
-    "🍧 Dessert & Merienda"
-  ],
-  "description": "The legendary home of genuine Kapampangan Halo-Halo with pastillas milk, halayang calabaza (mashed squash), and sweetened white kidney beans. Paired with savory palabok, dinuguan, tokwa't baboy, and all-day breakfast combos.",
-  "address": "San Nicolas, Floridablanca, Pampanga",
-  "image": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=80",
-  "images": [
-    "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=800&q=80"
-  ],
-  "branches": [
-    {
-      "branchName": "Kabigting's Halo-Halo - Floridablanca",
-      "municipality": "Floridablanca",
-      "address": "San Nicolas, Floridablanca, Pampanga",
-      "operatingHours": "08:00 AM - 07:30 PM",
-      "lat": 14.9755,
-      "lng": 120.528
-    }
-  ],
-  "username": "kabigtings_flori",
-  "password": "kabigtings_admin",
-  "occupancy": [
-    20,
-    35,
-    60,
-    95,
-    100,
-    90,
-    70,
-    60,
-    80,
-    90,
-    85,
-    65,
-    30,
-    15,
-    10
-  ],
-  "menu": [
-    {
-      "id": "menu-kabigting-halohalo",
-      "name": "Famous Kabigting's Halo-Halo",
-      "price": 110,
-      "ingredients": "Finely shaved ice, sweetened white kidney beans (kidney beans), homemade pastillas de leche (pure carabao's milk), halayang kalabasa (mashed squash)",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Dairy (Carabao Milk Pastillas), Legumes (White Kidney Beans).",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Historic Kapampangan Dessert with Natural Squash & Carabao Milk.",
-      "nutrition": {
-        "calories": 340,
-        "protein": 9,
-        "carbs": 62,
-        "fat": 7
-      },
-      "image": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-kabigting-palabok",
-      "name": "Special Pancit Palabok",
-      "price": 105,
-      "ingredients": "Rice noodles, savory shrimp-annatto sauce, crushed chicharon, tinapa flakes, hard-boiled egg, toasted garlic, spring onions",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish, Eggs, Pork, Fish (Tinapa).",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Traditional Kapampangan Merienda Favorite.",
-      "nutrition": {
-        "calories": 390,
-        "protein": 18,
-        "carbs": 54,
-        "fat": 12
-      },
-      "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-kabigting-combo-liempo",
-      "name": "Crispy Liempo w/ Halo-Halo Combo",
-      "price": 240,
-      "ingredients": "Golden fried crispy pork liempo, steamed rice, spiced vinegar dipping sauce + 1 glass Famous Kabigting's Halo-Halo",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Dairy.",
-      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Hearty Meal & Dessert Pairing.",
-      "nutrition": {
-        "calories": 880,
-        "protein": 38,
-        "carbs": 85,
-        "fat": 44
-      },
-      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-kabigting-dinuguan",
-      "name": "Dinuguan w/ Puto or Rice",
-      "price": 135,
-      "ingredients": "Kapampangan pork blood stew simmered with vinegar, green finger chilies, served with fluffy puto or rice",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Iron-Rich Traditional Stew.",
-      "nutrition": {
-        "calories": 460,
-        "protein": 28,
-        "carbs": 42,
-        "fat": 20
-      },
-      "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-kabigting-tokwa",
-      "name": "Tokwa't Baboy",
-      "price": 115,
-      "ingredients": "Deep-fried tofu cubes, boiled pork ears and mask, spiced soy-vinegar dressing, fresh onions",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Soy, Pork.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Classic Kapampangan Merienda / Pulutan.",
-      "nutrition": {
-        "calories": 320,
-        "protein": 22,
-        "carbs": 12,
-        "fat": 20
-      },
-      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"
-    }
-  ]
-},
-  {
-  "id": "res-flori-susies",
-  "name": "Susie's Cuisine (Floridablanca)",
-  "municipality": "Floridablanca",
-  "corridor": "Jose Abad Santos Avenue (JASA) Line",
-  "operatingHours": "07:30 AM - 07:00 PM",
-  "priceTier": "$",
-  "lat": 14.9738,
-  "lng": 120.5305,
-  "categories": [
-    "🏛️ Ancestral Kitchen",
-    "🍧 Dessert & Merienda"
-  ],
-  "description": "The iconic Queen of Kapampangan kakanin and merienda since 1972. Renowned for rich carabao milk Tibok-Tibok, Pancit Palabok, Sapin-Sapin, Moche, and traditional rice meals.",
-  "address": "Poblacion, Floridablanca, Pampanga",
-  "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=800&q=80",
-  "images": [
-    "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=800&q=80",
-    "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=800&q=80"
-  ],
-  "branches": [
-    {
-      "branchName": "Susie's Cuisine - Floridablanca Branch",
-      "municipality": "Floridablanca",
-      "address": "Poblacion, Floridablanca, Pampanga",
-      "operatingHours": "07:30 AM - 07:00 PM",
-      "lat": 14.9738,
-      "lng": 120.5305
-    }
-  ],
-  "username": "susies_flori",
-  "password": "susies_admin",
-  "occupancy": [
-    25,
-    40,
-    65,
-    90,
-    95,
-    85,
-    65,
-    55,
-    75,
-    85,
-    75,
-    55,
-    30,
-    15,
-    10
-  ],
-  "menu": [
-    {
-      "id": "menu-susies-tibok",
-      "name": "Authentic Tibok-Tibok (Slice)",
-      "price": 30,
-      "ingredients": "Pure fresh carabao's milk pudding, coconut milk, topped with fragrant toasted latik (coconut curds)",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Dairy (Carabao Milk), Coconut.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Legendary Kapampangan Carabao Milk Pudding.",
-      "nutrition": {
-        "calories": 190,
-        "protein": 5,
-        "carbs": 24,
-        "fat": 9
-      },
-      "image": "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-susies-palabok",
-      "name": "Pancit Palabok (Solo)",
-      "price": 120,
-      "ingredients": "Rice noodles, thick savory shrimp and annatto sauce, crushed chicharon, boiled eggs, tinapa flakes, calamansi",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish (Shrimp), Eggs, Fish, Pork.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Signature Kapampangan Palabok.",
-      "nutrition": {
-        "calories": 430,
-        "protein": 20,
-        "carbs": 58,
-        "fat": 14
-      },
-      "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-susies-bringhe",
-      "name": "Special Bringhe (Solo)",
-      "price": 95,
-      "ingredients": "Glutinous rice cooked in rich coconut milk and native turmeric (luyang dilaw), chicken slices, chorizo bilbao, bell peppers, boiled egg",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry, Eggs, Pork (Chorizo).",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Heirloom Kapampangan Yellow Sticky Rice.",
-      "nutrition": {
-        "calories": 480,
-        "protein": 18,
-        "carbs": 68,
-        "fat": 16
-      },
-      "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-susies-sapin",
-      "name": "Sapin-Sapin (Slice)",
-      "price": 25,
-      "ingredients": "Layered sticky glutinous rice cake flavored with ube, jackfruit (langka), and coconut cream, topped with latik",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Coconut.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Traditional Kapampangan Heritage Kakanin.",
-      "nutrition": {
-        "calories": 170,
-        "protein": 3,
-        "carbs": 32,
-        "fat": 4
-      },
-      "image": "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-susies-sisig",
-      "name": "Sizzling Pork Sisig w/ Rice",
-      "price": 195,
-      "ingredients": "Chopped grilled pork mask, liver, calamansi, white onions, chili peppers, served on hot plate with garlic rice",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Poultry Liver, Soy.",
-      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Classic Pampanga Sisig Rice Meal.",
-      "nutrition": {
-        "calories": 640,
-        "protein": 34,
-        "carbs": 52,
-        "fat": 34
-      },
-      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      "id": "menu-susies-tamales",
-      "name": "Tamales Special",
-      "price": 40,
-      "ingredients": "Steamed ground rice and coconut milk cake wrapped in banana leaves, topped with chicken strips, hard-boiled egg, and ground roasted peanuts",
-      "allergens": "⚠️ ALLERGEN WARNING: Contains Peanuts, Eggs, Poultry.",
-      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Heritage Banana-Leaf Wrapped Delicacy.",
-      "nutrition": {
-        "calories": 230,
-        "protein": 9,
-        "carbs": 28,
-        "fat": 10
-      },
-      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80"
-    }
-  ]
-}
 ];
 
 export const PRESEEDED_ATTRACTIONS = [
@@ -52649,47 +50310,79 @@ export const PRESEEDED_ATTRACTIONS = [
   }
 ];
 
-
 export const PRESEEDED_MEAL_PHOTOS = [
   {
-    id: 'mv-sisig',
-    name: 'Sizzling Pork Sisig',
-    imgLabel: '🐷 Pork Sisig Plate',
-    description: 'Finely chopped pork face, snout, ears, and chicken liver, seasoned with calamansi, onions, and chili.',
-    nutrition: { calories: 840, protein: 48, carbs: 4, fat: 72 },
-    allergens: '⚠️ ALLERGENS: Pork, Poultry, Offal, Calamansi citrus.',
-    compliance: '⚠️ High cholesterol, high lipid profiling, high purines.'
+    "id": "mv-sisig",
+    "name": "Sizzling Pork Sisig",
+    "imgLabel": "🐷 Pork Sisig Plate",
+    "description": "Finely chopped pork face, snout, ears, and chicken liver, seasoned with calamansi, onions, and chili.",
+    "nutrition": {
+      "calories": 840,
+      "protein": 48,
+      "carbs": 4,
+      "fat": 72
+    },
+    "allergens": "⚠️ ALLERGENS: Pork, Poultry, Offal, Calamansi citrus.",
+    "compliance": "⚠️ High cholesterol, high lipid profiling, high purines."
   },
   {
-    id: 'mv-karekare',
-    name: 'Beef Kare-Kare',
-    imgLabel: '🥜 Creamy Kare-Kare',
-    description: 'Tender beef tripe and oxtail stewed in a rich, velvety peanut sauce, served with steamed local vegetables.',
-    nutrition: { calories: 710, protein: 44, carbs: 18, fat: 52 },
-    allergens: '⚠️ ALLERGENS: Peanuts, Crustacean (requires Fermented Shrimp Paste / Bagoong).',
-    compliance: '⚠️ Moderate saturated fats, high sodium when combined with bagoong.'
+    "id": "mv-karekare",
+    "name": "Beef Kare-Kare",
+    "imgLabel": "🥜 Creamy Kare-Kare",
+    "description": "Tender beef tripe and oxtail stewed in a rich, velvety peanut sauce, served with steamed local vegetables.",
+    "nutrition": {
+      "calories": 710,
+      "protein": 44,
+      "carbs": 18,
+      "fat": 52
+    },
+    "allergens": "⚠️ ALLERGENS: Peanuts, Crustacean (requires Fermented Shrimp Paste / Bagoong).",
+    "compliance": "⚠️ Moderate saturated fats, high sodium when combined with bagoong."
   },
   {
-    id: 'mv-bringhe',
-    name: 'Bringhe Rice',
-    imgLabel: '🥥 Bringhe Rice',
-    description: 'Glutinous rice slow-cooked with fresh coconut cream, chicken strips, local turmeric ginger, and raisins.',
-    nutrition: { calories: 550, protein: 22, carbs: 70, fat: 20 },
-    allergens: '⚠️ ALLERGENS: Coconut, Raisins, Traces of chicken.',
-    compliance: '🟢 Good carbohydrate source, moderate healthy fats from coconut butter.'
+    "id": "mv-bringhe",
+    "name": "Bringhe Rice",
+    "imgLabel": "🥥 Bringhe Rice",
+    "description": "Glutinous rice slow-cooked with fresh coconut cream, chicken strips, local turmeric ginger, and raisins.",
+    "nutrition": {
+      "calories": 550,
+      "protein": 22,
+      "carbs": 70,
+      "fat": 20
+    },
+    "allergens": "⚠️ ALLERGENS: Coconut, Raisins, Traces of chicken.",
+    "compliance": "🟢 Good carbohydrate source, moderate healthy fats from coconut butter."
   },
   {
-    id: 'mv-pakosalad',
-    name: 'Pako Salad',
-    imgLabel: '🌿 Pako Fern Salad',
-    description: 'Crisp river fern (pako) tossed with red onions, fresh tomatoes, and slices of local salted duck egg.',
-    nutrition: { calories: 140, protein: 6, carbs: 12, fat: 8 },
-    allergens: '⚠️ ALLERGENS: Duck Egg (Egg albumin).',
-    compliance: '🟢 Excellent fiber density, low calorie, low lipid loading.'
+    "id": "mv-pakosalad",
+    "name": "Pako Salad",
+    "imgLabel": "🌿 Pako Fern Salad",
+    "description": "Crisp river fern (pako) tossed with red onions, fresh tomatoes, and slices of local salted duck egg.",
+    "nutrition": {
+      "calories": 140,
+      "protein": 6,
+      "carbs": 12,
+      "fat": 8
+    },
+    "allergens": "⚠️ ALLERGENS: Duck Egg (Egg albumin).",
+    "compliance": "🟢 Excellent fiber density, low calorie, low lipid loading."
   }
 ];
 
-
 export const OCCUPANCY_HOURS = [
-  '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM'
+  "8 AM",
+  "9 AM",
+  "10 AM",
+  "11 AM",
+  "12 PM",
+  "1 PM",
+  "2 PM",
+  "3 PM",
+  "4 PM",
+  "5 PM",
+  "6 PM",
+  "7 PM",
+  "8 PM",
+  "9 PM",
+  "10 PM"
 ];
