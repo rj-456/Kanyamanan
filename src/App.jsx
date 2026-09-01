@@ -487,6 +487,44 @@ function App() {
     }
   }, []);
 
+  const REMOVED_PRESEEDED_NAMES = [
+    "Apung Oting's Heritage Restaurant",
+    "Apung Oting's Restaurant",
+    "Bariotik Kitchen and Garden",
+    "Floridablanca Sugar Trail Resto",
+    "Kabigting's Halo-Halo (Floridablanca)",
+    "Susie's Cuisine (Floridablanca)",
+    "Lola Ima Buffet & Catering",
+    "Swamp Wild Duck Grill",
+    "Kusina San Guillermo",
+    "Apag Apalit Lechon & Grill",
+    "Apag Marangle",
+    "Bale Lubao Heritage Kitchen",
+    "Mabalacat Native Treats & Claypot",
+    "Macabebe Delta Seafood Grill",
+    "Atching Lillian's Ancestral Kitchen",
+    "Masantol Mangrove Crab House",
+    "Minalin Egg Farm Cafe",
+    "Porac Mountain Grill & Indigenous Kitchen",
+    "San Luis River Delta Eatery",
+    "San Simon Expressway Diner",
+    "Ernesto's Kitchen & Bar",
+    "Santa Ana Claypot Grill",
+    "Alviz Farm Heritage Kitchen & Experience",
+    "Fat Grille Restaurant",
+    "Ocampo-Lansang Turrones & Cafe",
+    "Santo Tomas Palayok Kitchen",
+    "Bala Kayu Silogan Atbp.",
+    "Sasmuan Coastal Seafood & Cafe"
+  ].map(s => s.toLowerCase().trim());
+
+  const isLegacyPreseeded = (res) => {
+    if (!res) return false;
+    if (res.isCustom || res.userCreated) return false;
+    const nameLower = (res.name || '').toLowerCase().trim();
+    return REMOVED_PRESEEDED_NAMES.some(dep => nameLower === dep || nameLower.includes(dep));
+  };
+
   // Local state restaurants database with 100% unique usernames & permanent frontend-backend persistence (Sorted Alphabetically A-Z)
   const [restaurants, setRestaurants] = useState(() => {
     let initialList = [];
@@ -499,8 +537,8 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v3_clean_dataset') {
-        localStorage.setItem('kanyamanan_db_version', 'v3_clean_dataset');
+      if (dbVersion !== 'v4_clean_dataset') {
+        localStorage.setItem('kanyamanan_db_version', 'v4_clean_dataset');
         localStorage.removeItem('kanyamanan_restaurants_db');
       }
     } catch (_) {}
@@ -511,7 +549,7 @@ function App() {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const sanitized = parsed.map((res, idx) => {
-            if (!res || typeof res !== 'object' || deletedIds.includes(res.id)) return null;
+            if (!res || typeof res !== 'object' || deletedIds.includes(res.id) || isLegacyPreseeded(res)) return null;
             const preseeded = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === res.id || (p.name && res.name && p.name.toLowerCase() === res.name.toLowerCase())));
             const menuToUse = (Array.isArray(res.menu) && res.menu.length > 0)
               ? res.menu
@@ -535,7 +573,7 @@ function App() {
 
           // Append any newly added preseeded restaurants that aren't deleted and not yet in cached localStorage
           (PRESEEDED_RESTAURANTS || []).forEach(pre => {
-            if (!pre || !pre.id || deletedIds.includes(pre.id)) return;
+            if (!pre || !pre.id || deletedIds.includes(pre.id) || isLegacyPreseeded(pre)) return;
             const exists = sanitized.some(r => r && (r.id === pre.id || (r.name && pre.name && r.name.toLowerCase() === pre.name.toLowerCase())));
             if (!exists) {
               sanitized.push({ ...pre });
@@ -557,7 +595,7 @@ function App() {
 
     if (initialList.length === 0) {
       const usedUsernames = new Set();
-      initialList = (PRESEEDED_RESTAURANTS || []).filter(pre => pre && pre.id && !deletedIds.includes(pre.id)).map((res, idx) => {
+      initialList = (PRESEEDED_RESTAURANTS || []).filter(pre => pre && pre.id && !deletedIds.includes(pre.id) && !isLegacyPreseeded(pre)).map((res, idx) => {
         let baseUser = res.username;
         if (!baseUser || baseUser === 'owner') {
           baseUser = (res.name || 'restaurant')
@@ -698,15 +736,15 @@ function App() {
         } catch (e) { }
 
         if (Array.isArray(liveData) && liveData.length > 0) {
-          const valid = liveData.filter(r => r && r.id && !deletedIds.includes(r.id));
+          const valid = liveData.filter(r => r && r.id && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
           if (valid.length > 0) {
             setRestaurants(prev => {
               const liveDict = {};
-              valid.forEach(r => { if (r && r.id) liveDict[r.id] = r; });
-              const currentList = Array.isArray(prev) && prev.length > 0 ? prev.filter(r => r && r.id && !deletedIds.includes(r.id)) : [];
-              const merged = currentList.map(r => (r && r.id && liveDict[r.id]) || r).filter(r => r && !deletedIds.includes(r.id));
+              valid.forEach(r => { if (r && r.id && !isLegacyPreseeded(r)) liveDict[r.id] = r; });
+              const currentList = Array.isArray(prev) && prev.length > 0 ? prev.filter(r => r && r.id && !deletedIds.includes(r.id) && !isLegacyPreseeded(r)) : [];
+              const merged = currentList.map(r => (r && r.id && liveDict[r.id]) || r).filter(r => r && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
               valid.forEach(vr => {
-                if (vr && vr.id && !deletedIds.includes(vr.id) && !merged.some(m => m && (m.id === vr.id || (m.name && vr.name && m.name.toLowerCase() === vr.name.toLowerCase())))) {
+                if (vr && vr.id && !deletedIds.includes(vr.id) && !isLegacyPreseeded(vr) && !merged.some(m => m && (m.id === vr.id || (m.name && vr.name && m.name.toLowerCase() === vr.name.toLowerCase())))) {
                   merged.push(vr);
                 }
               });
@@ -996,10 +1034,10 @@ function App() {
           } catch (e) { }
 
           setRestaurants(prev => {
-            const safePrev = Array.isArray(prev) ? prev.filter(r => r && r.id && !deletedIds.includes(r.id)) : [];
+            const safePrev = Array.isArray(prev) ? prev.filter(r => r && r.id && !deletedIds.includes(r.id) && !isLegacyPreseeded(r)) : [];
             const cloudDict = {};
             cloudRestaurants.forEach(r => {
-              if (r && r.id && !deletedIds.includes(r.id)) {
+              if (r && r.id && !deletedIds.includes(r.id) && !isLegacyPreseeded(r)) {
                 const pre = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === r.id || (p.name && r.name && p.name.toLowerCase() === r.name.toLowerCase())));
                 const isValidImg = r.image && (r.image.startsWith('http') || r.image.startsWith('data:') || r.image.startsWith('/'));
                 const cleanedImg = isValidImg ? r.image : (pre?.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80');
@@ -1011,9 +1049,9 @@ function App() {
                 };
               }
             });
-            const merged = safePrev.map(r => (r && r.id && cloudDict[r.id]) || r).filter(r => r && !deletedIds.includes(r.id));
+            const merged = safePrev.map(r => (r && r.id && cloudDict[r.id]) || r).filter(r => r && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
             cloudRestaurants.forEach(cr => {
-              if (cr && cr.id && !deletedIds.includes(cr.id) && !merged.some(r => r && (r.id === cr.id || (r.name && cr.name && r.name.toLowerCase() === cr.name.toLowerCase())))) {
+              if (cr && cr.id && !deletedIds.includes(cr.id) && !isLegacyPreseeded(cr) && !merged.some(r => r && (r.id === cr.id || (r.name && cr.name && r.name.toLowerCase() === cr.name.toLowerCase())))) {
                 merged.push(cloudDict[cr.id] || cr);
               }
             });
@@ -12617,6 +12655,8 @@ Return ONLY a valid JSON array:
         branches: updatedBranches,
         username: usernameToSave,
         password: passwordToSave,
+        isCustom: true,
+        userCreated: true,
         occupancy: generateOccupancyCurve(adminForm.priceTier, formattedMenu),
         menu: formattedMenu.length > 0 ? formattedMenu : [
           {
