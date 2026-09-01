@@ -487,43 +487,6 @@ function App() {
     }
   }, []);
 
-  const DEPRECATED_RESTAURANTS_BLOCKLIST = [
-    "Apung Oting's Heritage Restaurant",
-    "Apung Oting's Restaurant",
-    "Bariotik Kitchen and Garden",
-    "Floridablanca Sugar Trail Resto",
-    "Kabigting's Halo-Halo (Floridablanca)",
-    "Susie's Cuisine (Floridablanca)",
-    "Lola Ima Buffet & Catering",
-    "Swamp Wild Duck Grill",
-    "Kusina San Guillermo",
-    "Apag Apalit Lechon & Grill",
-    "Apag Marangle",
-    "Bale Lubao Heritage Kitchen",
-    "Mabalacat Native Treats & Claypot",
-    "Macabebe Delta Seafood Grill",
-    "Atching Lillian's Ancestral Kitchen",
-    "Masantol Mangrove Crab House",
-    "Minalin Egg Farm Cafe",
-    "Porac Mountain Grill & Indigenous Kitchen",
-    "San Luis River Delta Eatery",
-    "San Simon Expressway Diner",
-    "Ernesto's Kitchen & Bar",
-    "Santa Ana Claypot Grill",
-    "Alviz Farm Heritage Kitchen & Experience",
-    "Fat Grille Restaurant",
-    "Ocampo-Lansang Turrones & Cafe",
-    "Santo Tomas Palayok Kitchen",
-    "Bala Kayu Silogan Atbp.",
-    "Sasmuan Coastal Seafood & Cafe"
-  ].map(s => s.toLowerCase().trim());
-
-  const isDeprecatedRestaurant = (res) => {
-    if (!res) return true;
-    const nameLower = (res.name || '').toLowerCase().trim();
-    return DEPRECATED_RESTAURANTS_BLOCKLIST.some(dep => nameLower === dep || nameLower.includes(dep));
-  };
-
   // Local state restaurants database with 100% unique usernames & permanent frontend-backend persistence (Sorted Alphabetically A-Z)
   const [restaurants, setRestaurants] = useState(() => {
     let initialList = [];
@@ -533,13 +496,22 @@ function App() {
       if (savedDeleted) deletedIds = JSON.parse(savedDeleted) || [];
     } catch (e) { }
 
+    // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
+    try {
+      const dbVersion = localStorage.getItem('kanyamanan_db_version');
+      if (dbVersion !== 'v3_clean_dataset') {
+        localStorage.setItem('kanyamanan_db_version', 'v3_clean_dataset');
+        localStorage.removeItem('kanyamanan_restaurants_db');
+      }
+    } catch (_) {}
+
     try {
       const saved = localStorage.getItem('kanyamanan_restaurants_db');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const sanitized = parsed.map((res, idx) => {
-            if (!res || typeof res !== 'object' || deletedIds.includes(res.id) || isDeprecatedRestaurant(res)) return null;
+            if (!res || typeof res !== 'object' || deletedIds.includes(res.id)) return null;
             const preseeded = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === res.id || (p.name && res.name && p.name.toLowerCase() === res.name.toLowerCase())));
             const menuToUse = (Array.isArray(res.menu) && res.menu.length > 0)
               ? res.menu
@@ -563,7 +535,7 @@ function App() {
 
           // Append any newly added preseeded restaurants that aren't deleted and not yet in cached localStorage
           (PRESEEDED_RESTAURANTS || []).forEach(pre => {
-            if (!pre || !pre.id || deletedIds.includes(pre.id) || isDeprecatedRestaurant(pre)) return;
+            if (!pre || !pre.id || deletedIds.includes(pre.id)) return;
             const exists = sanitized.some(r => r && (r.id === pre.id || (r.name && pre.name && r.name.toLowerCase() === pre.name.toLowerCase())));
             if (!exists) {
               sanitized.push({ ...pre });
@@ -585,7 +557,7 @@ function App() {
 
     if (initialList.length === 0) {
       const usedUsernames = new Set();
-      initialList = (PRESEEDED_RESTAURANTS || []).filter(pre => pre && pre.id && !deletedIds.includes(pre.id) && !isDeprecatedRestaurant(pre)).map((res, idx) => {
+      initialList = (PRESEEDED_RESTAURANTS || []).filter(pre => pre && pre.id && !deletedIds.includes(pre.id)).map((res, idx) => {
         let baseUser = res.username;
         if (!baseUser || baseUser === 'owner') {
           baseUser = (res.name || 'restaurant')
@@ -610,7 +582,7 @@ function App() {
       });
     }
 
-    const finalList = [...initialList].filter(r => r && r.id && !deletedIds.includes(r.id) && !isDeprecatedRestaurant(r)).sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
+    const finalList = [...initialList].filter(r => r && r.id && !deletedIds.includes(r.id)).sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
     try {
       localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(finalList));
     } catch (e) { }
@@ -690,8 +662,7 @@ function App() {
   // Persistent localStorage synchronization effect for live frontend updates
   useEffect(() => {
     try {
-      const clean = (restaurants || []).filter(r => !isDeprecatedRestaurant(r));
-      localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(clean));
+      localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(restaurants));
     } catch (e) {
       console.error("LocalStorage save error:", e);
     }
@@ -2612,7 +2583,7 @@ So, where do we start? 😊`,
     const counts = {};
     MUNICIPALITIES.forEach(m => {
       counts[m] = (restaurants || []).filter(r =>
-        r && !isDeprecatedRestaurant(r) && (r.municipality === m || (Array.isArray(r.branches) && r.branches.some(b => b && (typeof b === 'string' ? b === m : b.municipality === m))))
+        r && (r.municipality === m || (Array.isArray(r.branches) && r.branches.some(b => b && (typeof b === 'string' ? b === m : b.municipality === m))))
       ).length;
     });
     return counts;
@@ -2620,7 +2591,7 @@ So, where do we start? 😊`,
 
   // Alphabetically Sorted Restaurants Helper (A to Z)
   const sortedRestaurants = useMemo(() => {
-    return [...(restaurants || [])].filter(r => r && !isDeprecatedRestaurant(r)).sort((a, b) =>
+    return [...(restaurants || [])].sort((a, b) =>
       (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
     );
   }, [restaurants]);
@@ -2629,7 +2600,7 @@ So, where do we start? 😊`,
   const filteredRestaurants = useMemo(() => {
     const q = (searchQuery || '').toLowerCase().trim();
     const list = (restaurants || []).filter(res => {
-      if (!res || typeof res !== 'object' || isDeprecatedRestaurant(res)) return false;
+      if (!res || typeof res !== 'object') return false;
 
       const resName = (res.name || '').toLowerCase();
       const resDesc = (res.description || '').toLowerCase();
