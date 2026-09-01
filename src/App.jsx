@@ -1014,9 +1014,11 @@ function App() {
 
   // Free AI Menu Scanner States
   const [aiRawMenuText, setAiRawMenuText] = useState('');
-  const [aiMenuImage, setAiMenuImage] = useState(null);
+  const [aiMenuImages, setAiMenuImages] = useState([]);
+  const aiMenuFileInputRef = useRef(null);
   const [isAiScanning, setIsAiScanning] = useState(false);
   const [aiOcrProgress, setAiOcrProgress] = useState(0);
+  const [aiOcrStatusMessage, setAiOcrStatusMessage] = useState('');
 
   // Free AI Tourist Attraction Document & Image Scanner States
   const [aiAttractionRawText, setAiAttractionRawText] = useState('');
@@ -11015,57 +11017,75 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const sliceImageIntoColumns = (imageDataUrl) => {
+  const sliceImageForMultiLayout = (imageDataUrl) => {
     return new Promise((resolve) => {
       const img = new Image();
       img.crossOrigin = 'Anonymous';
       img.onload = () => {
         try {
-          // 1. Full Image Enhanced
-          const fullCanvas = document.createElement('canvas');
-          const fullCtx = fullCanvas.getContext('2d');
+          const w = img.width;
+          const h = img.height;
+          const aspectRatio = w / h;
+
           let scale = 1;
-          if (img.width < 1600) scale = Math.min(3, 1800 / img.width);
-          else if (img.width > 3200) scale = 2400 / img.width;
-          
-          fullCanvas.width = Math.round(img.width * scale);
-          fullCanvas.height = Math.round(img.height * scale);
-          fullCtx.imageSmoothingEnabled = true;
-          fullCtx.imageSmoothingQuality = 'high';
-          fullCtx.drawImage(img, 0, 0, fullCanvas.width, fullCanvas.height);
+          if (w < 1600) scale = Math.min(3, 1800 / w);
+          else if (w > 3200) scale = 2400 / w;
 
-          // 2. Left Column Slice (0% to 53% width)
-          const leftCanvas = document.createElement('canvas');
-          const leftCtx = leftCanvas.getContext('2d');
-          const colWidth = Math.round(img.width * 0.53);
-          leftCanvas.width = Math.round(colWidth * scale);
-          leftCanvas.height = Math.round(img.height * scale);
-          leftCtx.imageSmoothingEnabled = true;
-          leftCtx.imageSmoothingQuality = 'high';
-          leftCtx.drawImage(img, 0, 0, colWidth, img.height, 0, 0, leftCanvas.width, leftCanvas.height);
+          // Helper to crop canvas cleanly
+          const makeSlice = (sx, sy, sw, sh) => {
+            const c = document.createElement('canvas');
+            c.width = Math.round(sw * scale);
+            c.height = Math.round(sh * scale);
+            const ctx = c.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height);
+            return c.toDataURL('image/png');
+          };
 
-          // 3. Right Column Slice (47% to 100% width)
-          const rightCanvas = document.createElement('canvas');
-          const rightCtx = rightCanvas.getContext('2d');
-          const rightStart = Math.round(img.width * 0.47);
-          const rightWidth = img.width - rightStart;
-          rightCanvas.width = Math.round(rightWidth * scale);
-          rightCanvas.height = Math.round(img.height * scale);
-          rightCtx.imageSmoothingEnabled = true;
-          rightCtx.imageSmoothingQuality = 'high';
-          rightCtx.drawImage(img, rightStart, 0, rightWidth, img.height, 0, 0, rightCanvas.width, rightCanvas.height);
+          const full = makeSlice(0, 0, w, h);
+          const slices = [full];
 
-          resolve({
-            full: fullCanvas.toDataURL('image/png'),
-            left: leftCanvas.toDataURL('image/png'),
-            right: rightCanvas.toDataURL('image/png'),
-            isWideGrid: img.width >= 400
-          });
+          // 1. Wide / Multi-column menu layouts (2-column & 3-column / tri-fold)
+          if (aspectRatio >= 1.15) {
+            // Left column (0% to 54% width)
+            slices.push(makeSlice(0, 0, Math.round(w * 0.54), h));
+            // Right column (46% to 100% width)
+            slices.push(makeSlice(Math.round(w * 0.46), 0, w - Math.round(w * 0.46), h));
+
+            // If wide 3-column tri-fold layout
+            if (aspectRatio >= 1.65) {
+              slices.push(makeSlice(0, 0, Math.round(w * 0.38), h)); // Left third
+              slices.push(makeSlice(Math.round(w * 0.31), 0, Math.round(w * 0.38), h)); // Middle third
+              slices.push(makeSlice(Math.round(w * 0.62), 0, w - Math.round(w * 0.62), h)); // Right third
+            }
+          }
+
+          // 2. Tall vertical / stacked menu layouts (receipts, vertical flyers, tall posters)
+          if (aspectRatio <= 0.88) {
+            slices.push(makeSlice(0, 0, w, Math.round(h * 0.55))); // Top half
+            slices.push(makeSlice(0, Math.round(h * 0.45), w, h - Math.round(h * 0.45))); // Bottom half
+            slices.push(makeSlice(0, Math.round(h * 0.25), w, Math.round(h * 0.50))); // Mid section
+          }
+
+          // 3. Dense 2x2 Grid menu boards
+          if (w >= 900 && h >= 700) {
+            const halfW = Math.round(w * 0.54);
+            const halfH = Math.round(h * 0.54);
+            const startW2 = Math.round(w * 0.46);
+            const startH2 = Math.round(h * 0.46);
+            slices.push(makeSlice(0, 0, halfW, halfH)); // Top-Left
+            slices.push(makeSlice(startW2, 0, w - startW2, halfH)); // Top-Right
+            slices.push(makeSlice(0, startH2, halfW, h - startH2)); // Bottom-Left
+            slices.push(makeSlice(startW2, startH2, w - startW2, h - startH2)); // Bottom-Right
+          }
+
+          resolve({ full, slices, aspectRatio });
         } catch (e) {
-          resolve({ full: imageDataUrl, isWideGrid: false });
+          resolve({ full: imageDataUrl, slices: [imageDataUrl], aspectRatio: 1 });
         }
       };
-      img.onerror = () => resolve({ full: imageDataUrl, isWideGrid: false });
+      img.onerror = () => resolve({ full: imageDataUrl, slices: [imageDataUrl], aspectRatio: 1 });
       img.src = imageDataUrl;
     });
   };
@@ -11170,13 +11190,19 @@ ${JSON.stringify(updatedMessages.slice(-8))}
   };
 
   const handleAiAnalyzeMenu = async () => {
-    if (!aiRawMenuText.trim() && !aiMenuImage) {
-      alert("Please upload a menu image or paste raw menu text to let AI scan and organize it for you!");
+    const imagesToScan = (aiMenuImages || [])
+      .map(img => (typeof img === 'string' ? img : img.dataUrl))
+      .filter(Boolean);
+    const hasRawText = Boolean(aiRawMenuText.trim());
+
+    if (!hasRawText && imagesToScan.length === 0) {
+      alert("Please upload menu photo(s) or paste raw menu text to let AI scan and organize it for you!");
       return;
     }
 
     setIsAiScanning(true);
-    setAiOcrProgress(10);
+    setAiOcrProgress(5);
+    setAiOcrStatusMessage(hasRawText ? "Parsing raw menu text..." : `Preparing ${imagesToScan.length} menu image(s)...`);
 
     try {
       const DISH_PHOTO_MAP = {
@@ -11193,28 +11219,48 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         'salmon': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
         'hipon': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
         'shrimp': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
+        'prawn': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
+        'sugpo': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
+        'gambas': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
+        'chili garlic': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
         'tahong': 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80',
+        'crab': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
+        'aligue': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
         'bulaklak': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'chicharon': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'tidtad': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
+        'dinuguan': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
         'longanisa': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
+        'tocino': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
         'asado': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'kilayin': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'pinakbet': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+        'chopsuey': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
         'leche flan': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80',
         'flan': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80',
+        'tibok': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80',
         'pancit': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
         'palabok': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
         'luglug': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
         'guisado': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
         'bihon': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
+        'canton': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
         'mami': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
         'chicken': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
         'inasal': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
+        'itik': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
+        'murcon': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'morcon': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'tapa': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'kalabaw': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'pindang': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'kare': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'bringhe': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
         'rice': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
+        'sinangag': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
         'halo': 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80',
+        'lumpia': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+        'shanghai': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
         'coke': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80',
         'royal': 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=600&q=80',
         'sprite': 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=600&q=80',
@@ -11250,40 +11296,73 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           'lunch', 'dinner', 'merienda', 'bilao orders', 'solo meals', 'group meals'
         ];
 
+        // 1. Clean and normalize input text
         const cleaned = text
           .replace(/\r\n/g, '\n')
           .replace(/\r/g, '\n')
           .replace(/[\u2013\u2014]/g, '-')
-          .replace(/[\u2022\u25CF\u25AA]/g, ' ')
+          .replace(/[\u2022\u25CF\u25AA*]/g, ' ')
           .replace(/[\t]+/g, ' ');
 
-        const initialLines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
+        // 2. Intelligent line & multi-item splitting (supports comma-separated list of items)
+        const rawLines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
+        const initialLines = [];
 
+        rawLines.forEach(line => {
+          // Check if single line has multiple items separated by comma/semicolon (e.g. "Item A P200, Item B P300")
+          const priceCount = (line.match(/(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|\$)?\s*\d{2,5}(?:\.\d{2})?(?:\s*(?:php|pesos|\/order|\/serving))?/gi) || []).length;
+          if (priceCount > 1 && /[,;]/.test(line)) {
+            const splitSubLines = line.split(/\s*[,;]\s*/).filter(Boolean);
+            splitSubLines.forEach(sub => initialLines.push(sub.trim()));
+          } else {
+            initialLines.push(line);
+          }
+        });
+
+        // 3. Robust price extraction helper
         const extractPrice = (t) => {
-          const cleaned = t.replace(/[₱\u20B1]/g, 'P').trim();
+          let str = t.trim();
+          if (!str) return null;
 
-          // 1. Standalone or trailing price matching "P 650", "P650", "from P 250", "P 1,050", "650", "Php 650", "P. 650"
-          const pMatch = cleaned.match(/(?:from\s+|starts?\s+at\s+)?(?:P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(\d{1,2}(?:,\d{3})+|\d{1,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving)?$/i);
-          if (pMatch) {
-            const num = parseFloat(pMatch[1].replace(/,/g, ''));
-            const textWithoutPrice = cleaned.slice(0, pMatch.index).trim();
+          // Pattern A: Leading price, e.g. "₱950 - Sinigang Na Hipon 300g" or "P950 Sinigang Na Hipon" or "950: Dish Name"
+          const leadingMatch = str.match(/^(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*(?:[-–—|:@\s]|\.\.\.)+\s*(.+)$/i);
+          if (leadingMatch) {
+            const num = parseFloat(leadingMatch[1].replace(/,/g, ''));
+            return { price: Math.round(num), cleanText: leadingMatch[2].trim() };
+          }
+
+          // Pattern B: Trailing price with currency or numbers, e.g. "Sinigang Na Hipon 300g P 950", "Dish 300g ₱950", "Dish 300g - 950"
+          const trailingMatch = str.match(/(?:[-–—|:@\s]|\.\.\.)+\s*(?:from\s+|starts?\s+at\s+)?(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving)?(?:\s*\([^)]*\))?$/i);
+          if (trailingMatch) {
+            const matchedPriceStr = trailingMatch[1].replace(/,/g, '');
+            const num = parseFloat(matchedPriceStr);
+            const textWithoutPrice = str.slice(0, trailingMatch.index).trim();
+            if (textWithoutPrice.length >= 2) {
+              return { price: Math.round(num), cleanText: textWithoutPrice };
+            }
+          }
+
+          // Pattern C: Price embedded in parentheses or brackets, e.g. "Sinigang Na Hipon 300g (₱950)" or "Dish [P 950]"
+          const parenMatch = str.match(/\(\s*(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving)?\s*\)/i);
+          if (parenMatch) {
+            const num = parseFloat(parenMatch[1].replace(/,/g, ''));
+            const textWithoutPrice = str.replace(parenMatch[0], '').trim();
             return { price: Math.round(num), cleanText: textWithoutPrice };
           }
 
-          // 2. Inline trailing price "Dish Name - P650"
-          const inlineMatch = cleaned.match(/(?:[._\-\s|]|:)+\s*(?:P|Php|PHP)?\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*$/i);
-          if (inlineMatch) {
-            const num = parseFloat(inlineMatch[1].replace(/,/g, ''));
-            const textWithoutPrice = cleaned.slice(0, inlineMatch.index).trim();
-            return { price: Math.round(num), cleanText: textWithoutPrice };
+          // Pattern D: Labeled price, e.g. "Sinigang Na Hipon 300g Price: 950"
+          const labeledMatch = str.match(/^(.+?)\s*(?:price|cost|amount)?\s*[:=@]\s*(?:[₱\u20B1]|P|Php|PHP)?\.?\s*(\d{2,5})/i);
+          if (labeledMatch) {
+            const num = parseFloat(labeledMatch[2]);
+            return { price: Math.round(num), cleanText: labeledMatch[1].trim() };
           }
 
           return null;
         };
 
         const isStandalonePriceLine = (l) => {
-          const cleaned = l.replace(/[₱\u20B1]/g, 'P').trim();
-          return /^(?:from\s+|starts?\s+at\s+)?(?:P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(?:\d{1,2}(?:,\d{3})+|\d{1,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving)?$/i.test(cleaned);
+          const cleanedLine = l.replace(/[₱\u20B1]/g, 'P').trim();
+          return /^(?:from\s+|starts?\s+at\s+)?(?:P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(?:\d{1,2}(?:,\d{3})+|\d{1,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving)?$/i.test(cleanedLine);
         };
 
         const isSectionHeader = (l) => {
@@ -11332,7 +11411,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             continue;
           }
 
-          // Line with price inline ("Dish Name P650")
+          // Line with price extracted inline ("Sinigang Na Hipon 300g P 950")
           if (priceExtracted && priceExtracted.cleanText.length >= 2) {
             if (currentItem) items.push(currentItem);
             currentItem = {
@@ -11344,10 +11423,12 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             continue;
           }
 
-          // Description line
+          // Description or ingredients line
           const isDesc = (
             lowerLine.startsWith('for reference') ||
             lowerLine.startsWith('for ref') ||
+            lowerLine.startsWith('ingredients:') ||
+            lowerLine.startsWith('desc:') ||
             lowerLine.startsWith('tender') ||
             lowerLine.startsWith('crispy') ||
             lowerLine.startsWith('savory') ||
@@ -11363,7 +11444,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           );
 
           if (currentItem && isDesc) {
-            const cleanDesc = line.replace(/^For reference(?: only)?:?\s*/i, '').trim();
+            const cleanDesc = line.replace(/^(?:For reference(?: only)?:?|ingredients:?|desc:?)\s*/i, '').trim();
             if (cleanDesc) {
               currentItem.desc = currentItem.desc ? `${currentItem.desc}, ${cleanDesc}` : cleanDesc;
               continue;
@@ -11379,7 +11460,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             continue;
           }
 
-          // New dish name
+          // New dish item
           if (currentItem) {
             items.push(currentItem);
           }
@@ -11400,33 +11481,105 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           if (item.portion) {
             name = `${name} (${item.portion})`;
           }
+
+          // Clean dish name prefixes (numbers, bullets, "Dish 1:", "Item 1 -", etc.)
           name = name
-            .replace(/^[0-9]+[.)\-]\s*/, '')
+            .replace(/^(?:dish|item)\s*[0-9A-Za-z]+\s*[:.-]\s*/i, '')
+            .replace(/^[0-9]+[.)-]\s*/, '')
             .replace(/^[A-Z]\d+[-–—\s.]*/, '')
+            .replace(/^[•*#\s-]+/, '')
             .replace(/[._–—]{2,}/g, ' ')
-            .replace(/\b[A-Za-z]/g, c => c.toUpperCase())
+            .replace(/[:-]$/, '')
             .trim();
+
+          // Title case dish name while preserving weights like "300g", "1kg", acronyms
+          name = name.replace(/\b[a-zA-Z]/g, (char, index, original) => {
+            const word = original.slice(index).split(/[\s,()-]/)[0];
+            if (/^(?:300g|500g|1kg|250g|SOUQ|BBQ|B&B|LGU|DRF)$/i.test(word)) return char;
+            return char.toUpperCase();
+          });
 
           const lowerCombined = (name + ' ' + (item.desc || '')).toLowerCase();
           let ingredients = item.desc || 'Traditional Kapampangan heritage seasoning, garlic, onions, native herbs';
           let allergens = 'None / Allergen Free';
           let calories = '450';
 
-          if (/sisig|pork|liempo|lechon|kawali|bagnet|baboy|bulaklak|bale|tidtad|asado|kilayin|longanisa/.test(lowerCombined)) {
-            allergens = 'Contains Pork';
+          if (/hipon|shrimp|prawn|sugpo|gambas|tahong|crab|aligue/.test(lowerCombined)) {
+            if (!item.desc) {
+              if (lowerCombined.includes('sinigang')) {
+                ingredients = 'Fresh prawns/shrimp, tamarind (sampalok) broth, water spinach (kangkong), radish (labanos), tomatoes, onions, finger chilies';
+              } else if (lowerCombined.includes('chili') || lowerCombined.includes('garlic')) {
+                ingredients = 'Sautéed fresh shrimp, toasted garlic, chili flakes, butter, native seasoning, spring onions';
+              } else {
+                ingredients = 'Fresh succulent shrimp/seafood, garlic, native spices, onions, lemon-butter sauce';
+              }
+            }
+            allergens = 'Contains Seafood / Shellfish';
+            calories = '340';
+          } else if (/sisig|pork sisig/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Crisp grilled pork mask & belly, chicken liver, calamansi, white onions, chili peppers (siling labuyo), native spices';
+            allergens = 'Contains Pork, Soy';
             calories = '580';
-          } else if (/pancit|luglug|guisado|bihon|mami|noodle|pasta/.test(lowerCombined)) {
-            allergens = 'Contains Gluten / Wheat, Soy';
-            calories = '410';
-          } else if (/beef|bulalo|kaldereta|bistek|baka|steak|shank/.test(lowerCombined)) {
+          } else if (/kare|kare-kare|kare kare/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Slow-braised beef shank & oxtail, roasted peanut sauce, toasted rice flour, eggplant, string beans (sitaw), pechay, banana blossom, sautéed bagoong';
+            allergens = 'Contains Peanuts, Shellfish (Bagoong), Beef';
+            calories = '620';
+          } else if (/pata|kawali|bagnet|liempo|lechon/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Deep-fried seasoned pork trotters/belly, garlic, bay leaves, peppercorn, spiced native vinegar dipping sauce';
+            allergens = 'Contains Pork';
+            calories = '720';
+          } else if (/bulalo/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Slow-simmered beef bone marrow & shank, sweet yellow corn, cabbage, pechay, whole black peppercorns, onions';
             allergens = 'Contains Beef';
-            calories = '680';
-          } else if (/chicken|inasal|manok|wing|leg|tail/.test(lowerCombined)) {
+            calories = '650';
+          } else if (/kaldereta|caldereta/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Braised beef shank/goat meat in rich tomato and liver spread sauce, bell peppers, carrots, potatoes, cheese, native spices';
+            allergens = 'Contains Beef/Meat, Dairy';
+            calories = '590';
+          } else if (/bringhe/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Heirloom glutinous rice (malagkit), coconut milk (gata), turmeric (luyang dilaw), chicken, chorizo de bilbao, boiled eggs, bell peppers';
+            allergens = 'Contains Poultry, Eggs';
+            calories = '480';
+          } else if (/pancit|luglug|palabok|bihon|canton|guisado|mami|noodle/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Rice/egg noodles, rich shrimp and annatto sauce, crushed chicharon, hard-boiled eggs, tinapa flakes, toasted garlic, spring onions, calamansi';
+            allergens = 'Contains Gluten / Wheat, Seafood, Eggs, Pork';
+            calories = '430';
+          } else if (/tidtad|dinuguan/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Kapampangan pork blood stew, tender pork offal, vinegar, garlic, onions, green finger chilies';
+            allergens = 'Contains Pork';
+            calories = '460';
+          } else if (/kilayin/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Braised pork loin and liver in spiced vinegar, garlic, native spices, onions, bay leaves';
+            allergens = 'Contains Pork';
+            calories = '510';
+          } else if (/inasal|chicken|manok/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Charcoal-grilled chicken marinated in lemongrass, calamansi, coconut vinegar, ginger, garlic, and annatto oil';
             allergens = 'Contains Poultry';
             calories = '420';
-          } else if (/fish|shrimp|seafood|salmon|tuna|crab|prawn/.test(lowerCombined)) {
-            allergens = 'Contains Seafood / Shellfish';
+          } else if (/itik|duck/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Deep-fried native farm duck marinated in garlic, native vinegar, and Kapampangan heritage spices';
+            allergens = 'Contains Poultry';
+            calories = '560';
+          } else if (/murcon|morcon/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Kapampangan beef roll stuffed with chorizo de bilbao, boiled eggs, cheddar cheese, carrots, pickles, braised in savory tomato gravy';
+            allergens = 'Contains Beef, Pork, Dairy, Eggs';
+            calories = '620';
+          } else if (/tapa|kalabaw|pindang/.test(lowerCombined)) {
+            if (!item.desc) ingredients = 'Cured Kapampangan carabao meat / beef, garlic, native vinegar, sea salt, sugar, black pepper';
+            allergens = 'Contains Beef/Carabao Meat';
+            calories = '450';
+          } else if (/pork|baboy|bulaklak|bale|asado|longanisa/.test(lowerCombined)) {
+            allergens = 'Contains Pork';
+            calories = '580';
+          } else if (/beef|bistek|baka|steak|shank/.test(lowerCombined)) {
+            allergens = 'Contains Beef';
+            calories = '680';
+          } else if (/fish|salmon|tuna|bangus|tilapia|seafood/.test(lowerCombined)) {
+            allergens = 'Contains Seafood / Fish';
             calories = '320';
+          } else if (/flan|tibok|dessert|halo-halo|halu-halo/.test(lowerCombined)) {
+            allergens = 'Contains Dairy, Eggs';
+            calories = '350';
           }
 
           return {
@@ -11440,54 +11593,98 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         }).filter(d => d.name.length >= 2);
       };
 
-      let parsedDishes = [];
+      let allDetectedDishes = [];
 
-      if (aiRawMenuText.trim()) {
-        parsedDishes = parseMenuTextStream(aiRawMenuText.trim());
-      } else if (aiMenuImage) {
-        setAiOcrProgress(25);
-        const slices = await sliceImageIntoColumns(aiMenuImage);
+      // 1. Scan from raw text if entered
+      if (hasRawText) {
+        setAiOcrProgress(15);
+        const fromText = parseMenuTextStream(aiRawMenuText.trim());
+        allDetectedDishes.push(...fromText);
+      }
 
-        if (slices.isWideGrid && slices.left && slices.right) {
-          setAiOcrProgress(40);
-          const leftText = await runCloudAiOcr(slices.left);
-          setAiOcrProgress(65);
-          const rightText = await runCloudAiOcr(slices.right);
-          setAiOcrProgress(85);
+      // 2. Scan across all uploaded menu image pages
+      if (imagesToScan.length > 0) {
+        const totalImgs = imagesToScan.length;
 
-          const leftDishes = parseMenuTextStream(leftText || '');
-          const rightDishes = parseMenuTextStream(rightText || '');
+        for (let i = 0; i < totalImgs; i++) {
+          const currentImg = imagesToScan[i];
+          const imgNum = i + 1;
+          const baseProg = Math.round(15 + (i / totalImgs) * 75);
 
-          if (leftDishes.length > 0 || rightDishes.length > 0) {
-            parsedDishes = [...leftDishes, ...rightDishes];
+          setAiOcrProgress(baseProg);
+          setAiOcrStatusMessage(`Scanning menu page ${imgNum} of ${totalImgs} (Adaptive layout slicing)...`);
+
+          const layoutData = await sliceImageForMultiLayout(currentImg);
+          const slicesToScan = layoutData.slices || [layoutData.full || currentImg];
+
+          let imgDishes = [];
+
+          // Scan layout slices with Cloud OCR
+          for (let sIdx = 0; sIdx < slicesToScan.length; sIdx++) {
+            const sliceProg = baseProg + Math.round(((sIdx + 1) / slicesToScan.length) * (75 / totalImgs));
+            setAiOcrProgress(Math.min(92, sliceProg));
+            setAiOcrStatusMessage(`Page ${imgNum}/${totalImgs}: Reading layout section ${sIdx + 1} of ${slicesToScan.length}...`);
+
+            const ocrText = await runCloudAiOcr(slicesToScan[sIdx]);
+            if (ocrText && ocrText.trim().length > 5) {
+              const parsed = parseMenuTextStream(ocrText.trim());
+              if (parsed.length > 0) {
+                imgDishes.push(...parsed);
+              }
+            }
           }
-        }
 
-        if (parsedDishes.length === 0) {
-          setAiOcrProgress(60);
-          const fullText = await runCloudAiOcr(slices.full || aiMenuImage);
-          if (fullText && fullText.trim().length > 5) {
-            parsedDishes = parseMenuTextStream(fullText.trim());
-          } else {
-            setAiOcrProgress(70);
-            const enhanced = await preprocessMenuImage(slices.full || aiMenuImage);
+          // Fallback to local Tesseract OCR with enhanced contrast if needed
+          if (imgDishes.length === 0) {
+            setAiOcrStatusMessage(`Page ${imgNum}/${totalImgs}: Applying neural OCR image enhancement...`);
+            const enhanced = await preprocessMenuImage(layoutData.full || currentImg);
             const ocrResult = await Tesseract.recognize(enhanced, 'eng', {
               logger: (m) => {
                 if (m.status === 'recognizing text' && typeof m.progress === 'number') {
-                  setAiOcrProgress(70 + Math.round(m.progress * 25));
+                  setAiOcrProgress(Math.min(94, baseProg + Math.round(m.progress * (70 / totalImgs))));
                 }
               }
             });
-            parsedDishes = parseMenuTextStream(ocrResult?.data?.text || '');
+            if (ocrResult?.data?.text) {
+              const parsed = parseMenuTextStream(ocrResult.data.text);
+              if (parsed.length > 0) {
+                imgDishes.push(...parsed);
+              }
+            }
           }
+
+          allDetectedDishes.push(...imgDishes);
         }
       }
 
-      if (parsedDishes.length > 0) {
-        setAdminDishes(parsedDishes);
-        alert(`🎉 AI OCR successfully detected and organized ${parsedDishes.length} menu items from your image/text into the dish catalog with matching authentic photos!`);
+      // Deduplicate dishes across multiple pages & overlapping slices
+      const uniqueDishMap = new Map();
+      allDetectedDishes.forEach(d => {
+        const norm = d.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!norm) return;
+        if (!uniqueDishMap.has(norm)) {
+          uniqueDishMap.set(norm, { ...d });
+        } else {
+          const existing = uniqueDishMap.get(norm);
+          if ((!existing.price || existing.price === '150') && d.price && d.price !== '150') {
+            existing.price = d.price;
+          }
+          if (d.ingredients && d.ingredients.length > (existing.ingredients || '').length) {
+            existing.ingredients = d.ingredients;
+          }
+        }
+      });
+
+      const finalDishes = Array.from(uniqueDishMap.values());
+
+      if (finalDishes.length > 0) {
+        setAdminDishes(finalDishes);
+        const sourceLabel = imagesToScan.length > 0
+          ? `${imagesToScan.length} uploaded menu page(s)${hasRawText ? ' & text' : ''}`
+          : 'pasted menu text';
+        alert(`🎉 AI OCR successfully detected and organized ${finalDishes.length} menu items from your ${sourceLabel} into the dish catalog with matching authentic photos!`);
       } else {
-        alert("⚠️ No food menu items or priced dishes were detected in the uploaded image.\n\nPlease upload a clear photo of a restaurant menu board, printed price list, or flyer (or paste the menu items in Option 2).");
+        alert("⚠️ No food menu items or priced dishes were detected.\n\nPlease upload clear photos of your menu boards/flyers or paste the menu text in Option 2.");
       }
     } catch (err) {
       console.error("AI OCR Error:", err);
@@ -11495,6 +11692,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     } finally {
       setIsAiScanning(false);
       setAiOcrProgress(0);
+      setAiOcrStatusMessage('');
     }
   };
 
@@ -13270,22 +13468,90 @@ ${JSON.stringify(updatedMessages.slice(-8))}
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-1">
-                            📷 Option 1: Upload Menu Board Photo / Flyer
-                          </label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="block text-[9px] font-bold text-charcoal-light uppercase">
+                              📷 Option 1: Upload Menu Board Photo(s) / Flyers {aiMenuImages.length > 0 && `(${aiMenuImages.length})`}
+                            </label>
+                            {aiMenuImages.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setAiMenuImages([]);
+                                  if (aiMenuFileInputRef.current) aiMenuFileInputRef.current.value = '';
+                                }}
+                                className="text-[9px] text-red-600 hover:text-red-800 font-bold flex items-center gap-0.5 cursor-pointer"
+                              >
+                                ✕ Clear All
+                              </button>
+                            )}
+                          </div>
                           <input
+                            ref={aiMenuFileInputRef}
                             type="file"
                             accept="image/*"
+                            multiple
                             onChange={(e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => setAiMenuImage(reader.result);
-                                reader.readAsDataURL(file);
+                              const files = Array.from(e.target.files || []);
+                              if (files.length > 0) {
+                                Promise.all(
+                                  files.map(file => new Promise((res) => {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => res({
+                                      id: Date.now() + Math.random().toString(),
+                                      dataUrl: reader.result,
+                                      name: file.name
+                                    });
+                                    reader.readAsDataURL(file);
+                                  }))
+                                ).then(newImgs => {
+                                  setAiMenuImages(prev => [...prev, ...newImgs]);
+                                });
                               }
                             }}
-                            className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white"
+                            className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white cursor-pointer"
                           />
+
+                          {/* Multi-Image Gallery Previews */}
+                          {aiMenuImages.length > 0 && (
+                            <div className="mt-2 space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[9px] font-black text-bananaleaf">
+                                  ✓ {aiMenuImages.length} Menu Page{aiMenuImages.length > 1 ? 's' : ''} Ready for AI Scanning
+                                </span>
+                                <span className="text-[8px] text-charcoal-light">Multi-layout adaptive OCR</span>
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-40 overflow-y-auto p-1.5 bg-white rounded-lg border border-[#E9E5DE]">
+                                {aiMenuImages.map((imgObj, iIdx) => {
+                                  const imgUrl = typeof imgObj === 'string' ? imgObj : imgObj.dataUrl;
+                                  const imgName = typeof imgObj === 'object' && imgObj.name ? imgObj.name : `Page ${iIdx + 1}`;
+                                  return (
+                                    <div key={iIdx} className="relative group rounded border border-[#E9E5DE] overflow-hidden bg-[#FAF8F5] p-1 flex flex-col items-center">
+                                      <img src={imgUrl} alt={`Menu page ${iIdx + 1}`} className="w-full h-14 object-cover rounded" />
+                                      <div className="w-full mt-1 flex items-center justify-between">
+                                        <span className="text-[8px] font-black text-charcoal truncate px-0.5">
+                                          P.{iIdx + 1}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const filtered = aiMenuImages.filter((_, idx) => idx !== iIdx);
+                                            setAiMenuImages(filtered);
+                                            if (filtered.length === 0 && aiMenuFileInputRef.current) {
+                                              aiMenuFileInputRef.current.value = '';
+                                            }
+                                          }}
+                                          className="text-[9px] text-red-600 hover:text-red-800 font-bold px-1 hover:bg-red-50 rounded cursor-pointer"
+                                          title="Remove this page"
+                                        >
+                                          ✕
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         <div>
@@ -13293,8 +13559,8 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                             📝 Option 2: Paste Raw Menu Text / Price List
                           </label>
                           <textarea
-                            rows={2}
-                            placeholder="e.g. SOUQ Pork Sisig ₱280, Crispy Kare-Kare ₱390, Bringhe ₱220..."
+                            rows={aiMenuImages.length > 0 ? 5 : 3}
+                            placeholder="e.g. Sinigang Na Hipon 300g P 950, Chili Garlic Shrimp 300g P 750, SOUQ Pork Sisig ₱280..."
                             value={aiRawMenuText}
                             onChange={(e) => setAiRawMenuText(e.target.value)}
                             className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white"
@@ -13309,9 +13575,9 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                         className="w-full py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-75"
                       >
                         {isAiScanning ? (
-                          <span>🤖 {aiOcrProgress > 0 ? `AI OCR Scanning & Reading Menu (${aiOcrProgress}%)...` : "AI OCR Initializing Engine..."}</span>
+                          <span>🤖 {aiOcrStatusMessage || (aiOcrProgress > 0 ? `AI OCR Reading Menu Pages (${aiOcrProgress}%)...` : "AI OCR Initializing Engine...")}</span>
                         ) : (
-                          <span>✨ Analyze & Auto-Organize Menu with AI OCR</span>
+                          <span>✨ Analyze & Auto-Organize Menu with Multi-Page AI OCR</span>
                         )}
                       </button>
                     </div>
@@ -13336,7 +13602,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                         {adminDishes.map((dish, idx) => (
                           <div key={idx} className="p-3 bg-white rounded-lg border border-[#E9E5DE] space-y-2 relative">
                             <div className="flex items-center justify-between">
-                              <span className="block text-[10px] font-black text-terracotta">DISH {String.fromCharCode(65 + idx)}</span>
+                              <span className="block text-[10px] font-black text-terracotta">DISH {idx + 1}</span>
                               {adminDishes.length > 1 && (
                                 <button
                                   type="button"
@@ -13428,9 +13694,22 @@ ${JSON.stringify(updatedMessages.slice(-8))}
                                 className="block w-full px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white text-charcoal focus:outline-none focus:ring-1 focus:ring-terracotta"
                               />
                               {dish.image && (
-                                <div className="flex items-center gap-1.5 mt-1">
-                                  <img src={dish.image} className="w-6 h-6 rounded object-cover border border-[#E9E5DE]" alt="Preview" />
-                                  <span className="text-[8px] text-bananaleaf font-black">✓ Photo Uploaded</span>
+                                <div className="flex items-center justify-between gap-2 mt-1 p-1 bg-[#F9F7F3] rounded border border-[#E9E5DE]">
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    <img src={dish.image} className="w-6 h-6 rounded object-cover border border-[#E9E5DE] shrink-0" alt="Preview" />
+                                    <span className="text-[8px] text-bananaleaf font-black truncate">✓ Photo Uploaded</span>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const updated = [...adminDishes];
+                                      updated[idx] = { ...updated[idx], image: '' };
+                                      setAdminDishes(updated);
+                                    }}
+                                    className="text-[8px] text-red-600 hover:text-red-800 font-bold px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                                  >
+                                    ✕ Remove
+                                  </button>
                                 </div>
                               )}
                             </div>

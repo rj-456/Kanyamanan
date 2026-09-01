@@ -51654,6 +51654,754 @@ export const PRESEEDED_RESTAURANTS = [
       }
     ]
   }
+,
+  {
+  "id": "res-flori-apung-oting",
+  "name": "Apung Oting's Restaurant",
+  "municipality": "Floridablanca",
+  "corridor": "Jose Abad Santos Avenue (JASA) Line",
+  "operatingHours": "09:00 AM - 09:00 PM",
+  "priceTier": "$$",
+  "lat": 14.974,
+  "lng": 120.529,
+  "categories": [
+    "🏛️ Ancestral Kitchen",
+    "🍲 Heritage Specialists"
+  ],
+  "description": "Apung Oting's Restaurant is a celebrated Floridablanca culinary destination renowned for its ancestral Kapampangan recipes, crispy pata family sets, bibe kaldereta, ginataang suso, and traditional hearty home-cooked feasts.",
+  "address": "Jose Abad Santos Ave, Poblacion, Floridablanca, Pampanga",
+  "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+  "images": [
+    "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80"
+  ],
+  "branches": [
+    {
+      "branchName": "Apung Oting's Restaurant - Main",
+      "municipality": "Floridablanca",
+      "address": "Jose Abad Santos Ave, Poblacion, Floridablanca, Pampanga",
+      "operatingHours": "09:00 AM - 09:00 PM",
+      "lat": 14.974,
+      "lng": 120.529
+    }
+  ],
+  "username": "apungoting_owner",
+  "password": "apungoting_admin",
+  "occupancy": [
+    15,
+    25,
+    40,
+    70,
+    95,
+    85,
+    50,
+    45,
+    65,
+    85,
+    90,
+    75,
+    40,
+    20,
+    10
+  ],
+  "menu": [
+    {
+      "id": "menu-oting-seta",
+      "name": "Set A Feast (Crispy Pata, Sisig, Chopsuey, Shanghai & Chaofan Rice)",
+      "price": 1599,
+      "ingredients": "Crispy Pata, Sizzling Pork Sisig, Chopsuey, Lumpiang Shanghai, Chaofan Fried Rice, 1.5L Coke",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Soy, Shellfish, Gluten.",
+      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Protein, Hearty Family Feast.",
+      "nutrition": {
+        "calories": 950,
+        "protein": 52,
+        "carbs": 65,
+        "fat": 48
+      },
+      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-oting-setb",
+      "name": "Set B Feast (Beef Bulalo, Kare-Kare Bagnet, Fried Hito with Buro Mangga)",
+      "price": 1699,
+      "ingredients": "Beef marrow bulalo, crispy bagnet kare-kare, fried hito, native buro with pickled mango, fish fillet, 5 cups steamed rice, Coke",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Beef Marrow, Pork, Peanuts, Fish, Fermented Buro.",
+      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Rich Kapampangan Delicacies.",
+      "nutrition": {
+        "calories": 920,
+        "protein": 55,
+        "carbs": 60,
+        "fat": 50
+      },
+      "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-oting-setc",
+      "name": "Set C Grand Feast (Crispy Pata, Kare-Kare Bagnet, Kalderetang Bibe, Pancit Canton)",
+      "price": 2000,
+      "ingredients": "Crispy pata, bagnet kare-kare, native duck kaldereta, chicharon fiesta, fish fillet, pancit canton, 5 cups rice, Coke",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Peanuts, Duck Meat, Gluten, Fish.",
+      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Grand Traditional Kapampangan Spread.",
+      "nutrition": {
+        "calories": 980,
+        "protein": 58,
+        "carbs": 70,
+        "fat": 52
+      },
+      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-oting-setd",
+      "name": "Set D Heritage Feast (Crispy Pata, Kalderetang Bibe, Ginataang Suso, Kare-Kare)",
+      "price": 1799,
+      "ingredients": "Crispy pata, braised duck kaldereta, freshwater snails in coconut cream, bagnet kare-kare, fish fillet, fried hito, 5 cups rice, Coke",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Duck Meat, Shellfish/Snails, Coconut, Peanuts.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Authentic Ancestral Kapampangan Specialty.",
+      "nutrition": {
+        "calories": 940,
+        "protein": 56,
+        "carbs": 58,
+        "fat": 49
+      },
+      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-oting-bibe",
+      "name": "Kalderetang Bibe (Native Duck Stew)",
+      "price": 580,
+      "ingredients": "Slow-braised native Candaba duck in rich tomato and liver sauce, bell peppers, native chili",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry/Duck, Soy.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Rich Kapampangan Game Meat Heritage.",
+      "nutrition": {
+        "calories": 560,
+        "protein": 42,
+        "carbs": 12,
+        "fat": 38
+      },
+      "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-oting-suso",
+      "name": "Ginataang Suso (River Snails in Spiced Coconut Milk)",
+      "price": 320,
+      "ingredients": "Fresh river snails (suso), rich coconut cream, ginger, garlic, finger chilies, kangkong leaves",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish/Snails and Coconut.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: High Mineral & Protein Native Delicacy.",
+      "nutrition": {
+        "calories": 340,
+        "protein": 24,
+        "carbs": 10,
+        "fat": 22
+      },
+      "image": "https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80"
+    }
+  ]
+},
+  {
+  "id": "res-flori-bariotik",
+  "name": "Bariotik Kitchen and Garden",
+  "municipality": "Floridablanca",
+  "corridor": "Jose Abad Santos Avenue (JASA) Line",
+  "operatingHours": "10:00 AM - 08:00 PM",
+  "priceTier": "$$",
+  "lat": 14.9685,
+  "lng": 120.5342,
+  "categories": [
+    "🌿 Farm-to-Table",
+    "🍲 Heritage Specialists"
+  ],
+  "description": "Bariotik Kitchen and Garden is a picturesque garden buffet restaurant in Floridablanca serving an all-you-can-eat spread of authentic Kapampangan native delicacies in a tranquil rustic ambiance.",
+  "address": "San Jose, Floridablanca, Pampanga",
+  "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+  "images": [
+    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80"
+  ],
+  "branches": [
+    {
+      "branchName": "Bariotik Kitchen and Garden - Main",
+      "municipality": "Floridablanca",
+      "address": "San Jose, Floridablanca, Pampanga",
+      "operatingHours": "10:00 AM - 08:00 PM",
+      "lat": 14.9685,
+      "lng": 120.5342
+    }
+  ],
+  "username": "bariotik_owner",
+  "password": "bariotik_admin",
+  "occupancy": [
+    20,
+    30,
+    50,
+    80,
+    100,
+    90,
+    60,
+    50,
+    70,
+    85,
+    90,
+    80,
+    45,
+    25,
+    15
+  ],
+  "menu": [
+    {
+      "id": "menu-bariotik-adult",
+      "name": "Regular Adult All-You-Can-Eat Heritage Buffet",
+      "price": 275,
+      "ingredients": "Unlimited access to traditional Kapampangan buffet line: Pork Sisig, Kare-Kare, Asado, Sinigang, Pancit Luglug, Rice & Desserts",
+      "allergens": "⚠️ ALLERGEN WARNING: May contain Pork, Peanuts, Seafood, Soy, Dairy.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Great Value All-You-Can-Eat Buffet.",
+      "nutrition": {
+        "calories": 850,
+        "protein": 48,
+        "carbs": 75,
+        "fat": 42
+      },
+      "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-bariotik-senior",
+      "name": "Senior Citizen / PWD Buffet Rate",
+      "price": 220,
+      "ingredients": "Full unlimited buffet spread discounted for Senior Citizens and PWD cardholders",
+      "allergens": "⚠️ ALLERGEN WARNING: May contain Pork, Peanuts, Seafood, Soy.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Special Discounted Heritage Buffet.",
+      "nutrition": {
+        "calories": 850,
+        "protein": 48,
+        "carbs": 75,
+        "fat": 42
+      },
+      "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-bariotik-kids",
+      "name": "Kids Buffet (Aged 5-7 Years Old)",
+      "price": 150,
+      "ingredients": "Unlimited buffet access tailored for young children (Kids 4 and below dine FREE)",
+      "allergens": "⚠️ ALLERGEN WARNING: May contain Pork, Dairy, Gluten.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Kid-Friendly Garden Dining.",
+      "nutrition": {
+        "calories": 500,
+        "protein": 25,
+        "carbs": 55,
+        "fat": 20
+      },
+      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
+    }
+  ]
+},
+  {
+  "id": "res-flori-danilos",
+  "name": "Danilo's Garden Restaurant",
+  "municipality": "Floridablanca",
+  "corridor": "Jose Abad Santos Avenue (JASA) Line",
+  "operatingHours": "08:00 AM - 09:00 PM",
+  "priceTier": "$$",
+  "lat": 14.9782,
+  "lng": 120.5218,
+  "categories": [
+    "🌿 Farm-to-Table",
+    "🍲 Heritage Specialists"
+  ],
+  "description": "Danilo's Garden Restaurant offers a soothing nature-inspired dining experience in Floridablanca with hearty native Kapampangan soups, sizzling specialties, and home-style noodle bilao.",
+  "address": "Valdez, Floridablanca, Pampanga",
+  "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80",
+  "images": [
+    "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80"
+  ],
+  "branches": [
+    {
+      "branchName": "Danilo's Garden Restaurant - Main",
+      "municipality": "Floridablanca",
+      "address": "Valdez, Floridablanca, Pampanga",
+      "operatingHours": "08:00 AM - 09:00 PM",
+      "lat": 14.9782,
+      "lng": 120.5218
+    }
+  ],
+  "username": "danilos_owner",
+  "password": "danilos_admin",
+  "occupancy": [
+    10,
+    20,
+    35,
+    65,
+    85,
+    75,
+    45,
+    35,
+    55,
+    75,
+    85,
+    70,
+    35,
+    20,
+    10
+  ],
+  "menu": [
+    {
+      "id": "menu-danilos-palayok",
+      "name": "Sinigang Mix sa Palayok (Salmon Belly, Ulo & Hipon)",
+      "price": 895,
+      "ingredients": "Claypot simmered tamarind broth, Norwegian salmon belly, salmon head, fresh river shrimp, native vegetables",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Seafood, Fish (Salmon), Shellfish (Shrimp).",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Rich in Omega-3, Heart-Healthy Broth.",
+      "nutrition": {
+        "calories": 480,
+        "protein": 46,
+        "carbs": 14,
+        "fat": 26
+      },
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-danilos-bulalo",
+      "name": "Special Beef Bulalo",
+      "price": 380,
+      "ingredients": "Slow-simmered beef shank with bone marrow, sweet corn on cob, pechay, peppercorns, savory broth",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Beef Marrow.",
+      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Protein, High Cholesterol Marrow.",
+      "nutrition": {
+        "calories": 650,
+        "protein": 48,
+        "carbs": 12,
+        "fat": 46
+      },
+      "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-danilos-hipon",
+      "name": "Sinigang na Hipon",
+      "price": 320,
+      "ingredients": "Fresh plump prawns, tamarind sour broth, water spinach (kangkong), radish, finger chilies",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish (Shrimp).",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Low Calorie, High Protein Seafood.",
+      "nutrition": {
+        "calories": 310,
+        "protein": 36,
+        "carbs": 10,
+        "fat": 12
+      },
+      "image": "https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-danilos-pancit",
+      "name": "Pansit Guisado",
+      "price": 295,
+      "ingredients": "Stir-fried bihon & canton noodles, sliced pork, shredded chicken, cabbage, carrots, calamansi",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Gluten / Wheat, Pork, Poultry, Soy.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Traditional Kapampangan Noodle Dish.",
+      "nutrition": {
+        "calories": 420,
+        "protein": 22,
+        "carbs": 62,
+        "fat": 12
+      },
+      "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-danilos-tofu",
+      "name": "Sizzling Tofu",
+      "price": 195,
+      "ingredients": "Crispy golden bean curd cubes, bell peppers, white onions, savory spiced mayonnaise dressing",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Soy, Egg (Mayonnaise).",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Vegetarian-Friendly Protein Option.",
+      "nutrition": {
+        "calories": 360,
+        "protein": 18,
+        "carbs": 16,
+        "fat": 26
+      },
+      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"
+    }
+  ]
+},
+  {
+  "id": "res-flori-jilm5",
+  "name": "JILM 5 (JLM 5 Food Trays & Grill)",
+  "municipality": "Floridablanca",
+  "corridor": "Jose Abad Santos Avenue (JASA) Line",
+  "operatingHours": "09:00 AM - 08:30 PM",
+  "priceTier": "$$",
+  "lat": 14.9725,
+  "lng": 120.531,
+  "categories": [
+    "🍲 Heritage Specialists",
+    "🍢 Streetfood Masters"
+  ],
+  "description": "JLM 5 is a beloved family-style grill and catering specialist in Floridablanca, celebrated for mouthwatering party food trays, sizzling sisig, crispy bagnet kare-kare, and signature chicken wings.",
+  "address": "Poblacion, Floridablanca, Pampanga",
+  "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
+  "images": [
+    "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80"
+  ],
+  "branches": [
+    {
+      "branchName": "JLM 5 Grill - Main Floridablanca",
+      "municipality": "Floridablanca",
+      "address": "Poblacion, Floridablanca, Pampanga",
+      "operatingHours": "09:00 AM - 08:30 PM",
+      "lat": 14.9725,
+      "lng": 120.531
+    }
+  ],
+  "username": "jilm5_owner",
+  "password": "jilm5_admin",
+  "occupancy": [
+    15,
+    25,
+    45,
+    75,
+    90,
+    80,
+    50,
+    40,
+    60,
+    80,
+    90,
+    75,
+    35,
+    20,
+    10
+  ],
+  "menu": [
+    {
+      "id": "menu-jilm5-bagnetkare",
+      "name": "Bagnet Kare-Kare Food Tray (10-12 pax)",
+      "price": 1850,
+      "ingredients": "Crisp golden pork bagnet, rich peanut gravy, string beans, eggplant, banana heart, sautéed bagoong alamang",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Peanuts, Shellfish (Bagoong).",
+      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Calorie Celebration Tray.",
+      "nutrition": {
+        "calories": 720,
+        "protein": 42,
+        "carbs": 20,
+        "fat": 54
+      },
+      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-jilm5-ribs",
+      "name": "Babyback Ribs Food Tray (10-12 pax)",
+      "price": 2300,
+      "ingredients": "Tender slow-smoked pork baby back ribs glazed in hickory barbecue sauce",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Soy.",
+      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Protein Feast.",
+      "nutrition": {
+        "calories": 680,
+        "protein": 48,
+        "carbs": 24,
+        "fat": 44
+      },
+      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-jilm5-sisigtray",
+      "name": "Pork Sisig Food Tray (10-12 pax)",
+      "price": 1750,
+      "ingredients": "Grilled minced pork mask, belly, chicken liver, calamansi, white onions, chili peppers",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Poultry (Liver), Soy.",
+      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Authentic Kapampangan Sisig Tray.",
+      "nutrition": {
+        "calories": 590,
+        "protein": 38,
+        "carbs": 6,
+        "fat": 46
+      },
+      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-jilm5-wings",
+      "name": "Honey Sriracha Chicken Wings (20 pcs)",
+      "price": 670,
+      "ingredients": "Crispy fried chicken wings tossed in sweet spicy honey sriracha glaze and sesame seeds",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry, Gluten / Wheat, Sesame.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Crowd Favorite Finger Food.",
+      "nutrition": {
+        "calories": 510,
+        "protein": 34,
+        "carbs": 22,
+        "fat": 32
+      },
+      "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80"
+    }
+  ]
+},
+  {
+  "id": "res-flori-kabigtings",
+  "name": "Kabigting's Halo-Halo (Floridablanca)",
+  "municipality": "Floridablanca",
+  "corridor": "Jose Abad Santos Avenue (JASA) Line",
+  "operatingHours": "08:00 AM - 07:30 PM",
+  "priceTier": "$",
+  "lat": 14.9755,
+  "lng": 120.528,
+  "categories": [
+    "🏛️ Ancestral Kitchen",
+    "🍧 Dessert & Merienda"
+  ],
+  "description": "The legendary home of genuine Kapampangan Halo-Halo with pastillas milk, halayang calabaza (mashed squash), and sweetened white kidney beans. Paired with savory palabok, dinuguan, tokwa't baboy, and all-day breakfast combos.",
+  "address": "San Nicolas, Floridablanca, Pampanga",
+  "image": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=80",
+  "images": [
+    "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=800&q=80"
+  ],
+  "branches": [
+    {
+      "branchName": "Kabigting's Halo-Halo - Floridablanca",
+      "municipality": "Floridablanca",
+      "address": "San Nicolas, Floridablanca, Pampanga",
+      "operatingHours": "08:00 AM - 07:30 PM",
+      "lat": 14.9755,
+      "lng": 120.528
+    }
+  ],
+  "username": "kabigtings_flori",
+  "password": "kabigtings_admin",
+  "occupancy": [
+    20,
+    35,
+    60,
+    95,
+    100,
+    90,
+    70,
+    60,
+    80,
+    90,
+    85,
+    65,
+    30,
+    15,
+    10
+  ],
+  "menu": [
+    {
+      "id": "menu-kabigting-halohalo",
+      "name": "Famous Kabigting's Halo-Halo",
+      "price": 110,
+      "ingredients": "Finely shaved ice, sweetened white kidney beans (kidney beans), homemade pastillas de leche (pure carabao's milk), halayang kalabasa (mashed squash)",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Dairy (Carabao Milk Pastillas), Legumes (White Kidney Beans).",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Historic Kapampangan Dessert with Natural Squash & Carabao Milk.",
+      "nutrition": {
+        "calories": 340,
+        "protein": 9,
+        "carbs": 62,
+        "fat": 7
+      },
+      "image": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-kabigting-palabok",
+      "name": "Special Pancit Palabok",
+      "price": 105,
+      "ingredients": "Rice noodles, savory shrimp-annatto sauce, crushed chicharon, tinapa flakes, hard-boiled egg, toasted garlic, spring onions",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish, Eggs, Pork, Fish (Tinapa).",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Traditional Kapampangan Merienda Favorite.",
+      "nutrition": {
+        "calories": 390,
+        "protein": 18,
+        "carbs": 54,
+        "fat": 12
+      },
+      "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-kabigting-combo-liempo",
+      "name": "Crispy Liempo w/ Halo-Halo Combo",
+      "price": 240,
+      "ingredients": "Golden fried crispy pork liempo, steamed rice, spiced vinegar dipping sauce + 1 glass Famous Kabigting's Halo-Halo",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Dairy.",
+      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Hearty Meal & Dessert Pairing.",
+      "nutrition": {
+        "calories": 880,
+        "protein": 38,
+        "carbs": 85,
+        "fat": 44
+      },
+      "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-kabigting-dinuguan",
+      "name": "Dinuguan w/ Puto or Rice",
+      "price": 135,
+      "ingredients": "Kapampangan pork blood stew simmered with vinegar, green finger chilies, served with fluffy puto or rice",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Iron-Rich Traditional Stew.",
+      "nutrition": {
+        "calories": 460,
+        "protein": 28,
+        "carbs": 42,
+        "fat": 20
+      },
+      "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-kabigting-tokwa",
+      "name": "Tokwa't Baboy",
+      "price": 115,
+      "ingredients": "Deep-fried tofu cubes, boiled pork ears and mask, spiced soy-vinegar dressing, fresh onions",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Soy, Pork.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Classic Kapampangan Merienda / Pulutan.",
+      "nutrition": {
+        "calories": 320,
+        "protein": 22,
+        "carbs": 12,
+        "fat": 20
+      },
+      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"
+    }
+  ]
+},
+  {
+  "id": "res-flori-susies",
+  "name": "Susie's Cuisine (Floridablanca)",
+  "municipality": "Floridablanca",
+  "corridor": "Jose Abad Santos Avenue (JASA) Line",
+  "operatingHours": "07:30 AM - 07:00 PM",
+  "priceTier": "$",
+  "lat": 14.9738,
+  "lng": 120.5305,
+  "categories": [
+    "🏛️ Ancestral Kitchen",
+    "🍧 Dessert & Merienda"
+  ],
+  "description": "The iconic Queen of Kapampangan kakanin and merienda since 1972. Renowned for rich carabao milk Tibok-Tibok, Pancit Palabok, Sapin-Sapin, Moche, and traditional rice meals.",
+  "address": "Poblacion, Floridablanca, Pampanga",
+  "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=800&q=80",
+  "images": [
+    "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=800&q=80",
+    "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=800&q=80"
+  ],
+  "branches": [
+    {
+      "branchName": "Susie's Cuisine - Floridablanca Branch",
+      "municipality": "Floridablanca",
+      "address": "Poblacion, Floridablanca, Pampanga",
+      "operatingHours": "07:30 AM - 07:00 PM",
+      "lat": 14.9738,
+      "lng": 120.5305
+    }
+  ],
+  "username": "susies_flori",
+  "password": "susies_admin",
+  "occupancy": [
+    25,
+    40,
+    65,
+    90,
+    95,
+    85,
+    65,
+    55,
+    75,
+    85,
+    75,
+    55,
+    30,
+    15,
+    10
+  ],
+  "menu": [
+    {
+      "id": "menu-susies-tibok",
+      "name": "Authentic Tibok-Tibok (Slice)",
+      "price": 30,
+      "ingredients": "Pure fresh carabao's milk pudding, coconut milk, topped with fragrant toasted latik (coconut curds)",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Dairy (Carabao Milk), Coconut.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Legendary Kapampangan Carabao Milk Pudding.",
+      "nutrition": {
+        "calories": 190,
+        "protein": 5,
+        "carbs": 24,
+        "fat": 9
+      },
+      "image": "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-susies-palabok",
+      "name": "Pancit Palabok (Solo)",
+      "price": 120,
+      "ingredients": "Rice noodles, thick savory shrimp and annatto sauce, crushed chicharon, boiled eggs, tinapa flakes, calamansi",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Shellfish (Shrimp), Eggs, Fish, Pork.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Signature Kapampangan Palabok.",
+      "nutrition": {
+        "calories": 430,
+        "protein": 20,
+        "carbs": 58,
+        "fat": 14
+      },
+      "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-susies-bringhe",
+      "name": "Special Bringhe (Solo)",
+      "price": 95,
+      "ingredients": "Glutinous rice cooked in rich coconut milk and native turmeric (luyang dilaw), chicken slices, chorizo bilbao, bell peppers, boiled egg",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry, Eggs, Pork (Chorizo).",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Heirloom Kapampangan Yellow Sticky Rice.",
+      "nutrition": {
+        "calories": 480,
+        "protein": 18,
+        "carbs": 68,
+        "fat": 16
+      },
+      "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-susies-sapin",
+      "name": "Sapin-Sapin (Slice)",
+      "price": 25,
+      "ingredients": "Layered sticky glutinous rice cake flavored with ube, jackfruit (langka), and coconut cream, topped with latik",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Coconut.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Traditional Kapampangan Heritage Kakanin.",
+      "nutrition": {
+        "calories": 170,
+        "protein": 3,
+        "carbs": 32,
+        "fat": 4
+      },
+      "image": "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-susies-sisig",
+      "name": "Sizzling Pork Sisig w/ Rice",
+      "price": 195,
+      "ingredients": "Chopped grilled pork mask, liver, calamansi, white onions, chili peppers, served on hot plate with garlic rice",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Pork, Poultry Liver, Soy.",
+      "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Classic Pampanga Sisig Rice Meal.",
+      "nutrition": {
+        "calories": 640,
+        "protein": 34,
+        "carbs": 52,
+        "fat": 34
+      },
+      "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+      "id": "menu-susies-tamales",
+      "name": "Tamales Special",
+      "price": 40,
+      "ingredients": "Steamed ground rice and coconut milk cake wrapped in banana leaves, topped with chicken strips, hard-boiled egg, and ground roasted peanuts",
+      "allergens": "⚠️ ALLERGEN WARNING: Contains Peanuts, Eggs, Poultry.",
+      "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Heritage Banana-Leaf Wrapped Delicacy.",
+      "nutrition": {
+        "calories": 230,
+        "protein": 9,
+        "carbs": 28,
+        "fat": 10
+      },
+      "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80"
+    }
+  ]
+}
 ];
 
 export const PRESEEDED_ATTRACTIONS = [
