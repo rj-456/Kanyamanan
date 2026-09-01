@@ -690,7 +690,8 @@ function App() {
   // Persistent localStorage synchronization effect for live frontend updates
   useEffect(() => {
     try {
-      localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(restaurants));
+      const clean = (restaurants || []).filter(r => !isDeprecatedRestaurant(r));
+      localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(clean));
     } catch (e) {
       console.error("LocalStorage save error:", e);
     }
@@ -2611,7 +2612,7 @@ So, where do we start? 😊`,
     const counts = {};
     MUNICIPALITIES.forEach(m => {
       counts[m] = (restaurants || []).filter(r =>
-        r && (r.municipality === m || (Array.isArray(r.branches) && r.branches.some(b => b && (typeof b === 'string' ? b === m : b.municipality === m))))
+        r && !isDeprecatedRestaurant(r) && (r.municipality === m || (Array.isArray(r.branches) && r.branches.some(b => b && (typeof b === 'string' ? b === m : b.municipality === m))))
       ).length;
     });
     return counts;
@@ -2619,7 +2620,7 @@ So, where do we start? 😊`,
 
   // Alphabetically Sorted Restaurants Helper (A to Z)
   const sortedRestaurants = useMemo(() => {
-    return [...(restaurants || [])].sort((a, b) =>
+    return [...(restaurants || [])].filter(r => r && !isDeprecatedRestaurant(r)).sort((a, b) =>
       (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' })
     );
   }, [restaurants]);
@@ -2628,7 +2629,7 @@ So, where do we start? 😊`,
   const filteredRestaurants = useMemo(() => {
     const q = (searchQuery || '').toLowerCase().trim();
     const list = (restaurants || []).filter(res => {
-      if (!res || typeof res !== 'object') return false;
+      if (!res || typeof res !== 'object' || isDeprecatedRestaurant(res)) return false;
 
       const resName = (res.name || '').toLowerCase();
       const resDesc = (res.description || '').toLowerCase();
