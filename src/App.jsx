@@ -487,6 +487,43 @@ function App() {
     }
   }, []);
 
+  const DEPRECATED_RESTAURANTS_BLOCKLIST = [
+    "Apung Oting's Heritage Restaurant",
+    "Apung Oting's Restaurant",
+    "Bariotik Kitchen and Garden",
+    "Floridablanca Sugar Trail Resto",
+    "Kabigting's Halo-Halo (Floridablanca)",
+    "Susie's Cuisine (Floridablanca)",
+    "Lola Ima Buffet & Catering",
+    "Swamp Wild Duck Grill",
+    "Kusina San Guillermo",
+    "Apag Apalit Lechon & Grill",
+    "Apag Marangle",
+    "Bale Lubao Heritage Kitchen",
+    "Mabalacat Native Treats & Claypot",
+    "Macabebe Delta Seafood Grill",
+    "Atching Lillian's Ancestral Kitchen",
+    "Masantol Mangrove Crab House",
+    "Minalin Egg Farm Cafe",
+    "Porac Mountain Grill & Indigenous Kitchen",
+    "San Luis River Delta Eatery",
+    "San Simon Expressway Diner",
+    "Ernesto's Kitchen & Bar",
+    "Santa Ana Claypot Grill",
+    "Alviz Farm Heritage Kitchen & Experience",
+    "Fat Grille Restaurant",
+    "Ocampo-Lansang Turrones & Cafe",
+    "Santo Tomas Palayok Kitchen",
+    "Bala Kayu Silogan Atbp.",
+    "Sasmuan Coastal Seafood & Cafe"
+  ].map(s => s.toLowerCase().trim());
+
+  const isDeprecatedRestaurant = (res) => {
+    if (!res) return true;
+    const nameLower = (res.name || '').toLowerCase().trim();
+    return DEPRECATED_RESTAURANTS_BLOCKLIST.some(dep => nameLower === dep || nameLower.includes(dep));
+  };
+
   // Local state restaurants database with 100% unique usernames & permanent frontend-backend persistence (Sorted Alphabetically A-Z)
   const [restaurants, setRestaurants] = useState(() => {
     let initialList = [];
@@ -502,7 +539,7 @@ function App() {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const sanitized = parsed.map((res, idx) => {
-            if (!res || typeof res !== 'object' || deletedIds.includes(res.id)) return null;
+            if (!res || typeof res !== 'object' || deletedIds.includes(res.id) || isDeprecatedRestaurant(res)) return null;
             const preseeded = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === res.id || (p.name && res.name && p.name.toLowerCase() === res.name.toLowerCase())));
             const menuToUse = (Array.isArray(res.menu) && res.menu.length > 0)
               ? res.menu
@@ -526,7 +563,7 @@ function App() {
 
           // Append any newly added preseeded restaurants that aren't deleted and not yet in cached localStorage
           (PRESEEDED_RESTAURANTS || []).forEach(pre => {
-            if (!pre || !pre.id || deletedIds.includes(pre.id)) return;
+            if (!pre || !pre.id || deletedIds.includes(pre.id) || isDeprecatedRestaurant(pre)) return;
             const exists = sanitized.some(r => r && (r.id === pre.id || (r.name && pre.name && r.name.toLowerCase() === pre.name.toLowerCase())));
             if (!exists) {
               sanitized.push({ ...pre });
@@ -548,7 +585,7 @@ function App() {
 
     if (initialList.length === 0) {
       const usedUsernames = new Set();
-      initialList = (PRESEEDED_RESTAURANTS || []).filter(pre => pre && pre.id && !deletedIds.includes(pre.id)).map((res, idx) => {
+      initialList = (PRESEEDED_RESTAURANTS || []).filter(pre => pre && pre.id && !deletedIds.includes(pre.id) && !isDeprecatedRestaurant(pre)).map((res, idx) => {
         let baseUser = res.username;
         if (!baseUser || baseUser === 'owner') {
           baseUser = (res.name || 'restaurant')
@@ -573,7 +610,11 @@ function App() {
       });
     }
 
-    return [...initialList].filter(r => r && r.id && !deletedIds.includes(r.id)).sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
+    const finalList = [...initialList].filter(r => r && r.id && !deletedIds.includes(r.id) && !isDeprecatedRestaurant(r)).sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
+    try {
+      localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(finalList));
+    } catch (e) { }
+    return finalList;
   });
 
   // Persistent Tourist Attractions Database State with auto-healing error recovery
