@@ -508,7 +508,6 @@ function App() {
     "Porac Mountain Grill & Indigenous Kitchen",
     "San Luis River Delta Eatery",
     "San Simon Expressway Diner",
-    "Ernesto's Kitchen & Bar",
     "Santa Ana Claypot Grill",
     "Alviz Farm Heritage Kitchen & Experience",
     "Fat Grille Restaurant",
@@ -522,6 +521,9 @@ function App() {
   const isLegacyPreseeded = (res) => {
     if (!res) return false;
     if (res.isCustom || res.userCreated) return false;
+    // Explicitly block the legacy synthetic duplicate Ernesto entry
+    if (res.id === 'res-ernestos-santa-ana') return true;
+    if ((res.address || '').includes('Santo Rosario') && (res.name || '').toLowerCase().includes('ernesto')) return true;
     const nameLower = (res.name || '').toLowerCase().trim();
     return REMOVED_PRESEEDED_NAMES.some(dep => nameLower === dep || nameLower.includes(dep));
   };
@@ -538,8 +540,8 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v5_clean_dataset') {
-        localStorage.setItem('kanyamanan_db_version', 'v5_clean_dataset');
+      if (dbVersion !== 'v9_dedup_ernestos_santa_ana') {
+        localStorage.setItem('kanyamanan_db_version', 'v9_dedup_ernestos_santa_ana');
         localStorage.removeItem('kanyamanan_restaurants_db');
       }
     } catch (_) {}
@@ -556,6 +558,19 @@ function App() {
               ? res.menu
               : (preseeded?.menu || [{ id: `menu-${idx}-0`, name: 'Signature Sisig', price: 250, ingredients: 'Grilled pork snout, calamansi, onions', allergens: 'Contains Pork', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80', healthIndicators: 'Moderate Calorie', nutrition: { calories: 450, protein: 25, carbs: 10, fat: 35 } }]);
 
+            const preseededBranches = Array.isArray(preseeded?.branches) ? preseeded.branches : [];
+            const cachedBranches = Array.isArray(res.branches) && res.branches.length > 0 ? res.branches : preseededBranches;
+            const mergedBranches = [...cachedBranches];
+            preseededBranches.forEach(pb => {
+              const exists = mergedBranches.some(cb => 
+                (cb.branchName && pb.branchName && cb.branchName.toLowerCase() === pb.branchName.toLowerCase()) ||
+                (cb.municipality && pb.municipality && cb.municipality.toLowerCase() === pb.municipality.toLowerCase())
+              );
+              if (!exists) {
+                mergedBranches.push(pb);
+              }
+            });
+
             return {
               ...(preseeded || {}),
               ...res,
@@ -565,19 +580,29 @@ function App() {
               corridor: res.corridor || preseeded?.corridor || 'MacArthur Highway Line',
               operatingHours: res.operatingHours || preseeded?.operatingHours || '09:00 AM - 09:00 PM',
               priceTier: res.priceTier || preseeded?.priceTier || '$',
-              branches: Array.isArray(res.branches) && res.branches.length > 0 ? res.branches : (preseeded?.branches || [{ branchName: `${res.name || 'Restaurant'} (Main Branch)`, municipality: res.municipality || 'City of San Fernando', address: res.address || 'Pampanga', operatingHours: res.operatingHours || '09:00 AM - 09:00 PM', lat: res.lat || 15.0300, lng: res.lng || 120.6800 }]),
+              branches: mergedBranches.length > 0 ? mergedBranches : [{ branchName: `${res.name || 'Restaurant'} (Main Branch)`, municipality: res.municipality || 'City of San Fernando', address: res.address || 'Pampanga', operatingHours: res.operatingHours || '09:00 AM - 09:00 PM', lat: res.lat || 15.0300, lng: res.lng || 120.6800 }],
               menu: menuToUse,
               username: res.username || preseeded?.username || `${(res.name || 'res').toLowerCase().replace(/[^a-z0-9]/g, '_')}_owner`,
               password: res.password || preseeded?.password || 'password123'
             };
           }).filter(Boolean);
 
-          // Append any newly added preseeded restaurants that aren't deleted and not yet in cached localStorage
+          // Append any newly added preseeded restaurants or merge new branches
           (PRESEEDED_RESTAURANTS || []).forEach(pre => {
             if (!pre || !pre.id || deletedIds.includes(pre.id) || isLegacyPreseeded(pre)) return;
-            const exists = sanitized.some(r => r && (r.id === pre.id || (r.name && pre.name && r.name.toLowerCase() === pre.name.toLowerCase())));
-            if (!exists) {
+            const existingIdx = sanitized.findIndex(r => r && (r.id === pre.id || (r.name && pre.name && r.name.toLowerCase() === pre.name.toLowerCase())));
+            if (existingIdx === -1) {
               sanitized.push({ ...pre });
+            } else if (Array.isArray(pre.branches)) {
+              pre.branches.forEach(pb => {
+                const branchExists = (sanitized[existingIdx].branches || []).some(cb => 
+                  (cb.branchName && pb.branchName && cb.branchName.toLowerCase() === pb.branchName.toLowerCase()) ||
+                  (cb.municipality && pb.municipality && cb.municipality.toLowerCase() === pb.municipality.toLowerCase())
+                );
+                if (!branchExists) {
+                  sanitized[existingIdx].branches = [...(sanitized[existingIdx].branches || []), pb];
+                }
+              });
             }
           });
 
@@ -741,12 +766,32 @@ function App() {
           if (valid.length > 0) {
             setRestaurants(prev => {
               const liveDict = {};
-              valid.forEach(r => { if (r && r.id && !isLegacyPreseeded(r)) liveDict[r.id] = r; });
+              valid.forEach(r => {
+                if (r && r.id && !isLegacyPreseeded(r)) {
+                  const pre = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === r.id || (p.name && r.name && p.name.toLowerCase() === r.name.toLowerCase())));
+                  const liveBranches = Array.isArray(r.branches) ? [...r.branches] : [];
+                  if (Array.isArray(pre?.branches)) {
+                    pre.branches.forEach(pb => {
+                      const exists = liveBranches.some(cb =>
+                        (cb.branchName && pb.branchName && cb.branchName.toLowerCase() === pb.branchName.toLowerCase()) ||
+                        (cb.municipality && pb.municipality && cb.municipality.toLowerCase() === pb.municipality.toLowerCase())
+                      );
+                      if (!exists) {
+                        liveBranches.push(pb);
+                      }
+                    });
+                  }
+                  liveDict[r.id] = {
+                    ...r,
+                    branches: liveBranches.length > 0 ? liveBranches : (pre?.branches || r.branches)
+                  };
+                }
+              });
               const currentList = Array.isArray(prev) && prev.length > 0 ? prev.filter(r => r && r.id && !deletedIds.includes(r.id) && !isLegacyPreseeded(r)) : [];
               const merged = currentList.map(r => (r && r.id && liveDict[r.id]) || r).filter(r => r && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
               valid.forEach(vr => {
                 if (vr && vr.id && !deletedIds.includes(vr.id) && !isLegacyPreseeded(vr) && !merged.some(m => m && (m.id === vr.id || (m.name && vr.name && m.name.toLowerCase() === vr.name.toLowerCase())))) {
-                  merged.push(vr);
+                  merged.push(liveDict[vr.id] || vr);
                 }
               });
               try {
@@ -888,11 +933,35 @@ function App() {
     };
   }, [userProfile?.email, userProfile?.username]);
 
-  // Constraints & Group Size Adjuster
   const [numPersons, setNumPersons] = useState(1);
   const [activeImgIdx, setActiveImgIdx] = useState(0);
   const [zoomedDishImg, setZoomedDishImg] = useState(null);
+  const [fullscreenImage, setFullscreenImage] = useState(null); // { images: string[], index: number, title?: string, isZoomed?: boolean }
   const [isTrackingGPS, setIsTrackingGPS] = useState(false);
+
+  // Keyboard navigation & escape listener for Fullscreen Image Lightbox
+  useEffect(() => {
+    if (!fullscreenImage) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setFullscreenImage(null);
+      } else if (e.key === 'ArrowLeft' && Array.isArray(fullscreenImage.images) && fullscreenImage.images.length > 1) {
+        setFullscreenImage(prev => prev ? {
+          ...prev,
+          index: prev.index === 0 ? prev.images.length - 1 : prev.index - 1,
+          isZoomed: false
+        } : null);
+      } else if (e.key === 'ArrowRight' && Array.isArray(fullscreenImage.images) && fullscreenImage.images.length > 1) {
+        setFullscreenImage(prev => prev ? {
+          ...prev,
+          index: (prev.index + 1) % prev.images.length,
+          isZoomed: false
+        } : null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [fullscreenImage]);
   const [isSimulating, setIsSimulating] = useState(false);
 
   // Live Trip Navigation & Multi-Stop Progression States
@@ -1042,8 +1111,24 @@ function App() {
                 const pre = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === r.id || (p.name && r.name && p.name.toLowerCase() === r.name.toLowerCase())));
                 const isValidImg = r.image && (r.image.startsWith('http') || r.image.startsWith('data:') || r.image.startsWith('/'));
                 const cleanedImg = isValidImg ? r.image : (pre?.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80');
+
+                // Ensure all preseeded branches (including newly registered branches like Lubao) are merged
+                const cloudBranches = Array.isArray(r.branches) ? [...r.branches] : [];
+                if (Array.isArray(pre?.branches)) {
+                  pre.branches.forEach(pb => {
+                    const exists = cloudBranches.some(cb =>
+                      (cb.branchName && pb.branchName && cb.branchName.toLowerCase() === pb.branchName.toLowerCase()) ||
+                      (cb.municipality && pb.municipality && cb.municipality.toLowerCase() === pb.municipality.toLowerCase())
+                    );
+                    if (!exists) {
+                      cloudBranches.push(pb);
+                    }
+                  });
+                }
+
                 cloudDict[r.id] = {
                   ...r,
+                  branches: cloudBranches.length > 0 ? cloudBranches : (pre?.branches || r.branches),
                   image: cleanedImg,
                   images: Array.isArray(r.images) && r.images.length > 0 ? r.images : [cleanedImg],
                   municipality: r.municipality || pre?.municipality || 'City of San Fernando'
@@ -1056,6 +1141,16 @@ function App() {
                 merged.push(cloudDict[cr.id] || cr);
               }
             });
+
+            // Retain preseeded restaurants (like Bale Lubao, Wow Lubao) if not yet in Firestore
+            (PRESEEDED_RESTAURANTS || []).forEach(pre => {
+              if (!pre || !pre.id || deletedIds.includes(pre.id) || isLegacyPreseeded(pre)) return;
+              const exists = merged.some(r => r && (r.id === pre.id || (r.name && pre.name && r.name.toLowerCase() === pre.name.toLowerCase())));
+              if (!exists) {
+                merged.push({ ...pre });
+              }
+            });
+
             try {
               localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(merged));
             } catch (e) { }
@@ -18330,12 +18425,25 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
 
               {/* Restaurant Cover Image Carousel */}
               {selectedRestaurant.images && selectedRestaurant.images.length > 0 ? (
-                <div className="w-full h-44 sm:h-52 rounded-xl overflow-hidden shadow-xs border border-[#E9E5DE] shrink-0 relative group/carousel">
+                <div
+                  className="w-full h-44 sm:h-52 rounded-xl overflow-hidden shadow-xs border border-[#E9E5DE] shrink-0 relative group/carousel cursor-zoom-in"
+                  onClick={() => setFullscreenImage({
+                    images: selectedRestaurant.images,
+                    index: activeImgIdx,
+                    title: selectedRestaurant.name
+                  })}
+                  title="Click to view full screen"
+                >
                   <img
                     src={selectedRestaurant.images[activeImgIdx]}
                     alt={`${selectedRestaurant.name} - view ${activeImgIdx + 1}`}
-                    className="w-full h-full object-cover transition-all duration-300"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover/carousel:scale-102"
                   />
+
+                  {/* Expand Full View Badge */}
+                  <div className="absolute top-2.5 right-2.5 bg-black/65 hover:bg-black/85 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg backdrop-blur-xs flex items-center gap-1.5 transition-all shadow-md z-10 select-none opacity-85 group-hover/carousel:opacity-100 hover:scale-105">
+                    <span>🔍</span> Full View
+                  </div>
 
                   {/* Prev Button */}
                   <button
@@ -18344,7 +18452,7 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
                       e.stopPropagation();
                       setActiveImgIdx((prev) => (prev === 0 ? selectedRestaurant.images.length - 1 : prev - 1));
                     }}
-                    className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-charcoal hover:scale-105 flex items-center justify-center shadow-md transition-all opacity-0 group-hover/carousel:opacity-100 font-bold z-10 select-none"
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-charcoal hover:scale-105 flex items-center justify-center shadow-md transition-all opacity-0 group-hover/carousel:opacity-100 font-bold z-10 select-none cursor-pointer"
                   >
                     ←
                   </button>
@@ -18356,7 +18464,7 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
                       e.stopPropagation();
                       setActiveImgIdx((prev) => (prev === selectedRestaurant.images.length - 1 ? 0 : prev + 1));
                     }}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-charcoal hover:scale-105 flex items-center justify-center shadow-md transition-all opacity-0 group-hover/carousel:opacity-100 font-bold z-10 select-none"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-charcoal hover:scale-105 flex items-center justify-center shadow-md transition-all opacity-0 group-hover/carousel:opacity-100 font-bold z-10 select-none cursor-pointer"
                   >
                     →
                   </button>
@@ -18371,18 +18479,29 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
                           e.stopPropagation();
                           setActiveImgIdx(idx);
                         }}
-                        className={`w-1.5 h-1.5 rounded-full transition-all ${idx === activeImgIdx ? 'bg-white w-3' : 'bg-white/50'}`}
+                        className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${idx === activeImgIdx ? 'bg-white w-3' : 'bg-white/50'}`}
                       ></button>
                     ))}
                   </div>
                 </div>
               ) : selectedRestaurant.image ? (
-                <div className="w-full h-44 sm:h-52 rounded-xl overflow-hidden shadow-xs border border-[#E9E5DE] shrink-0">
+                <div
+                  className="w-full h-44 sm:h-52 rounded-xl overflow-hidden shadow-xs border border-[#E9E5DE] shrink-0 relative group/carousel cursor-zoom-in"
+                  onClick={() => setFullscreenImage({
+                    images: [selectedRestaurant.image],
+                    index: 0,
+                    title: selectedRestaurant.name
+                  })}
+                  title="Click to view full screen"
+                >
                   <img
                     src={selectedRestaurant.image}
                     alt={selectedRestaurant.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover/carousel:scale-102"
                   />
+                  <div className="absolute top-2.5 right-2.5 bg-black/65 hover:bg-black/85 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg backdrop-blur-xs flex items-center gap-1.5 transition-all shadow-md z-10 select-none opacity-85 group-hover/carousel:opacity-100 hover:scale-105">
+                    <span>🔍</span> Full View
+                  </div>
                 </div>
               ) : null}
 
@@ -18528,17 +18647,21 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
                               <div
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setZoomedDishImg(dish.image);
+                                  setFullscreenImage({
+                                    images: [dish.image],
+                                    index: 0,
+                                    title: `${dish.name} (₱${dish.price})`
+                                  });
                                 }}
                                 className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-[#E9E5DE] dark:border-[#282420] cursor-zoom-in hover:opacity-90 transition-opacity relative group/dishimg"
-                                title="Click to zoom image"
+                                title="Click for full view"
                               >
                                 <img
                                   src={dish.image}
                                   alt={dish.name}
                                   className="w-full h-full object-cover"
                                 />
-                                <div className="absolute inset-0 bg-charcoal/20 opacity-0 group-hover/dishimg:opacity-100 flex items-center justify-center transition-opacity text-white text-[10px] font-bold">
+                                <div className="absolute inset-0 bg-charcoal/30 opacity-0 group-hover/dishimg:opacity-100 flex items-center justify-center transition-opacity text-white text-[11px] font-bold">
                                   🔍
                                 </div>
                               </div>
@@ -18615,11 +18738,24 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
                     {/* Dish Image & Ingredients */}
                     <div className="flex items-start gap-3">
                       {activeDish.image && (
-                        <img
-                          src={activeDish.image}
-                          alt={activeDish.name}
-                          className="w-16 h-16 rounded-xl object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0"
-                        />
+                        <div
+                          onClick={() => setFullscreenImage({
+                            images: [activeDish.image],
+                            index: 0,
+                            title: `${activeDish.name} (₱${activeDish.price})`
+                          })}
+                          className="w-16 h-16 rounded-xl overflow-hidden border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 cursor-zoom-in relative group/deconimg"
+                          title="Click for full view"
+                        >
+                          <img
+                            src={activeDish.image}
+                            alt={activeDish.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/deconimg:opacity-100 flex items-center justify-center transition-opacity text-white text-[10px] font-bold">
+                            🔍
+                          </div>
+                        </div>
                       )}
                       {/package|bundle|buffet|unlimited|\/pax|\/head/i.test(activeDish.name) ? (
                         <div className="space-y-1.5 flex-1 min-w-0">
@@ -18738,7 +18874,154 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
         </div>
       )}
 
-      {/* Zoomed Dish Image Modal */}
+      {/* Fullscreen Lightbox Modal (Clickable Full View with Navigation & Zoom) */}
+      {fullscreenImage && Array.isArray(fullscreenImage.images) && fullscreenImage.images.length > 0 && (
+        <div
+          className="fixed inset-0 z-[300] flex flex-col bg-black/95 backdrop-blur-xl p-3 sm:p-5 select-none animate-fade-in"
+          onClick={() => setFullscreenImage(null)}
+        >
+          {/* Lightbox Header Bar (High-contrast solid bar) */}
+          <div
+            className="flex items-center justify-between text-white z-20 px-4 py-2.5 bg-neutral-900/95 border border-white/20 rounded-2xl shadow-2xl shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2.5 min-w-0 pr-4">
+              <span className="text-xs sm:text-sm font-bold truncate text-white">
+                {fullscreenImage.title || 'Image Preview'}
+              </span>
+              {fullscreenImage.images.length > 1 && (
+                <span className="text-[10px] sm:text-xs font-mono bg-white/20 px-2.5 py-0.5 rounded-full border border-white/30 shrink-0 text-white font-bold">
+                  {fullscreenImage.index + 1} / {fullscreenImage.images.length}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Toggle Zoom button */}
+              <button
+                type="button"
+                onClick={() => setFullscreenImage(prev => prev ? { ...prev, isZoomed: !prev.isZoomed } : null)}
+                className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-white/20 shadow-sm active:scale-95"
+                title={fullscreenImage.isZoomed ? "Reset Zoom" : "Zoom In (150%)"}
+              >
+                {fullscreenImage.isZoomed ? '🔍 Fit' : '🔍+ Zoom'}
+              </button>
+
+              {/* Open in new tab button */}
+              <a
+                href={fullscreenImage.images[fullscreenImage.index]}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-white/20 shadow-sm active:scale-95"
+                title="Open original image in new tab"
+              >
+                ↗ Original
+              </a>
+
+              {/* High-Contrast Close (X) Button - Ultra Visible in Light & Dark Mode */}
+              <button
+                type="button"
+                onClick={() => setFullscreenImage(null)}
+                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-red-600 hover:bg-red-700 active:scale-95 text-white flex items-center justify-center text-sm font-black shadow-lg border-2 border-white/50 transition-all cursor-pointer hover:rotate-90 shrink-0"
+                title="Close (Esc)"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          {/* Lightbox Center Image Stage */}
+          <div
+            className="flex-1 flex items-center justify-center relative min-h-0 overflow-auto my-2"
+            onClick={() => setFullscreenImage(null)}
+          >
+            {/* Prev Arrow */}
+            {fullscreenImage.images.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFullscreenImage(prev => prev ? {
+                    ...prev,
+                    index: prev.index === 0 ? prev.images.length - 1 : prev.index - 1,
+                    isZoomed: false
+                  } : null);
+                }}
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-neutral-900/90 hover:bg-black text-white border-2 border-white/40 flex items-center justify-center text-xl sm:text-2xl font-black shadow-2xl hover:scale-110 active:scale-95 transition-all z-20 cursor-pointer"
+                title="Previous image (Left Arrow key)"
+              >
+                ‹
+              </button>
+            )}
+
+            {/* Next Arrow */}
+            {fullscreenImage.images.length > 1 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFullscreenImage(prev => prev ? {
+                    ...prev,
+                    index: (prev.index + 1) % prev.images.length,
+                    isZoomed: false
+                  } : null);
+                }}
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-neutral-900/90 hover:bg-black text-white border-2 border-white/40 flex items-center justify-center text-xl sm:text-2xl font-black shadow-2xl hover:scale-110 active:scale-95 transition-all z-20 cursor-pointer"
+                title="Next image (Right Arrow key)"
+              >
+                ›
+              </button>
+            )}
+
+            {/* Main Stage Image */}
+            <img
+              src={fullscreenImage.images[fullscreenImage.index]}
+              alt={fullscreenImage.title || 'Full view'}
+              onClick={(e) => {
+                e.stopPropagation();
+                setFullscreenImage(prev => prev ? { ...prev, isZoomed: !prev.isZoomed } : null);
+              }}
+              className={`rounded-xl shadow-2xl object-contain transition-all duration-300 ${
+                fullscreenImage.isZoomed
+                  ? 'max-h-[140vh] max-w-[140vw] scale-125 cursor-zoom-out'
+                  : 'max-h-[80vh] max-w-[92vw] cursor-zoom-in'
+              }`}
+            />
+          </div>
+
+          {/* Lightbox Footer Bar with thumbnails & keyboard hint */}
+          <div
+            className="flex items-center justify-between gap-4 px-4 py-2 bg-neutral-900/95 border border-white/20 rounded-2xl shadow-xl shrink-0"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="text-[10px] text-white/60 hidden sm:inline">
+              ⌨️ Use ← / → to switch images, click image to zoom, Esc to close
+            </span>
+
+            {fullscreenImage.images.length > 1 ? (
+              <div className="flex items-center justify-center gap-2 overflow-x-auto max-w-full mx-auto sm:mx-0">
+                {fullscreenImage.images.map((imgUrl, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setFullscreenImage(prev => prev ? { ...prev, index: idx, isZoomed: false } : null)}
+                    className={`w-11 h-9 sm:w-13 sm:h-11 rounded-lg overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                      idx === fullscreenImage.index
+                        ? 'border-terracotta scale-105 shadow-md'
+                        : 'border-white/20 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={imgUrl} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            ) : <div />}
+          </div>
+        </div>
+      )}
+
+      {/* Legacy Zoomed Dish Image Modal Fallback */}
       {zoomedDishImg && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-charcoal/85 backdrop-blur-sm p-4 cursor-zoom-out animate-fade-in"

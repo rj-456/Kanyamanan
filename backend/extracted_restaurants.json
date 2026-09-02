@@ -6564,90 +6564,6 @@
     ]
   },
   {
-    "id": "res-bale-lubao",
-    "name": "Bale Lubao Heritage Kitchen",
-    "municipality": "Lubao",
-    "corridor": "MacArthur Highway Line",
-    "operatingHours": "10:00 AM - 09:00 PM",
-    "priceTier": "$",
-    "lat": 14.936,
-    "lng": 120.601,
-    "categories": [
-      "🏛️ Ancestral Kitchen",
-      "🐟 Local Seafood"
-    ],
-    "description": "Rustic heritage restaurant in Lubao serving signature Crispy Pata, Inihaw na Tilapia with Buro, and traditional Pancit Luglug.",
-    "address": "Barangay San Jose, Lubao, Pampanga",
-    "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Bale Lubao Main Branch",
-        "municipality": "Lubao",
-        "address": "San Nicolas 1st, Lubao, Pampanga",
-        "operatingHours": "10:00 AM - 09:00 PM",
-        "lat": 14.936,
-        "lng": 120.601
-      }
-    ],
-    "username": "balelubao_owner",
-    "password": "password123",
-    "occupancy": [
-      15,
-      25,
-      50,
-      80,
-      90,
-      85,
-      60,
-      40,
-      60,
-      80,
-      90,
-      75,
-      45,
-      20,
-      10
-    ],
-    "menu": [
-      {
-        "id": "balelubao-1",
-        "name": "Bale Lubao Crispy Pata",
-        "price": 580,
-        "ingredients": "Crispy deep fried pork knuckle, soy vinegar dip",
-        "allergens": "Contains Pork, Soy",
-        "healthIndicators": "High Lipids",
-        "nutrition": {
-          "calories": 920,
-          "protein": 55,
-          "carbs": 8,
-          "fat": 74
-        },
-        "image": "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=500&q=80"
-      },
-      {
-        "id": "balelubao-2",
-        "name": "Inihaw na Tilapia with Buru",
-        "price": 240,
-        "ingredients": "Char-grilled tilapia fish, fermented rice fish paste, fresh veggies",
-        "allergens": "Contains Fish",
-        "healthIndicators": "High Protein",
-        "nutrition": {
-          "calories": 380,
-          "protein": 34,
-          "carbs": 14,
-          "fat": 18
-        },
-        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
     "id": "res-bariotik-kitchen-floridablanca",
     "name": "Bariotik Kitchen and Garden",
     "municipality": "Floridablanca",
@@ -17028,75 +16944,6 @@
     ]
   },
   {
-    "id": "res-ernestos-santa-ana",
-    "name": "Ernesto's Kitchen & Bar",
-    "municipality": "Santa Ana",
-    "corridor": "Mount Arayat Line",
-    "operatingHours": "11:00 AM - 10:00 PM",
-    "priceTier": "$",
-    "lat": 15.097,
-    "lng": 120.769,
-    "categories": [
-      "🏛️ Ancestral Kitchen",
-      "🍖 Barbecue & Grill"
-    ],
-    "description": "Santa Ana's favorite dining kitchen famed for Ernesto's Signature Sisig, Sizzling Beef Tapa, and Crispy Pata.",
-    "address": "Barangay Sto. Niño, Santa Ana, Pampanga",
-    "image": "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Ernesto's Kitchen Santa Ana Main",
-        "municipality": "Santa Ana",
-        "address": "San Joaquin, Santa Ana, Pampanga",
-        "operatingHours": "11:00 AM - 10:00 PM",
-        "lat": 15.097,
-        "lng": 120.769
-      }
-    ],
-    "username": "ernestos_owner",
-    "password": "password123",
-    "occupancy": [
-      15,
-      25,
-      50,
-      75,
-      90,
-      85,
-      60,
-      35,
-      55,
-      75,
-      90,
-      70,
-      40,
-      20,
-      10
-    ],
-    "menu": [
-      {
-        "id": "ernesto-1",
-        "name": "Ernesto's Signature Sisig",
-        "price": 260,
-        "ingredients": "Crispy pork mask, chicken liver, calamansi, native chili",
-        "allergens": "Contains Pork",
-        "healthIndicators": "High Lipids",
-        "nutrition": {
-          "calories": 640,
-          "protein": 27,
-          "carbs": 6,
-          "fat": 56
-        },
-        "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
     "id": "res-erwins-sisigan-ningnangan-arayat",
     "name": "Erwin's Sisigan & Ningnangan",
     "municipality": "Arayat",
@@ -18298,7 +18145,8 @@
       "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80"
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+      "/restaurants/lubao/ningnangan_menu.jpg"
     ],
     "branches": [
       {
@@ -18340,6 +18188,14 @@
         "operatingHours": "10:00 AM - 10:30 PM",
         "lat": 15.011,
         "lng": 120.7175
+      },
+      {
+        "branchName": "Lubao Branch",
+        "municipality": "Lubao",
+        "address": "Jose Abad Santos Avenue, San Nicolas 2nd, Lubao, Pampanga",
+        "operatingHours": "10:00 AM - 10:00 PM",
+        "lat": 14.938,
+        "lng": 120.601
       }
     ],
     "username": "ningnangan",
@@ -37927,74 +37783,6 @@
     ]
   },
   {
-    "id": "santa-ana-claypot",
-    "name": "Santa Ana Claypot Grill",
-    "municipality": "Santa Ana",
-    "corridor": "NLEX Corridor",
-    "operatingHours": "09:00 AM - 09:00 PM",
-    "priceTier": "$$",
-    "lat": 15.0995,
-    "lng": 120.7698,
-    "categories": [
-      "🏛️ Ancestral Kitchen"
-    ],
-    "description": "Traditional slow-cooking in clay pot palayoks. Famous for serving turmeric-stained chicken rice on banana leaves.",
-    "address": "Barangay San Nicolas, Santa Ana, Pampanga",
-    "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-    "images": [
-      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80"
-    ],
-    "branches": [
-      {
-        "branchName": "Santa Ana Claypot Grill (Main Branch)",
-        "municipality": "Santa Ana",
-        "address": "Barangay San Nicolas, Santa Ana, Pampanga",
-        "operatingHours": "09:00 AM - 09:00 PM",
-        "lat": 15.0995,
-        "lng": 120.7698
-      }
-    ],
-    "username": "santa_ana_claypot_grill_owner",
-    "password": "password123",
-    "occupancy": [
-      10,
-      15,
-      30,
-      70,
-      85,
-      75,
-      45,
-      50,
-      60,
-      80,
-      90,
-      75,
-      40,
-      15,
-      0
-    ],
-    "menu": [
-      {
-        "id": "sn-bringhe",
-        "name": "Santa Ana Claypot Bringhe",
-        "price": 280,
-        "ingredients": "Glutinous rice, coconut milk, organic chicken, turmeric ginger, raisins",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Coconut. Traces of chicken.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Carbohydrates. Energy dense.",
-        "nutrition": {
-          "calories": 510,
-          "protein": 18,
-          "carbs": 66,
-          "fat": 18
-        },
-        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
-      }
-    ]
-  },
-  {
     "id": "santo-tomas-lechon",
     "name": "Santo Tomas Palayok Kitchen",
     "municipality": "Santo Tomas",
@@ -52365,6 +52153,3741 @@
           "fat": 10
         },
         "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80"
+      }
+    ]
+  },
+  {
+    "id": "res-bale-lubao",
+    "name": "Bale Lubao",
+    "municipality": "Lubao",
+    "corridor": "Jose Abad Santos Avenue (JASA) Line",
+    "operatingHours": "08:00 AM - 08:00 PM",
+    "priceTier": "$$",
+    "lat": 14.9117,
+    "lng": 120.5644,
+    "categories": [
+      "🏛️ Ancestral Kitchen",
+      "🍲 Kapampangan Classics",
+      "🎉 Events & Catering"
+    ],
+    "description": "Bale Lubao Restaurant and Events Center is a premier culinary destination located beside All Well's Supermarket along Jose Abad Santos Avenue in Santa Cruz, Lubao. Famous for its authentic Daily Specials, rich Sinigang na Salmon Ulo, Beef Kare-Kare, Sizzling Dinakdakan, and value Lauriat combos.",
+    "address": "Jose Abad Santos Ave., Brgy. Santa Cruz, Lubao, Pampanga (Beside All Well's Supermarket)",
+    "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+      "/restaurants/lubao/bale_lubao_menu.jpg"
+    ],
+    "branches": [
+      {
+        "branchName": "Bale Lubao Main Restaurant & Events Center",
+        "municipality": "Lubao",
+        "address": "Jose Abad Santos Ave., Brgy. Santa Cruz, Lubao, Pampanga (Beside All Well's Supermarket)",
+        "operatingHours": "08:00 AM - 08:00 PM",
+        "lat": 14.9117,
+        "lng": 120.5644
+      }
+    ],
+    "username": "balelubao_owner",
+    "password": "balelubao_admin",
+    "occupancy": [
+      15,
+      25,
+      45,
+      75,
+      85,
+      90,
+      70,
+      50,
+      65,
+      80,
+      85,
+      70,
+      40,
+      20,
+      10
+    ],
+    "menu": [
+      {
+        "id": "menu-balelubao-1787700000000",
+        "name": "Siomai Rice",
+        "price": 99,
+        "ingredients": "Steamed savory pork dumplings, garlic fried rice, homemade chili garlic oil",
+        "allergens": "Contains Pork, Soy, Gluten",
+        "healthIndicators": "🟢 Healthy Choice - Portion Controlled",
+        "nutrition": {
+          "calories": 380,
+          "protein": 16,
+          "carbs": 52,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000001",
+        "name": "Shawarma Rice",
+        "price": 129,
+        "ingredients": "Middle-Eastern spiced shredded beef, turmeric rice, garlic yogurt cucumber sauce",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "🟢 Healthy Choice - Balanced Meal",
+        "nutrition": {
+          "calories": 440,
+          "protein": 22,
+          "carbs": 54,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000002",
+        "name": "Shanghai Rice",
+        "price": 99,
+        "ingredients": "Crispy pork spring rolls, golden garlic rice, sweet chili dip",
+        "allergens": "Contains Pork, Eggs, Gluten",
+        "healthIndicators": "Comfort Classic",
+        "nutrition": {
+          "calories": 410,
+          "protein": 15,
+          "carbs": 55,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000003",
+        "name": "Beef Bulgogi Rice Bowl",
+        "price": 139,
+        "ingredients": "Tender marinated beef sirloin, sweet sesame soy reduction, steamed rice, toasted sesame seeds",
+        "allergens": "Contains Soy, Sesame",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 460,
+          "protein": 26,
+          "carbs": 56,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000004",
+        "name": "Beef Burger Steak (2pcs)",
+        "price": 129,
+        "ingredients": "Two seasoned beef burger patties, savory mushroom gravy, steamed white rice",
+        "allergens": "Contains Soy, Dairy, Gluten",
+        "healthIndicators": "Savory Classic",
+        "nutrition": {
+          "calories": 480,
+          "protein": 24,
+          "carbs": 48,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000005",
+        "name": "Fried Chicken Lauriat",
+        "price": 219,
+        "ingredients": "Crispy deep-fried chicken, pancit canton noodles, pork siomai, fried rice, crispy chips",
+        "allergens": "Contains Poultry, Pork, Gluten, Crustaceans",
+        "healthIndicators": "Feast Combo",
+        "nutrition": {
+          "calories": 720,
+          "protein": 35,
+          "carbs": 75,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000006",
+        "name": "Sweet N Sour Fish Fillet Lauriat",
+        "price": 219,
+        "ingredients": "Battered fish fillet in sweet & sour pineapple glaze, pancit canton, siomai, fried rice, chips",
+        "allergens": "Contains Fish, Pork, Gluten",
+        "healthIndicators": "Balanced Feast",
+        "nutrition": {
+          "calories": 680,
+          "protein": 30,
+          "carbs": 80,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000007",
+        "name": "Chicken BBQ Lauriat",
+        "price": 219,
+        "ingredients": "Glazed chicken BBQ skewer, savory fried rice, stir-fried canton, pork siomai, crunchy chips",
+        "allergens": "Contains Poultry, Soy, Gluten, Crustaceans",
+        "healthIndicators": "High Protein Feast",
+        "nutrition": {
+          "calories": 710,
+          "protein": 38,
+          "carbs": 72,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000008",
+        "name": "Chicken BBQ",
+        "price": 159,
+        "ingredients": "Charcoal-grilled chicken leg quarter, Kapampangan sweet soy basting, rice",
+        "allergens": "Contains Soy",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 480,
+          "protein": 36,
+          "carbs": 45,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000009",
+        "name": "Chicken Teriyaki",
+        "price": 159,
+        "ingredients": "Pan-seared tender chicken thigh fillet, sweet Japanese teriyaki glaze, steamed rice",
+        "allergens": "Contains Soy, Sesame",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 490,
+          "protein": 34,
+          "carbs": 52,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000010",
+        "name": "Spicy Chicken",
+        "price": 159,
+        "ingredients": "Crispy fried chicken tossed in zesty chili garlic sauce, steamed rice",
+        "allergens": "Contains Gluten",
+        "healthIndicators": "Spicy & Savory",
+        "nutrition": {
+          "calories": 510,
+          "protein": 32,
+          "carbs": 48,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000011",
+        "name": "Sizzling Chicken",
+        "price": 159,
+        "ingredients": "Sizzling chicken tidbits with caramelized onions and brown gravy, rice",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Savory Classic",
+        "nutrition": {
+          "calories": 500,
+          "protein": 33,
+          "carbs": 46,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000012",
+        "name": "Fried Chicken",
+        "price": 159,
+        "ingredients": "Crispy golden fried chicken quarter, rich homestyle chicken gravy, rice",
+        "allergens": "Contains Gluten",
+        "healthIndicators": "Comfort Classic",
+        "nutrition": {
+          "calories": 520,
+          "protein": 35,
+          "carbs": 44,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000013",
+        "name": "Chicken Sisig",
+        "price": 159,
+        "ingredients": "Minced chicken breast and thighs, calamansi, red onions, green chili, steamed rice",
+        "allergens": "None",
+        "healthIndicators": "🟢 Healthy Choice - Lean Sisig",
+        "nutrition": {
+          "calories": 430,
+          "protein": 35,
+          "carbs": 42,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000014",
+        "name": "Chicken Fillet",
+        "price": 159,
+        "ingredients": "Golden breaded chicken cutlet, creamy dipping sauce, steamed white rice",
+        "allergens": "Contains Gluten, Eggs",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 460,
+          "protein": 32,
+          "carbs": 48,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000015",
+        "name": "Bistik Tagalog",
+        "price": 175,
+        "ingredients": "Tender beef sirloin cutlets braised in citrus calamansi and dark soy, onion rings",
+        "allergens": "Contains Soy",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 470,
+          "protein": 34,
+          "carbs": 44,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000016",
+        "name": "Beef Kare-Kare",
+        "price": 175,
+        "ingredients": "Slow-simmered beef shank and tripe in rich peanut gravy, native vegetables, shrimp paste",
+        "allergens": "Contains Peanuts, Crustaceans",
+        "healthIndicators": "Traditional Heritage",
+        "nutrition": {
+          "calories": 560,
+          "protein": 32,
+          "carbs": 48,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000017",
+        "name": "Bulalo",
+        "price": 175,
+        "ingredients": "Slow-cooked beef marrow shank in clear savory broth, sweet corn, cabbage, peppercorn",
+        "allergens": "None",
+        "healthIndicators": "Nutrient Rich Bone Broth",
+        "nutrition": {
+          "calories": 520,
+          "protein": 36,
+          "carbs": 38,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000018",
+        "name": "Beef Caldereta",
+        "price": 175,
+        "ingredients": "Rich braised beef stew with liver spread, bell peppers, carrots, potatoes, grated cheddar",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Hearty Classic",
+        "nutrition": {
+          "calories": 540,
+          "protein": 33,
+          "carbs": 46,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000019",
+        "name": "Beef Burger Steak",
+        "price": 159,
+        "ingredients": "Flame-seared beef burger steak, savory button mushroom gravy, steamed rice",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 470,
+          "protein": 26,
+          "carbs": 46,
+          "fat": 19
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000020",
+        "name": "Roast Beef",
+        "price": 175,
+        "ingredients": "Thin-sliced slow roast beef top round, creamy peppercorn mushroom gravy, rice",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 490,
+          "protein": 35,
+          "carbs": 45,
+          "fat": 17
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000021",
+        "name": "Beef Mongolian",
+        "price": 175,
+        "ingredients": "Tender beef strips wok-tossed with scallions, fresh ginger, and savory Mongolian sauce",
+        "allergens": "Contains Soy, Sesame",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 480,
+          "protein": 32,
+          "carbs": 48,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000022",
+        "name": "Pork Sisig",
+        "price": 159,
+        "ingredients": "Authentic Kapampangan grilled pork mask, liver, red onions, calamansi, green finger chili",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Iconic Kapampangan Delicacy",
+        "nutrition": {
+          "calories": 580,
+          "protein": 28,
+          "carbs": 42,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000023",
+        "name": "Pork Sisig w/ Egg",
+        "price": 169,
+        "ingredients": "Sizzling pork sisig topped with fresh sunny farm egg, calamansi, steamed rice",
+        "allergens": "Contains Pork, Eggs",
+        "healthIndicators": "Kapampangan Specialty",
+        "nutrition": {
+          "calories": 650,
+          "protein": 34,
+          "carbs": 43,
+          "fat": 33
+        },
+        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000024",
+        "name": "B-Backribs",
+        "price": 159,
+        "ingredients": "Tender pork baby back ribs braised and caramelized with sweet smoky barbecue sauce, rice",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Comfort Food",
+        "nutrition": {
+          "calories": 570,
+          "protein": 30,
+          "carbs": 48,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000025",
+        "name": "Roast Pork",
+        "price": 159,
+        "ingredients": "Herb-crusted roasted pork loin slices, savory pork jus reduction, steamed rice",
+        "allergens": "Contains Pork",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 490,
+          "protein": 32,
+          "carbs": 44,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000026",
+        "name": "Pork Tonkatsu",
+        "price": 159,
+        "ingredients": "Panko-breaded crisp pork cutlet, tangy tonkatsu sauce, steamed rice",
+        "allergens": "Contains Pork, Gluten, Eggs",
+        "healthIndicators": "Crispy Favorite",
+        "nutrition": {
+          "calories": 540,
+          "protein": 28,
+          "carbs": 54,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000027",
+        "name": "Sizzling Tenderloin",
+        "price": 159,
+        "ingredients": "Tender pork tenderloin strips sauteed in garlic butter, sizzling iron plate, rice",
+        "allergens": "Contains Pork, Dairy",
+        "healthIndicators": "Savory High Protein",
+        "nutrition": {
+          "calories": 500,
+          "protein": 33,
+          "carbs": 42,
+          "fat": 19
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000028",
+        "name": "Chicharon Bulaklak",
+        "price": 159,
+        "ingredients": "Crispy deep-fried pork mesentery curls, spiced sinamak vinegar dip, steamed rice",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Crispy Indulgence",
+        "nutrition": {
+          "calories": 610,
+          "protein": 24,
+          "carbs": 42,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000029",
+        "name": "Tokwa't Baboy",
+        "price": 159,
+        "ingredients": "Crispy golden fried tofu cubes and tender pork belly slices, garlic soy-vinegar dressing",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "High Protein Classic",
+        "nutrition": {
+          "calories": 450,
+          "protein": 26,
+          "carbs": 44,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000030",
+        "name": "Pork Sinigang",
+        "price": 159,
+        "ingredients": "Pork ribs simmered in sour tamarind soup with kangkong, labanos, sitaw, tomato",
+        "allergens": "Contains Pork",
+        "healthIndicators": "🟢 Healthy Choice - Rich Veggie Broth",
+        "nutrition": {
+          "calories": 440,
+          "protein": 26,
+          "carbs": 44,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000031",
+        "name": "Binagoongan",
+        "price": 159,
+        "ingredients": "Pork belly cooked in sauteed fermented shrimp paste, fried talong, finger chilies, rice",
+        "allergens": "Contains Pork, Crustaceans",
+        "healthIndicators": "Savory & Bold",
+        "nutrition": {
+          "calories": 560,
+          "protein": 28,
+          "carbs": 45,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000032",
+        "name": "Pork Kare-Kare",
+        "price": 159,
+        "ingredients": "Tender pork belly in fragrant toasted peanut sauce with native greens and bagoong",
+        "allergens": "Contains Pork, Peanuts, Crustaceans",
+        "healthIndicators": "Kapampangan Feast",
+        "nutrition": {
+          "calories": 550,
+          "protein": 28,
+          "carbs": 48,
+          "fat": 25
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000033",
+        "name": "Lechon Kawali",
+        "price": 159,
+        "ingredients": "Crisp-crackling pork belly squares, sweet-tangy liver sauce, spiced vinegar, rice",
+        "allergens": "Contains Pork, Gluten",
+        "healthIndicators": "Crispy Favorite",
+        "nutrition": {
+          "calories": 640,
+          "protein": 27,
+          "carbs": 42,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000034",
+        "name": "Pork Shanghai",
+        "price": 149,
+        "ingredients": "Crispy fried pork lumpiang shanghai rolls, sweet-and-sour dipping sauce, garlic rice",
+        "allergens": "Contains Pork, Eggs, Gluten",
+        "healthIndicators": "Crispy Favorite",
+        "nutrition": {
+          "calories": 480,
+          "protein": 20,
+          "carbs": 54,
+          "fat": 19
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000035",
+        "name": "Sizzling Dinakdakan",
+        "price": 169,
+        "ingredients": "Grilled pork snout and ears tossed with red shallots, ginger, calamansi, creamy dressing",
+        "allergens": "Contains Pork, Dairy",
+        "healthIndicators": "Savory Kapampangan Pulutan",
+        "nutrition": {
+          "calories": 530,
+          "protein": 29,
+          "carbs": 42,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000036",
+        "name": "Pork BBQ",
+        "price": 159,
+        "ingredients": "Two skewers of tender marinated pork shoulder, caramelized barbecue glaze, rice",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Street Food Classic",
+        "nutrition": {
+          "calories": 490,
+          "protein": 30,
+          "carbs": 46,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000037",
+        "name": "Sizzling Bopis",
+        "price": 159,
+        "ingredients": "Finely minced pork heart and lungs sauteed with annatto, carrots, radish, and chilies",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Spicy Specialty",
+        "nutrition": {
+          "calories": 460,
+          "protein": 31,
+          "carbs": 42,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000038",
+        "name": "Sizzling Porkchop",
+        "price": 159,
+        "ingredients": "Pan-grilled seasoned pork chop, rich brown gravy, sweet corn kernels, steamed rice",
+        "allergens": "Contains Pork, Dairy, Gluten",
+        "healthIndicators": "Hearty Meal",
+        "nutrition": {
+          "calories": 520,
+          "protein": 32,
+          "carbs": 44,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000039",
+        "name": "Pork Asado",
+        "price": 159,
+        "ingredients": "Kapampangan braised pork belly in sweet tomato sauce, bay leaves, liver spread, potatoes",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Traditional Heritage",
+        "nutrition": {
+          "calories": 530,
+          "protein": 28,
+          "carbs": 48,
+          "fat": 23
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000040",
+        "name": "Pork Dinuguan",
+        "price": 159,
+        "ingredients": "Savory stew of pork belly simmered in seasoned pork blood, vinegar, garlic, and wild chili",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Authentic Delicacy",
+        "nutrition": {
+          "calories": 480,
+          "protein": 33,
+          "carbs": 42,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000041",
+        "name": "Pork Adobo",
+        "price": 159,
+        "ingredients": "Classic pork chunks braised in cane vinegar, garlic cloves, bay leaves, peppercorns, rice",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Filipino National Heritage",
+        "nutrition": {
+          "calories": 510,
+          "protein": 29,
+          "carbs": 44,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000042",
+        "name": "Bicol Express",
+        "price": 159,
+        "ingredients": "Spicy pork strips simmered in rich coconut cream, bagoong alamang, and siling haba",
+        "allergens": "Contains Pork, Crustaceans",
+        "healthIndicators": "Spicy & Rich",
+        "nutrition": {
+          "calories": 560,
+          "protein": 27,
+          "carbs": 44,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000043",
+        "name": "Chopsuey",
+        "price": 159,
+        "ingredients": "Stir-fried farm-fresh cauliflower, broccoli, snow peas, bell peppers, carrots, quail eggs",
+        "allergens": "Contains Eggs, Soy",
+        "healthIndicators": "🟢 Healthy Choice - High Fiber",
+        "nutrition": {
+          "calories": 320,
+          "protein": 14,
+          "carbs": 48,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000044",
+        "name": "Sisig Tofu in Mayo",
+        "price": 159,
+        "ingredients": "Golden tofu cubes, red shallots, wild green chili, calamansi, light creamy dressing",
+        "allergens": "Contains Soy, Eggs",
+        "healthIndicators": "🟢 Healthy Choice - Plant Protein",
+        "nutrition": {
+          "calories": 370,
+          "protein": 18,
+          "carbs": 44,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000045",
+        "name": "Sizzling Pusit",
+        "price": 159,
+        "ingredients": "Fresh squid sauteed with garlic, butter, and sweet bell peppers served on hot iron plate",
+        "allergens": "Contains Mollusks, Dairy",
+        "healthIndicators": "🟢 Healthy Choice - Low Fat Seafood",
+        "nutrition": {
+          "calories": 360,
+          "protein": 28,
+          "carbs": 42,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000046",
+        "name": "Sizzling Bangus",
+        "price": 159,
+        "ingredients": "Boneless milkfish belly steak, garlic chips, calamansi zest, sliced red chilies, rice",
+        "allergens": "Contains Fish",
+        "healthIndicators": "🟢 Healthy Choice - Heart-Healthy Omega-3",
+        "nutrition": {
+          "calories": 390,
+          "protein": 32,
+          "carbs": 42,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000047",
+        "name": "Calamares Pritos",
+        "price": 159,
+        "ingredients": "Crisp breaded squid rings fried golden, tangy tartar sauce dip, steamed rice",
+        "allergens": "Contains Mollusks, Gluten, Eggs",
+        "healthIndicators": "Crisp Seafood",
+        "nutrition": {
+          "calories": 460,
+          "protein": 24,
+          "carbs": 54,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000048",
+        "name": "Sinigang na Bangus",
+        "price": 159,
+        "ingredients": "Fresh Lubao milkfish in sour tamarind broth with kangkong, radish, green chili, tomato",
+        "allergens": "Contains Fish",
+        "healthIndicators": "🟢 Healthy Choice - Lean Protein & Omega-3",
+        "nutrition": {
+          "calories": 350,
+          "protein": 30,
+          "carbs": 42,
+          "fat": 9
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000049",
+        "name": "Sinigang na Hipon",
+        "price": 175,
+        "ingredients": "Succulent river prawns simmered in tangy tamarind soup with yardlong beans and leafy greens",
+        "allergens": "Contains Crustaceans",
+        "healthIndicators": "🟢 Healthy Choice - Low Calorie Seafood",
+        "nutrition": {
+          "calories": 340,
+          "protein": 28,
+          "carbs": 42,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000050",
+        "name": "Sinigang na Salmon Ulo",
+        "price": 175,
+        "ingredients": "Rich Atlantic salmon head in tamarind miso broth, mustasa leaves, ginger, tomato",
+        "allergens": "Contains Fish, Soy",
+        "healthIndicators": "🟢 Healthy Choice - High Essential Omega-3",
+        "nutrition": {
+          "calories": 420,
+          "protein": 34,
+          "carbs": 40,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000051",
+        "name": "Sweet & Sour Fish Fillet",
+        "price": 159,
+        "ingredients": "Crispy white fish fillet tossed with sweet pineapple chunks, carrots, bell peppers, rice",
+        "allergens": "Contains Fish",
+        "healthIndicators": "🟢 Healthy Choice",
+        "nutrition": {
+          "calories": 390,
+          "protein": 26,
+          "carbs": 54,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000052",
+        "name": "Fresh Fried Fish Fillet w/ Dip",
+        "price": 159,
+        "ingredients": "Golden pan-fried fish cutlets seasoned with local spices, house spiced garlic mayonnaise dip",
+        "allergens": "Contains Fish, Eggs",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 420,
+          "protein": 29,
+          "carbs": 46,
+          "fat": 13
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-balelubao-1787700000053",
+        "name": "Fish Fillet w/ Tofu",
+        "price": 159,
+        "ingredients": "Crispy fish fillet nuggets and fried firm tofu cubes braised in savory ginger soy sauce",
+        "allergens": "Contains Fish, Soy",
+        "healthIndicators": "🟢 Healthy Choice - High Protein",
+        "nutrition": {
+          "calories": 410,
+          "protein": 31,
+          "carbs": 45,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      }
+    ]
+  },
+  {
+    "id": "res-wow-lubao",
+    "name": "Wow Lubao",
+    "municipality": "Lubao",
+    "corridor": "Jose Abad Santos Avenue (JASA) Line",
+    "operatingHours": "09:00 AM - 08:30 PM",
+    "priceTier": "$",
+    "lat": 14.9281,
+    "lng": 120.576,
+    "categories": [
+      "🍗 Grilled & BBQ",
+      "🍱 Budget Meals",
+      "🍧 Teahouse & Snacks"
+    ],
+    "description": "Wow Lubao is a beloved local eatery and pasalubong center situated along Jose Abad Santos Avenue in San Agustin, Lubao. Renowned for its affordable combo meals served with rice and iced tea, featuring savory pork BBQ skewers, baby back ribs, and authentic sisig.",
+    "address": "Jose Abad Santos Avenue, Barangay San Agustin, Lubao, Pampanga",
+    "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+      "/restaurants/lubao/wow_lubao_menu.jpg"
+    ],
+    "branches": [
+      {
+        "branchName": "Wow Lubao Main Branch",
+        "municipality": "Lubao",
+        "address": "Jose Abad Santos Avenue, San Agustin, Lubao, Pampanga",
+        "operatingHours": "09:00 AM - 08:30 PM",
+        "lat": 14.9281,
+        "lng": 120.576
+      }
+    ],
+    "username": "wowlubao_owner",
+    "password": "wowlubao_admin",
+    "occupancy": [
+      10,
+      20,
+      35,
+      60,
+      85,
+      90,
+      75,
+      55,
+      60,
+      75,
+      85,
+      65,
+      40,
+      20,
+      10
+    ],
+    "menu": [
+      {
+        "id": "menu-wowlubao-1787700000000",
+        "name": "Pork BBQ (1pc)",
+        "price": 25,
+        "ingredients": "Single tender skewer of pork barbecue, sweet soy marinade, banana ketchup glaze",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Quick Bite",
+        "nutrition": {
+          "calories": 180,
+          "protein": 14,
+          "carbs": 6,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-wowlubao-1787700000001",
+        "name": "Pork BBQ (2pcs w/ Rice & Iced Tea)",
+        "price": 50,
+        "ingredients": "Two savory pork BBQ skewers, steamed white rice, chilled sweetened iced tea",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Affordable Combo Meal",
+        "nutrition": {
+          "calories": 430,
+          "protein": 26,
+          "carbs": 48,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-wowlubao-1787700000002",
+        "name": "Chicken BBQ Combo",
+        "price": 99,
+        "ingredients": "Grilled chicken leg quarter with barbecue basting, cup of steamed rice, refreshing iced tea",
+        "allergens": "Contains Poultry, Soy",
+        "healthIndicators": "High Protein Value Combo",
+        "nutrition": {
+          "calories": 510,
+          "protein": 36,
+          "carbs": 48,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-wowlubao-1787700000003",
+        "name": "Baby Back Ribs Combo",
+        "price": 99,
+        "ingredients": "Smoky grilled baby back ribs, glazed savory BBQ sauce, steamed rice, iced tea",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Comfort Combo",
+        "nutrition": {
+          "calories": 580,
+          "protein": 32,
+          "carbs": 48,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-wowlubao-1787700000004",
+        "name": "Pork Sisig Combo",
+        "price": 99,
+        "ingredients": "Sizzling minced pork sisig with egg and onions, cup of white rice, refreshing iced tea",
+        "allergens": "Contains Pork, Eggs",
+        "healthIndicators": "Kapampangan Classic Combo",
+        "nutrition": {
+          "calories": 590,
+          "protein": 30,
+          "carbs": 46,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-wowlubao-1787700000005",
+        "name": "Chicken Sisig Combo",
+        "price": 99,
+        "ingredients": "Flaked tender chicken sisig with calamansi and green chilies, white rice, iced tea",
+        "allergens": "None",
+        "healthIndicators": "🟢 Healthy Choice - Lean Protein Combo",
+        "nutrition": {
+          "calories": 480,
+          "protein": 34,
+          "carbs": 46,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-wowlubao-1787700000006",
+        "name": "Bangus Sisig Combo",
+        "price": 99,
+        "ingredients": "De-boned flaked milkfish sisig with onions and citrus calamansi, steamed rice, iced tea",
+        "allergens": "Contains Fish",
+        "healthIndicators": "🟢 Healthy Choice - Heart Healthy Omega-3",
+        "nutrition": {
+          "calories": 440,
+          "protein": 32,
+          "carbs": 46,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-wowlubao-1787700000007",
+        "name": "Kare-Kare Combo",
+        "price": 99,
+        "ingredients": "Savory stewed pork with native vegetables in peanut sauce, shrimp paste, rice, iced tea",
+        "allergens": "Contains Pork, Peanuts, Crustaceans",
+        "healthIndicators": "Traditional Stew Value Combo",
+        "nutrition": {
+          "calories": 560,
+          "protein": 26,
+          "carbs": 50,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-wowlubao-1787700000008",
+        "name": "Chicharon Bulaklak Combo",
+        "price": 99,
+        "ingredients": "Golden crispy pork mesentery, spiced cane vinegar dip, steamed rice, iced tea",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Crisp Indulgence Combo",
+        "nutrition": {
+          "calories": 620,
+          "protein": 24,
+          "carbs": 45,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-wowlubao-1787700000009",
+        "name": "Fish Fillet Combo",
+        "price": 99,
+        "ingredients": "Golden breaded white fish fillet, creamy tartar dipping sauce, steamed rice, iced tea",
+        "allergens": "Contains Fish, Eggs",
+        "healthIndicators": "🟢 Healthy Choice - Value Meal",
+        "nutrition": {
+          "calories": 460,
+          "protein": 28,
+          "carbs": 52,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      }
+    ]
+  },
+  {
+    "id": "res-boss-madam-santa-ana",
+    "name": "Boss Madam Chicken Inasal",
+    "municipality": "Santa Ana",
+    "corridor": "Jose Abad Santos Avenue (JASA) Line",
+    "operatingHours": "09:00 AM - 12:00 AM",
+    "priceTier": "$",
+    "lat": 15.094,
+    "lng": 120.7695,
+    "categories": [
+      "🍗 Inasal & BBQ",
+      "🍱 Silog & Budget Meals",
+      "🥣 Lugaw & Comfort Food"
+    ],
+    "description": "Popular late-night diner and chicken inasal hotspot located along Jose Abad Santos Avenue in San Juan, Santa Ana. Celebrated for its authentic Bacolod-style Chicken Inasal, grilled Liempo, all-day Silog bowls, unlimited Lugaw specials, and hearty Beef Papaitan.",
+    "address": "802 Jose Abad Santos Avenue, Barangay San Juan, Santa Ana, Pampanga",
+    "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+      "/restaurants/santa_ana/boss_madam_menu.jpg"
+    ],
+    "branches": [
+      {
+        "branchName": "Boss Madam Chicken Inasal Santa Ana Main",
+        "municipality": "Santa Ana",
+        "address": "802 Jose Abad Santos Avenue, Barangay San Juan, Santa Ana, Pampanga",
+        "operatingHours": "09:00 AM - 12:00 AM",
+        "lat": 15.094,
+        "lng": 120.7695
+      }
+    ],
+    "username": "bossmadam_owner",
+    "password": "bossmadam_admin",
+    "occupancy": [
+      10,
+      20,
+      40,
+      60,
+      80,
+      85,
+      70,
+      55,
+      65,
+      85,
+      95,
+      80,
+      50,
+      25,
+      10
+    ],
+    "menu": [
+      {
+        "id": "menu-bossmadam-1787800000000",
+        "name": "Liempo Inasal",
+        "price": 150,
+        "ingredients": "Charcoal-grilled marinated pork belly with lemongrass and achuete glaze, garlic rice",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "High Protein Favorite",
+        "nutrition": {
+          "calories": 580,
+          "protein": 32,
+          "carbs": 45,
+          "fat": 34
+        },
+        "image": "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000001",
+        "name": "Chicken Inasal (Best Seller)",
+        "price": 130,
+        "ingredients": "Marinated chicken leg quarter with sinamak, calamansi, and annatto basting oil, rice",
+        "allergens": "Contains Poultry, Soy",
+        "healthIndicators": "High Protein House Signature",
+        "nutrition": {
+          "calories": 520,
+          "protein": 42,
+          "carbs": 44,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000002",
+        "name": "Breaded Porkchop",
+        "price": 99,
+        "ingredients": "Panko-breaded crisp porkchop with savory gravy, garlic fried rice",
+        "allergens": "Contains Pork, Gluten, Eggs",
+        "healthIndicators": "Comfort Classic",
+        "nutrition": {
+          "calories": 490,
+          "protein": 28,
+          "carbs": 48,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000003",
+        "name": "Fried Chicken",
+        "price": 99,
+        "ingredients": "Crispy fried chicken cutlet, spiced chicken gravy, steamed garlic rice",
+        "allergens": "Contains Poultry, Gluten",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 480,
+          "protein": 34,
+          "carbs": 44,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000004",
+        "name": "Lechon Kawali Meal",
+        "price": 89,
+        "ingredients": "Crispy fried pork belly slices, vinegar dip, garlic fried rice",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Crispy Indulgence",
+        "nutrition": {
+          "calories": 540,
+          "protein": 24,
+          "carbs": 45,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000005",
+        "name": "HotSilog",
+        "price": 79,
+        "ingredients": "2 juicy grilled red hotdogs, sunny side up egg, garlic sinangag rice",
+        "allergens": "Contains Pork, Eggs, Gluten",
+        "healthIndicators": "Classic Breakfast",
+        "nutrition": {
+          "calories": 440,
+          "protein": 16,
+          "carbs": 50,
+          "fat": 19
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000006",
+        "name": "SioSilog",
+        "price": 68,
+        "ingredients": "4 steamed savory pork siomai, fried egg, garlic fried rice, chili garlic sauce",
+        "allergens": "Contains Pork, Eggs, Gluten",
+        "healthIndicators": "Budget Friendly Meal",
+        "nutrition": {
+          "calories": 410,
+          "protein": 18,
+          "carbs": 52,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000007",
+        "name": "PatSilog",
+        "price": 79,
+        "ingredients": "Seasoned beef patty with rich brown mushroom sauce, fried egg, garlic rice",
+        "allergens": "Contains Dairy, Eggs, Gluten",
+        "healthIndicators": "Savory Silog",
+        "nutrition": {
+          "calories": 460,
+          "protein": 22,
+          "carbs": 48,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000008",
+        "name": "TapSilog",
+        "price": 99,
+        "ingredients": "Tender marinated sweet-savory beef tapa, golden sunny egg, garlic rice",
+        "allergens": "Contains Soy, Eggs",
+        "healthIndicators": "High Protein Silog",
+        "nutrition": {
+          "calories": 490,
+          "protein": 32,
+          "carbs": 48,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000009",
+        "name": "CornSilog",
+        "price": 79,
+        "ingredients": "Sauteed corned beef with onions, sunny fried egg, aromatic garlic sinangag",
+        "allergens": "Contains Eggs",
+        "healthIndicators": "Comfort Breakfast",
+        "nutrition": {
+          "calories": 450,
+          "protein": 20,
+          "carbs": 48,
+          "fat": 19
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000010",
+        "name": "ToSilog",
+        "price": 79,
+        "ingredients": "Sweet cured Kapampangan pork tocino, fried egg, garlic sinangag rice",
+        "allergens": "Contains Pork, Eggs",
+        "healthIndicators": "Sweet Kapampangan Staple",
+        "nutrition": {
+          "calories": 480,
+          "protein": 24,
+          "carbs": 54,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000011",
+        "name": "Sizzling Kare-Kare",
+        "price": 150,
+        "ingredients": "Sizzling crispy lechon kawali, eggplant, string beans in peanut gravy, bagoong",
+        "allergens": "Contains Pork, Peanuts, Crustaceans",
+        "healthIndicators": "Kapampangan Feast",
+        "nutrition": {
+          "calories": 610,
+          "protein": 30,
+          "carbs": 32,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000012",
+        "name": "Sizzling Dinakdakan",
+        "price": 120,
+        "ingredients": "Grilled pork cheeks and ears, chopped onions, calamansi, creamy dressing on hot plate",
+        "allergens": "Contains Pork, Dairy",
+        "healthIndicators": "Savory Pulutan",
+        "nutrition": {
+          "calories": 510,
+          "protein": 28,
+          "carbs": 12,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000013",
+        "name": "Sizzling Sisig",
+        "price": 110,
+        "ingredients": "Authentic sizzling minced pork mask and chicken liver, red onions, fresh chili",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Kapampangan Classic",
+        "nutrition": {
+          "calories": 540,
+          "protein": 27,
+          "carbs": 10,
+          "fat": 42
+        },
+        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000014",
+        "name": "Sizzling Tofu Sisig",
+        "price": 110,
+        "ingredients": "Crispy cubed tofu, diced red onions, calamansi, green chilies, creamy dressing",
+        "allergens": "Contains Soy, Eggs",
+        "healthIndicators": "🟢 Healthy Choice - Vegetarian Option",
+        "nutrition": {
+          "calories": 340,
+          "protein": 18,
+          "carbs": 24,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000015",
+        "name": "Unli Lugaw w/ Lechon Kawali",
+        "price": 89,
+        "ingredients": "Unlimited warm ginger rice congee topped with crispy lechon kawali, boiled egg, toasted garlic",
+        "allergens": "Contains Pork, Eggs",
+        "healthIndicators": "Comforting Congee Meal",
+        "nutrition": {
+          "calories": 480,
+          "protein": 22,
+          "carbs": 62,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000016",
+        "name": "Unli Lugaw w/ Chicken",
+        "price": 79,
+        "ingredients": "Unlimited steaming rice porridge topped with flaked chicken, egg, scallions",
+        "allergens": "Contains Poultry, Eggs",
+        "healthIndicators": "🟢 Healthy Choice - Warm Congee",
+        "nutrition": {
+          "calories": 410,
+          "protein": 26,
+          "carbs": 60,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000017",
+        "name": "Crab Soup w/ Siomai & Egg",
+        "price": 79,
+        "ingredients": "Hearty warm crab and corn soup with steamed pork dumplings and hard-boiled egg",
+        "allergens": "Contains Crustaceans, Pork, Eggs",
+        "healthIndicators": "Warm Broth",
+        "nutrition": {
+          "calories": 320,
+          "protein": 18,
+          "carbs": 34,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000018",
+        "name": "Unli Lugaw w/ Beef Laman Loob",
+        "price": 79,
+        "ingredients": "Unlimited ginger rice porridge served with savory tender beef tripe, egg, and calamansi",
+        "allergens": "Contains Eggs",
+        "healthIndicators": "Savory Native Congee",
+        "nutrition": {
+          "calories": 420,
+          "protein": 24,
+          "carbs": 58,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-bossmadam-1787800000019",
+        "name": "Beef Papaitan w/ Rice",
+        "price": 79,
+        "ingredients": "Traditional bitter-spiced beef innards soup with ginger and chili, steamed rice",
+        "allergens": "None",
+        "healthIndicators": "Authentic Local Brew",
+        "nutrition": {
+          "calories": 390,
+          "protein": 28,
+          "carbs": 42,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      }
+    ]
+  },
+  {
+    "id": "res-ernestos-kitchen-bar-santa-ana",
+    "name": "Ernesto’s Kitchen & Bar",
+    "municipality": "Santa Ana",
+    "corridor": "Jose Abad Santos Avenue (JASA) Line",
+    "operatingHours": "11:00 AM - 10:00 PM",
+    "priceTier": "$$",
+    "lat": 15.095,
+    "lng": 120.766,
+    "categories": [
+      "🍲 Kapampangan Classics",
+      "🥩 Pork & Sizzling Specialties",
+      "🦐 Fresh Seafood Viands",
+      "🍺 Resto-Bar"
+    ],
+    "description": "Vibrant dining destination and bar in Santa Lucia, Santa Ana, situated in front of RCS. Renowned for rich group sharing platters, traditional Kapampangan Pulutuk, Asadong Matwa, Aligue Seafood Fried Rice, Gambas, and mouth-watering Crispy Pork Kare-Kare.",
+    "address": "Santa Lucia, Santa Ana, Pampanga (In front of RCS Sta. Ana)",
+    "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+      "/restaurants/santa_ana/ernestos_menu.jpg"
+    ],
+    "branches": [
+      {
+        "branchName": "Ernesto’s Kitchen & Bar Main",
+        "municipality": "Santa Ana",
+        "address": "Santa Lucia, Santa Ana, Pampanga (In front of RCS Sta. Ana)",
+        "operatingHours": "11:00 AM - 10:00 PM",
+        "lat": 15.095,
+        "lng": 120.766
+      }
+    ],
+    "username": "ernestos_owner",
+    "password": "ernestos_admin",
+    "occupancy": [
+      10,
+      15,
+      30,
+      50,
+      70,
+      75,
+      60,
+      50,
+      65,
+      80,
+      90,
+      85,
+      60,
+      35,
+      15
+    ],
+    "menu": [
+      {
+        "id": "menu-ernestos-1787800000000",
+        "name": "Chicken Molo Soup",
+        "price": 225,
+        "ingredients": "Pork and shrimp dumplings in rich chicken broth with shredded chicken and garlic",
+        "allergens": "Contains Poultry, Pork, Crustaceans, Gluten",
+        "healthIndicators": "Comfort Sharing Broth",
+        "nutrition": {
+          "calories": 280,
+          "protein": 22,
+          "carbs": 24,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000001",
+        "name": "Hot & Sour Soup",
+        "price": 225,
+        "ingredients": "Tangy-spicy broth with tofu strips, wood ear mushrooms, bamboo shoots, and egg ribbons",
+        "allergens": "Contains Soy, Eggs",
+        "healthIndicators": "Zesty Soup",
+        "nutrition": {
+          "calories": 220,
+          "protein": 12,
+          "carbs": 28,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000002",
+        "name": "Munggo with Sotanghon",
+        "price": 225,
+        "ingredients": "Stewed native mung beans with vermicelli noodles, chicharon cracklings, and spinach",
+        "allergens": "Contains Pork",
+        "healthIndicators": "🟢 Healthy Choice - High Fiber",
+        "nutrition": {
+          "calories": 310,
+          "protein": 18,
+          "carbs": 42,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000003",
+        "name": "Suam Mais",
+        "price": 225,
+        "ingredients": "Traditional Kapampangan sweet corn soup with fresh chili leaves and tender pork",
+        "allergens": "Contains Pork",
+        "healthIndicators": "🟢 Healthy Choice - Native Kapampangan",
+        "nutrition": {
+          "calories": 260,
+          "protein": 16,
+          "carbs": 34,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000004",
+        "name": "Malunggay Egg Drop Soup",
+        "price": 225,
+        "ingredients": "Nutrient-rich moringa leaves in clear ginger broth with whisked egg swirls",
+        "allergens": "Contains Eggs",
+        "healthIndicators": "🟢 Healthy Choice - Superfood Greens",
+        "nutrition": {
+          "calories": 160,
+          "protein": 12,
+          "carbs": 14,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000005",
+        "name": "Garlic and Basil Chicken Thigh",
+        "price": 300,
+        "ingredients": "Pan-roasted boneless chicken thigh, fragrant fresh basil, garlic butter reduction",
+        "allergens": "Contains Poultry, Dairy",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 480,
+          "protein": 38,
+          "carbs": 6,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000006",
+        "name": "General Tso Chicken Thigh",
+        "price": 300,
+        "ingredients": "Crispy battered chicken thigh tossed in sweet-savory spicy ginger garlic sauce",
+        "allergens": "Contains Poultry, Soy, Gluten",
+        "healthIndicators": "Savory & Sweet",
+        "nutrition": {
+          "calories": 530,
+          "protein": 34,
+          "carbs": 42,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000007",
+        "name": "Chicken Wings (Choice of Sauce)",
+        "price": 250,
+        "ingredients": "Crispy fried wings tossed in choice of Soy Glazed, Spicy Garlic, Parmesan, Buffalo, or Honey Lemon",
+        "allergens": "Contains Poultry, Dairy, Soy",
+        "healthIndicators": "Resto-Bar Favorite",
+        "nutrition": {
+          "calories": 510,
+          "protein": 36,
+          "carbs": 18,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000008",
+        "name": "ChaoFan",
+        "price": 375,
+        "ingredients": "Wok-tossed fried rice with diced pork asado, scrambled egg, scallions, sweet soy",
+        "allergens": "Contains Pork, Eggs, Soy",
+        "healthIndicators": "Sharing Fried Rice",
+        "nutrition": {
+          "calories": 680,
+          "protein": 24,
+          "carbs": 98,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000009",
+        "name": "Chicken Dashi Fried Rice",
+        "price": 375,
+        "ingredients": "Japanese-inspired umami fried rice with chicken flakes, dashi seasoning, and nori",
+        "allergens": "Contains Poultry, Fish, Soy",
+        "healthIndicators": "Umami Rich Rice",
+        "nutrition": {
+          "calories": 640,
+          "protein": 26,
+          "carbs": 94,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000010",
+        "name": "Aligue Seafood Fried Rice",
+        "price": 375,
+        "ingredients": "Fragrant jasmine rice wok-tossed with crab paste (aligue), shrimps, squid, and calamansi",
+        "allergens": "Contains Crustaceans, Mollusks",
+        "healthIndicators": "Rich Seafood Feast",
+        "nutrition": {
+          "calories": 720,
+          "protein": 30,
+          "carbs": 92,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000011",
+        "name": "Yang Chow Fried Rice",
+        "price": 375,
+        "ingredients": "Classic Cantonese fried rice with fresh prawns, roast pork, green peas, and egg",
+        "allergens": "Contains Crustaceans, Pork, Eggs",
+        "healthIndicators": "Classic Sharing Staple",
+        "nutrition": {
+          "calories": 650,
+          "protein": 28,
+          "carbs": 92,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000012",
+        "name": "Pork Ribs Binagoongan",
+        "price": 300,
+        "ingredients": "Tender pork spare ribs stewed in sauteed shrimp paste with fried eggplant slices",
+        "allergens": "Contains Pork, Crustaceans",
+        "healthIndicators": "Rich Savory Viand",
+        "nutrition": {
+          "calories": 590,
+          "protein": 32,
+          "carbs": 14,
+          "fat": 44
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000013",
+        "name": "Pork Ribs Sinigang",
+        "price": 300,
+        "ingredients": "Tender pork ribs simmered in sour tamarind broth with kangkong, radish, and tomato",
+        "allergens": "Contains Pork",
+        "healthIndicators": "🟢 Healthy Choice - Rich Veggie Broth",
+        "nutrition": {
+          "calories": 420,
+          "protein": 34,
+          "carbs": 12,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000014",
+        "name": "Lechon Kawali",
+        "price": 300,
+        "ingredients": "Deep-fried crispy pork belly with crisp crackling, spiced liver sauce and vinegar",
+        "allergens": "Contains Pork, Gluten",
+        "healthIndicators": "Crispy Indulgence",
+        "nutrition": {
+          "calories": 620,
+          "protein": 28,
+          "carbs": 6,
+          "fat": 52
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000015",
+        "name": "Sweet and Sour Pork",
+        "price": 300,
+        "ingredients": "Crispy battered pork cuts tossed with pineapple chunks, bell peppers, carrots",
+        "allergens": "Contains Pork, Gluten",
+        "healthIndicators": "Sweet & Tangy",
+        "nutrition": {
+          "calories": 510,
+          "protein": 26,
+          "carbs": 48,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000016",
+        "name": "Salt and Pepper Pork",
+        "price": 300,
+        "ingredients": "Crispy seasoned pork ribs tossed with crushed garlic, sea salt, and fresh red chili",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Savory Crunch",
+        "nutrition": {
+          "calories": 490,
+          "protein": 30,
+          "carbs": 12,
+          "fat": 34
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000017",
+        "name": "Pork Asadong Matwa",
+        "price": 300,
+        "ingredients": "Traditional heritage Kapampangan sweet-sour braised pork belly with calamansi and bay leaves",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Kapampangan Heritage Special",
+        "nutrition": {
+          "calories": 540,
+          "protein": 30,
+          "carbs": 18,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000018",
+        "name": "Pulutuk",
+        "price": 275,
+        "ingredients": "Authentic Kapampangan pork blood and offal delicacy sauteed dry with vinegar and chili",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Ancestral Kapampangan Pulutan",
+        "nutrition": {
+          "calories": 440,
+          "protein": 36,
+          "carbs": 8,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000019",
+        "name": "Sisig",
+        "price": 300,
+        "ingredients": "Authentic grilled and sizzling pork mask, onions, calamansi, wild finger chili",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Signature Kapampangan Sisig",
+        "nutrition": {
+          "calories": 560,
+          "protein": 29,
+          "carbs": 6,
+          "fat": 46
+        },
+        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000020",
+        "name": "Dinakdakan",
+        "price": 300,
+        "ingredients": "Charbroiled pork mask tossed with shallots, calamansi, ginger, and creamy dressing",
+        "allergens": "Contains Pork, Dairy",
+        "healthIndicators": "Savory Pulutan",
+        "nutrition": {
+          "calories": 520,
+          "protein": 28,
+          "carbs": 8,
+          "fat": 40
+        },
+        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000021",
+        "name": "Crispy Pork Kare Kare",
+        "price": 350,
+        "ingredients": "Golden lechon kawali over rich toasted peanut stew, native vegetables, bagoong",
+        "allergens": "Contains Pork, Peanuts, Crustaceans",
+        "healthIndicators": "Heritage Celebration Dish",
+        "nutrition": {
+          "calories": 680,
+          "protein": 38,
+          "carbs": 24,
+          "fat": 48
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000022",
+        "name": "Lemon Garlic Shrimp",
+        "price": 320,
+        "ingredients": "Succulent fresh shrimps sauteed in garlic butter, fresh lemon zest, and white wine reduction",
+        "allergens": "Contains Crustaceans, Dairy",
+        "healthIndicators": "🟢 Healthy Choice - Lean Seafood",
+        "nutrition": {
+          "calories": 310,
+          "protein": 32,
+          "carbs": 6,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000023",
+        "name": "Aligue Gambas",
+        "price": 350,
+        "ingredients": "Juicy tiger prawns simmered in rich crab fat sauce, toasted garlic chips, and chili oil",
+        "allergens": "Contains Crustaceans",
+        "healthIndicators": "Indulgent Seafood Viand",
+        "nutrition": {
+          "calories": 420,
+          "protein": 34,
+          "carbs": 8,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000024",
+        "name": "Seafood Salpicao",
+        "price": 350,
+        "ingredients": "Medley of shrimps, squid, and fish cubes sauteed in Worcestershire, garlic, and butter",
+        "allergens": "Contains Crustaceans, Mollusks, Fish, Dairy, Soy",
+        "healthIndicators": "High Protein Seafood",
+        "nutrition": {
+          "calories": 340,
+          "protein": 36,
+          "carbs": 10,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000025",
+        "name": "Seafood Vianda",
+        "price": 350,
+        "ingredients": "Mixed seafood platter sauteed with seasonal bell peppers and savory house oyster sauce",
+        "allergens": "Contains Crustaceans, Mollusks, Soy",
+        "healthIndicators": "Flavorful Catch",
+        "nutrition": {
+          "calories": 330,
+          "protein": 32,
+          "carbs": 14,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000026",
+        "name": "Sweet & Sour Dory",
+        "price": 300,
+        "ingredients": "Crispy battered cream dory fillet pieces tossed in sweet pineapple sauce and bell peppers",
+        "allergens": "Contains Fish, Gluten",
+        "healthIndicators": "🟢 Healthy Choice",
+        "nutrition": {
+          "calories": 360,
+          "protein": 26,
+          "carbs": 38,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000027",
+        "name": "Salt & Pepper Shrimp",
+        "price": 350,
+        "ingredients": "Crisp whole shrimps tossed with scallions, toasted garlic, and crushed peppercorn",
+        "allergens": "Contains Crustaceans",
+        "healthIndicators": "🟢 Healthy Choice - Crispy Catch",
+        "nutrition": {
+          "calories": 290,
+          "protein": 30,
+          "carbs": 8,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000028",
+        "name": "Salt & Pepper Dory",
+        "price": 350,
+        "ingredients": "Golden breaded dory nuggets seasoned with sea salt, white pepper, and green chilies",
+        "allergens": "Contains Fish, Gluten",
+        "healthIndicators": "Crispy Fish Viand",
+        "nutrition": {
+          "calories": 340,
+          "protein": 28,
+          "carbs": 18,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000029",
+        "name": "Shrimp Broccoli",
+        "price": 320,
+        "ingredients": "Fresh shrimps wok-stirred with crunchy farm broccoli florets and garlic oyster sauce",
+        "allergens": "Contains Crustaceans, Soy",
+        "healthIndicators": "🟢 Healthy Choice - Low Carb & Fiber",
+        "nutrition": {
+          "calories": 260,
+          "protein": 28,
+          "carbs": 12,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000030",
+        "name": "Sea Food KareKare",
+        "price": 375,
+        "ingredients": "Prawns, squid, and mussels in creamy peanut sauce with eggplant and pechay",
+        "allergens": "Contains Crustaceans, Mollusks, Peanuts",
+        "healthIndicators": "Seafood Heritage Specialty",
+        "nutrition": {
+          "calories": 520,
+          "protein": 38,
+          "carbs": 26,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000031",
+        "name": "Sinigang Na Hipon",
+        "price": 320,
+        "ingredients": "River prawns in tangy tamarind soup with yardlong beans, radish, and kangkong",
+        "allergens": "Contains Crustaceans",
+        "healthIndicators": "🟢 Healthy Choice - Low Calorie",
+        "nutrition": {
+          "calories": 240,
+          "protein": 28,
+          "carbs": 12,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000032",
+        "name": "Sinigang na Bangus",
+        "price": 320,
+        "ingredients": "Fresh Pampanga milkfish in sour tamarind broth with green chilies and leafy greens",
+        "allergens": "Contains Fish",
+        "healthIndicators": "🟢 Healthy Choice - Heart Healthy Omega-3",
+        "nutrition": {
+          "calories": 280,
+          "protein": 32,
+          "carbs": 10,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000033",
+        "name": "Sinigang Salmon Head",
+        "price": 320,
+        "ingredients": "Atlantic salmon head simmered in tamarind miso broth with mustasa greens",
+        "allergens": "Contains Fish, Soy",
+        "healthIndicators": "🟢 Healthy Choice - Rich Omega-3",
+        "nutrition": {
+          "calories": 340,
+          "protein": 30,
+          "carbs": 8,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000034",
+        "name": "Bistig Baka",
+        "price": 320,
+        "ingredients": "Thin-sliced tender beef braised in dark soy sauce, fresh calamansi, and sweet onion rings",
+        "allergens": "Contains Soy",
+        "healthIndicators": "High Protein Favorite",
+        "nutrition": {
+          "calories": 460,
+          "protein": 38,
+          "carbs": 14,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000035",
+        "name": "Beef Caldereta",
+        "price": 320,
+        "ingredients": "Hearty beef chuck stewed with liver spread, tomato sauce, bell peppers, carrots, cheese",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Rich & Comforting",
+        "nutrition": {
+          "calories": 510,
+          "protein": 36,
+          "carbs": 22,
+          "fat": 30
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000036",
+        "name": "Beef Broccoli",
+        "price": 300,
+        "ingredients": "Tender beef strips wok-tossed with fresh broccoli florets in savory ginger soy sauce",
+        "allergens": "Contains Soy",
+        "healthIndicators": "🟢 Healthy Choice - High Protein & Veggies",
+        "nutrition": {
+          "calories": 380,
+          "protein": 34,
+          "carbs": 16,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000037",
+        "name": "Kare Kare (Beef)",
+        "price": 390,
+        "ingredients": "Slow-simmered beef shank and oxtail in traditional peanut sauce with native bagoong",
+        "allergens": "Contains Peanuts, Crustaceans",
+        "healthIndicators": "Heritage Beef Classic",
+        "nutrition": {
+          "calories": 620,
+          "protein": 42,
+          "carbs": 24,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000038",
+        "name": "Nilagang Baka",
+        "price": 390,
+        "ingredients": "Clear beef broth with tender beef short ribs, cabbage, corn cobs, and black peppercorn",
+        "allergens": "None",
+        "healthIndicators": "Nutritious Bone Broth",
+        "nutrition": {
+          "calories": 480,
+          "protein": 40,
+          "carbs": 18,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000039",
+        "name": "Sinigang na Baka",
+        "price": 390,
+        "ingredients": "Tender beef brisket in sour tamarind soup with native gabi (taro) and leafy greens",
+        "allergens": "None",
+        "healthIndicators": "Warming Tangy Beef Stew",
+        "nutrition": {
+          "calories": 490,
+          "protein": 38,
+          "carbs": 16,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000040",
+        "name": "Chinese Chopsuey",
+        "price": 300,
+        "ingredients": "Crisp stir-fried cauliflower, snow peas, carrots, baby corn, and quail eggs in light sauce",
+        "allergens": "Contains Eggs, Soy",
+        "healthIndicators": "🟢 Healthy Choice - High Fiber",
+        "nutrition": {
+          "calories": 240,
+          "protein": 12,
+          "carbs": 32,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000041",
+        "name": "Creamy Chopsuey",
+        "price": 300,
+        "ingredients": "Stir-fried farm vegetables coated in rich butter-cream sauce with chicken strips",
+        "allergens": "Contains Dairy, Poultry, Soy",
+        "healthIndicators": "Rich Vegetable Dish",
+        "nutrition": {
+          "calories": 320,
+          "protein": 16,
+          "carbs": 28,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000042",
+        "name": "Pusung Saging with Grilled Shrimp",
+        "price": 300,
+        "ingredients": "Banana heart blossoms stewed in vinegar and coconut cream, topped with charred shrimps",
+        "allergens": "Contains Crustaceans",
+        "healthIndicators": "🟢 Healthy Choice - Authentic Kapampangan",
+        "nutrition": {
+          "calories": 280,
+          "protein": 22,
+          "carbs": 20,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000043",
+        "name": "Pinakbet Bagnet",
+        "price": 330,
+        "ingredients": "Traditional squash, okra, eggplant, and sitaw stew in bagoong topped with crispy bagnet",
+        "allergens": "Contains Pork, Crustaceans",
+        "healthIndicators": "Crispy Veggie Classic",
+        "nutrition": {
+          "calories": 480,
+          "protein": 26,
+          "carbs": 24,
+          "fat": 30
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-ernestos-1787800000044",
+        "name": "Chopsuey Bagnet",
+        "price": 330,
+        "ingredients": "Medley of stir-fried fresh vegetables crowned with golden crackling pork bagnet",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Crisp & Nutritious",
+        "nutrition": {
+          "calories": 460,
+          "protein": 24,
+          "carbs": 26,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      }
+    ]
+  },
+  {
+    "id": "res-lotus-st-isidore-santa-ana",
+    "name": "Lotus Restaurant (St. Isidore the FARMer)",
+    "municipality": "Santa Ana",
+    "corridor": "Jose Abad Santos Avenue (JASA) Line",
+    "operatingHours": "08:00 AM - 09:00 PM",
+    "priceTier": "$$",
+    "lat": 15.085,
+    "lng": 120.772,
+    "categories": [
+      "🌿 Farm-to-Table Agritourism",
+      "🐟 Freshwater & Seafood",
+      "🐐 Native Goat & Farm Dishes"
+    ],
+    "description": "Tranquil farm-to-table open-air restaurant located inside St. Isidore The FARMer Resort in San Isidro, Santa Ana. Featuring fresh harvest vegetables, native free-range chicken, authentic fermented buro side dishes, Kalderetang Kambing, and farm-fresh seafood laksa.",
+    "address": "434 Purok 5, Barangay San Isidro, Santa Ana, Pampanga",
+    "image": "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
+      "/restaurants/santa_ana/lotus_restaurant_menu.jpg"
+    ],
+    "branches": [
+      {
+        "branchName": "Lotus Restaurant at St. Isidore The FARMer Resort",
+        "municipality": "Santa Ana",
+        "address": "434 Purok 5, Brgy. San Isidro, Santa Ana, Pampanga",
+        "operatingHours": "08:00 AM - 09:00 PM",
+        "lat": 15.085,
+        "lng": 120.772
+      }
+    ],
+    "username": "stisidore_lotus_owner",
+    "password": "stisidore_admin",
+    "occupancy": [
+      15,
+      25,
+      45,
+      75,
+      90,
+      85,
+      65,
+      50,
+      60,
+      75,
+      80,
+      65,
+      35,
+      15,
+      10
+    ],
+    "menu": [
+      {
+        "id": "menu-lotus-1787800000000",
+        "name": "Pinakbet w/ Lechon Kawali",
+        "price": 165,
+        "ingredients": "Farm-fresh squash, eggplant, okra, and sitaw sauteed in bagoong with crispy lechon",
+        "allergens": "Contains Pork, Crustaceans",
+        "healthIndicators": "🟢 Healthy Choice - High Fiber Farm Harvest",
+        "nutrition": {
+          "calories": 380,
+          "protein": 20,
+          "carbs": 24,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000001",
+        "name": "Stir Fry Sweet & Spicy Eggplant",
+        "price": 140,
+        "ingredients": "Freshly harvested purple eggplants wok-tossed in sweet chili glaze, sesame, garlic",
+        "allergens": "Contains Soy, Sesame",
+        "healthIndicators": "🟢 Healthy Choice - Plant Forward",
+        "nutrition": {
+          "calories": 210,
+          "protein": 4,
+          "carbs": 32,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000002",
+        "name": "Chopsuey",
+        "price": 185,
+        "ingredients": "Organic garden vegetables stir-fried with chicken strips, quail eggs, and light savory gravy",
+        "allergens": "Contains Poultry, Eggs, Soy",
+        "healthIndicators": "🟢 Healthy Choice - Nutrient Dense",
+        "nutrition": {
+          "calories": 240,
+          "protein": 16,
+          "carbs": 26,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000003",
+        "name": "Pigar Pigar",
+        "price": 175,
+        "ingredients": "Quick stir-fried thinly sliced beef and sweet white onions in light soy-calamansi sauce",
+        "allergens": "Contains Soy",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 360,
+          "protein": 28,
+          "carbs": 12,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000004",
+        "name": "Bangus Ala Pobre",
+        "price": 175,
+        "ingredients": "Pan-fried milkfish belly steak topped with toasted golden garlic bits and Worcestershire reduction",
+        "allergens": "Contains Fish, Soy",
+        "healthIndicators": "🟢 Healthy Choice - Heart Healthy Omega-3",
+        "nutrition": {
+          "calories": 320,
+          "protein": 28,
+          "carbs": 6,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000005",
+        "name": "Garlic Buttered Shrimps",
+        "price": 260,
+        "ingredients": "Fresh succulent river shrimps sauteed in farm butter, minced garlic, and parsley",
+        "allergens": "Contains Crustaceans, Dairy",
+        "healthIndicators": "High Protein Catch",
+        "nutrition": {
+          "calories": 310,
+          "protein": 28,
+          "carbs": 4,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000006",
+        "name": "Sizzling Gambas",
+        "price": 255,
+        "ingredients": "Plump shrimps in zesty spiced tomato-garlic reduction on sizzling cast-iron skillet",
+        "allergens": "Contains Crustaceans",
+        "healthIndicators": "Spicy Seafood Favorite",
+        "nutrition": {
+          "calories": 290,
+          "protein": 26,
+          "carbs": 10,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000007",
+        "name": "Sizzling Pusit",
+        "price": 150,
+        "ingredients": "Squid rings sauteed with butter, garlic, and sweet bell peppers on hot plate",
+        "allergens": "Contains Mollusks, Dairy",
+        "healthIndicators": "🟢 Healthy Choice - Lean Marine Protein",
+        "nutrition": {
+          "calories": 240,
+          "protein": 26,
+          "carbs": 8,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000008",
+        "name": "Pinaputok na Tilapia",
+        "price": 145,
+        "ingredients": "Fresh tilapia fish stuffed with diced native tomatoes, onions, ginger, foil-baked over coals",
+        "allergens": "Contains Fish",
+        "healthIndicators": "🟢 Healthy Choice - Farm Fresh Catch",
+        "nutrition": {
+          "calories": 260,
+          "protein": 32,
+          "carbs": 6,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000009",
+        "name": "Crispy Fried Hito",
+        "price": 125,
+        "ingredients": "Farm-raised freshwater catfish scored and deep-fried to golden crunch, served with buro",
+        "allergens": "Contains Fish",
+        "healthIndicators": "Traditional Kapampangan Fish",
+        "nutrition": {
+          "calories": 320,
+          "protein": 28,
+          "carbs": 4,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000010",
+        "name": "Beef Caldereta",
+        "price": 275,
+        "ingredients": "Tender beef chunks braised in rich tomato liver spread with carrots, potatoes, bell peppers",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Hearty Farm Stew",
+        "nutrition": {
+          "calories": 480,
+          "protein": 34,
+          "carbs": 22,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000011",
+        "name": "Beef Broccoli",
+        "price": 290,
+        "ingredients": "Stir-fried beef sirloin and broccoli florets in savory oyster sauce",
+        "allergens": "Contains Soy",
+        "healthIndicators": "🟢 Healthy Choice - Lean Beef & Greens",
+        "nutrition": {
+          "calories": 360,
+          "protein": 32,
+          "carbs": 14,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000012",
+        "name": "Beef Salpicao",
+        "price": 270,
+        "ingredients": "Cubed beef tenderloin sauteed with button mushrooms, toasted garlic chips, and butter",
+        "allergens": "Contains Dairy, Soy",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 420,
+          "protein": 36,
+          "carbs": 8,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000013",
+        "name": "Kalderetang Kambing",
+        "price": 295,
+        "ingredients": "Authentic goat meat slow-simmered in spiced tomato liver reduction, green olives, peppers",
+        "allergens": "None",
+        "healthIndicators": "Lean Native Meat Specialty",
+        "nutrition": {
+          "calories": 460,
+          "protein": 38,
+          "carbs": 16,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000014",
+        "name": "Spicy Adobong Kambing",
+        "price": 290,
+        "ingredients": "Native goat stewed in cane vinegar, garlic, bay leaves, peppercorns, and red bird’s eye chili",
+        "allergens": "Contains Soy",
+        "healthIndicators": "Bold Native Stew",
+        "nutrition": {
+          "calories": 440,
+          "protein": 38,
+          "carbs": 10,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000015",
+        "name": "Burong Galunggong",
+        "price": 45,
+        "ingredients": "Traditional fermented rice paste with salted round scad fish, sauteed with garlic and ginger",
+        "allergens": "Contains Fish",
+        "healthIndicators": "🟢 Healthy Choice - Probiotic Fermented Classic",
+        "nutrition": {
+          "calories": 120,
+          "protein": 8,
+          "carbs": 18,
+          "fat": 2
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000016",
+        "name": "Atsarang Gulay",
+        "price": 40,
+        "ingredients": "Pickled native green papaya, carrots, bell peppers in spiced sweet cane vinegar",
+        "allergens": "None",
+        "healthIndicators": "🟢 Healthy Choice - Digestive Probiotic",
+        "nutrition": {
+          "calories": 80,
+          "protein": 1,
+          "carbs": 20,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000017",
+        "name": "Burong Tilapia",
+        "price": 50,
+        "ingredients": "Classic Kapampangan fermented rice and fresh tilapia fillet sauteed in aromatics",
+        "allergens": "Contains Fish",
+        "healthIndicators": "🟢 Healthy Choice - Traditional Kapampangan Buro",
+        "nutrition": {
+          "calories": 130,
+          "protein": 9,
+          "carbs": 18,
+          "fat": 2
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000018",
+        "name": "Kinilaw na Ampalaya",
+        "price": 50,
+        "ingredients": "Thin-sliced bitter gourd cured in cane vinegar, red onions, ginger, and calamansi",
+        "allergens": "None",
+        "healthIndicators": "🟢 Healthy Choice - Blood Sugar Friendly Superfood",
+        "nutrition": {
+          "calories": 60,
+          "protein": 2,
+          "carbs": 12,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000019",
+        "name": "Burong Mustasa",
+        "price": 45,
+        "ingredients": "Salt-cured fermented mustard greens with aromatics, perfect side for fried dishes",
+        "allergens": "None",
+        "healthIndicators": "🟢 Healthy Choice - Fermented Greens",
+        "nutrition": {
+          "calories": 50,
+          "protein": 2,
+          "carbs": 8,
+          "fat": 1
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000020",
+        "name": "Garlic Chicken (Half)",
+        "price": 240,
+        "ingredients": "Farm chicken roasted to golden crisp skin and infused with crushed native garlic cloves",
+        "allergens": "Contains Poultry",
+        "healthIndicators": "High Protein Farm Poultry",
+        "nutrition": {
+          "calories": 490,
+          "protein": 44,
+          "carbs": 4,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000021",
+        "name": "Buffalo Wings",
+        "price": 190,
+        "ingredients": "Crispy chicken wings glazed in spicy-tangy cayenne pepper butter sauce",
+        "allergens": "Contains Poultry, Dairy",
+        "healthIndicators": "Resto Favorite",
+        "nutrition": {
+          "calories": 460,
+          "protein": 32,
+          "carbs": 8,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000022",
+        "name": "Spicy Gochujang Chicken",
+        "price": 190,
+        "ingredients": "Golden chicken wings coated with sweet and spicy Korean fermented chili paste and sesame",
+        "allergens": "Contains Poultry, Soy, Sesame",
+        "healthIndicators": "Spicy & Savory",
+        "nutrition": {
+          "calories": 480,
+          "protein": 32,
+          "carbs": 18,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000023",
+        "name": "Teriyaki Chicken Wings",
+        "price": 185,
+        "ingredients": "Fried wings glazed in sweet house teriyaki reduction, toasted sesame seeds",
+        "allergens": "Contains Poultry, Soy, Sesame",
+        "healthIndicators": "Sweet Umami Glaze",
+        "nutrition": {
+          "calories": 470,
+          "protein": 32,
+          "carbs": 20,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000024",
+        "name": "Crispy Pata",
+        "price": 590,
+        "ingredients": "Deep-fried pork knuckle with blistered crackling skin, soy-vinegar dipping sauce",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Grand Celebration Dish",
+        "nutrition": {
+          "calories": 890,
+          "protein": 56,
+          "carbs": 6,
+          "fat": 68
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000025",
+        "name": "Lechon Kawali",
+        "price": 210,
+        "ingredients": "Crisp pork belly cutlets deep-fried golden, served with liver sauce and spiced vinegar",
+        "allergens": "Contains Pork, Gluten",
+        "healthIndicators": "Crispy Favorite",
+        "nutrition": {
+          "calories": 580,
+          "protein": 28,
+          "carbs": 6,
+          "fat": 48
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000026",
+        "name": "Patatim (Whole Pata)",
+        "price": 600,
+        "ingredients": "Whole tender pork leg braised slowly in sweet anise-scented soy broth with bok choy",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Slow Braised Feast",
+        "nutrition": {
+          "calories": 820,
+          "protein": 58,
+          "carbs": 22,
+          "fat": 54
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000027",
+        "name": "Beef Nilaga",
+        "price": 195,
+        "ingredients": "Slow-simmered beef brisket bone soup with sweet farm corn, cabbage, and string beans",
+        "allergens": "None",
+        "healthIndicators": "Comforting Clear Broth",
+        "nutrition": {
+          "calories": 410,
+          "protein": 34,
+          "carbs": 16,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000028",
+        "name": "Crispy Pork Sinigang",
+        "price": 185,
+        "ingredients": "Sour tamarind broth with vegetables served with crunchy fried lechon kawali on top",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Zesty Crispy Stew",
+        "nutrition": {
+          "calories": 490,
+          "protein": 28,
+          "carbs": 18,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000029",
+        "name": "Native Chicken Sinampalukan",
+        "price": 190,
+        "ingredients": "Free-range native chicken soup simmered with sour tamarind leaves and ginger",
+        "allergens": "Contains Poultry",
+        "healthIndicators": "🟢 Healthy Choice - Authentic Native Broth",
+        "nutrition": {
+          "calories": 360,
+          "protein": 36,
+          "carbs": 12,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000030",
+        "name": "Native Chicken Tinola",
+        "price": 185,
+        "ingredients": "Free-range native chicken soup with green papaya and fresh chili leaves in ginger broth",
+        "allergens": "Contains Poultry",
+        "healthIndicators": "🟢 Healthy Choice - Nutrient Dense Soup",
+        "nutrition": {
+          "calories": 340,
+          "protein": 38,
+          "carbs": 10,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000031",
+        "name": "Sinigang na Hipon",
+        "price": 275,
+        "ingredients": "Fresh farm river shrimps in tangy tamarind soup with yardlong beans and kangkong",
+        "allergens": "Contains Crustaceans",
+        "healthIndicators": "🟢 Healthy Choice - Lean Marine Protein",
+        "nutrition": {
+          "calories": 230,
+          "protein": 28,
+          "carbs": 12,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000032",
+        "name": "Sinigang na Salmon Belly",
+        "price": 300,
+        "ingredients": "Rich salmon belly cuts simmered in tamarind broth with fresh farm vegetables",
+        "allergens": "Contains Fish",
+        "healthIndicators": "🟢 Healthy Choice - Essential Fatty Acids",
+        "nutrition": {
+          "calories": 380,
+          "protein": 30,
+          "carbs": 10,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000033",
+        "name": "Pumpkin Mac & Cheese",
+        "price": 145,
+        "ingredients": "Elbow macaroni tossed in farm pumpkin puree, cheddar, and mozzarella cream sauce",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "🟢 Healthy Choice - Vitamin-A Rich Comfort",
+        "nutrition": {
+          "calories": 380,
+          "protein": 14,
+          "carbs": 48,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000034",
+        "name": "Seafood Laksa Noodles",
+        "price": 280,
+        "ingredients": "Egg noodles in fragrant coconut curry laksa broth with shrimps, squid, and boiled egg",
+        "allergens": "Contains Crustaceans, Mollusks, Eggs, Gluten",
+        "healthIndicators": "Spicy Coconut Noodle Soup",
+        "nutrition": {
+          "calories": 520,
+          "protein": 28,
+          "carbs": 54,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000035",
+        "name": "Japchae",
+        "price": 185,
+        "ingredients": "Sweet potato glass noodles stir-fried with sesame oil, farm carrots, mushrooms, spinach, beef",
+        "allergens": "Contains Soy, Sesame",
+        "healthIndicators": "🟢 Healthy Choice - Gluten-Free Starch",
+        "nutrition": {
+          "calories": 340,
+          "protein": 14,
+          "carbs": 52,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000036",
+        "name": "St. Isidore Pancit Mix",
+        "price": 175,
+        "ingredients": "Traditional stir-fried bihon and canton noodles with farm vegetables, chicken strips, liver",
+        "allergens": "Contains Poultry, Soy, Gluten",
+        "healthIndicators": "Classic Heritage Pancit",
+        "nutrition": {
+          "calories": 410,
+          "protein": 20,
+          "carbs": 62,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000037",
+        "name": "Lomi Overload",
+        "price": 165,
+        "ingredients": "Thick egg noodles in rich savory egg broth topped with chicharon, lechon, liver, and eggs",
+        "allergens": "Contains Pork, Eggs, Gluten",
+        "healthIndicators": "Comforting Overload Soup",
+        "nutrition": {
+          "calories": 540,
+          "protein": 32,
+          "carbs": 56,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000038",
+        "name": "Crispy Chicken Feet",
+        "price": 130,
+        "ingredients": "Deep-fried seasoned chicken feet with crunchy collagen skin, spiced vinegar dip",
+        "allergens": "Contains Poultry",
+        "healthIndicators": "Collagen Rich Pulutan",
+        "nutrition": {
+          "calories": 290,
+          "protein": 24,
+          "carbs": 6,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000039",
+        "name": "Chicharon Bulaklak",
+        "price": 160,
+        "ingredients": "Golden deep-fried pork flower fat curls served with house garlic cane vinegar",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Crispy Indulgence",
+        "nutrition": {
+          "calories": 580,
+          "protein": 22,
+          "carbs": 4,
+          "fat": 52
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000040",
+        "name": "Tokwa't Baboy",
+        "price": 165,
+        "ingredients": "Crispy fried tofu squares and tender boiled pork belly with scallions, soy-calamansi sauce",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "High Protein Classic",
+        "nutrition": {
+          "calories": 420,
+          "protein": 26,
+          "carbs": 18,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000041",
+        "name": "Sizzling Crispy Sisig",
+        "price": 175,
+        "ingredients": "Minced crispy pork cheeks, onions, calamansi, liver spread on hot iron skillet",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Kapampangan Sisig Favorite",
+        "nutrition": {
+          "calories": 550,
+          "protein": 28,
+          "carbs": 8,
+          "fat": 44
+        },
+        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-lotus-1787800000042",
+        "name": "Cheesy Beef Dynamite",
+        "price": 155,
+        "ingredients": "Green finger chilies stuffed with seasoned minced beef and melted cheese, fried crisp",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Spicy Crunchy Appetizer",
+        "nutrition": {
+          "calories": 340,
+          "protein": 18,
+          "carbs": 22,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      }
+    ]
+  },
+  {
+    "id": "res-the-ville-mandelin-santa-ana",
+    "name": "The Ville (Mandelin)",
+    "municipality": "Santa Ana",
+    "corridor": "Jose Abad Santos Avenue (JASA) Line",
+    "operatingHours": "07:00 AM - 10:00 PM",
+    "priceTier": "$",
+    "lat": 15.105,
+    "lng": 120.762,
+    "categories": [
+      "🏨 Hotel & Resort Dining",
+      "🥩 Sizzling & Inihaw Platters",
+      "🥞 All Day Breakfast & Merienda",
+      "🥓 Korean BBQ"
+    ],
+    "description": "Upscale resort dining located at Mandelin Ville Hotel, Resort & Events Place along Santa Ana - Magalang Road in Barangay Santiago. Offers celebration bundles, grand Inihaw Platters, Ampalaya Lagat Kapampangan, Korean Samgyupsal, and artisanal all-day breakfast.",
+    "address": "88 Santa Ana - Magalang Rd, Barangay Santiago, Santa Ana, Pampanga",
+    "image": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+      "/restaurants/santa_ana/the_ville_menu1.jpg",
+      "/restaurants/santa_ana/the_ville_menu2.jpg",
+      "/restaurants/santa_ana/the_ville_menu3.jpg"
+    ],
+    "branches": [
+      {
+        "branchName": "The Ville (Mandelin) Main Branch",
+        "municipality": "Santa Ana",
+        "address": "88 Santa Ana - Magalang Rd, Barangay Santiago, Santa Ana, Pampanga",
+        "operatingHours": "07:00 AM - 10:00 PM",
+        "lat": 15.105,
+        "lng": 120.762
+      }
+    ],
+    "username": "mandelin_theville_owner",
+    "password": "mandelin_admin",
+    "occupancy": [
+      10,
+      20,
+      35,
+      60,
+      85,
+      90,
+      75,
+      60,
+      70,
+      85,
+      95,
+      80,
+      50,
+      25,
+      10
+    ],
+    "menu": [
+      {
+        "id": "menu-theville-1787800000000",
+        "name": "Crispy Chicken Bundle (Sharing)",
+        "price": 1530,
+        "ingredients": "Whole crispy fried chicken, Pancit Canton or Guisado, Sinigang na Hipon, 4 Steamed Rice + Free Sisig",
+        "allergens": "Contains Poultry, Crustaceans, Pork, Gluten",
+        "healthIndicators": "Group Celebration Feast (4-6 pax)",
+        "nutrition": {
+          "calories": 1980,
+          "protein": 145,
+          "carbs": 210,
+          "fat": 65
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000001",
+        "name": "Crispy Pata Bundle (Sharing)",
+        "price": 1930,
+        "ingredients": "Grand crispy pata, Chopsuey or Pinakbet, Pancit Canton, 4 Steamed Rice, Pitcher of Iced Tea + Free Sisig",
+        "allergens": "Contains Pork, Crustaceans, Gluten",
+        "healthIndicators": "Grand Resort Feast (4-6 pax)",
+        "nutrition": {
+          "calories": 2450,
+          "protein": 160,
+          "carbs": 220,
+          "fat": 110
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000002",
+        "name": "Inihaw Bundle (Sharing)",
+        "price": 1659,
+        "ingredients": "Inihaw Platter (BBQ, Liempo, Talong, Tilapia), Chopsuey, Pancit Canton, 4 Rice, Iced Tea + Free Sisig",
+        "allergens": "Contains Pork, Fish, Gluten, Soy",
+        "healthIndicators": "Charcoal Grilled Feast (4-6 pax)",
+        "nutrition": {
+          "calories": 2150,
+          "protein": 155,
+          "carbs": 215,
+          "fat": 75
+        },
+        "image": "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000003",
+        "name": "Crispy Whole Chicken",
+        "price": 590,
+        "ingredients": "Deep-fried whole marinated chicken with crackling skin, homestyle gravy dip",
+        "allergens": "Contains Poultry, Gluten",
+        "healthIndicators": "Family Sharing Favorite",
+        "nutrition": {
+          "calories": 1200,
+          "protein": 110,
+          "carbs": 12,
+          "fat": 75
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000004",
+        "name": "Chicken Adobo",
+        "price": 380,
+        "ingredients": "Braised chicken cuts in sugarcane vinegar, soy sauce, garlic cloves, black peppercorn",
+        "allergens": "Contains Poultry, Soy",
+        "healthIndicators": "Filipino Heritage Classic",
+        "nutrition": {
+          "calories": 480,
+          "protein": 42,
+          "carbs": 8,
+          "fat": 30
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000005",
+        "name": "Chicken Tinola",
+        "price": 380,
+        "ingredients": "Hearty chicken soup with green papaya and fresh chili leaves in warming ginger broth",
+        "allergens": "Contains Poultry",
+        "healthIndicators": "🟢 Healthy Choice - Warming Broth",
+        "nutrition": {
+          "calories": 360,
+          "protein": 40,
+          "carbs": 12,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000006",
+        "name": "Buttered Chicken",
+        "price": 410,
+        "ingredients": "Golden fried chicken nuggets tossed in rich sweet garlic butter glaze",
+        "allergens": "Contains Poultry, Dairy",
+        "healthIndicators": "Rich & Sweet Favorite",
+        "nutrition": {
+          "calories": 520,
+          "protein": 36,
+          "carbs": 24,
+          "fat": 30
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000007",
+        "name": "Sinampalukang Manok",
+        "price": 410,
+        "ingredients": "Native chicken pieces simmered in sour broth with fresh tamarind shoots",
+        "allergens": "Contains Poultry",
+        "healthIndicators": "🟢 Healthy Choice - Zesty Herbal Broth",
+        "nutrition": {
+          "calories": 380,
+          "protein": 38,
+          "carbs": 10,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000008",
+        "name": "Lechon Kawali",
+        "price": 550,
+        "ingredients": "Crispy pork belly chunks fried to golden perfection, liver sauce, spiced vinegar dip",
+        "allergens": "Contains Pork, Gluten",
+        "healthIndicators": "Crispy Indulgence",
+        "nutrition": {
+          "calories": 640,
+          "protein": 30,
+          "carbs": 6,
+          "fat": 54
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000009",
+        "name": "Inihaw na Liempo",
+        "price": 350,
+        "ingredients": "Thick marinated pork belly grilled over charcoal with sweet soy basting",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Charcoal Grilled Classic",
+        "nutrition": {
+          "calories": 520,
+          "protein": 32,
+          "carbs": 6,
+          "fat": 40
+        },
+        "image": "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000010",
+        "name": "Fried Liempo",
+        "price": 350,
+        "ingredients": "Deep-fried pork belly strips with seasoned garlic crunch and spiced vinegar dip",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Crispy Pork Viand",
+        "nutrition": {
+          "calories": 540,
+          "protein": 30,
+          "carbs": 4,
+          "fat": 44
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000011",
+        "name": "Pork BBQ (Stick)",
+        "price": 48,
+        "ingredients": "Skewered marinated pork shoulder glazed with sweet banana ketchup BBQ baste",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Street Food Skewer",
+        "nutrition": {
+          "calories": 210,
+          "protein": 18,
+          "carbs": 6,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000012",
+        "name": "Pork Adobo",
+        "price": 380,
+        "ingredients": "Pork belly chunks braised in cane vinegar, garlic, bay leaves, peppercorns",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Kapampangan Heritage Stew",
+        "nutrition": {
+          "calories": 560,
+          "protein": 30,
+          "carbs": 8,
+          "fat": 44
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000013",
+        "name": "Sinigang na Baboy",
+        "price": 450,
+        "ingredients": "Pork belly in sour tamarind broth with kangkong, radish, string beans, tomato",
+        "allergens": "Contains Pork",
+        "healthIndicators": "🟢 Healthy Choice - Veggie Rich Stew",
+        "nutrition": {
+          "calories": 440,
+          "protein": 30,
+          "carbs": 14,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000014",
+        "name": "Sizzling Sisig",
+        "price": 285,
+        "ingredients": "Authentic sizzling Kapampangan pork jowl, calamansi, red onions, fresh green chili",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Signature Kapampangan Sisig",
+        "nutrition": {
+          "calories": 560,
+          "protein": 29,
+          "carbs": 8,
+          "fat": 44
+        },
+        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000015",
+        "name": "Crispy Pata",
+        "price": 870,
+        "ingredients": "Large pork knuckle deep-fried until extra blistered and crispy, garlic soy-vinegar dip",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Grand Feast Centerpiece",
+        "nutrition": {
+          "calories": 920,
+          "protein": 60,
+          "carbs": 4,
+          "fat": 72
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000016",
+        "name": "Pork Asado",
+        "price": 450,
+        "ingredients": "Tender braised pork belly in sweet tomato-garlic sauce with potatoes and bay leaves",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Traditional Stew",
+        "nutrition": {
+          "calories": 520,
+          "protein": 28,
+          "carbs": 22,
+          "fat": 34
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000017",
+        "name": "Chicharon Bulaklak",
+        "price": 450,
+        "ingredients": "Crispy deep-fried pork mesentery with spicy sugarcane vinegar and crushed garlic",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Crispy Specialty",
+        "nutrition": {
+          "calories": 640,
+          "protein": 24,
+          "carbs": 4,
+          "fat": 58
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000018",
+        "name": "Pork Shanghai",
+        "price": 320,
+        "ingredients": "Golden fried lumpiang shanghai with seasoned ground pork and minced carrots, sweet chili sauce",
+        "allergens": "Contains Pork, Eggs, Gluten",
+        "healthIndicators": "Crispy Appetizer",
+        "nutrition": {
+          "calories": 440,
+          "protein": 20,
+          "carbs": 32,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000019",
+        "name": "Sinigang na Baka",
+        "price": 480,
+        "ingredients": "Tender beef short ribs in tangy tamarind soup with native greens and tomato",
+        "allergens": "None",
+        "healthIndicators": "Comforting Sour Broth",
+        "nutrition": {
+          "calories": 460,
+          "protein": 36,
+          "carbs": 12,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000020",
+        "name": "Nilagang Baka",
+        "price": 480,
+        "ingredients": "Slow-boiled beef shank soup with sweet corn, cabbage, and whole peppercorns",
+        "allergens": "None",
+        "healthIndicators": "Rich Bone Broth",
+        "nutrition": {
+          "calories": 470,
+          "protein": 38,
+          "carbs": 14,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000021",
+        "name": "Bistek Kapampangan",
+        "price": 410,
+        "ingredients": "Tender sliced beef sirloin marinated in calamansi and soy, topped with onion rings",
+        "allergens": "Contains Soy",
+        "healthIndicators": "High Protein Classic",
+        "nutrition": {
+          "calories": 450,
+          "protein": 38,
+          "carbs": 14,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000022",
+        "name": "Ribeye Steak",
+        "price": 1600,
+        "ingredients": "Premium grilled ribeye beef steak cooked to order with herb garlic butter and gravy",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Premium High Protein",
+        "nutrition": {
+          "calories": 780,
+          "protein": 62,
+          "carbs": 4,
+          "fat": 56
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000023",
+        "name": "Roasted Beef",
+        "price": 480,
+        "ingredients": "Slow-roasted beef top round slices in rich mushroom demi-glace sauce",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Hearty Beef Viand",
+        "nutrition": {
+          "calories": 460,
+          "protein": 40,
+          "carbs": 12,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000024",
+        "name": "Chopsuey",
+        "price": 380,
+        "ingredients": "Stir-fried farm cauliflower, snow peas, carrots, young corn, bell peppers in savory sauce",
+        "allergens": "Contains Soy",
+        "healthIndicators": "🟢 Healthy Choice - High Fiber",
+        "nutrition": {
+          "calories": 230,
+          "protein": 10,
+          "carbs": 32,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000025",
+        "name": "Pinakbet",
+        "price": 380,
+        "ingredients": "Stewed native squash, eggplant, sitaw, and okra in fragrant bagoong alamang with pork bits",
+        "allergens": "Contains Pork, Crustaceans",
+        "healthIndicators": "🟢 Healthy Choice - Farm Fresh Harvest",
+        "nutrition": {
+          "calories": 290,
+          "protein": 14,
+          "carbs": 26,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000026",
+        "name": "Ampalaya Lagat Kapampangan",
+        "price": 295,
+        "ingredients": "Sauteed bitter gourd with diced pork, tomatoes, and egg in authentic Kapampangan style",
+        "allergens": "Contains Pork, Eggs",
+        "healthIndicators": "🟢 Healthy Choice - Traditional Kapampangan Dish",
+        "nutrition": {
+          "calories": 240,
+          "protein": 16,
+          "carbs": 16,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000027",
+        "name": "Tortang Talong",
+        "price": 210,
+        "ingredients": "Char-grilled whole eggplant dipped in seasoned egg batter and pan-fried golden",
+        "allergens": "Contains Eggs",
+        "healthIndicators": "🟢 Healthy Choice - Comfort Vegetable",
+        "nutrition": {
+          "calories": 220,
+          "protein": 12,
+          "carbs": 18,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000028",
+        "name": "Adobong Kangkong",
+        "price": 210,
+        "ingredients": "Fresh water spinach greens sauteed in cane vinegar, garlic, and savory soy sauce",
+        "allergens": "Contains Soy",
+        "healthIndicators": "🟢 Healthy Choice - Low Calorie Greens",
+        "nutrition": {
+          "calories": 140,
+          "protein": 6,
+          "carbs": 14,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000029",
+        "name": "Creamy Tuna Pasta",
+        "price": 350,
+        "ingredients": "Penne pasta tossed in rich garlic cream sauce with flaked tuna chunks and parsley",
+        "allergens": "Contains Fish, Dairy, Gluten",
+        "healthIndicators": "Protein Rich Pasta",
+        "nutrition": {
+          "calories": 490,
+          "protein": 28,
+          "carbs": 58,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000030",
+        "name": "Filipino Spaghetti",
+        "price": 310,
+        "ingredients": "Sweet style spaghetti with savory ground pork, sliced red hotdogs, grated cheddar",
+        "allergens": "Contains Pork, Dairy, Gluten",
+        "healthIndicators": "Kids & Family Favorite",
+        "nutrition": {
+          "calories": 520,
+          "protein": 24,
+          "carbs": 68,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000031",
+        "name": "Pancit Canton",
+        "price": 380,
+        "ingredients": "Egg noodles stir-fried with pork strips, shrimp, carrots, and cabbage",
+        "allergens": "Contains Pork, Crustaceans, Soy, Gluten",
+        "healthIndicators": "Celebration Noodle Dish",
+        "nutrition": {
+          "calories": 420,
+          "protein": 22,
+          "carbs": 58,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000032",
+        "name": "Pancit Guisado",
+        "price": 380,
+        "ingredients": "Combination of bihon and canton noodles wok-tossed with native vegetables and meat",
+        "allergens": "Contains Pork, Soy, Gluten",
+        "healthIndicators": "Traditional Merienda",
+        "nutrition": {
+          "calories": 410,
+          "protein": 20,
+          "carbs": 60,
+          "fat": 11
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000033",
+        "name": "Arrozcaldo",
+        "price": 280,
+        "ingredients": "Warm ginger chicken rice congee garnished with scallions, toasted garlic, boiled egg",
+        "allergens": "Contains Poultry, Eggs",
+        "healthIndicators": "🟢 Healthy Choice - Warming Congee",
+        "nutrition": {
+          "calories": 360,
+          "protein": 24,
+          "carbs": 48,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000034",
+        "name": "Sinigang na Hipon",
+        "price": 460,
+        "ingredients": "Fresh prawns simmered in sour tamarind broth with local water greens",
+        "allergens": "Contains Crustaceans",
+        "healthIndicators": "🟢 Healthy Choice - Lean Marine Catch",
+        "nutrition": {
+          "calories": 280,
+          "protein": 32,
+          "carbs": 12,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000035",
+        "name": "Sinigang na Isda",
+        "price": 390,
+        "ingredients": "Fresh white fish cutlets in tangy sour broth with radish and kangkong",
+        "allergens": "Contains Fish",
+        "healthIndicators": "🟢 Healthy Choice - Low Fat Fish Stew",
+        "nutrition": {
+          "calories": 290,
+          "protein": 34,
+          "carbs": 10,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000036",
+        "name": "Buttered Garlic Shrimp (100g)",
+        "price": 460,
+        "ingredients": "Prawns sauteed in garlic butter and white wine, served steaming",
+        "allergens": "Contains Crustaceans, Dairy",
+        "healthIndicators": "High Protein Seafood",
+        "nutrition": {
+          "calories": 340,
+          "protein": 30,
+          "carbs": 6,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000037",
+        "name": "Fish Fillet in Sweet and Sour Sauce",
+        "price": 380,
+        "ingredients": "Crispy fried fish fillet coated in tangy pineapple and bell pepper sauce",
+        "allergens": "Contains Fish, Gluten",
+        "healthIndicators": "Crispy Fish Viand",
+        "nutrition": {
+          "calories": 380,
+          "protein": 26,
+          "carbs": 44,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000038",
+        "name": "Sizzling Gambas (100g)",
+        "price": 460,
+        "ingredients": "Fresh shrimp in garlic tomato chili reduction served on sizzling iron plate",
+        "allergens": "Contains Crustaceans",
+        "healthIndicators": "Spicy Seafood Classic",
+        "nutrition": {
+          "calories": 310,
+          "protein": 28,
+          "carbs": 8,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000039",
+        "name": "Tocino Breakfast",
+        "price": 250,
+        "ingredients": "Sweet cured pork tocino, sunny fried egg, aromatic garlic sinangag rice",
+        "allergens": "Contains Pork, Eggs",
+        "healthIndicators": "Classic Breakfast",
+        "nutrition": {
+          "calories": 510,
+          "protein": 24,
+          "carbs": 54,
+          "fat": 21
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000040",
+        "name": "Sta. Ana's Longganisa Breakfast",
+        "price": 250,
+        "ingredients": "Authentic garlicky Santa Ana longganisa sausage, sunny farm egg, garlic sinangag rice",
+        "allergens": "Contains Pork, Eggs",
+        "healthIndicators": "Local Town Specialty Breakfast",
+        "nutrition": {
+          "calories": 540,
+          "protein": 26,
+          "carbs": 50,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000041",
+        "name": "Fried Daing na Bangus Breakfast",
+        "price": 250,
+        "ingredients": "Crisp marinated milkfish fillet with garlic rice and fried egg",
+        "allergens": "Contains Fish, Eggs",
+        "healthIndicators": "High Protein Breakfast",
+        "nutrition": {
+          "calories": 480,
+          "protein": 32,
+          "carbs": 46,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000042",
+        "name": "Beef Sirloin Tapa Breakfast",
+        "price": 250,
+        "ingredients": "Marinated tender beef tapa strips, sunny egg, garlic rice, pickled atchara",
+        "allergens": "Contains Soy, Eggs",
+        "healthIndicators": "High Protein Breakfast",
+        "nutrition": {
+          "calories": 490,
+          "protein": 34,
+          "carbs": 46,
+          "fat": 17
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000043",
+        "name": "2 pcs. Hotdog Breakfast",
+        "price": 250,
+        "ingredients": "Two jumbo grilled red hotdogs, sunny farm egg, garlic sinangag rice",
+        "allergens": "Contains Pork, Eggs, Gluten",
+        "healthIndicators": "All Day Breakfast Favorite",
+        "nutrition": {
+          "calories": 480,
+          "protein": 18,
+          "carbs": 50,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000044",
+        "name": "The Ville's Crispy Liempo Breakfast",
+        "price": 250,
+        "ingredients": "Golden crispy pork belly cutlets with garlic fried rice and sunny egg",
+        "allergens": "Contains Pork, Eggs",
+        "healthIndicators": "Crispy Morning Meal",
+        "nutrition": {
+          "calories": 560,
+          "protein": 28,
+          "carbs": 48,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000045",
+        "name": "Pork BBQ Breakfast",
+        "price": 250,
+        "ingredients": "Two glazed pork barbecue skewers, sunny side up egg, garlic fried rice",
+        "allergens": "Contains Pork, Soy, Eggs",
+        "healthIndicators": "Savory Breakfast Skewer",
+        "nutrition": {
+          "calories": 490,
+          "protein": 28,
+          "carbs": 50,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000046",
+        "name": "Corned Beef Breakfast",
+        "price": 250,
+        "ingredients": "Sauteed premium corned beef with onions and potatoes, fried egg, garlic rice",
+        "allergens": "Contains Eggs",
+        "healthIndicators": "Hearty Breakfast",
+        "nutrition": {
+          "calories": 500,
+          "protein": 26,
+          "carbs": 48,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000047",
+        "name": "Pork Samgyupsal",
+        "price": 450,
+        "ingredients": "Thick sliced fresh pork belly grilled at your table, served with assorted Korean side dishes and lettuce wraps",
+        "allergens": "Contains Pork, Sesame, Soy",
+        "healthIndicators": "Korean Grill Experience",
+        "nutrition": {
+          "calories": 680,
+          "protein": 44,
+          "carbs": 12,
+          "fat": 52
+        },
+        "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000048",
+        "name": "Beef Samgyupsal",
+        "price": 550,
+        "ingredients": "Thinly sliced tender beef brisket grilled and served with kimchi, pickled radish, and dipping sauces",
+        "allergens": "Contains Sesame, Soy",
+        "healthIndicators": "Premium Korean Beef Grill",
+        "nutrition": {
+          "calories": 620,
+          "protein": 48,
+          "carbs": 10,
+          "fat": 44
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000049",
+        "name": "Cheesesticks",
+        "price": 160,
+        "ingredients": "Crispy fried spring roll wrappers filled with melted cheddar cheese, sweet dip",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Crisp Snack",
+        "nutrition": {
+          "calories": 340,
+          "protein": 12,
+          "carbs": 28,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000050",
+        "name": "French Fries",
+        "price": 180,
+        "ingredients": "Crispy golden potato fries seasoned with fine sea salt, served with ketchup and mayo",
+        "allergens": "None",
+        "healthIndicators": "Classic Crisp Snack",
+        "nutrition": {
+          "calories": 360,
+          "protein": 4,
+          "carbs": 46,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000051",
+        "name": "Inihaw Platter",
+        "price": 599,
+        "ingredients": "Generous combination of Pork BBQ skewers, Grilled Liempo, Charred Talong, and Grilled Tilapia",
+        "allergens": "Contains Pork, Fish, Soy",
+        "healthIndicators": "Grand Charcoal Grilled Sharing Platter",
+        "nutrition": {
+          "calories": 840,
+          "protein": 78,
+          "carbs": 18,
+          "fat": 48
+        },
+        "image": "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000052",
+        "name": "Halo-Halo Special",
+        "price": 100,
+        "ingredients": "Shaved ice with sweetened beans, nata de coco, macapuno, leche flan, ube halaya, milk",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Refreshing Classic Dessert",
+        "nutrition": {
+          "calories": 310,
+          "protein": 6,
+          "carbs": 58,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000053",
+        "name": "Mais con Yelo",
+        "price": 70,
+        "ingredients": "Sweet sweet corn kernels, shaved ice, evaporated milk, topped with cornflakes and sugar",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Sweet Refreshing Treat",
+        "nutrition": {
+          "calories": 240,
+          "protein": 5,
+          "carbs": 48,
+          "fat": 4
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "menu-theville-1787800000054",
+        "name": "Banana con Yelo",
+        "price": 70,
+        "ingredients": "Caramelized saba bananas (minatamis na saging), shaved ice, rich milk",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Traditional Filipino Sweet Treat",
+        "nutrition": {
+          "calories": 250,
+          "protein": 4,
+          "carbs": 52,
+          "fat": 3
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
       }
     ]
   }
