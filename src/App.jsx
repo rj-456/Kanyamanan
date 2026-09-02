@@ -2098,12 +2098,14 @@ So, where do we start? 😊`,
             dishTotalQty = 1;
           }
 
+          const isPerPax = /package|bundle|buffet|unlimited|\/pax|\/head/i.test(dish.name) || dish.type === 'bundle' || dish.type === 'buffet';
+
           if (sharedQty > 0) {
-            const sharedCalsPerPerson = (dishCals * sharedQty) / groupCount;
-            const sharedProtPerPerson = (dishProt * sharedQty) / groupCount;
-            const sharedCarbsPerPerson = (dishCarbs * sharedQty) / groupCount;
-            const sharedFatPerPerson = (dishFat * sharedQty) / groupCount;
-            const sharedCostPerPerson = (dishPrice * sharedQty) / groupCount;
+            const sharedCalsPerPerson = isPerPax ? (dishCals * sharedQty) : ((dishCals * sharedQty) / groupCount);
+            const sharedProtPerPerson = isPerPax ? (dishProt * sharedQty) : ((dishProt * sharedQty) / groupCount);
+            const sharedCarbsPerPerson = isPerPax ? (dishCarbs * sharedQty) : ((dishCarbs * sharedQty) / groupCount);
+            const sharedFatPerPerson = isPerPax ? (dishFat * sharedQty) : ((dishFat * sharedQty) / groupCount);
+            const sharedCostPerPerson = isPerPax ? (dishPrice * sharedQty) : ((dishPrice * sharedQty) / groupCount);
 
             groupMembers.forEach(m => {
               memberMetrics[m.id].calories += sharedCalsPerPerson;
@@ -2111,7 +2113,7 @@ So, where do we start? 😊`,
               memberMetrics[m.id].carbs += sharedCarbsPerPerson;
               memberMetrics[m.id].fat += sharedFatPerPerson;
               memberMetrics[m.id].cost += sharedCostPerPerson;
-              memberMetrics[m.id].dishesCount += sharedQty / groupCount;
+              memberMetrics[m.id].dishesCount += sharedQty / (isPerPax ? 1 : groupCount);
               if (dish.allergens) {
                 dish.allergens.split(',').map(a => a.trim()).filter(Boolean).forEach(a => memberMetrics[m.id].allergens.add(a));
               }
@@ -2119,16 +2121,18 @@ So, where do we start? 😊`,
           }
 
           if (dishTotalQty > 0) {
-            tableCalories += dishCals * dishTotalQty;
-            tableProtein += dishProt * dishTotalQty;
-            tableCarbs += dishCarbs * dishTotalQty;
-            tableFat += dishFat * dishTotalQty;
-            tableCost += dishPrice * dishTotalQty;
-            tableDishesCount += dishTotalQty;
+            const effectiveMultiplier = (sharedQty > 0 && isPerPax) ? (dishTotalQty - sharedQty + (sharedQty * groupCount)) : dishTotalQty;
 
-            stopCalories += dishCals * dishTotalQty;
-            stopCost += dishPrice * dishTotalQty;
-            stopDishesCount += dishTotalQty;
+            tableCalories += dishCals * effectiveMultiplier;
+            tableProtein += dishProt * effectiveMultiplier;
+            tableCarbs += dishCarbs * effectiveMultiplier;
+            tableFat += dishFat * effectiveMultiplier;
+            tableCost += dishPrice * effectiveMultiplier;
+            tableDishesCount += effectiveMultiplier;
+
+            stopCalories += dishCals * effectiveMultiplier;
+            stopCost += dishPrice * effectiveMultiplier;
+            stopDishesCount += effectiveMultiplier;
 
             if (dish.allergens) {
               dish.allergens.split(',').map(a => a.trim()).filter(Boolean).forEach(a => activeAllergens.add(a));
@@ -11287,9 +11291,17 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       }
     }
 
+    // Support Reservation Packages, Bundles, Sets & Buffets
+    if (/^(?:(?:reservation\s+)?package|set\s+menu|combo|bundle|buffet|eat\s*all\s*you\s*can|unlimited)\b/i.test(str)) {
+      return {
+        name: str.trim(),
+        defaultPrice: '265'
+      };
+    }
+
     // 3. Trailing OCR and portion noise clean up (e.g. "A 3 Pai Z Ball", "3 Pax", "4-6 Person")
     str = str
-      .replace(/\s+(?:a\s+)?\d+\s*(?:pai|pax|p|pers|person|ball|bilao|platter|tray|ld|z|bowl|pcs?).*$/i, '')
+      .replace(/\s+(?:a\s+)?\d+\s*(?:pai|pers|person|ball|bilao|platter|tray|ld|z|bowl|pcs?).*$/i, '')
       .replace(/\s*[\)|}\]=>~^+%<].*$/i, '')
       .replace(/\s+[A-Z0-9]{1,3}(?:\s+[A-Z0-9]{1,3}){1,}$/i, '')
       .replace(/\s+\d+\s*(?:ld|g|kg|pcs?|orders?|tray)?$/i, '')
@@ -11319,7 +11331,8 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       'shake', 'juice', 'tea', 'coffee', 'cooler', 'dessert', 'cake', 'bagnet', 'pasta',
       'wrap', 'carbonara', 'cutlet', 'hitu', 'hito', 'tilapia', 'bangus', 'spareribs',
       'tinola', 'pochero', 'potchero', 'potcherung', 'ligang', 'nilaga', 'caldereta',
-      'kaldereta', 'adobo', 'begukan', 'binagoongan', 'aligue', 'gule', 'nasi', 'meryenda'
+      'kaldereta', 'adobo', 'begukan', 'binagoongan', 'aligue', 'gule', 'nasi', 'meryenda',
+      'package', 'reservation', 'bundle', 'buffet', 'unlimited', 'set', 'ayce', 'group', 'pax'
     ];
 
     const hasFoodAnchor = FOOD_ANCHORS.some(anchor => lower.includes(anchor));
@@ -11371,6 +11384,47 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     });
   };
 
+  const splitMenuColumns = (imageDataUrl) => {
+    return new Promise((resolve) => {
+      if (!imageDataUrl || typeof imageDataUrl !== 'string') return resolve({ left: null, right: null });
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.onload = () => {
+        try {
+          const w = img.width;
+          const h = img.height;
+          // When image is vertical or square flyer (aspect ratio between 0.5 and 1.3)
+          if (w >= 300 && h >= 300) {
+            const colW = Math.round(w * 0.52);
+            // Left column canvas (0 to 52%)
+            const cL = document.createElement('canvas');
+            cL.width = colW;
+            cL.height = h;
+            const ctxL = cL.getContext('2d');
+            ctxL.drawImage(img, 0, 0, colW, h, 0, 0, colW, h);
+
+            // Right column canvas (48% to 100%)
+            const cR = document.createElement('canvas');
+            cR.width = colW;
+            cR.height = h;
+            const ctxR = cR.getContext('2d');
+            ctxR.drawImage(img, Math.round(w * 0.48), 0, colW, h, 0, 0, colW, h);
+
+            return resolve({
+              left: cL.toDataURL('image/jpeg', 0.9),
+              right: cR.toDataURL('image/jpeg', 0.9)
+            });
+          }
+          resolve({ left: null, right: null });
+        } catch (e) {
+          resolve({ left: null, right: null });
+        }
+      };
+      img.onerror = () => resolve({ left: null, right: null });
+      img.src = imageDataUrl;
+    });
+  };
+
   const runGeminiVisionMenu = async (imageDataUrl, keyOverride = null) => {
     const apiKey = (
       (typeof keyOverride === 'string' && keyOverride !== 'BASIC_OCR' ? keyOverride : '') ||
@@ -11391,24 +11445,24 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       const timeoutId = setTimeout(() => controller.abort(), 12000);
 
       const prompt = `Analyze this restaurant menu flyer, board, or document image very carefully.
-Extract ALL authentic food and beverage items shown on the menu into a clean JSON array.
+Extract ALL authentic food and beverage items, or reservation packages, shown on the menu into a clean JSON array.
 
-CRITICAL INSTRUCTIONS FOR ACCURACY ACROSS ANY RESTAURANT:
-1. Extract the EXACT dishes printed on THIS specific menu image.
-2. Read the EXACT printed price printed next to each dish. Do NOT make up, default, or estimate prices if a price is printed.
-3. If a dish has multiple sizes (e.g. Regular/Large, Solo/Platter, Small/Medium/Large), extract the base/regular size item and you can also include the platter/bilao version as a separate entry if distinct.
-4. Clean away non-food text (e.g. store address, phone numbers, wifi, "Home Delivery", "For Orders Call", footer notices).
-5. For each item, extract:
-  - "name": Clean Title Cased dish name as printed on the menu
-  - "price": Exact printed price as a clean integer numeric string (e.g. "250", "400", "160", "30")
-  - "ingredients": Key ingredients, cooking technique, or flavor profile
-  - "allergens": Concise allergen summary (e.g. "Contains Pork", "Contains Shellfish/Seafood", "Contains Dairy, Eggs", "Contains Peanuts", "None / Allergen Free")
-  - "calories": Realistic calorie estimate (e.g. "450")
-
-Return ONLY a valid JSON array:
+CRITICAL INSTRUCTIONS FOR ACCURACY:
+1. Extract the EXACT dishes or packages printed on THIS specific menu image.
+2. IF THE MENU HAS RESERVATION PACKAGES, FUNCTION SETS, BUNDLES, OR EAT-ALL-YOU-CAN (e.g. "Package A P 265/PAX", "Package D P 295/PAX", "Eat-All-You-Can ₱499"):
+   - Extract each package as an item.
+   - "name": Clean name with pricing unit, e.g. "Reservation Package A (₱265/PAX)" or "Package D (₱295/PAX)"
+   - "price": Exact numeric price per pax or per head (e.g. "265", "295")
+   - "ingredients": "Includes: " followed by all included dishes and choices in that package (e.g. "Includes: Sizzling Chicken, Pork Sisig, Sweet and Sour Fish Fillet, Fried Vegetable Lumpia, Pancit Guisado, Plain Rice, Ice Tea, Buko Pandan Salad")
+   - "allergens": Concise allergen summary from the included foods
+   - "calories": Realistic calorie estimate (e.g. "650")
+3. If the menu has 2 or more columns, read each column top-to-bottom so items from column 1 and column 2 are NOT merged together.
+4. Read the EXACT printed price printed next to each dish or package. Do NOT make up, default, or estimate prices if a price is printed.
+5. Clean away non-food text (e.g. store address, phone numbers, wifi, "Home Delivery", "For Orders Call", footer reservation notices).
+6. Return ONLY a valid JSON array:
 [
   {
-    "name": "Dish Name",
+    "name": "Dish or Package Name",
     "price": "250",
     "ingredients": "...",
     "allergens": "...",
@@ -11618,12 +11672,160 @@ Return ONLY a valid JSON array:
           .replace(/[\u2022\u25CF\u25AA*]/g, ' ')
           .replace(/[\t]+/g, ' ');
 
+        // -------------------------------------------------------------
+        // Dedicated Package & Buffet Parser (Reservation Sets, AYCE, Bundles)
+        // -------------------------------------------------------------
+        const parsePackagesFromText = (rawStr) => {
+          if (!rawStr || typeof rawStr !== 'string') return { packages: [], consumedIndices: new Set() };
+          const lines = rawStr.split('\n').map(l => l.trim()).filter(Boolean);
+          const packages = [];
+          const consumedIndices = new Set();
+          let currentPkg = null;
+
+          const isIgnoredFooter = (l) => {
+            const low = l.toLowerCase();
+            return (
+              low.includes('function reservation') ||
+              low.includes('ideal for') ||
+              low.includes('business meeting') ||
+              low.includes('birthday') ||
+              low.includes('baptismal') ||
+              low.includes('wedding') ||
+              low.includes('for inquiries') ||
+              low.includes('please call') ||
+              low.includes('gold drive') ||
+              low.includes('bubusuk') ||
+              /^\(?0\d{1,4}\)?[- ]?\d{3,4}[- ]?\d{3,4}/.test(l)
+            );
+          };
+
+          const isPkgHeader = (l) => {
+            if (/\b(?:package|packag[ef]|reservation\s+package|set(?:\s+menu)?|combo|bundle)(?::|\s|-)*([A-Za-z0-9]+)?/i.test(l)) return true;
+            if (/^[A-F][.)]\s*(?:(?:P|₱|Php)?\s*\d{2,5}(?:\s*\/\s*(?:pax|head|person))?)?/i.test(l)) return true;
+            if (/^(?:eat\s*all\s*you\s*can|buffet|unlimited)\b/i.test(l)) return true;
+            return false;
+          };
+
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (isIgnoredFooter(line)) {
+              consumedIndices.add(i);
+              continue;
+            }
+
+            if (isPkgHeader(line)) {
+              consumedIndices.add(i);
+              if (currentPkg && (currentPkg.items.length > 0 || currentPkg.price)) {
+                packages.push(currentPkg);
+              }
+
+              let pkgName = line;
+              let pkgPrice = '';
+
+              const priceMatch = line.match(/(?:[₱\u20B1]|P|Php|PHP)?\.?\s*(\d{2,5})(?:\s*\/\s*(?:pax|head|person))?/i);
+              if (priceMatch) {
+                pkgPrice = priceMatch[1];
+              }
+
+              // Robust extraction of Package Letter / Identification (e.g. Package A, Package B, A., etc.)
+              const letterMatch = line.match(/\b(?:package|packag[ef]|reservation\s+package|set(?:\s+menu)?|bundle)(?::|\s|-)+([A-Za-z0-9]+)\b/i) || line.match(/^([A-F])[.)]/i);
+              if (letterMatch) {
+                pkgName = `Reservation Package ${letterMatch[1].toUpperCase()}`;
+              } else if (/^(?:eat\s*all\s*you\s*can|buffet|unlimited)/i.test(line)) {
+                pkgName = line
+                  .replace(/(?:from\s+)?(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])\.?\s*\d{2,5}(?:\s*\/\s*(?:pax|head|person|set))?/gi, '')
+                  .replace(/[:–—\t -]+$/, '')
+                  .trim() || 'Eat-All-You-Can Buffet';
+              } else {
+                pkgName = line
+                  .replace(/(?:from\s+)?(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])\.?\s*\d{2,5}(?:\s*\/\s*(?:pax|head|person|set))?/gi, '')
+                  .replace(/[:–—\t -]+$/, '')
+                  .trim() || line;
+              }
+
+              // Extract inline dishes if separated by colon or dash
+              const colonIndex = line.indexOf(':');
+              const dashIndex = line.indexOf(' - ');
+              const splitIdx = colonIndex !== -1 ? colonIndex : dashIndex;
+              let inlineDishes = [];
+              if (splitIdx !== -1 && splitIdx < line.length - 1) {
+                const afterPart = line.slice(splitIdx + 1).trim();
+                if (afterPart.includes(',') || afterPart.length > 5) {
+                  inlineDishes = afterPart.split(',').map(s => s.trim()).filter(s => s.length >= 2);
+                }
+              }
+
+              currentPkg = {
+                name: pkgName,
+                price: pkgPrice,
+                items: inlineDishes
+              };
+              continue;
+            }
+
+            if (currentPkg) {
+              // Check if line is just the price line right below header (e.g. "P 265/PAX" or "P 295/PAX")
+              const standalonePriceMatch = line.match(/^(?:from\s+)?(?:[₱\u20B1]|P|Php|PHP)?\.?\s*(\d{2,5})(?:\s*\/\s*(?:pax|head|person))?$/i);
+              if (standalonePriceMatch && !currentPkg.price) {
+                currentPkg.price = standalonePriceMatch[1];
+                consumedIndices.add(i);
+                continue;
+              }
+
+              const cleanItem = line.replace(/^[•*#\s-]+/, '').trim();
+              if (cleanItem.length >= 2 && !cleanItem.toLowerCase().startsWith('package') && !isPkgHeader(cleanItem)) {
+                currentPkg.items.push(cleanItem);
+                consumedIndices.add(i);
+              }
+            }
+          }
+
+          if (currentPkg && (currentPkg.items.length > 0 || currentPkg.price)) {
+            packages.push(currentPkg);
+          }
+
+          if (packages.length === 0 || !packages.some(p => p.items.length > 0)) {
+            return { packages: [], consumedIndices: new Set() };
+          }
+
+          const mappedPackages = packages.map(pkg => {
+            const finalPrice = pkg.price || '265';
+            const nameWithPrice = pkg.name.includes('/PAX') || pkg.name.includes('₱')
+              ? pkg.name
+              : `${pkg.name} (₱${finalPrice}/PAX)`;
+            const itemsStr = pkg.items.join(', ');
+            const primaryDish = pkg.items[0] || 'chicken';
+            const lowerAll = (nameWithPrice + ' ' + itemsStr).toLowerCase();
+
+            let allergens = 'None / Allergen Free';
+            if (/pork|sisig|liempo|bacon/.test(lowerAll)) allergens = 'Contains Pork';
+            if (/fish|fillet|tuna|salmon|bangus|shrimp|seafood/.test(lowerAll)) allergens = allergens !== 'None / Allergen Free' ? `${allergens}, Fish/Seafood` : 'Contains Fish/Seafood';
+            if (/chicken|poultry/.test(lowerAll)) allergens = allergens !== 'None / Allergen Free' ? `${allergens}, Poultry` : 'Contains Poultry';
+            if (/beef|bulalo|pares/.test(lowerAll)) allergens = allergens !== 'None / Allergen Free' ? `${allergens}, Beef` : 'Contains Beef';
+            if (/peanuts|kare/.test(lowerAll)) allergens = allergens !== 'None / Allergen Free' ? `${allergens}, Peanuts` : 'Contains Peanuts';
+
+            return {
+              name: nameWithPrice,
+              price: String(finalPrice),
+              ingredients: pkg.items.length > 0 ? `Includes: ${itemsStr}` : 'Complete group reservation set package with meat, sides, rice, drinks, and dessert',
+              allergens: allergens,
+              calories: '650',
+              image: getRealDishPhoto(primaryDish)
+            };
+          });
+
+          return { packages: mappedPackages, consumedIndices };
+        };
+
+        const { packages: detectedPackages, consumedIndices } = parsePackagesFromText(cleaned);
+
         // 2. Intelligent line & multi-item splitting (supports comma-separated list of items)
         const rawLines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
         const initialLines = [];
 
-        rawLines.forEach(line => {
-          const priceCount = (line.match(/(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|\$)?\s*\d{2,5}(?:\.\d{2})?(?:\s*(?:php|pesos|\/order|\/serving))?/gi) || []).length;
+        rawLines.forEach((line, lineIdx) => {
+          if (consumedIndices && consumedIndices.has(lineIdx)) return;
+          const priceCount = (line.match(/(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|\$)?\s*\d{2,5}(?:\.\d{2})?(?:\s*(?:php|pesos|\/order|\/serving|\/pax|\/head))?/gi) || []).length;
           if (priceCount > 1 && /[,;]/.test(line)) {
             const splitSubLines = line.split(/\s*[,;]\s*/).filter(Boolean);
             splitSubLines.forEach(sub => initialLines.push(sub.trim()));
@@ -11637,13 +11839,13 @@ Return ONLY a valid JSON array:
           let str = t.trim();
           if (!str) return null;
 
-          const leadingMatch = str.match(/^(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*(?:[-–—|:@\s]|\.\.\.)+\s*(.+)$/i);
+          const leadingMatch = str.match(/^(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*(?:[:|@\s–—-]|\.\.\.)+\s*(.+)$/i);
           if (leadingMatch) {
             const num = parseFloat(leadingMatch[1].replace(/,/g, ''));
             return { price: Math.round(num), cleanText: leadingMatch[2].trim() };
           }
 
-          const trailingMatch = str.match(/(?:[-–—|:@\s]|\.\.\.)+\s*(?:from\s+|starts?\s+at\s+)?(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving)?(?:\s*\([^)]*\))?$/i);
+          const trailingMatch = str.match(/(?:[:|@\s–—-]|\.\.\.)+\s*(?:from\s+|starts?\s+at\s+)?(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving|\/pax|\/head|\/person|\/set|per\s+pax|per\s+head)?(?:\s*\([^)]*\))?$/i);
           if (trailingMatch) {
             const matchedPriceStr = trailingMatch[1].replace(/,/g, '');
             const num = parseFloat(matchedPriceStr);
@@ -11653,7 +11855,7 @@ Return ONLY a valid JSON array:
             }
           }
 
-          const parenMatch = str.match(/\(\s*(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving)?\s*\)/i);
+          const parenMatch = str.match(/\(\s*(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving|\/pax|\/head|\/person)?\s*\)/i);
           if (parenMatch) {
             const num = parseFloat(parenMatch[1].replace(/,/g, ''));
             const textWithoutPrice = str.replace(parenMatch[0], '').trim();
@@ -11671,7 +11873,7 @@ Return ONLY a valid JSON array:
 
         const isStandalonePriceLine = (l) => {
           const cleanedLine = l.replace(/[₱\u20B1]/g, 'P').trim();
-          return /^(?:from\s+|starts?\s+at\s+)?(?:P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(?:\d{1,2}(?:,\d{3})+|\d{1,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving)?$/i.test(cleanedLine);
+          return /^(?:from\s+|starts?\s+at\s+)?(?:P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(?:\d{1,2}(?:,\d{3})+|\d{1,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving|\/pax|\/head|\/person|\/set|per\s+pax|per\s+head)?$/i.test(cleanedLine);
         };
 
         const isSectionHeader = (l) => {
@@ -11958,7 +12160,7 @@ Return ONLY a valid JSON array:
           }
         }
 
-        return items
+        const regularDishes = items
           .map(item => {
             const validation = cleanAndValidateDishName(item.name);
             if (!validation) return null;
@@ -12048,6 +12250,8 @@ Return ONLY a valid JSON array:
             };
           })
           .filter(Boolean);
+
+        return [...(detectedPackages || []), ...regularDishes];
       };
 
       let allDetectedDishes = [];
@@ -12092,11 +12296,28 @@ Return ONLY a valid JSON array:
               if (parsed.length > 0) return parsed;
             }
 
-            // 4. Fast Local OCR Fallback
-            const enhanced = await preprocessMenuImage(textCropped || optimizedImg);
-            const ocrResult = await Tesseract.recognize(enhanced, 'eng');
-            if (ocrResult?.data?.text) {
-              return parseMenuTextStream(ocrResult.data.text);
+            // 4. Fast Local OCR Fallback (Multi-column adaptive)
+            const cols = await splitMenuColumns(optimizedImg);
+            let combinedOcrText = '';
+
+            if (cols.left && cols.right) {
+              setAiOcrStatusMessage(`Reading Column 1 of menu Page ${imgNum}...`);
+              const enhLeft = await preprocessMenuImage(cols.left);
+              const ocrLeft = await Tesseract.recognize(enhLeft, 'eng');
+
+              setAiOcrStatusMessage(`Reading Column 2 of menu Page ${imgNum}...`);
+              const enhRight = await preprocessMenuImage(cols.right);
+              const ocrRight = await Tesseract.recognize(enhRight, 'eng');
+
+              combinedOcrText = (ocrLeft?.data?.text || '') + '\n\n' + (ocrRight?.data?.text || '');
+            } else {
+              const enhanced = await preprocessMenuImage(textCropped || optimizedImg);
+              const ocrResult = await Tesseract.recognize(enhanced, 'eng');
+              combinedOcrText = ocrResult?.data?.text || '';
+            }
+
+            if (combinedOcrText && combinedOcrText.trim()) {
+              return parseMenuTextStream(combinedOcrText);
             }
 
             return [];
@@ -14029,7 +14250,7 @@ Return ONLY a valid JSON array:
                           </label>
                           <textarea
                             rows={aiMenuImages.length > 0 ? 5 : 3}
-                            placeholder="e.g. Sinigang Na Hipon 300g P 950, Chili Garlic Shrimp 300g P 750, SOUQ Pork Sisig ₱280..."
+                            placeholder="e.g. Reservation Package A - ₱265/pax: Sizzling Chicken, Pork Sisig, Pancit Guisado, Rice, Drinks... OR SOUQ Pork Sisig ₱280, Bulalo ₱450..."
                             value={aiRawMenuText}
                             onChange={(e) => setAiRawMenuText(e.target.value)}
                             className="block w-full px-3 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-white"
@@ -14056,91 +14277,115 @@ Return ONLY a valid JSON array:
                     <div className="border border-[#E9E5DE] rounded-xl p-4 bg-[#FAF8F5] space-y-3">
                       <div className="flex items-center justify-between">
                         <h4 className="text-[10px] font-extrabold text-charcoal-light uppercase tracking-wider flex items-center gap-1">
-                          <Coffee className="h-3.5 w-3.5" /> Signature Dishes ({adminDishes.length})
+                          <Coffee className="h-3.5 w-3.5" /> Signature Dishes & Packages ({adminDishes.length})
                         </h4>
-                        <button
-                          type="button"
-                          onClick={() => setAdminDishes([...adminDishes, { name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }])}
-                          className="px-2.5 py-1 bg-terracotta text-white text-[10px] font-black rounded-lg hover:bg-terracotta-dark transition-colors flex items-center gap-1"
-                        >
-                          <Plus className="h-3 w-3" /> Add Dish
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAdminDishes([...adminDishes, {
+                                name: '',
+                                price: '',
+                                ingredients: '',
+                                allergens: '',
+                                calories: '',
+                                image: '',
+                                isPackage: true
+                              }]);
+                            }}
+                            className="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-black rounded-lg transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
+                            title="Add a clean, blank function reservation package, set menu, or buffet"
+                          >
+                            <Plus className="h-3 w-3" /> Add Package
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAdminDishes([...adminDishes, { name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }])}
+                            className="px-2.5 py-1 bg-terracotta text-white text-[10px] font-black rounded-lg hover:bg-terracotta-dark transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
+                          >
+                            <Plus className="h-3 w-3" /> Add Dish
+                          </button>
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {adminDishes.map((dish, idx) => (
-                          <div key={idx} className="p-3 bg-white rounded-lg border border-[#E9E5DE] space-y-2 relative">
-                            <div className="flex items-center justify-between">
-                              <span className="block text-[10px] font-black text-terracotta">DISH {idx + 1}</span>
-                              {adminDishes.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={() => setAdminDishes(adminDishes.filter((_, i) => i !== idx))}
-                                  className="text-[9px] text-terracotta hover:text-red-600 font-bold px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors"
-                                >
-                                  ✕ Remove
-                                </button>
-                              )}
-                            </div>
-                            <div className="grid grid-cols-3 gap-2">
+                        {adminDishes.map((dish, idx) => {
+                          const isThisPackage = dish.isPackage || /package|bundle|buffet|unlimited|\/pax/i.test(dish.name);
+                          return (
+                            <div key={idx} className="p-3 bg-white rounded-lg border border-[#E9E5DE] space-y-2 relative">
+                              <div className="flex items-center justify-between">
+                                <span className={`block text-[10px] font-black ${isThisPackage ? 'text-amber-600 font-extrabold flex items-center gap-1' : 'text-terracotta'}`}>
+                                  {isThisPackage ? `🏷️ PACKAGE / BUNDLE ${idx + 1}` : `DISH ${idx + 1}`}
+                                </span>
+                                {adminDishes.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setAdminDishes(adminDishes.filter((_, i) => i !== idx))}
+                                    className="text-[9px] text-terracotta hover:text-red-600 font-bold px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors"
+                                  >
+                                    ✕ Remove
+                                  </button>
+                                )}
+                              </div>
+                              <div className="grid grid-cols-3 gap-2">
+                                <input
+                                  type="text"
+                                  placeholder={isThisPackage ? "Package / Bundle name" : "Dish name"}
+                                  value={dish.name}
+                                  onChange={(e) => {
+                                    const updated = [...adminDishes];
+                                    updated[idx] = { ...updated[idx], name: e.target.value };
+                                    setAdminDishes(updated);
+                                  }}
+                                  className="col-span-2 px-2 py-1 text-[11px] border border-[#E9E5DE] rounded bg-white"
+                                />
+                                <input
+                                  type="number"
+                                  placeholder={isThisPackage ? "Price/Pax (₱)" : "Price (₱)"}
+                                  value={dish.price}
+                                  onChange={(e) => {
+                                    const updated = [...adminDishes];
+                                    updated[idx] = { ...updated[idx], price: e.target.value };
+                                    setAdminDishes(updated);
+                                  }}
+                                  className="px-2 py-1 text-[11px] border border-[#E9E5DE] rounded bg-white"
+                                />
+                              </div>
                               <input
                                 type="text"
-                                placeholder="Dish name"
-                                value={dish.name}
+                                placeholder={isThisPackage ? "Included dishes (e.g. Sisig, Chicken, Rice, Drinks)" : "Ingredients list"}
+                                value={dish.ingredients}
                                 onChange={(e) => {
                                   const updated = [...adminDishes];
-                                  updated[idx] = { ...updated[idx], name: e.target.value };
+                                  updated[idx] = { ...updated[idx], ingredients: e.target.value };
                                   setAdminDishes(updated);
                                 }}
-                                className="col-span-2 px-2 py-1 text-[11px] border border-[#E9E5DE] rounded bg-white"
+                                className="w-full px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
                               />
-                              <input
-                                type="number"
-                                placeholder="Price (₱)"
-                                value={dish.price}
-                                onChange={(e) => {
-                                  const updated = [...adminDishes];
-                                  updated[idx] = { ...updated[idx], price: e.target.value };
-                                  setAdminDishes(updated);
-                                }}
-                                className="px-2 py-1 text-[11px] border border-[#E9E5DE] rounded bg-white"
-                              />
-                            </div>
-                            <input
-                              type="text"
-                              placeholder="Ingredients list"
-                              value={dish.ingredients}
-                              onChange={(e) => {
-                                const updated = [...adminDishes];
-                                updated[idx] = { ...updated[idx], ingredients: e.target.value };
-                                setAdminDishes(updated);
-                              }}
-                              className="w-full px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
-                            />
-                            <div className="grid grid-cols-2 gap-2">
-                              <input
-                                type="text"
-                                placeholder="Allergen tags"
-                                value={dish.allergens}
-                                onChange={(e) => {
-                                  const updated = [...adminDishes];
-                                  updated[idx] = { ...updated[idx], allergens: e.target.value };
-                                  setAdminDishes(updated);
-                                }}
-                                className="px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
-                              />
-                              <input
-                                type="number"
-                                placeholder="Calories (kcal)"
-                                value={dish.calories}
-                                onChange={(e) => {
-                                  const updated = [...adminDishes];
-                                  updated[idx] = { ...updated[idx], calories: e.target.value };
-                                  setAdminDishes(updated);
-                                }}
-                                className="px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
-                              />
-                            </div>
+                              <div className="grid grid-cols-2 gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Allergen tags (e.g. Contains Pork)"
+                                  value={dish.allergens}
+                                  onChange={(e) => {
+                                    const updated = [...adminDishes];
+                                    updated[idx] = { ...updated[idx], allergens: e.target.value };
+                                    setAdminDishes(updated);
+                                  }}
+                                  className="px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
+                                />
+                                <input
+                                  type="number"
+                                  placeholder={isThisPackage ? "Calories/Pax (kcal)" : "Calories (kcal)"}
+                                  value={dish.calories}
+                                  onChange={(e) => {
+                                    const updated = [...adminDishes];
+                                    updated[idx] = { ...updated[idx], calories: e.target.value };
+                                    setAdminDishes(updated);
+                                  }}
+                                  className="px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
+                                />
+                              </div>
                             <div className="space-y-1">
                               <label className="block text-[9px] font-bold text-charcoal-light uppercase tracking-wider">
                                 Upload Dish Photo (Required)
@@ -14183,7 +14428,8 @@ Return ONLY a valid JSON array:
                               )}
                             </div>
                           </div>
-                        ))}
+                        );
+                      })}
                       </div>
                     </div>
 
@@ -17323,19 +17569,19 @@ Return ONLY a valid JSON array:
 
                                   {/* Dedicated Search Bar for this Stop */}
                                   <div className="relative w-full">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-charcoal-light pointer-events-none" />
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-charcoal-light dark:text-gray-400 pointer-events-none" />
                                     <input
                                       type="text"
                                       placeholder={`Search ${res.name} dishes (e.g. Sisig, Soup, Rice, Drinks)...`}
                                       value={stopSearchQueries[stopId] || ''}
                                       onChange={(e) => setStopSearchQueries(prev => ({ ...prev, [stopId]: e.target.value }))}
-                                      className="w-full pl-8.5 pr-8 py-2 text-xs bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-charcoal dark:text-gray-200 placeholder-charcoal-light/60 focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-all shadow-2xs font-medium"
+                                      className="w-full pl-10 pr-9 py-2 text-xs bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-charcoal dark:text-gray-200 placeholder-charcoal-light/60 focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-all shadow-2xs font-medium"
                                     />
                                     {stopSearchQueries[stopId] && (
                                       <button
                                         type="button"
                                         onClick={() => setStopSearchQueries(prev => ({ ...prev, [stopId]: '' }))}
-                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-charcoal-light hover:text-charcoal rounded-full transition-colors cursor-pointer"
+                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-charcoal-light hover:text-charcoal dark:hover:text-white rounded-full transition-colors cursor-pointer"
                                         title="Clear search"
                                       >
                                         <X className="h-3.5 w-3.5" />
@@ -17381,10 +17627,21 @@ Return ONLY a valid JSON array:
                                                   <img src={dish.image} alt={dish.name} className="w-12 h-12 rounded-lg object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0" />
                                                 )}
                                                 <div className="min-w-0">
-                                                  <div className="flex items-center gap-1.5">
+                                                  <div className="flex items-center gap-1.5 flex-wrap">
                                                     <strong className="text-xs font-black text-charcoal dark:text-white truncate">{dish.name}</strong>
-                                                    <span className="text-xs font-extrabold text-terracotta dark:text-orange-400 shrink-0">₱{dish.price}</span>
+                                                    {/package|bundle|buffet|unlimited|\/pax|\/head/i.test(dish.name) ? (
+                                                      <span className="text-[9px] font-black uppercase bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                                                        🏷️ Package (₱{dish.price} / pax)
+                                                      </span>
+                                                    ) : (
+                                                      <span className="text-xs font-extrabold text-terracotta dark:text-orange-400 shrink-0">₱{dish.price}</span>
+                                                    )}
                                                   </div>
+                                                  {dish.ingredients && (
+                                                    <p className="text-[10px] text-charcoal-light dark:text-gray-400 line-clamp-2 mt-0.5 m-0 italic">
+                                                      🍽️ {dish.ingredients}
+                                                    </p>
+                                                  )}
                                                   <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                                                     <span className="text-[9px] font-black bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 px-1.5 py-0.2 rounded">🔥 {dishCals} kcal</span>
                                                     <span className="text-[9px] font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded">🥩 {dishProt}g P</span>
@@ -17419,6 +17676,22 @@ Return ONLY a valid JSON array:
                                                 </div>
                                               ) : (
                                                 <div className="pt-2.5 border-t border-[#E9E5DE]/80 dark:border-[#2E2A24] space-y-2 w-full sm:w-auto">
+                                                  {/package|bundle|buffet|unlimited|\/pax|\/head/i.test(dish.name) && (
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                      <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                          const allHaveOne = groupMembers.every(m => getDishQtyFor(stopId, dish.id, m.id, false) >= 1);
+                                                          groupMembers.forEach(m => {
+                                                            handleSetDishQuantity(stopId, dish.id, m.id, allHaveOne ? 0 : 1);
+                                                          });
+                                                        }}
+                                                        className="text-[10px] font-black px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-300 border border-amber-500/30 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                                                      >
+                                                        <span>👥 {groupMembers.every(m => getDishQtyFor(stopId, dish.id, m.id, false) >= 1) ? '✓ Included for All Pax' : `Set for Entire Group (${groupMembers.length} Pax)`}</span>
+                                                      </button>
+                                                    </div>
+                                                  )}
                                                   <div className="flex flex-wrap items-center gap-2">
                                                     {groupMembers.map((m, mIdx) => {
                                                       const mQty = getDishQtyFor(stopId, dish.id, m.id, isDefaultFirst && mIdx === 0);
@@ -18243,44 +18516,62 @@ Return ONLY a valid JSON array:
 
                   return (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {filteredMenu.map(dish => (
-                        <div
-                          key={dish.id}
-                          onClick={() => setActiveDish(dish)}
-                          className={`p-3 rounded-xl border transition-all text-left cursor-pointer flex gap-3 items-center ${activeDish?.id === dish.id ? 'bg-terracotta/5 border-terracotta shadow-sm' : 'bg-white border-[#E9E5DE] hover:border-terracotta/40'}`}
-                        >
-                          {dish.image && (
-                            <div
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setZoomedDishImg(dish.image);
-                              }}
-                              className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-[#E9E5DE] cursor-zoom-in hover:opacity-90 transition-opacity relative group/dishimg"
-                              title="Click to zoom image"
-                            >
-                              <img
-                                src={dish.image}
-                                alt={dish.name}
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute inset-0 bg-charcoal/20 opacity-0 group-hover/dishimg:opacity-100 flex items-center justify-center transition-opacity text-white text-[10px] font-bold">
-                                🔍
+                      {filteredMenu.map(dish => {
+                        const isPkg = /package|bundle|buffet|unlimited|\/pax|\/head/i.test(dish.name) || dish.type === 'bundle' || dish.type === 'buffet';
+                        return (
+                          <div
+                            key={dish.id}
+                            onClick={() => setActiveDish(dish)}
+                            className={`p-3 rounded-xl border transition-all text-left cursor-pointer flex gap-3 items-center ${activeDish?.id === dish.id ? 'bg-terracotta/5 border-terracotta shadow-sm' : isPkg ? 'bg-amber-50/30 dark:bg-amber-950/15 border-amber-300/70 dark:border-amber-700/50 hover:border-amber-500' : 'bg-white dark:bg-[#1E1B18] border-[#E9E5DE] dark:border-[#282420] hover:border-terracotta/40'}`}
+                          >
+                            {dish.image && (
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setZoomedDishImg(dish.image);
+                                }}
+                                className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-[#E9E5DE] dark:border-[#282420] cursor-zoom-in hover:opacity-90 transition-opacity relative group/dishimg"
+                                title="Click to zoom image"
+                              >
+                                <img
+                                  src={dish.image}
+                                  alt={dish.name}
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-charcoal/20 opacity-0 group-hover/dishimg:opacity-100 flex items-center justify-center transition-opacity text-white text-[10px] font-bold">
+                                  🔍
+                                </div>
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between items-start gap-1">
+                                <div className="min-w-0">
+                                  {isPkg && (
+                                    <span className="inline-block text-[8px] font-black uppercase tracking-wider text-amber-800 dark:text-amber-300 bg-amber-500/20 px-1.5 py-0.2 rounded mb-0.5">
+                                      🏷️ Package Set
+                                    </span>
+                                  )}
+                                  <strong className="text-xs font-extrabold text-charcoal dark:text-white truncate block">{dish.name}</strong>
+                                </div>
+                                <span className="text-xs font-black text-bananaleaf dark:text-emerald-400 shrink-0">
+                                  ₱{dish.price}{isPkg ? ' / pax' : ''}
+                                </span>
+                              </div>
+
+                              {dish.ingredients && (
+                                <p className="text-[10px] text-charcoal-light dark:text-gray-400 line-clamp-2 mt-1 m-0 italic">
+                                  🍽️ {dish.ingredients}
+                                </p>
+                              )}
+
+                              <div className="flex items-center justify-between text-[9px] text-charcoal-light dark:text-gray-400 mt-2 pt-2 border-t border-[#FAF8F5] dark:border-[#282420]">
+                                <span>Caloric: <b>{dish.nutrition?.calories || 450} kcal</b></span>
+                                <span className="text-terracotta dark:text-orange-400 font-bold">{isPkg ? 'View Inclusions →' : 'Deconstruct →'}</span>
                               </div>
                             </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex justify-between items-start gap-1">
-                              <strong className="text-xs font-extrabold text-charcoal truncate block">{dish.name}</strong>
-                              <span className="text-xs font-black text-bananaleaf shrink-0">₱{dish.price}</span>
-                            </div>
-
-                            <div className="flex items-center justify-between text-[9px] text-charcoal-light mt-2 pt-2 border-t border-[#FAF8F5]">
-                              <span>Caloric: <b>{dish.nutrition?.calories || 450} kcal</b></span>
-                              <span className="text-terracotta font-bold">Deconstruct →</span>
-                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   );
                 })()}
@@ -18300,14 +18591,14 @@ Return ONLY a valid JSON array:
                     <div className="flex justify-between items-start border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
                       <div className="min-w-0 flex-1 pr-2">
                         <span className="text-[10px] font-black text-terracotta uppercase tracking-wider block">
-                          🔬 Ingredient & Nutrition Deconstructor
+                          {/package|bundle|buffet|unlimited|\/pax|\/head/i.test(activeDish.name) ? '🏷️ Reservation Package & Inclusions' : '🔬 Ingredient & Nutrition Deconstructor'}
                         </span>
                         <div className="flex items-center gap-2 mt-0.5">
                           <h3 className="text-sm font-black text-charcoal dark:text-white truncate">
                             {activeDish.name}
                           </h3>
                           <span className="text-xs font-black text-bananaleaf shrink-0">
-                            ₱{activeDish.price}
+                            ₱{activeDish.price}{/package|bundle|buffet|unlimited|\/pax|\/head/i.test(activeDish.name) ? ' / pax' : ''}
                           </span>
                         </div>
                       </div>
@@ -18330,14 +18621,39 @@ Return ONLY a valid JSON array:
                           className="w-16 h-16 rounded-xl object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0"
                         />
                       )}
-                      <div className="space-y-1 flex-1 min-w-0">
-                        <strong className="text-[10px] font-black uppercase text-charcoal-light block">
-                          Raw Components:
-                        </strong>
-                        <p className="text-xs text-charcoal dark:text-gray-200 leading-relaxed m-0">
-                          {activeDish.ingredients || 'Traditional Kapampangan heritage seasoning, native herbs, garlic, onions.'}
-                        </p>
-                      </div>
+                      {/package|bundle|buffet|unlimited|\/pax|\/head/i.test(activeDish.name) ? (
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[9px] font-black uppercase bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">
+                              🏷️ Package Inclusions Checklist
+                            </span>
+                          </div>
+                          <div className="p-2.5 bg-[#FAF8F5] dark:bg-[#161412] rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] space-y-1">
+                            <strong className="text-[10px] font-black uppercase text-charcoal-light dark:text-gray-400 block">
+                              Included Courses & Dishes:
+                            </strong>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {(activeDish.ingredients || '').replace(/^includes:\s*/i, '').split(/[,;•]/).map(item => item.trim()).filter(Boolean).map((course, cIdx) => (
+                                <span key={cIdx} className="inline-flex items-center gap-1 text-[10px] font-bold bg-white dark:bg-[#201D1A] border border-[#E9E5DE] dark:border-[#2E2A24] px-2 py-0.5 rounded-lg text-charcoal dark:text-gray-200 shadow-2xs">
+                                  ✓ {course}
+                                </span>
+                              ))}
+                            </div>
+                            <p className="text-[9px] text-charcoal-light dark:text-gray-400 italic pt-1 border-t border-[#E9E5DE]/60 mt-1 m-0">
+                              Function reservation set package designed for meetings, celebrations, and groups.
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-1 flex-1 min-w-0">
+                          <strong className="text-[10px] font-black uppercase text-charcoal-light block">
+                            Raw Components:
+                          </strong>
+                          <p className="text-xs text-charcoal dark:text-gray-200 leading-relaxed m-0">
+                            {activeDish.ingredients || 'Traditional Kapampangan heritage seasoning, native herbs, garlic, onions.'}
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Allergen & Health Indicator Banners */}
