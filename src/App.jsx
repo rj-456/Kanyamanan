@@ -1812,6 +1812,8 @@ function App() {
   const [adminSectionTab, setAdminSectionTab] = useState('restaurants'); // 'restaurants' | 'requests' | 'attractions'
   const [adminRequestFilterTab, setAdminRequestFilterTab] = useState('pending'); // 'pending' | 'all' | 'approved' | 'rejected'
   const [adminEditingAttractionId, setAdminEditingAttractionId] = useState(null);
+  const [adminAttractionSearch, setAdminAttractionSearch] = useState('');
+  const [adminAttractionMunicipalityFilter, setAdminAttractionMunicipalityFilter] = useState('All');
   const [adminAttractionForm, setAdminAttractionForm] = useState({
     name: '',
     municipality: 'City of San Fernando',
@@ -15676,10 +15678,61 @@ ${rawText}`;
 
               {/* Tourist Attractions Data Table */}
               <div className="bento-card p-5 bg-white space-y-4 shadow-sm border-[#E9E5DE]">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <h3 className="text-xs font-extrabold text-charcoal uppercase tracking-wider m-0">
-                    Heritage Tourist Destinations Database ({attractions.length} Sites)
+                    Heritage Tourist Destinations Database ({attractions.filter(attr => {
+                      const matchesSearch = !adminAttractionSearch.trim() ||
+                        (attr.name && attr.name.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
+                        (attr.municipality && attr.municipality.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
+                        (attr.type && attr.type.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
+                        (attr.description && attr.description.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
+                        (attr.address && attr.address.toLowerCase().includes(adminAttractionSearch.toLowerCase()));
+                      const matchesMun = adminAttractionMunicipalityFilter === 'All' || attr.municipality === adminAttractionMunicipalityFilter;
+                      return matchesSearch && matchesMun;
+                    }).length} of {attractions.length} Sites)
                   </h3>
+
+                  {/* Search Bar & Municipality Filter */}
+                  <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                    {/* Search Input */}
+                    <div className="relative min-w-[200px] sm:w-64">
+                      <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-light pointer-events-none" />
+                      <input
+                        type="text"
+                        value={adminAttractionSearch}
+                        onChange={(e) => setAdminAttractionSearch(e.target.value)}
+                        placeholder="Search landmark, category, city..."
+                        className="w-full pl-8 pr-7 py-1.5 text-xs bg-ivory border border-[#E9E5DE] rounded-xl focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white"
+                      />
+                      {adminAttractionSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setAdminAttractionSearch('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-charcoal-light hover:text-charcoal p-0.5 cursor-pointer"
+                          title="Clear Search"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Municipality Filter Dropdown */}
+                    <select
+                      value={adminAttractionMunicipalityFilter}
+                      onChange={(e) => setAdminAttractionMunicipalityFilter(e.target.value)}
+                      className="px-2.5 py-1.5 text-xs bg-ivory border border-[#E9E5DE] rounded-xl font-medium focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white text-charcoal cursor-pointer"
+                    >
+                      <option value="All">All Municipalities ({attractions.length})</option>
+                      {MUNICIPALITIES.map(m => {
+                        const count = attractions.filter(a => a.municipality === m).length;
+                        return (
+                          <option key={m} value={m}>
+                            {m} {count > 0 ? `(${count})` : ''}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto border border-[#E9E5DE] rounded-xl">
@@ -15694,37 +15747,62 @@ ${rawText}`;
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E9E5DE] bg-white text-charcoal font-medium">
-                      {attractions.map(attr => (
-                        <tr key={attr.id} className="hover:bg-ivory/40">
-                          <td className="px-4 py-3 font-extrabold flex items-center gap-2">
-                            {attr.image && <img src={attr.image} alt={attr.name} className="w-8 h-8 rounded object-cover border border-[#E9E5DE]" />}
-                            <span>{attr.name}</span>
-                          </td>
-                          <td className="px-4 py-3 text-terracotta font-bold">📍 {attr.municipality}</td>
-                          <td className="px-4 py-3 text-charcoal-light">{attr.type}</td>
-                          <td className="px-4 py-3 text-charcoal-light text-[11px] max-w-xs truncate">{attr.description}</td>
-                          <td className="px-4 py-3 text-right space-x-1 shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => startAdminAttractionEdit(attr)}
-                              className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs hover:border-terracotta"
-                              title="Edit Destination"
-                            >
-                              <Edit className="h-4 w-4 text-terracotta" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => deleteAttraction(attr.id)}
-                              className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs"
-                              title="Delete Destination"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                      {attractions
+                        .filter(attr => {
+                          const matchesSearch = !adminAttractionSearch.trim() ||
+                            (attr.name && attr.name.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
+                            (attr.municipality && attr.municipality.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
+                            (attr.type && attr.type.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
+                            (attr.description && attr.description.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
+                            (attr.address && attr.address.toLowerCase().includes(adminAttractionSearch.toLowerCase()));
+                          const matchesMun = adminAttractionMunicipalityFilter === 'All' || attr.municipality === adminAttractionMunicipalityFilter;
+                          return matchesSearch && matchesMun;
+                        })
+                        .map(attr => (
+                          <tr key={attr.id} className="hover:bg-ivory/40">
+                            <td className="px-4 py-3 font-extrabold flex items-center gap-2">
+                              {attr.image && <img src={attr.image} alt={attr.name} className="w-8 h-8 rounded object-cover border border-[#E9E5DE]" />}
+                              <span>{attr.name}</span>
+                            </td>
+                            <td className="px-4 py-3 text-terracotta font-bold">📍 {attr.municipality}</td>
+                            <td className="px-4 py-3 text-charcoal-light">{attr.type}</td>
+                            <td className="px-4 py-3 text-charcoal-light text-[11px] max-w-xs truncate">{attr.description}</td>
+                            <td className="px-4 py-3 text-right space-x-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => startAdminAttractionEdit(attr)}
+                                className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs hover:border-terracotta"
+                                title="Edit Destination"
+                              >
+                                <Edit className="h-4 w-4 text-terracotta" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => deleteAttraction(attr.id)}
+                                className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs"
+                                title="Delete Destination"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
+                  {attractions.filter(attr => {
+                    const matchesSearch = !adminAttractionSearch.trim() ||
+                      (attr.name && attr.name.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
+                      (attr.municipality && attr.municipality.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
+                      (attr.type && attr.type.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
+                      (attr.description && attr.description.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
+                      (attr.address && attr.address.toLowerCase().includes(adminAttractionSearch.toLowerCase()));
+                    const matchesMun = adminAttractionMunicipalityFilter === 'All' || attr.municipality === adminAttractionMunicipalityFilter;
+                    return matchesSearch && matchesMun;
+                  }).length === 0 && (
+                    <div className="py-8 text-center text-charcoal-light text-xs">
+                      🔍 No heritage destinations found matching "{adminAttractionSearch}".
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
