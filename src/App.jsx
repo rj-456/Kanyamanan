@@ -509,11 +509,8 @@ function App() {
     "San Luis River Delta Eatery",
     "San Simon Expressway Diner",
     "Santa Ana Claypot Grill",
-    "Alviz Farm Heritage Kitchen & Experience",
-    "Fat Grille Restaurant",
     "Ocampo-Lansang Turrones & Cafe",
     "Santo Tomas Palayok Kitchen",
-    "Bala Kayu Silogan Atbp.",
     "Sasmuan Coastal Seafood & Cafe",
     "Guagua Kusina Matua"
   ].map(s => s.toLowerCase().trim());
@@ -521,10 +518,11 @@ function App() {
   const isLegacyPreseeded = (res) => {
     if (!res) return false;
     if (res.isCustom || res.userCreated) return false;
-    // Explicitly block the legacy synthetic duplicate Ernesto entry
-    if (res.id === 'res-ernestos-santa-ana') return true;
+    // Explicitly block legacy synthetic/removed entries
+    if (res.id === 'res-ernestos-santa-ana' || res.id === 'santa-rita-turrones' || (res.id && res.id.includes('ocampo-lansang'))) return true;
     if ((res.address || '').includes('Santo Rosario') && (res.name || '').toLowerCase().includes('ernesto')) return true;
     const nameLower = (res.name || '').toLowerCase().trim();
+    if (nameLower.includes('ocampo-lansang') || nameLower.includes('turrones & cafe') || nameLower.includes('turrones de casoy')) return true;
     return REMOVED_PRESEEDED_NAMES.some(dep => nameLower === dep || nameLower.includes(dep));
   };
 
@@ -540,8 +538,8 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v9_dedup_ernestos_santa_ana') {
-        localStorage.setItem('kanyamanan_db_version', 'v9_dedup_ernestos_santa_ana');
+      if (dbVersion !== 'v11_add_sasmuan_restaurants') {
+        localStorage.setItem('kanyamanan_db_version', 'v11_add_sasmuan_restaurants');
         localStorage.removeItem('kanyamanan_restaurants_db');
       }
     } catch (_) {}
@@ -12464,7 +12462,7 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
     }
   };
 
-  // Free AI Tourist Attraction Document & Image Scanner (AI OCR & Intelligent Extractor)
+  // High-Precision AI Tourist Attraction Document & URL/Article Smart Scanner
   const handleAiAnalyzeAttraction = async () => {
     if (!aiAttractionRawText.trim() && !aiAttractionFile) {
       alert("Please upload a document/image (PDF, Flyer, Photo) or paste attraction information to let AI scan and organize it for you!");
@@ -12477,9 +12475,80 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
     try {
       let rawText = aiAttractionRawText.trim();
       let attachedImage = null;
+      let wikiData = null;
 
+      // 1. Universal Web URL & Wikipedia Resolver (CORS-safe with origin=* and offline fallback)
+      const anyUrlMatch = rawText.match(/https?:\/\/[^\s]+/i);
+      if (anyUrlMatch) {
+        setAiAttractionProgress(25);
+        const fullUrl = anyUrlMatch[0];
+        const wikiMatch = fullUrl.match(/https?:\/\/(?:[a-zA-Z0-9-]+\.)?wikipedia\.org\/wiki\/([^#\s?]+)/i);
+
+        if (wikiMatch) {
+          const rawSlug = decodeURIComponent(wikiMatch[1]);
+          const cleanSlug = rawSlug.replace(/_/g, ' ');
+          
+          try {
+            // Strategy A: Wikipedia Action Query API with origin=* (Fully CORS compliant in all browsers)
+            const actionApiUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages|coordinates&exintro=1&explaintext=1&piprop=original|thumbnail&pithumbsize=1000&titles=${encodeURIComponent(rawSlug)}&format=json&origin=*`;
+            const actionRes = await fetch(actionApiUrl);
+            if (actionRes.ok) {
+              const actionJson = await actionRes.json();
+              const pages = actionJson.query?.pages || {};
+              const page = Object.values(pages)[0];
+              if (page && page.title && page.pageid && page.pageid > 0) {
+                wikiData = {
+                  title: page.title,
+                  extract: page.extract || '',
+                  thumbnail: page.thumbnail,
+                  originalimage: page.original,
+                  coordinates: page.coordinates && page.coordinates[0] ? { lat: page.coordinates[0].lat, lon: page.coordinates[0].lon } : null
+                };
+              }
+            }
+          } catch (actionErr) {
+            console.warn("Wikipedia Action API fetch error:", actionErr);
+          }
+
+          // Strategy B: Fallback to REST summary API if needed
+          if (!wikiData) {
+            try {
+              const restRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(rawSlug)}`);
+              if (restRes.ok) {
+                wikiData = await restRes.json();
+              }
+            } catch (restErr) {
+              console.warn("Wikipedia REST summary fallback error:", restErr);
+            }
+          }
+
+          if (wikiData) {
+            const fullWikiText = `${wikiData.title || ''}\n${wikiData.description || ''}\n${wikiData.extract || ''}`;
+            rawText = fullWikiText + (rawText ? '\n\n' + rawText : '');
+            if (!attachedImage && (wikiData.originalimage?.source || wikiData.thumbnail?.source)) {
+              attachedImage = wikiData.originalimage?.source || wikiData.thumbnail?.source;
+            }
+          } else {
+            // Strategy C: Offline / Direct Slug Parser for Wikipedia
+            rawText = `${cleanSlug}\n${rawText}`;
+          }
+        } else {
+          // General Non-Wikipedia Web Link Handler
+          try {
+            const urlObj = new URL(fullUrl);
+            const pathParts = urlObj.pathname.split('/').filter(Boolean);
+            const lastPart = pathParts[pathParts.length - 1] || '';
+            const humanizedSlug = decodeURIComponent(lastPart).replace(/[_\-+]/g, ' ').replace(/\.[a-zA-Z0-9]+$/, '').trim();
+            if (humanizedSlug && humanizedSlug.length > 2) {
+              rawText = `${humanizedSlug}\n${rawText}`;
+            }
+          } catch (_) {}
+        }
+      }
+
+      // 2. Handle Attached File (Image, Text, PDF)
       if (aiAttractionFile) {
-        setAiAttractionProgress(30);
+        setAiAttractionProgress(40);
 
         const isImage = aiAttractionFile.startsWith('data:image/');
         const isText = aiAttractionFile.startsWith('data:text/');
@@ -12494,7 +12563,7 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
             rawText = (rawText ? rawText + '\n\n' : '') + cloudText.trim();
             setAiAttractionProgress(85);
           } else {
-            setAiAttractionProgress(50);
+            setAiAttractionProgress(55);
             const enhancedImage = await preprocessMenuImage(optimizedImage);
             const { createWorker } = await import('tesseract.js');
             const worker = await createWorker('eng');
@@ -12523,70 +12592,205 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
 
       setAiAttractionProgress(90);
 
-      if (!rawText || rawText.trim().length < 5) {
+      if (!rawText || rawText.trim().length < 3) {
         alert("⚠️ Could not detect readable text in the document. Please ensure the file is clear or paste text directly.");
         return;
       }
 
-      // Intelligent NLP Entity Extractor
-      const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-      const lower = rawText.toLowerCase();
+      // 3. Intelligent Municipality Detector (Location patterns + Word Boundary + Disambiguation)
+      const munScores = {};
+      MUNICIPALITIES.forEach(m => { munScores[m] = 0; });
 
-      // 1. Detect Municipality
-      let detectedMun = 'City of San Fernando';
+      // Direct location preposition phrases: 'located in/at ... [District of] <Mun>'
       for (const mun of MUNICIPALITIES) {
-        if (lower.includes(mun.toLowerCase())) {
-          detectedMun = mun;
-          break;
+        const munPattern = mun === 'City of San Fernando' ? '(?:city of )?san fernando' : mun === 'Angeles City' ? 'angeles(?: city)?' : mun === 'Mabalacat City' ? 'mabalacat(?: city)?' : mun;
+        const directRegex = new RegExp('(?:located in|situated in|found in|municipality of|town of|in the [a-z0-9\\s]+ district of|district of|in )\\s*(?:the\\s+)?(?:[a-z0-9\\s]+,\\s*)?' + munPattern + '(?:\\s*,?\\s*pampanga)?', 'i');
+        if (directRegex.test(rawText)) {
+          munScores[mun] += 20;
         }
       }
 
-      // 2. Detect Name
-      let detectedName = '';
-      for (const l of lines) {
-        const lLower = l.toLowerCase();
-        if (l.length >= 3 && l.length <= 80 && !lLower.startsWith('address') && !lLower.startsWith('location') && !lLower.startsWith('category') && !lLower.startsWith('pampanga') && !lLower.startsWith('gps') && !lLower.startsWith('http') && !lLower.startsWith('latitude')) {
-          detectedName = l.replace(/^[^a-zA-Z0-9(]+|[^a-zA-Z0-9)]+$/g, '').trim();
-          if (lLower.includes('church') || lLower.includes('park') || lLower.includes('falls') || lLower.includes('museum') || lLower.includes('sanctuary') || lLower.includes('parish') || lLower.includes('eco') || lLower.includes('shrine') || lLower.includes('cathedral') || lLower.includes('bale')) {
-            break;
+      // Official Municipality exact name matches with word boundaries
+      for (const mun of MUNICIPALITIES) {
+        const simpleName = mun.replace('City of ', '').replace(' City', '');
+        const regex = new RegExp('\\b' + simpleName + '\\b', 'i');
+        if (regex.test(rawText)) {
+          const archRegex = new RegExp('archdiocese of\\s+' + simpleName, 'i');
+          if (archRegex.test(rawText) && !new RegExp('(?:in|at|located)\\s+' + simpleName, 'i').test(rawText)) {
+            munScores[mun] += 1;
+          } else {
+            munScores[mun] += 10;
           }
         }
       }
 
-      // 3. Detect Category / Type
+      // Specific Sub-aliases with exact word boundaries (avoiding substring collisions)
+      const MUNICIPALITY_ALIASES = {
+        'Angeles City': ['angeles city', 'kuliat', 'balibago', 'clark freeport', 'sapangbato', 'sapang bato', 'cutcut', 'sto rosario', 'santo rosario', 'nepomuceno', 'anunas', 'malabanias', 'brgy pampang', 'barangay pampang'],
+        'City of San Fernando': ['city of san fernando', 'csfp', 'dolores san fernando', 'telabastagan', 'sindalan', 'san agustin san fernando'],
+        'Mabalacat City': ['mabalacat city', 'dau', 'clark air base', 'clark global city', 'sapang balen', 'camachiles'],
+        'Guagua': ['guagua', 'betis', 'san juan bautista guagua', 'natividad guagua', 'plaza burgos guagua', 'ascomo'],
+        'Lubao': ['lubao', 'prado siongco', 'prado farm', 'san nicolas 1st lubao', 'santa catalina lubao'],
+        'Bacolor': ['bacolor', 'sunken church', 'villa de bacolor', 'cabambangan', 'san guillermo'],
+        'Arayat': ['mount arayat', 'mt arayat', 'arayat national park', 'cacutud arayat'],
+        'Magalang': ['baritan magalang', 'ayala magalang', 'san bartolome magalang'],
+        'Porac': ['sandbox', 'alviera', 'hacienda dolores', 'sapang ubing', 'camias porac'],
+        'Candaba': ['candaba swamp', 'candaba bird sanctuary', 'candaba duck', 'bahay pare'],
+        'Floridablanca': ['basa air base', 'nabuclod', 'gumain'],
+        'Mexico': ['mexico pampanga', 'municipality of mexico', 'santa monica mexico', 'lagundi mexico'],
+        'Santa Rita': ['santa rita', 'sta rita', 'sta. rita', 'san agustin sta rita', 'duman festival'],
+        'Santa Ana': ['santa ana', 'sta ana', 'sta. ana', 'sepung ilog'],
+        'Santo Tomas': ['santo tomas', 'sto tomas', 'sto. tomas', 'san matias santo tomas', 'palayok center'],
+        'San Luis': ['san luis gonzaga', 'san luis-baliwag', 'san roque san luis'],
+        'San Simon': ['san simon expressway', 'san agustin san simon'],
+        'Apalit': ['apung iru', 'libad festival', 'sulipan'],
+        'Macabebe': ['san nicolas macabebe', 'castillejos macabebe'],
+        'Masantol': ['bebe anac', 'sagrada familia masantol'],
+        'Minalin': ['minalin sunken', 'egg basket of pampanga', 'santa monica minalin'],
+        'Sasmuan': ['sexmoan', 'bangkal sasmuan', 'kuraldal', 'sasmuan mangrove']
+      };
+
+      for (const [mun, aliases] of Object.entries(MUNICIPALITY_ALIASES)) {
+        for (const alias of aliases) {
+          const regex = new RegExp('\\b' + alias.replace('.', '\\.') + '\\b', 'i');
+          if (regex.test(rawText)) {
+            munScores[mun] += 12;
+          }
+        }
+      }
+
+      let detectedMun = 'Guagua';
+      let maxMunScore = -1;
+      for (const [mun, score] of Object.entries(munScores)) {
+        if (score > maxMunScore) {
+          maxMunScore = score;
+          detectedMun = mun;
+        }
+      }
+      if (maxMunScore <= 0) {
+        detectedMun = 'City of San Fernando';
+      }
+
+      // 4. Intelligent Landmark Name Extractor
+      let detectedName = '';
+      if (wikiData?.title) {
+        detectedName = wikiData.title;
+      } else {
+        // Check for common URL slug extraction (e.g. .../wiki/Museo_ning_Angeles)
+        const genericUrlMatch = rawText.match(/https?:\/\/[^\s/$.?#].[^\s]*/i);
+        if (genericUrlMatch) {
+          const urlPath = genericUrlMatch[0].split('?')[0].split('#')[0];
+          const segments = urlPath.split('/').filter(Boolean);
+          const lastSeg = segments[segments.length - 1];
+          if (lastSeg && !lastSeg.includes('.html') && !lastSeg.includes('.php') && lastSeg.length > 3) {
+            detectedName = decodeURIComponent(lastSeg).replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).trim();
+          }
+        }
+
+        // Look for title from text headers or sentences
+        if (!detectedName) {
+          const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+          for (const l of lines) {
+            const lLower = l.toLowerCase();
+            if (l.length >= 3 && l.length <= 80 && !lLower.startsWith('address') && !lLower.startsWith('location') && !lLower.startsWith('category') && !lLower.startsWith('http') && !lLower.startsWith('gps')) {
+              const clean = l.replace(/^[^a-zA-Z0-9(]+|[^a-zA-Z0-9)]+$/g, '').trim();
+              if (/(?:museum|museo|church|parish|cathedral|basilica|shrine|mansion|falls|park|hill|lake|mount|sanctuary|center|landmark|plaza|bale)/i.test(clean)) {
+                detectedName = clean;
+                break;
+              }
+              if (!detectedName && clean.length > 3) {
+                detectedName = clean;
+              }
+            }
+          }
+        }
+      }
+
+      // Fallback clean name
+      if (!detectedName || detectedName.startsWith('http')) {
+        detectedName = `Heritage Landmark in ${detectedMun}`;
+      }
+
+      // 5. Accurate Weighted Category Scoring
+      const lower = (rawText || '').toLowerCase();
+      const categoryScores = {
+        '🎨 Heritage Museum': 0,
+        '🏛️ Historic Parish Church': 0,
+        '🌲 Nature / Ecotourism': 0,
+        '🏺 Artisan Workshop': 0,
+        '📍 Cultural Landmark': 0
+      };
+
+      const museumKeys = ['museum', 'museo', 'gallery', 'heritage house', 'mansion', 'bahay na bato', 'ancestral house', 'exhibit', 'archive', 'collection', 'artifacts', 'curator', 'memorabilia', 'kuliat foundation', 'cultural center', 'historical artifacts', 'bale matua'];
+      const churchKeys = ['church', 'parish', 'cathedral', 'basilica', 'shrine', 'chapel', 'convent', 'simbahan', 'belfry', 'bell tower', 'retablo', 'parroquia', 'diocesan', 'augustinian', 'santa ', 'san '];
+      const natureKeys = ['nature', 'ecotourism', 'eco-park', 'falls', 'waterfall', 'hot spring', 'trail', 'hiking', 'swamp', 'bird sanctuary', 'mountain', 'mt.', 'volcano', 'lake', 'river', 'delta', 'resort', 'safari', 'waterpark', 'canopy', 'adventure park', 'tree park'];
+      const artisanKeys = ['artisan', 'workshop', 'giant lantern', 'parol', 'pottery', 'palayok', 'woodcarving', 'wood carving', 'furniture craft', 'sculpture', 'embroidery', 'pukpuk', 'weaving', 'craftsmanship', 'lantern center'];
+      const landmarkKeys = ['landmark', 'monument', 'plaza', 'historic site', 'marker', 'arch', 'ruins', 'bridge', 'train station', 'memorial', 'statue', 'heritage district', 'pamintuan'];
+
+      museumKeys.forEach(k => { if (lower.includes(k) || detectedName.toLowerCase().includes(k)) categoryScores['🎨 Heritage Museum'] += 4; });
+      churchKeys.forEach(k => { if (lower.includes(k) || detectedName.toLowerCase().includes(k)) categoryScores['🏛️ Historic Parish Church'] += 3; });
+      natureKeys.forEach(k => { if (lower.includes(k) || detectedName.toLowerCase().includes(k)) categoryScores['🌲 Nature / Ecotourism'] += 4; });
+      artisanKeys.forEach(k => { if (lower.includes(k) || detectedName.toLowerCase().includes(k)) categoryScores['🏺 Artisan Workshop'] += 4; });
+      landmarkKeys.forEach(k => { if (lower.includes(k) || detectedName.toLowerCase().includes(k)) categoryScores['📍 Cultural Landmark'] += 2; });
+
       let detectedType = '🏛️ Historic Parish Church';
-      if (lower.includes('nature') || lower.includes('park') || lower.includes('falls') || lower.includes('trail') || lower.includes('mountain') || lower.includes('river') || lower.includes('eco') || lower.includes('garden') || lower.includes('ecotourism') || lower.includes('farm')) {
-        detectedType = '🌲 Nature / Ecotourism';
-      } else if (lower.includes('museum') || lower.includes('gallery') || lower.includes('ancestral') || lower.includes('heritage house') || lower.includes('mansion') || lower.includes('artifacts')) {
-        detectedType = '🎨 Heritage Museum';
-      } else if (lower.includes('artisan') || lower.includes('workshop') || lower.includes('lantern') || lower.includes('pottery') || lower.includes('craft') || lower.includes('woodcarv')) {
-        detectedType = '🏺 Artisan Workshop';
-      } else if (lower.includes('monument') || lower.includes('landmark') || lower.includes('plaza') || lower.includes('bridge') || lower.includes('shrine') || lower.includes('arch')) {
-        detectedType = '📍 Cultural Landmark';
+      let maxScore = 0;
+      for (const [cat, score] of Object.entries(categoryScores)) {
+        if (score > maxScore) {
+          maxScore = score;
+          detectedType = cat;
+        }
       }
 
-      // 4. Detect Address
-      let detectedAddress = `${detectedMun}, Pampanga`;
-      const addrLine = lines.find(l => /barangay|brgy|street|st\.|highway|road|poblacion|avenue|sitio/i.test(l));
-      if (addrLine) {
+      // 6. Coordinates Extraction
+      const defaultCoord = MUNICIPALITY_COORDINATES[detectedMun] || { lat: 15.1365, lng: 120.5902 };
+      let detectedLat = defaultCoord.lat;
+      let detectedLng = defaultCoord.lng;
+
+      if (wikiData?.coordinates && wikiData.coordinates.lat && wikiData.coordinates.lon) {
+        detectedLat = Number(wikiData.coordinates.lat.toFixed(6));
+        detectedLng = Number(wikiData.coordinates.lon.toFixed(6));
+      } else {
+        const coordMatch = rawText.match(/(\d{1,2}\.\d{4,8})\s*[,°\s]\s*(\d{2,3}\.\d{4,8})/);
+        if (coordMatch) {
+          detectedLat = parseFloat(coordMatch[1]);
+          detectedLng = parseFloat(coordMatch[2]);
+        }
+      }
+
+      // 7. Address Resolution
+      let detectedAddress = `${detectedName}, ${detectedMun}, Pampanga`;
+      const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+      const addrLine = lines.find(l => /barangay|brgy|street|st\.|highway|road|poblacion|avenue|sitio|district|corner/i.test(l) && !l.toLowerCase().includes('http'));
+      if (addrLine && addrLine.length < 100) {
         detectedAddress = addrLine.replace(/^(?:address|location|exact address)\s*(?::|-)\s*/i, '').trim();
+        if (!detectedAddress.toLowerCase().includes(detectedMun.toLowerCase())) {
+          detectedAddress += `, ${detectedMun}, Pampanga`;
+        }
       }
 
-      // 5. GPS Coordinates
-      const coordMatch = rawText.match(/(\d{1,2}\.\d{4,8})\s*[,°\s]\s*(\d{2,3}\.\d{4,8})/);
-      const defaultCoord = MUNICIPALITY_COORDINATES[detectedMun] || { lat: 15.0300, lng: 120.6800 };
-      const detectedLat = coordMatch ? parseFloat(coordMatch[1]) : defaultCoord.lat;
-      const detectedLng = coordMatch ? parseFloat(coordMatch[2]) : defaultCoord.lng;
+      // 8. Description & Details
+      let detectedDesc = wikiData?.extract || '';
+      if (!detectedDesc) {
+        const descParagraphs = lines.filter(l => l.length > 40 && !/^(?:address|location|gps|category|type|barangay|brgy|lat|lng)/i.test(l) && !l.toLowerCase().includes('http') && l !== detectedName);
+        detectedDesc = descParagraphs[0] || `${detectedName} is a premier ${detectedType.replace(/^[^\s]+\s*/, '')} in ${detectedMun}, Pampanga celebrating authentic Capampangan history and culture.`;
+      }
+      const detectedDetails = `Key heritage highlights, guided visitor features, and cultural exhibits located at ${detectedName} in ${detectedMun}, Pampanga.`;
 
-      // 6. Descriptions
-      const descParagraphs = lines.filter(l => l.length > 30 && !/^(?:address|location|gps|category|type|barangay|brgy|lat|lng)/i.test(l) && !l.toLowerCase().includes('http') && l !== detectedName);
-      const detectedDesc = descParagraphs[0] || `Iconic ${detectedMun} tourist destination celebrating the vibrant heritage and natural wonders of Pampanga.`;
-      const detectedDetails = descParagraphs[1] || `Key architectural features, guided cultural highlights, and scenic visitor experiences located in ${detectedMun}.`;
+      // 9. Photo Selection
+      const fallbackImages = {
+        '🎨 Heritage Museum': 'https://images.unsplash.com/photo-1566127444979-b3d2b654e3d7?auto=format&fit=crop&w=1000&q=80',
+        '🏛️ Historic Parish Church': 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=1000&q=80',
+        '🌲 Nature / Ecotourism': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
+        '🏺 Artisan Workshop': 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=80',
+        '📍 Cultural Landmark': 'https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?auto=format&fit=crop&w=1000&q=80'
+      };
+      const finalImage = attachedImage || fallbackImages[detectedType] || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=1000&q=80';
 
-      // Populate Admin Attraction Form
+      // 10. Populate Admin Attraction Form
       setAdminAttractionForm(prev => ({
         ...prev,
-        name: detectedName || prev.name || 'New Tourist Destination',
+        name: detectedName,
         municipality: detectedMun,
         type: detectedType,
         address: detectedAddress,
@@ -12594,15 +12798,15 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
         lng: detectedLng,
         description: detectedDesc,
         details: detectedDetails,
-        image: attachedImage || prev.image || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=800&q=80',
-        images: attachedImage ? [attachedImage, ...(prev.images || [])] : prev.images
+        image: finalImage,
+        images: [finalImage, ...(prev.images || [])]
       }));
 
       setAiAttractionProgress(100);
-      alert(`🎉 AI successfully organized tourist destination details for "${detectedName || 'New Tourist Destination'}" in ${detectedMun}!\n\n• Category: ${detectedType}\n• Coordinates: ${detectedLat}, ${detectedLng}\n• Address: ${detectedAddress}\n\nReview the populated fields below and click "Save & Publish Destination".`);
+      alert(`🎉 AI successfully organized tourist destination details for "${detectedName}" in ${detectedMun}!\n\n• Category: ${detectedType}\n• Coordinates: ${detectedLat}, ${detectedLng}\n• Address: ${detectedAddress}\n\nReview the populated fields below and click "Save & Publish Destination".`);
     } catch (err) {
       console.error("AI Attraction Extractor Error:", err);
-      alert("⚠️ Encountered an error analyzing the document. Please verify the document or paste text directly.");
+      alert("⚠️ Encountered an error analyzing the attraction document. Please verify the link or paste text directly.");
     } finally {
       setIsAiAttractionScanning(false);
       setAiAttractionProgress(0);
@@ -18707,20 +18911,20 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
                   onClick={() => setActiveDish(null)}
                 >
                   <div
-                    className="relative max-w-md w-full bg-white dark:bg-[#1E1B18] rounded-2xl shadow-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 animate-scale-up text-xs"
+                    className="relative max-w-lg w-full bg-white dark:bg-[#1E1B18] rounded-2xl shadow-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 animate-scale-up text-xs max-h-[90vh] overflow-y-auto"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {/* Modal Header */}
-                    <div className="flex justify-between items-start border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
-                      <div className="min-w-0 flex-1 pr-2">
+                    <div className="flex justify-between items-start gap-3 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
+                      <div className="min-w-0 flex-1">
                         <span className="text-[10px] font-black text-terracotta uppercase tracking-wider block">
                           {/package|bundle|buffet|unlimited|\/pax|\/head/i.test(activeDish.name) ? '🏷️ Reservation Package & Inclusions' : '🔬 Ingredient & Nutrition Deconstructor'}
                         </span>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <h3 className="text-sm font-black text-charcoal dark:text-white truncate">
+                        <div className="flex flex-wrap items-baseline justify-between gap-2 mt-1">
+                          <h3 className="text-base font-black text-charcoal dark:text-white leading-snug break-words flex-1 min-w-[200px]">
                             {activeDish.name}
                           </h3>
-                          <span className="text-xs font-black text-bananaleaf shrink-0">
+                          <span className="text-xs font-black text-bananaleaf bg-bananaleaf/10 dark:bg-bananaleaf/20 px-2 py-0.5 rounded-md shrink-0">
                             ₱{activeDish.price}{/package|bundle|buffet|unlimited|\/pax|\/head/i.test(activeDish.name) ? ' / pax' : ''}
                           </span>
                         </div>
