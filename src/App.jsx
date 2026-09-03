@@ -11361,28 +11361,18 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       .replace(/[._–—]{2,}/g, ' ')
       .trim();
 
-    // 1. Strict blocklist of non-food phrases (eliminates "JDELIVE Y", "TAT Oo", "Falbit")
+    // 1. Strict blocklist of non-food phrases
     const lower = str.toLowerCase();
     const NON_FOOD_PHRASES = [
-      'delive', 'delivery', 'free delivery', 'contact', 'call us', 'open daily',
-      'operating hours', 'menu board', 'food tray', 'food trays', 'best seller',
+      'portal', 'delivery', 'free delivery', 'contact', 'call us', 'open daily',
+      'operating hours', 'menu board', 'best seller',
       'must try', 'popular', 'price list', 'dine in', 'take out', 'page 1',
       'page 2', 'page 3', 'all rights', 'copyright', 'tat oo', 'falbit',
-      'photo uploaded', 'choose file', 'signature dish', 'kanyamanan', 'pampanga',
-      'phome', 'tray size', 'serving size', 'single order', 'order now', 'facebook',
+      'photo uploaded', 'choose file', 'signature dish', 'kanyamanan',
+      'phome', 'single order', 'order now', 'facebook',
       'instagram', 'cashier', 'subtotal', 'terms', 'conditions'
     ];
     if (NON_FOOD_PHRASES.some(p => lower.includes(p))) return null;
-
-    // 2. Canonical Kapampangan/Filipino dish match (strips OCR noise from real dishes)
-    for (const canon of KNOWN_DISH_CANONICAL) {
-      if (canon.pattern.test(str)) {
-        return {
-          name: canon.name,
-          defaultPrice: canon.defaultPrice
-        };
-      }
-    }
 
     // Support Reservation Packages, Bundles, Sets & Buffets
     if (/^(?:(?:reservation\s+)?package|set\s+menu|combo|bundle|buffet|eat\s*all\s*you\s*can|unlimited)\b/i.test(str)) {
@@ -11392,7 +11382,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       };
     }
 
-    // 3. Trailing OCR and portion noise clean up (e.g. "A 3 Pai Z Ball", "3 Pax", "4-6 Person")
+    // Trailing OCR and portion noise clean up
     str = str
       .replace(/\s+(?:a\s+)?\d+\s*(?:pai|pers|person|ball|bilao|platter|tray|ld|z|bowl|pcs?).*$/i, '')
       .replace(/\s*[\)|}\]=>~^+%<].*$/i, '')
@@ -11402,50 +11392,19 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       .replace(/\s{2,}/g, ' ')
       .trim();
 
-    // Re-check canonical after stripping trailing noise
-    for (const canon of KNOWN_DISH_CANONICAL) {
-      if (canon.pattern.test(str)) {
-        return {
-          name: canon.name,
-          defaultPrice: canon.defaultPrice
-        };
-      }
-    }
-
-    // 4. Require authentic culinary anchor word for custom/unlisted dishes
-    const FOOD_ANCHORS = [
-      'chicken', 'pork', 'beef', 'fish', 'shrimp', 'prawn', 'squid', 'crab', 'seafood',
-      'sisig', 'kare', 'pata', 'kawali', 'inasal', 'sinigang', 'bulalo', 'tidtad',
-      'kilayin', 'morcon', 'bringhe', 'pancit', 'luglug', 'lugug', 'palabok', 'bihon', 'canton',
-      'chopsuey', 'pinakbet', 'pakbit', 'lumpia', 'flan', 'tibok', 'rice', 'bbq', 'barbecue',
-      'liempo', 'lechon', 'steak', 'soup', 'salad', 'wings', 'ribs', 'belly',
-      'fillet', 'platter', 'bilao', 'meal', 'curry', 'inihaw', 'fried', 'grilled',
-      'sautéed', 'roast', 'roasted', 'crispy', 'tapa', 'tocino', 'longganisa',
-      'shake', 'juice', 'tea', 'coffee', 'cooler', 'dessert', 'cake', 'bagnet', 'pasta',
-      'wrap', 'carbonara', 'cutlet', 'hitu', 'hito', 'tilapia', 'bangus', 'spareribs',
-      'tinola', 'pochero', 'potchero', 'potcherung', 'ligang', 'nilaga', 'caldereta',
-      'kaldereta', 'adobo', 'begukan', 'binagoongan', 'aligue', 'gule', 'nasi', 'meryenda',
-      'package', 'reservation', 'bundle', 'buffet', 'unlimited', 'set', 'ayce', 'group', 'pax'
-    ];
-
-    const hasFoodAnchor = FOOD_ANCHORS.some(anchor => lower.includes(anchor));
-    if (!hasFoodAnchor) {
-      return null;
-    }
-
-    if (str.length < 3 || str.length > 50) return null;
+    if (str.length < 2 || str.length > 70) return null;
     const letterCount = (str.match(/[a-zA-Z]/g) || []).length;
-    if (letterCount < 3 || letterCount / str.length < 0.7) return null;
+    if (letterCount < 2) return null;
 
     const titleCased = str.replace(/\b[a-zA-Z]/g, (c, idx, orig) => {
       const w = orig.slice(idx).split(/[\s,()-]/)[0];
-      if (/^(?:300g|500g|1kg|250g|SOUQ|BBQ|B&B|LGU|DRF)$/i.test(w)) return c;
+      if (/^(?:300g|500g|1kg|250g|SOUQ|BBQ|B&B|LGU|DRF|AYCE)$/i.test(w)) return c;
       return c.toUpperCase();
     });
 
     return {
       name: titleCased,
-      defaultPrice: '240'
+      defaultPrice: '150'
     };
   };
 
@@ -11538,28 +11497,23 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       const timeoutId = setTimeout(() => controller.abort(), 12000);
 
       const prompt = `Analyze this restaurant menu flyer, board, or document image very carefully.
-Extract ALL authentic food and beverage items, or reservation packages, shown on the menu into a clean JSON array.
+Extract ALL authentic food and beverage items, silog combinations, sides, beverages, or reservation packages shown on the menu into a clean JSON array.
 
 CRITICAL INSTRUCTIONS FOR ACCURACY:
-1. Extract the EXACT dishes or packages printed on THIS specific menu image.
-2. IF THE MENU HAS RESERVATION PACKAGES, FUNCTION SETS, BUNDLES, OR EAT-ALL-YOU-CAN (e.g. "Package A P 265/PAX", "Package D P 295/PAX", "Eat-All-You-Can ₱499"):
-   - Extract each package as an item.
-   - "name": Clean name with pricing unit, e.g. "Reservation Package A (₱265/PAX)" or "Package D (₱295/PAX)"
-   - "price": Exact numeric price per pax or per head (e.g. "265", "295")
-   - "ingredients": "Includes: " followed by all included dishes and choices in that package (e.g. "Includes: Sizzling Chicken, Pork Sisig, Sweet and Sour Fish Fillet, Fried Vegetable Lumpia, Pancit Guisado, Plain Rice, Ice Tea, Buko Pandan Salad")
-   - "allergens": Concise allergen summary from the included foods
-   - "calories": Realistic calorie estimate (e.g. "650")
-3. If the menu has 2 or more columns, read each column top-to-bottom so items from column 1 and column 2 are NOT merged together.
-4. Read the EXACT printed price printed next to each dish or package. Do NOT make up, default, or estimate prices if a price is printed.
-5. Clean away non-food text (e.g. store address, phone numbers, wifi, "Home Delivery", "For Orders Call", footer reservation notices).
-6. Return ONLY a valid JSON array:
+1. Extract the EXACT dishes, combos, silog meals, or packages printed on THIS menu image.
+2. Read the EXACT printed price printed next to each dish or package (e.g. 50, 68, 120, 160, 20, 0, 15, 30). Do NOT change or invent prices when a price is visible. Complimentary/free items should have price "0".
+3. If an item has parenthetical or listed ingredients/options (e.g. "Combisilog (Choose two protein options...)"), put the clean item name in "name", and the full option details in "ingredients".
+4. Determine realistic allergen warnings (e.g. "Contains Pork", "Contains Beef, Eggs", "Contains Dairy", "None / Allergen Free").
+5. Provide realistic calorie estimates.
+6. Clean away non-food text (e.g. store address, phone numbers, wifi, "Home Delivery", "For Orders Call", cashier footer).
+7. Return ONLY a valid JSON array:
 [
   {
     "name": "Dish or Package Name",
-    "price": "250",
-    "ingredients": "...",
-    "allergens": "...",
-    "calories": "450"
+    "price": "50",
+    "ingredients": "Detailed ingredients or options",
+    "allergens": "Contains Pork, Eggs",
+    "calories": "550"
   }
 ]`;
 
@@ -11599,6 +11553,82 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
       return null;
     } catch (e) {
       console.warn("Gemini Vision Menu reader fallback:", e);
+      return null;
+    }
+  };
+
+  const runGeminiTextMenu = async (rawText, keyOverride = null) => {
+    const apiKey = (
+      (typeof keyOverride === 'string' && keyOverride !== 'BASIC_OCR' ? keyOverride : '') ||
+      geminiApiKey ||
+      import.meta?.env?.VITE_GEMINI_API_KEY ||
+      (typeof localStorage !== 'undefined' && localStorage.getItem('kanyamanan_gemini_api_key')) ||
+      ''
+    ).trim();
+    if (!apiKey || !rawText || typeof rawText !== 'string') return null;
+
+    try {
+      const model = import.meta?.env?.VITE_GEMINI_MODEL || 'gemini-2.5-flash';
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const prompt = `Analyze this restaurant menu text or price list.
+Extract ALL dishes, beverages, silogs, appetizers, packages, combos, sides, or promo items into a clean JSON array.
+
+CRITICAL INSTRUCTIONS:
+1. Extract EVERY single item listed. Do NOT skip items, do NOT merge different items together.
+2. Read the EXACT printed price for each item. Free or complimentary items must have price "0". Preserve exact numeric prices (e.g. 50, 68, 120, 160, 20, 0, 15, 30).
+3. If an item has parenthetical details or descriptions (e.g. "Combisilog (Choose two protein options from Tapa, Tosino, Longganisa, Spam, Embotido, or Corned Beef, served with egg and rice)"), set "name" to the clean item name ("Combisilog"), and place the full description/options in "ingredients".
+4. Determine realistic allergen warnings (e.g. "Contains Pork", "Contains Beef, Pork, Eggs", "Contains Dairy", "None / Allergen Free").
+5. Provide realistic calorie estimates (e.g. "550", "680", "140", "35").
+6. Return ONLY a valid JSON array:
+[
+  {
+    "name": "Dish Name",
+    "price": "50",
+    "ingredients": "Description or ingredients",
+    "allergens": "Contains Pork, Eggs",
+    "calories": "550"
+  }
+]
+
+Menu Text:
+${rawText}`;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: prompt }]
+          }],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 2048,
+            responseMimeType: 'application/json'
+          }
+        })
+      });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          const parsed = JSON.parse(text);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        }
+      }
+      return null;
+    } catch (e) {
+      console.warn("Gemini Text Menu parser fallback:", e);
       return null;
     }
   };
@@ -11662,15 +11692,42 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
 
     setIsAiScanning(true);
     setAiOcrProgress(5);
-    setAiOcrStatusMessage(hasRawText ? "Parsing raw menu text..." : `Preparing ${imagesToScan.length} menu image(s)...`);
+    setAiOcrStatusMessage(hasRawText ? "Parsing raw menu text with AI..." : `Preparing ${imagesToScan.length} menu image(s)...`);
 
     try {
       const DISH_PHOTO_MAP = {
+        'tokwa': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+        'tofu': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+        'tokalog': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+        'ham': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
+        'hamkalog': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
+        'shanghai': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+        'shangkalog': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+        'lumpia': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+        'pata': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'patkalog': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'patty': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
+        'patties': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
+        'burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
+        'lunch meat': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
+        'luncheon': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
+        'lunkalog': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
+        'spam': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
+        'hotdog': 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&w=600&q=80',
+        'hotkalog': 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&w=600&q=80',
+        'siomai': 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?auto=format&fit=crop&w=600&q=80',
+        'siokalog': 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?auto=format&fit=crop&w=600&q=80',
+        'longganisa': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
+        'longanisa': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
+        'longkalog': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
+        'corned beef': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'cornkalog': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+        'combisilog': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
+        'silog': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
         'sisig': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
         'pork sisig': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
         'kawali': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'crispy pata': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'pata': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'bbq': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
         'liempo': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'lechon': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
@@ -11690,7 +11747,6 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
         'chicharon': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'tidtad': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
         'dinuguan': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
-        'longanisa': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
         'tocino': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
         'asado': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'kilayin': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
@@ -11717,13 +11773,16 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
         'kare': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
         'bringhe': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
         'rice': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
+        'garlic rice': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
         'sinangag': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
-        'halo': 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=600&q=80',
-        'lumpia': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
-        'shanghai': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
+        'fries': 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&q=80',
+        'french fries': 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&q=80',
+        'soup': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
+        'gravy': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
         'coke': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80',
         'royal': 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=600&q=80',
         'sprite': 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=600&q=80',
+        'soft drinks': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80',
         'drink': 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80',
         'water': 'https://images.unsplash.com/photo-1559839914-ba2a0f0d2c49?auto=format&fit=crop&w=600&q=80'
       };
@@ -11734,6 +11793,29 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
           if (lower.includes(key)) return url;
         }
         return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
+      };
+
+      const splitPreservingParentheses = (str) => {
+        const results = [];
+        let current = '';
+        let parenDepth = 0;
+        let bracketDepth = 0;
+        for (let i = 0; i < str.length; i++) {
+          const char = str[i];
+          if (char === '(') parenDepth++;
+          else if (char === ')') { if (parenDepth > 0) parenDepth--; }
+          else if (char === '[') bracketDepth++;
+          else if (char === ']') { if (bracketDepth > 0) bracketDepth--; }
+
+          if ((char === ',' || char === ';' || char === '\n') && parenDepth === 0 && bracketDepth === 0) {
+            if (current.trim()) results.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        if (current.trim()) results.push(current.trim());
+        return results;
       };
 
       const parseMenuTextStream = (text) => {
@@ -11765,9 +11847,7 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
           .replace(/[\u2022\u25CF\u25AA*]/g, ' ')
           .replace(/[\t]+/g, ' ');
 
-        // -------------------------------------------------------------
-        // Dedicated Package & Buffet Parser (Reservation Sets, AYCE, Bundles)
-        // -------------------------------------------------------------
+        // Dedicated Package & Buffet Parser
         const parsePackagesFromText = (rawStr) => {
           if (!rawStr || typeof rawStr !== 'string') return { packages: [], consumedIndices: new Set() };
           const lines = rawStr.split('\n').map(l => l.trim()).filter(Boolean);
@@ -11820,7 +11900,6 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
                 pkgPrice = priceMatch[1];
               }
 
-              // Robust extraction of Package Letter / Identification (e.g. Package A, Package B, A., etc.)
               const letterMatch = line.match(/\b(?:package|packag[ef]|reservation\s+package|set(?:\s+menu)?|bundle)(?::|\s|-)+([A-Za-z0-9]+)\b/i) || line.match(/^([A-F])[.)]/i);
               if (letterMatch) {
                 pkgName = `Reservation Package ${letterMatch[1].toUpperCase()}`;
@@ -11836,7 +11915,6 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
                   .trim() || line;
               }
 
-              // Extract inline dishes if separated by colon or dash
               const colonIndex = line.indexOf(':');
               const dashIndex = line.indexOf(' - ');
               const splitIdx = colonIndex !== -1 ? colonIndex : dashIndex;
@@ -11857,7 +11935,6 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
             }
 
             if (currentPkg) {
-              // Check if line is just the price line right below header (e.g. "P 265/PAX" or "P 295/PAX")
               const standalonePriceMatch = line.match(/^(?:from\s+)?(?:[₱\u20B1]|P|Php|PHP)?\.?\s*(\d{2,5})(?:\s*\/\s*(?:pax|head|person))?$/i);
               if (standalonePriceMatch && !currentPkg.price) {
                 currentPkg.price = standalonePriceMatch[1];
@@ -11903,7 +11980,8 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
               ingredients: pkg.items.length > 0 ? `Includes: ${itemsStr}` : 'Complete group reservation set package with meat, sides, rice, drinks, and dessert',
               allergens: allergens,
               calories: '650',
-              image: getRealDishPhoto(primaryDish)
+              image: getRealDishPhoto(primaryDish),
+              isPackage: true
             };
           });
 
@@ -11912,53 +11990,56 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
 
         const { packages: detectedPackages, consumedIndices } = parsePackagesFromText(cleaned);
 
-        // 2. Intelligent line & multi-item splitting (supports comma-separated list of items)
-        const rawLines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
-        const initialLines = [];
-
-        rawLines.forEach((line, lineIdx) => {
-          if (consumedIndices && consumedIndices.has(lineIdx)) return;
-          const priceCount = (line.match(/(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|\$)?\s*\d{2,5}(?:\.\d{2})?(?:\s*(?:php|pesos|\/order|\/serving|\/pax|\/head))?/gi) || []).length;
-          if (priceCount > 1 && /[,;]/.test(line)) {
-            const splitSubLines = line.split(/\s*[,;]\s*/).filter(Boolean);
-            splitSubLines.forEach(sub => initialLines.push(sub.trim()));
-          } else {
-            initialLines.push(line);
-          }
-        });
-
-        // 3. Robust price extraction helper
+        // Robust price extraction helper
         const extractPrice = (t) => {
-          let str = t.trim();
+          let str = (t || '').trim();
           if (!str) return null;
 
-          const leadingMatch = str.match(/^(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*(?:[:|@\s–—-]|\.\.\.)+\s*(.+)$/i);
-          if (leadingMatch) {
-            const num = parseFloat(leadingMatch[1].replace(/,/g, ''));
-            return { price: Math.round(num), cleanText: leadingMatch[2].trim() };
-          }
-
-          const trailingMatch = str.match(/(?:[:|@\s–—-]|\.\.\.)+\s*(?:from\s+|starts?\s+at\s+)?(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving|\/pax|\/head|\/person|\/set|per\s+pax|per\s+head)?(?:\s*\([^)]*\))?$/i);
-          if (trailingMatch) {
-            const matchedPriceStr = trailingMatch[1].replace(/,/g, '');
-            const num = parseFloat(matchedPriceStr);
-            const textWithoutPrice = str.slice(0, trailingMatch.index).trim();
-            if (textWithoutPrice.length >= 2) {
-              return { price: Math.round(num), cleanText: textWithoutPrice };
+          // 1. Trailing currency symbol with price: e.g. "₱50", "₱ 50", "Php 50", "P50", "₱0", "Free"
+          const trailingPriceMatch = str.match(/(?:[:|@\s–—-]|\.\.\.|\s+)*(?:from\s+|starts?\s+at\s+)?(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])\s*(\d+(?:\.\d{1,2})?|\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)(?:\s*(?:php|pesos|\/order|\/serving|\/pax|\/head|\/person|\/set|per\s+pax|per\s+head))?(?:\s*\([^)]*\))?$/i);
+          if (trailingPriceMatch) {
+            const matchedVal = parseFloat(trailingPriceMatch[1].replace(/,/g, ''));
+            const cleanText = str.slice(0, trailingPriceMatch.index).trim();
+            if (cleanText.length >= 2) {
+              return { price: Math.round(matchedVal), cleanText };
             }
           }
 
-          const parenMatch = str.match(/\(\s*(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])?\.?\s*(\d{1,2}(?:,\d{3})+|\d{2,5}(?:\.\d{2})?)\s*(?:php|pesos|\/order|\/serving|\/pax|\/head|\/person)?\s*\)/i);
-          if (parenMatch) {
-            const num = parseFloat(parenMatch[1].replace(/,/g, ''));
-            const textWithoutPrice = str.replace(parenMatch[0], '').trim();
-            return { price: Math.round(num), cleanText: textWithoutPrice };
+          // 2. Trailing bare number after dash, colon, tab or multiple spaces
+          const trailingBareNumberMatch = str.match(/(?:[:|@–—-]|\t|\s{2,})\s*(\d+(?:\.\d{1,2})?)\s*(?:php|pesos|\/order|\/serving|\/pax|\/head|\/person|\/set)?$/i);
+          if (trailingBareNumberMatch) {
+            const matchedVal = parseFloat(trailingBareNumberMatch[1]);
+            const cleanText = str.slice(0, trailingBareNumberMatch.index).trim();
+            if (cleanText.length >= 2) {
+              return { price: Math.round(matchedVal), cleanText };
+            }
           }
 
-          const labeledMatch = str.match(/^(.+?)\s*(?:price|cost|amount)?\s*[:=@]\s*(?:[₱\u20B1]|P|Php|PHP)?\.?\s*(\d{2,5})/i);
-          if (labeledMatch) {
-            const num = parseFloat(labeledMatch[2]);
-            return { price: Math.round(num), cleanText: labeledMatch[1].trim() };
+          // 3. Trailing simple number after space
+          const trailingSimpleNumber = str.match(/\s+(\d+(?:\.\d{1,2})?)$/);
+          if (trailingSimpleNumber) {
+            const num = parseFloat(trailingSimpleNumber[1]);
+            const cleanText = str.slice(0, trailingSimpleNumber.index).trim();
+            if (cleanText.length >= 2 && !/^(?:page|no|item|table|step|version|pack)\s*$/i.test(cleanText)) {
+              return { price: Math.round(num), cleanText };
+            }
+          }
+
+          // 4. Parenthesized price
+          const parenPriceMatch = str.match(/\(\s*(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])?\s*(\d+(?:\.\d{1,2})?)\s*(?:php|pesos|\/order|\/serving|\/pax|\/head)?\s*\)$/i);
+          if (parenPriceMatch) {
+            const num = parseFloat(parenPriceMatch[1]);
+            const cleanText = str.replace(parenPriceMatch[0], '').trim();
+            if (cleanText.length >= 2) {
+              return { price: Math.round(num), cleanText };
+            }
+          }
+
+          // 5. Leading price
+          const leadingPriceMatch = str.match(/^(?:[₱\u20B1]|P|Php|PHP|PhP|Ph|[$¥€])\s*(\d+(?:\.\d{1,2})?)\s*(?:[:|@\s–—-]|\.\.\.)+\s*(.+)$/i);
+          if (leadingPriceMatch) {
+            const num = parseFloat(leadingPriceMatch[1]);
+            return { price: Math.round(num), cleanText: leadingPriceMatch[2].trim() };
           }
 
           return null;
@@ -11985,178 +12066,102 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
         };
 
         const getAuthenticDishDescription = (dishName, rawDesc) => {
-          if (rawDesc && rawDesc.trim().length > 8) {
+          if (rawDesc && rawDesc.trim().length >= 3) {
             return rawDesc.trim();
           }
           const lower = (dishName || '').toLowerCase();
 
-          if (/lagat\s*pusu|puso/.test(lower)) {
-            return 'Traditional Kapampangan banana blossoms (puso ng saging) sautéed in garlic, onions, native vinegar, and savory pork slices.';
-          }
-          if (/pakbit|pinakbet/.test(lower)) {
-            return 'Authentic Kapampangan pinakbet with bitter melon, squash, eggplant, sitaw, okra, and crisp pork cracklings in savory bagoong alamang.';
-          }
-          if (/veggies\s*with\s*buro|buro/.test(lower)) {
-            return 'Fresh steamed native vegetables served with traditional Kapampangan buro (fermented rice dip) and fresh greens.';
-          }
-          if (/tilapia|binukadkad/.test(lower)) {
-            return 'Butterflied deep-fried crisp tilapia seasoned with garlic, calamansi, and native spices.';
-          }
-          if (/hitu|hito/.test(lower)) {
-            return 'Crispy deep-fried farm-fresh catfish (hito) served with traditional Kapampangan buro (fermented rice dip) and fresh greens.';
-          }
-          if (/spareribs|caldereta\s*spareribs/.test(lower)) {
-            return 'Braised pork spareribs in rich tomato sauce and liver spread with bell peppers, carrots, potatoes, and melted cheese.';
-          }
-          if (/crispy\s*pork\s*belly\s*kare|pork\s*belly\s*kare/.test(lower)) {
-            return 'Crispy golden lechon pork belly served over rich peanut annatto sauce with eggplant, sitaw, and savory bagoong.';
-          }
-          if (/ligang\s*baka|nilagang\s*baka/.test(lower)) {
-            return 'Kapampangan slow-simmered beef shank and bone marrow soup with sweet corn, pechay, and cabbage.';
-          }
-          if (/potcherung|pochero/.test(lower)) {
-            return 'Rich savory stew with tender meat, plantains (saba), garbanzos, chorizo, and cabbage in spiced tomato sauce.';
-          }
-          if (/tinolang|tinola/.test(lower)) {
-            return 'Native chicken soup simmered in fragrant ginger, lemongrass, green papaya, and chili leaves in clear broth.';
-          }
-          if (/salmon\s*head|sigang\s*salmon/.test(lower)) {
-            return 'Fresh salmon head simmered in sour tamarind broth with mustasa greens, tomatoes, onions, and green chilies.';
-          }
-          if (/sisig\s*bangus|bangus\s*sisig/.test(lower)) {
-            return 'Flaked grilled milkfish tossed with calamansi, onions, ginger, and green chilies on a sizzling plate.';
-          }
-          if (/carbonara|sisig\s*carbonara/.test(lower)) {
-            return 'Creamy Italian-style pasta infused with smoky, savory Kapampangan crispy pork sisig and parmesan cheese.';
-          }
-          if (/aligue\s*pasta/.test(lower)) {
-            return 'Fettuccine or spaghetti tossed in rich crab fat (aligue), garlic, olive oil, and fresh calamansi.';
-          }
-          if (/cutlet|cutlets/.test(lower)) {
-            return 'Golden panko-crusted chicken breast cutlets served with savory dip and shoestring potatoes.';
-          }
-          if (/pesto/.test(lower)) {
-            return 'Tender grilled chicken tossed in fragrant basil pesto, garlic, and extra virgin olive oil.';
-          }
-          if (/caesar/.test(lower)) {
-            return 'Crisp romaine wrap filled with grilled chicken breast, parmesan shavings, and creamy Caesar dressing.';
-          }
-          if (/adana\s*wrap/.test(lower)) {
-            return 'Spiced grilled minced chicken wrap with fresh garden vegetables and garlic sauce.';
-          }
-          if (/fried\s*chicken\s*whole|fried\s*chicken/.test(lower)) {
-            return 'Signature crispy golden heritage fried chicken marinated in traditional spices, served with savory gravy.';
-          }
-          if (/begukan|binagoongan/.test(lower)) {
-            return 'Crisp-fried pork belly tossed in savory sautéed fermented shrimp paste (bagoong alamang), tomatoes, garlic, and finger chilies.';
-          }
-          if (/kare|kare-kare|kare kare/.test(lower)) {
-            return 'Slow-braised tender beef shank & oxtail simmered in rich roasted peanut and annatto sauce, served with eggplant, string beans, pechay, and sautéed bagoong.';
-          }
-          if (/sisig|pork sisig/.test(lower)) {
-            return 'Crisp grilled pork mask & belly, chicken liver, calamansi, white onions, and spicy chili peppers (siling labuyo) on a sizzling plate.';
-          }
-          if (/crispy pata|pata/.test(lower)) {
-            return 'Deep-fried seasoned pork trotters with blistered crunchy skin and tender juicy meat, served with spiced native soy-vinegar dipping sauce.';
-          }
-          if (/kawali|lechon kawali|bagnet/.test(lower)) {
-            return 'Golden deep-fried seasoned pork belly with crackling crunchy skin and juicy meat, served with spiced native vinegar dip.';
-          }
-          if (/inasal/.test(lower)) {
-            return 'Charcoal-grilled chicken marinated in calamansi, lemongrass, native coconut vinegar, garlic, ginger, and basted with golden annatto oil.';
-          }
-          if (/bulalo/.test(lower)) {
-            return 'Slow-simmered beef bone marrow and shank in rich savory broth with sweet yellow corn, pechay, cabbage, and whole black peppercorns.';
-          }
-          if (/sinigang/.test(lower)) {
-            if (lower.includes('hipon') || lower.includes('shrimp')) {
-              return 'Fresh succulent prawns simmered in a savory sour tamarind (sampalok) broth with water spinach, radish, tomatoes, and finger chilies.';
-            } else if (lower.includes('salmon') || lower.includes('bangus') || lower.includes('isda') || lower.includes('fish')) {
-              return 'Fresh fish simmered in a fragrant sour broth infused with native tomatoes, onions, ginger, and mustard greens.';
-            }
-            return 'Tender pork cuts simmered in a rich, tangy tamarind broth with native vegetables, string beans, and green finger chilies.';
-          }
-          if (/bringhe/.test(lower)) {
-            return 'Kapampangan heirloom turmeric glutinous rice infused with rich coconut milk, chicken, chorizo de bilbao, boiled eggs, and bell peppers.';
-          }
-          if (/pancit|luglug|lugug|palabok/.test(lower)) {
-            return 'Traditional noodles smothered in rich shrimp and annatto gravy, topped with crushed chicharon, hard-boiled eggs, tinapa flakes, and calamansi.';
-          }
-          if (/bihon|canton|guisado|mami|lomi/.test(lower)) {
-            return 'Stir-fried savory noodles tossed with tender pork, chicken, crisp farm vegetables, and aromatic toasted garlic.';
-          }
-          if (/tidtad|dinuguan/.test(lower)) {
-            return 'Traditional Kapampangan pork blood stew simmered with tender pork offal cuts, spiced native vinegar, garlic, and green chilies.';
-          }
-          if (/kilayin/.test(lower)) {
-            return 'Heritage Kapampangan braised pork loin and liver cooked in spiced native coconut vinegar, garlic, onions, and bay leaves.';
-          }
-          if (/morcon|murcon|embutido/.test(lower)) {
-            return 'Kapampangan beef roll filled with chorizo de bilbao, boiled eggs, cheddar cheese, carrots, and pickles braised in savory tomato gravy.';
-          }
-          if (/kaldereta|caldereta/.test(lower)) {
-            return 'Braised beef shank or goat meat in rich spiced tomato sauce and liver spread with bell peppers, carrots, potatoes, and cheese.';
-          }
-          if (/pinakbet/.test(lower)) {
-            return 'Native bitter melon, squash, eggplant, string beans, and okra sautéed in savory fermented shrimp paste (bagoong) and pork cracklings.';
-          }
-          if (/chopsuey/.test(lower)) {
-            return 'Stir-fried crisp farm-fresh vegetables, carrots, bell peppers, snow peas, and quail eggs in savory garlic oyster glaze.';
-          }
-          if (/lumpia|shanghai/.test(lower)) {
-            return 'Crispy golden fried spring rolls stuffed with seasoned minced pork, minced carrots, garlic, and sweet chili dipping sauce.';
-          }
-          if (/tibok|tibok-tibok|maja/.test(lower)) {
-            return 'Silky Kapampangan carabao\'s milk pudding infused with coconut milk and topped with golden toasted coconut latik.';
-          }
-          if (/flan|leche flan/.test(lower)) {
-            return 'Velvety steamed egg custard dessert with a rich golden caramelized sugar syrup glaze.';
-          }
-          if (/halo-halo|halu-halo/.test(lower)) {
-            return 'Traditional shaved ice dessert layered with sweetened beans, ube halaya, leche flan, nata de coco, macapuno, and evaporated milk.';
-          }
-          if (/shrimp|hipon|prawn|gambas/.test(lower)) {
-            return 'Fresh succulent shrimp sautéed in generous toasted garlic, rich golden butter, and native seasonings.';
-          }
-          if (/bbq|barbecue|isaw|liempo/.test(lower)) {
-            return 'Tender grilled skewers glazed in sweet and savory native barbecue marinade, charcoal grilled to smoky perfection.';
-          }
-          if (/pork|baboy|asado|longanisa|tocino/.test(lower)) {
-            return 'Heritage Kapampangan cured or braised pork prepared with traditional spices, garlic, and sweet-savory aromatics.';
-          }
-          if (/chicken|manok/.test(lower)) {
-            return 'Tender chicken seasoned with native herbs, garlic, onions, and traditional spices.';
-          }
-          if (/rice|sinangag|aligue rice|garlic rice/.test(lower)) {
-            return 'Fragrant steamed or stir-fried rice tossed with golden toasted garlic and native seasonings.';
-          }
-          if (/juice|shake|tea|coffee|drink|beverage|sago/.test(lower)) {
-            return 'Refreshing chilled beverage made with natural ingredients, sweet syrup, and refreshing flavors.';
-          }
+          if (/fries|french fries/.test(lower)) return 'Crispy golden deep-fried potato fries seasoned with salt.';
+          if (/soup|gravy/.test(lower)) return 'Hot savory complimentary broth or rich golden gravy.';
+          if (/tokalog|tofu|tokwa/.test(lower)) return 'Savory tofu and braised pork dish served with garlic fried rice and sunny-side egg.';
+          if (/hamkalog|ham/.test(lower)) return 'Savory sweet-cured ham slices served with garlic fried rice and fried egg.';
+          if (/shangkalog|shanghai|lumpia/.test(lower)) return 'Crispy golden pork lumpia spring rolls served with garlic fried rice and egg.';
+          if (/patkalog|patties|pata/.test(lower)) return 'Savory meat patties or pork cuts served with golden garlic fried rice and egg.';
+          if (/lunkalog|luncheon|spam/.test(lower)) return 'Crispy pan-fried luncheon meat served with garlic fried rice and sunny egg.';
+          if (/hotkalog|hotdog/.test(lower)) return 'Classic tender-juicy hotdog served with garlic fried rice and fried egg.';
+          if (/siokalog|siomai/.test(lower)) return 'Steamed or fried savory pork siomai dumplings served with garlic rice, chili garlic, and egg.';
+          if (/longkalog|longganisa|longanisa/.test(lower)) return 'Sweet and savory native garlic longganisa sausages served with fried egg and garlic rice.';
+          if (/cornkalog|corned beef/.test(lower)) return 'Sautéed savory corned beef with onions served with garlic fried rice and egg.';
+          if (/combisilog/.test(lower)) return 'Special two-protein combo meal served with garlic fried rice and sunny egg.';
+          if (/tapsilog|tapa/.test(lower)) return 'Cured marinated beef tapa served with garlic fried rice and sunny-side-up egg.';
+          if (/tocilog|tocino/.test(lower)) return 'Sweet-cured tender pork tocino served with golden garlic fried rice and egg.';
+          if (/bangsilog|bangus/.test(lower)) return 'Crispy pan-fried marinated milkfish (bangus) served with garlic fried rice and egg.';
+          if (/sisig/.test(lower)) return 'Crisp grilled pork mask & belly, chicken liver, calamansi, white onions, and spicy chilies on a sizzling plate.';
+          if (/crispy pata|pata/.test(lower)) return 'Deep-fried seasoned pork trotters with blistered crunchy skin and tender juicy meat, served with spiced native soy-vinegar dip.';
+          if (/lechon|kawali|bagnet/.test(lower)) return 'Golden deep-fried seasoned pork belly with crackling crunchy skin and juicy meat.';
+          if (/bulalo/.test(lower)) return 'Slow-simmered beef bone marrow and shank in rich savory broth with sweet yellow corn and cabbage.';
+          if (/sinigang/.test(lower)) return 'Savory sour tamarind broth with native vegetables and green finger chilies.';
+          if (/kare|kare-kare/.test(lower)) return 'Tender beef and oxtail simmered in rich peanut annatto sauce with eggplant, string beans, and bagoong.';
+          if (/garlic rice|sinangag/.test(lower)) return 'Fragrant steamed or stir-fried rice tossed with golden toasted garlic and native seasonings.';
+          if (/rice/.test(lower)) return 'Fragrant steamed white rice.';
+          if (/coke|royal|sprite|soft drinks|soda/.test(lower)) return 'Refreshing chilled carbonated soft drink.';
+          if (/tea|juice|shake|cooler/.test(lower)) return 'Refreshing chilled natural beverage served cold.';
 
-          return 'Traditional Kapampangan heritage dish prepared with authentic local spices, garlic, onions, and native seasoning.';
+          return 'Traditional Filipino heritage dish prepared with authentic spices, garlic, onions, and savory aromatics.';
         };
 
-        const getRealisticFallbackPrice = (dishName) => {
-          const lower = (dishName || '').toLowerCase();
-          if (/pata|seafood|crab|sugpo|prawn|bilao|platter|family/.test(lower)) return '380';
-          if (/beef|kare|bulalo|morcon|kaldereta|bistek|oxtail/.test(lower)) return '350';
-          if (/begukan|kawali|pork|sisig|liempo|lechon|bagnet|asado/.test(lower)) return '260';
-          if (/inasal|chicken|manok|itik|duck/.test(lower)) return '220';
-          if (/pancit|luglug|palabok|bihon|canton|mami|lomi|noodles/.test(lower)) return '190';
-          if (/pinakbet|chopsuey|vegetable|salad|lumpia/.test(lower)) return '180';
-          if (/rice|sinangag|garlic rice/.test(lower)) return '120';
-          if (/tibok|flan|dessert|halo-halo|cake/.test(lower)) return '95';
-          if (/drink|juice|shake|tea|coffee|sago|coke|royal|sprite|water/.test(lower)) return '65';
-          return '240';
+        const getDishAllergens = (dishName, desc) => {
+          const lower = `${dishName} ${desc}`.toLowerCase();
+          const allergenList = [];
+
+          if (/pork|baboy|lechon|sisig|liempo|ham|bacon|pata|hotdog|luncheon|longganisa|longanisa|shanghai|embutido|spam|ribs|bagnet|tokalog|hamkalog|shangkalog|patkalog|lunkalog|hotkalog|siokalog|longkalog/.test(lower)) {
+            allergenList.push('Pork');
+          }
+          if (/beef|baka|corned beef|bulalo|steak|tapa|patties|burger|oxtail|shank|cornkalog/.test(lower)) {
+            allergenList.push('Beef');
+          }
+          if (/chicken|manok|turkey|duck|itik|inasal|wings|nuggets|chicsilog|poultry/.test(lower)) {
+            allergenList.push('Poultry');
+          }
+          if (/fish|salmon|tuna|bangus|tilapia|shrimp|prawn|hipon|squid|pusit|crab|aligue|tahong|seafood|tinapa|bangsilog|isda/.test(lower)) {
+            allergenList.push('Fish/Seafood');
+          }
+          if (/egg|eggs|itlog|silog|kalog|omelet|flan|mayo|mayonnaise/.test(lower)) {
+            allergenList.push('Eggs');
+          }
+          if (/cheese|milk|butter|cream|carbonara|dairy|latte/.test(lower)) {
+            allergenList.push('Dairy');
+          }
+          if (/peanut|peanuts|kare|kare-kare|cashew|nuts/.test(lower)) {
+            allergenList.push('Peanuts');
+          }
+          if (/tofu|tokwa|soy|toyo|taho|edamame|tokalog/.test(lower)) {
+            allergenList.push('Soy/Tofu');
+          }
+          if (/noodle|noodles|pasta|spaghetti|pancit|bihon|canton|mami|lumpia|wrapper|flour|bread|gluten|wheat/.test(lower)) {
+            allergenList.push('Gluten/Wheat');
+          }
+
+          if (allergenList.length === 0) return 'None / Allergen Free';
+          return `Contains ${allergenList.join(', ')}`;
         };
 
+        const getDishCalories = (dishName, desc) => {
+          const lowerName = (dishName || '').toLowerCase();
+          const lowerAll = `${dishName} ${desc}`.toLowerCase();
+          if (/soup|gravy|broth|water/.test(lowerName) && !/bulalo|sinigang/.test(lowerName)) return '35';
+          if (/soft drinks|soda|coke|royal|sprite/.test(lowerName)) return '140';
+          if (/tea|juice|cooler|shake/.test(lowerName)) return '120';
+          if (/fries|french fries/.test(lowerName)) return '320';
+          if (/garlic rice|sinangag/.test(lowerName)) return '220';
+          if (/plain rice|rice/.test(lowerName)) return '180';
+          if (/sisig|lechon|kawali|pata|bagnet|kare|bulalo|crispy pata/.test(lowerName)) return '680';
+          if (/silog|kalog|combo|tapsilog|tocilog/.test(lowerName)) return '550';
+          if (/seafood|fish|bangus|tilapia|salmon|shrimp/.test(lowerName)) return '340';
+          if (/chicken|inasal|bbq/.test(lowerName)) return '420';
+          if (/dessert|flan|halo-halo|cake/.test(lowerName)) return '380';
+          return '450';
+        };
+
+        // 2. Intelligent line splitting preserving parenthesized descriptions
+        const initialLines = splitPreservingParentheses(cleaned);
         const items = [];
         const unassignedPrices = [];
         let currentItem = null;
 
         for (let i = 0; i < initialLines.length; i++) {
-          const line = initialLines[i];
+          const line = initialLines[i].trim();
+          if (!line) continue;
           const lowerLine = line.toLowerCase();
 
           if (NON_FOOD_BLOCKLIST.some(word => lowerLine.includes(word))) continue;
@@ -12175,9 +12180,9 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
 
           if (isPurePrice) {
             const priceVal = priceExtracted ? priceExtracted.price : Math.round(parseFloat(line.replace(/[^0-9.]/g, '')));
-            if (currentItem && !currentItem.price) {
+            if (currentItem && (currentItem.price === null || currentItem.price === undefined)) {
               currentItem.price = priceVal;
-            } else if (priceVal && priceVal >= 20) {
+            } else if (priceVal !== null && !isNaN(priceVal)) {
               unassignedPrices.push(priceVal);
             }
             continue;
@@ -12185,10 +12190,25 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
 
           if (priceExtracted && priceExtracted.cleanText.length >= 2) {
             if (currentItem) items.push(currentItem);
+
+            let rawClean = priceExtracted.cleanText;
+            let inlineDesc = '';
+            const parenMatch = rawClean.match(/^(.+?)\s*\(([^)]+)\)$/);
+            if (parenMatch) {
+              rawClean = parenMatch[1].trim();
+              inlineDesc = parenMatch[2].trim();
+            } else {
+              const colonIdx = rawClean.indexOf(':');
+              if (colonIdx > 2 && colonIdx < rawClean.length - 2) {
+                inlineDesc = rawClean.slice(colonIdx + 1).trim();
+                rawClean = rawClean.slice(0, colonIdx).trim();
+              }
+            }
+
             currentItem = {
-              name: priceExtracted.cleanText,
+              name: rawClean,
               price: priceExtracted.price,
-              desc: '',
+              desc: inlineDesc,
               portion: ''
             };
             continue;
@@ -12210,7 +12230,7 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
             lowerLine.includes('noodle dish') ||
             lowerLine.includes('with vinegar') ||
             lowerLine.includes('simmered') ||
-            line.length > 35
+            line.length > 40
           );
 
           if (currentItem && isDesc) {
@@ -12221,23 +12241,22 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
             }
           }
 
-          if (/^(?:P|₱|Php|PHP|Ph)?\.?\s*\d+/i.test(line.trim())) {
-            const fallbackPrice = Math.round(parseFloat(line.replace(/[^0-9.]/g, '')));
-            if (currentItem && fallbackPrice && !currentItem.price) {
-              currentItem.price = fallbackPrice;
-            } else if (fallbackPrice && fallbackPrice >= 20) {
-              unassignedPrices.push(fallbackPrice);
-            }
-            continue;
-          }
-
           if (currentItem) {
             items.push(currentItem);
           }
+
+          let rawClean = line.trim();
+          let inlineDesc = '';
+          const parenMatch = rawClean.match(/^(.+?)\s*\(([^)]+)\)$/);
+          if (parenMatch) {
+            rawClean = parenMatch[1].trim();
+            inlineDesc = parenMatch[2].trim();
+          }
+
           currentItem = {
-            name: line.trim(),
+            name: rawClean,
             price: null,
-            desc: '',
+            desc: inlineDesc,
             portion: ''
           };
         }
@@ -12248,7 +12267,7 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
 
         // Two-column alignment: Pair unassigned prices to dishes without prices in order
         for (const it of items) {
-          if (!it.price && unassignedPrices.length > 0) {
+          if ((it.price === null || it.price === undefined) && unassignedPrices.length > 0) {
             it.price = unassignedPrices.shift();
           }
         }
@@ -12263,75 +12282,13 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
               name = `${name} (${item.portion})`;
             }
 
-            const lowerCombined = (name + ' ' + (item.desc || '')).toLowerCase();
             const ingredients = getAuthenticDishDescription(name, item.desc);
-            let allergens = 'None / Allergen Free';
-            let calories = '450';
+            const allergens = getDishAllergens(name, ingredients);
+            const calories = getDishCalories(name, ingredients);
 
-            if (/hipon|shrimp|prawn|sugpo|gambas|tahong|crab|aligue/.test(lowerCombined)) {
-              allergens = 'Contains Seafood / Shellfish';
-              calories = '340';
-            } else if (/sisig|pork sisig/.test(lowerCombined)) {
-              allergens = 'Contains Pork, Soy';
-              calories = '580';
-            } else if (/kare|kare-kare|kare kare/.test(lowerCombined)) {
-              allergens = 'Contains Peanuts, Shellfish (Bagoong), Beef';
-              calories = '620';
-            } else if (/pata|kawali|bagnet|liempo|lechon|begukan|binagoongan/.test(lowerCombined)) {
-              allergens = 'Contains Pork';
-              calories = '720';
-            } else if (/bulalo/.test(lowerCombined)) {
-              allergens = 'Contains Beef';
-              calories = '650';
-            } else if (/kaldereta|caldereta/.test(lowerCombined)) {
-              allergens = 'Contains Beef/Meat, Dairy';
-              calories = '590';
-            } else if (/bringhe/.test(lowerCombined)) {
-              allergens = 'Contains Poultry, Eggs';
-              calories = '480';
-            } else if (/pancit|luglug|palabok|bihon|canton|guisado|mami|noodle/.test(lowerCombined)) {
-              allergens = 'Contains Gluten / Wheat, Seafood, Eggs, Pork';
-              calories = '430';
-            } else if (/tidtad|dinuguan/.test(lowerCombined)) {
-              allergens = 'Contains Pork';
-              calories = '460';
-            } else if (/kilayin/.test(lowerCombined)) {
-              allergens = 'Contains Pork';
-              calories = '510';
-            } else if (/inasal|chicken|manok/.test(lowerCombined)) {
-              allergens = 'Contains Poultry';
-              calories = '420';
-            } else if (/itik|duck/.test(lowerCombined)) {
-              allergens = 'Contains Poultry';
-              calories = '560';
-            } else if (/murcon|morcon/.test(lowerCombined)) {
-              allergens = 'Contains Beef, Pork, Dairy, Eggs';
-              calories = '620';
-            } else if (/tapa|kalabaw|pindang/.test(lowerCombined)) {
-              allergens = 'Contains Beef/Carabao Meat';
-              calories = '450';
-            } else if (/pork|baboy|bulaklak|bale|asado|longanisa/.test(lowerCombined)) {
-              allergens = 'Contains Pork';
-              calories = '580';
-            } else if (/beef|bistek|baka|steak|shank/.test(lowerCombined)) {
-              allergens = 'Contains Beef';
-              calories = '680';
-            } else if (/fish|salmon|tuna|bangus|tilapia|seafood/.test(lowerCombined)) {
-              allergens = 'Contains Seafood / Fish';
-              calories = '320';
-            } else if (/flan|tibok|dessert|halo-halo|halu-halo/.test(lowerCombined)) {
-              allergens = 'Contains Dairy, Eggs';
-              calories = '350';
-            }
-
-            let finalPrice = item.price ? String(item.price).trim() : '';
-            const parsedNum = parseInt(finalPrice.replace(/[^0-9]/g, ''), 10);
-            // If price is missing or suspiciously low (< 80) for a main dish (like Chopsuey, Kare-Kare, Begukan, Sisig), it is an OCR fragment (e.g. 72):
-            if (isNaN(parsedNum) || (parsedNum < 80 && !/rice|drink|juice|shake|tea|dessert|flan|water|soda/i.test(name))) {
-              finalPrice = validation.defaultPrice || getRealisticFallbackPrice(name);
-            } else {
-              finalPrice = String(parsedNum);
-            }
+            let finalPrice = (item.price !== null && item.price !== undefined && !isNaN(item.price))
+              ? String(item.price).trim()
+              : (validation.defaultPrice || '150');
 
             return {
               name: name,
@@ -12352,11 +12309,33 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
       // 1. Scan from raw text if entered
       if (hasRawText) {
         setAiOcrProgress(15);
-        const fromText = parseMenuTextStream(aiRawMenuText.trim());
-        allDetectedDishes.push(...fromText);
+        setAiOcrStatusMessage("Analyzing menu text with AI...");
+
+        // Try Gemini Text Parser first if API key is available
+        const geminiTextResult = await runGeminiTextMenu(aiRawMenuText.trim(), effectiveKey);
+        if (Array.isArray(geminiTextResult) && geminiTextResult.length > 0) {
+          const formatted = geminiTextResult.map(d => ({
+            name: String(d.name || '').trim(),
+            price: String(d.price !== undefined && d.price !== null ? d.price : '150').replace(/[^0-9.]/g, '') || '150',
+            ingredients: d.ingredients || 'Traditional Filipino heritage seasoning, garlic, onions, native aromatics',
+            allergens: d.allergens || 'None / Allergen Free',
+            calories: String(d.calories || '450').replace(/[^0-9]/g, '') || '450',
+            image: getRealDishPhoto(d.name)
+          })).filter(d => d.name.length >= 2);
+
+          if (formatted.length > 0) {
+            allDetectedDishes.push(...formatted);
+          }
+        }
+
+        // If Gemini is not configured or returned empty, run the rock-solid local stream parser
+        if (allDetectedDishes.length === 0) {
+          const fromText = parseMenuTextStream(aiRawMenuText.trim());
+          allDetectedDishes.push(...fromText);
+        }
       }
 
-      // 2. Scan across all uploaded menu image pages in PARALLEL (<2 seconds total!)
+      // 2. Scan across all uploaded menu image pages in PARALLEL
       if (imagesToScan.length > 0) {
         const totalImgs = imagesToScan.length;
         setAiOcrProgress(30);
@@ -12373,7 +12352,7 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
             if (Array.isArray(geminiResult) && geminiResult.length > 0) {
               return geminiResult.map(d => ({
                 name: String(d.name || '').trim(),
-                price: String(d.price || '150').replace(/[^0-9.]/g, '') || '150',
+                price: String(d.price !== undefined && d.price !== null ? d.price : '150').replace(/[^0-9.]/g, '') || '150',
                 ingredients: d.ingredients || 'Traditional Kapampangan heritage seasoning, garlic, onions, native herbs',
                 allergens: d.allergens || 'None / Allergen Free',
                 calories: String(d.calories || '450').replace(/[^0-9]/g, '') || '450',
@@ -12381,7 +12360,7 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
               })).filter(d => d.name.length >= 2);
             }
 
-            // 3. Cloud OCR on cropped text panel (excludes photos on right side)
+            // 3. Cloud OCR on cropped text panel
             const textCropped = await cropTextPanel(optimizedImg);
             const ocrText = await runCloudAiOcr(textCropped || optimizedImg);
             if (ocrText && ocrText.trim().length > 5) {
@@ -15761,7 +15740,7 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
             <div className="bg-[#1A1A1A] border border-[#333333] rounded-2xl p-5 space-y-3 shadow-md border-l-4 border-l-terracotta">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-black text-terracotta uppercase tracking-wider">
-                  GROUP JECCAN!
+                  Made by JECCAN!
                 </span>
                 <span className="bg-[#E2F1E7] text-[#2C5E3B] text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-[#2C5E3B]/20 inline-block">
                   Project Creators & Developers
@@ -15831,7 +15810,7 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
               className="w-10 h-10 object-contain rounded-xl shadow-md border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 bg-white dark:bg-[#1E1B18] p-0.5"
             />
             <div>
-              <h1 className="text-xl font-extrabold tracking-tight text-charcoal dark:text-white m-0 flex items-center gap-1.5 leading-none">
+              <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron m-0 flex items-center gap-1.5 leading-none">
                 Kanyamanan
               </h1>
               <p className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium tracking-wide mt-0.5">
@@ -16019,17 +15998,17 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
               </div>
 
               <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                {/* Left Column: Rich Editorial Typography & Narrative */}
-                <div className="lg:col-span-6 space-y-4 text-left">
+                {/* Left Column: Rich Editorial Typography, Feature Pills & Quick Actions */}
+                <div className="lg:col-span-6 space-y-4 sm:space-y-5 text-left">
                   {/* Top Cultural Badge */}
-                  <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-terracotta/10 via-[#FFF8F3] to-saffron/15 dark:from-terracotta/20 dark:via-[#26211C] dark:to-saffron/20 border border-terracotta/30 dark:border-terracotta/40 text-terracotta shadow-2xs whitespace-nowrap">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-terracotta text-white text-[10px] shadow-xs">
+                  <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-terracotta/10 via-[#FFF8F3] to-saffron/15 dark:from-terracotta/20 dark:via-[#26211C] dark:to-saffron/20 border border-terracotta/30 dark:border-terracotta/40 text-terracotta shadow-xs whitespace-nowrap backdrop-blur-xs">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-terracotta to-[#D9531E] text-white text-[10px] shadow-xs animate-pulse">
                       ✨
                     </span>
                     <span className="text-[11px] sm:text-xs font-black tracking-wider uppercase text-charcoal dark:text-[#F7F5F0]">
                       Manyaman a Kayamanan
                     </span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-terracotta/40"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-terracotta/50"></span>
                     <span className="text-[10px] sm:text-[11px] font-extrabold tracking-wide uppercase text-terracotta">
                       Culinary Heritage of Pampanga
                     </span>
@@ -16037,61 +16016,86 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
 
                   {/* Main Headline */}
                   <div className="space-y-1.5">
-                    <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1E1915] dark:text-white tracking-tight leading-tight m-0 drop-shadow-xs">
+                    <h2 className="text-3xl sm:text-4xl lg:text-[46px] xl:text-[50px] font-black text-[#1E1915] dark:text-white tracking-tight leading-[1.1] m-0 drop-shadow-xs">
                       Mekeni, Mangan Tana!
                     </h2>
-                    <div className="text-base sm:text-xl lg:text-2xl xl:text-[26px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron tracking-tight whitespace-nowrap pr-4">
+                    <div className="text-base sm:text-xl lg:text-2xl xl:text-[25px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron tracking-tight">
                       Explore Pampanga’s Culinary Map and more!
                     </div>
                   </div>
 
-                  {/* Rich Narrative Description with Highlighted Feature Anchors */}
-                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed font-medium m-0">
-                    Welcome to <strong className="text-charcoal dark:text-white font-black bg-terracotta/10 dark:bg-terracotta/20 px-1.5 py-0.5 rounded-md text-terracotta">Kanyamanan</strong>, the provincial culinary guide and health informatics portal for Pampanga. Discover ancestral heirloom recipes with verified <strong className="text-[#1E1915] dark:text-white font-bold">nutritional &amp; allergen insights</strong>, explore certified Kapampangan kitchens across all <strong className="text-[#1E1915] dark:text-white font-bold">22 municipalities &amp; cities</strong>, craft <strong className="text-[#1E1915] dark:text-white font-bold">AI-guided food trails</strong>, and navigate travel corridors in real time.
+                  {/* Fast, Entertaining & Easy-to-Read Intro */}
+                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed font-medium m-0 max-w-xl">
+                    Discover <strong className="text-charcoal dark:text-white font-black bg-terracotta/10 dark:bg-terracotta/20 px-1.5 py-0.5 rounded-md text-terracotta inline-block">Pampanga's best heirloom flavors</strong>, legendary local kitchens across all <strong className="text-[#1E1915] dark:text-white font-bold">22 towns</strong>, and top tourist spots — powered by smart <strong className="text-[#1E1915] dark:text-white font-bold">AI food trails</strong> and instant <strong className="text-[#1E1915] dark:text-white font-bold">health insights</strong>! 🍲✨
                   </p>
+
+                  {/* Fun, Fast-to-Scan Feature Cards */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 max-w-lg">
+                    <div className="bg-gradient-to-b from-white to-[#FFF9F5] dark:from-[#1E1B18] dark:to-[#25201B] px-2.5 py-2 rounded-xl border border-terracotta/20 dark:border-terracotta/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
+                      <span className="text-sm">🍲</span>
+                      <span className="text-[10px] font-black text-charcoal dark:text-white mt-0.5">22 Towns</span>
+                      <span className="text-[8px] font-extrabold text-terracotta uppercase">Authentic Eats</span>
+                    </div>
+                    <div className="bg-gradient-to-b from-white to-[#F6FFF9] dark:from-[#1E1B18] dark:to-[#1B2520] px-2.5 py-2 rounded-xl border border-bananaleaf/20 dark:border-bananaleaf/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
+                      <span className="text-sm">🌿</span>
+                      <span className="text-[10px] font-black text-charcoal dark:text-white mt-0.5">Health Data</span>
+                      <span className="text-[8px] font-extrabold text-bananaleaf dark:text-[#52B788] uppercase">Allergens &amp; Diet</span>
+                    </div>
+                    <div className="bg-gradient-to-b from-white to-[#FFFDF5] dark:from-[#1E1B18] dark:to-[#25231B] px-2.5 py-2 rounded-xl border border-saffron/25 dark:border-saffron/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
+                      <span className="text-sm">🤖</span>
+                      <span className="text-[10px] font-black text-charcoal dark:text-white mt-0.5">AI Trails</span>
+                      <span className="text-[8px] font-extrabold text-saffron-dark dark:text-saffron uppercase">Smart Trips</span>
+                    </div>
+                    <div className="bg-gradient-to-b from-white to-[#FAF5FF] dark:from-[#1E1B18] dark:to-[#221B25] px-2.5 py-2 rounded-xl border border-purple-500/20 dark:border-purple-500/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
+                      <span className="text-sm">⛰️</span>
+                      <span className="text-[10px] font-black text-charcoal dark:text-white mt-0.5">Top Sights</span>
+                      <span className="text-[8px] font-extrabold text-purple-700 dark:text-purple-400 uppercase">Must-Visit Spots</span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Right Column: Kapampangan Culture & Food Showcase */}
-                <div className="lg:col-span-6 flex items-center justify-center lg:justify-end">
+                {/* Right Column: Kapampangan Food & Tourist Destination Showcase */}
+                <div className="lg:col-span-6 flex flex-col items-center justify-center lg:items-end">
+                  {/* Top: Iconic Kapampangan Food Showcase */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-center w-full max-w-lg">
 
-                    {/* Left Flank: Nature & Heritage */}
-                    <div className="flex flex-row sm:flex-col gap-3">
-                      {/* Card 1: Real Mount Arayat */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-3 hover:rotate-0 hover:-translate-y-1 text-center group">
-                        <div className="h-20 rounded-xl overflow-hidden relative shadow-xs">
+                    {/* Left Flank: Authentic Culinary Classics */}
+                    <div className="flex flex-row sm:flex-col gap-2.5">
+                      {/* Card 1: Kare-Kare */}
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center group">
+                        <div className="h-16 sm:h-18 rounded-xl overflow-hidden relative shadow-xs">
                           <img
-                            src="/attractions/real_mt_arayat.png"
-                            alt="Mount Arayat (Bunduk Alaya) Pampanga"
+                            src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80"
+                            alt="Authentic Kapampangan Kare-Kare Stew"
                             className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
-                            onError={(e) => { e.target.src = "/attractions/mt_arayat_park.jpg"; }}
+                            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80"; }}
                           />
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
-                            ⛰️ Mt. Arayat
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                            🥜 Kare-Kare
                           </span>
                         </div>
-                        <div className="pt-1.5 text-center">
-                          <span className="font-extrabold text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Bunduk Alaya</span>
-                          <span className="text-[9px] font-black text-bananaleaf block mt-0.5 uppercase tracking-wide">Natures</span>
+                        <div className="pt-1 text-center">
+                          <span className="font-extrabold text-[11px] text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Kare-Kare</span>
+                          <span className="text-[8.5px] font-black text-amber-700 dark:text-amber-500 block mt-0.5 uppercase tracking-wide">Peanut Stew</span>
                         </div>
                       </div>
 
-                      {/* Card 2: Historical Churches */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center group">
-                        <div className="h-20 rounded-xl overflow-hidden relative shadow-xs">
+                      {/* Card 2: Bringhe */}
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-1 hover:rotate-0 hover:-translate-y-1 text-center group">
+                        <div className="h-16 sm:h-18 rounded-xl overflow-hidden relative shadow-xs">
                           <img
-                            src="/attractions/real_betis_church.jpg"
-                            alt="Historical Churches Pampanga"
+                            src="https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=400&q=80"
+                            alt="Kapampangan Bringhe Fiesta Rice"
                             className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
-                            onError={(e) => { e.target.src = "/attractions/betis_church_guagua.png"; }}
+                            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80"; }}
                           />
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-xs text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
-                            🏛️ Heritage Church
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                            🥥 Bringhe
                           </span>
                         </div>
-                        <div className="pt-1.5 text-center">
-                          <span className="font-extrabold text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Historical Churches</span>
-                          <span className="text-[9px] font-black text-[#2C5E3B] block mt-0.5 uppercase tracking-wide">Heritage</span>
+                        <div className="pt-1 text-center">
+                          <span className="font-extrabold text-[11px] text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Bringhe Rice</span>
+                          <span className="text-[8.5px] font-black text-bananaleaf block mt-0.5 uppercase tracking-wide">Fiesta Dish</span>
                         </div>
                       </div>
                     </div>
@@ -16115,47 +16119,133 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
                       </div>
                     </div>
 
-                    {/* Right Flank: Festivals & Celebrations */}
-                    <div className="flex flex-row sm:flex-col gap-3">
-                      {/* Card 4: Giant Lantern */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-3 hover:rotate-0 hover:-translate-y-1 text-center group">
-                        <div className="h-20 rounded-xl overflow-hidden relative shadow-xs">
+                    {/* Right Flank: Crispy Pata & Desserts */}
+                    <div className="flex flex-row sm:flex-col gap-2.5">
+                      {/* Card 3: Crispy Pata */}
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center group">
+                        <div className="h-16 sm:h-18 rounded-xl overflow-hidden relative shadow-xs">
                           <img
-                            src="/attractions/giant_lantern_san_fernando.jpg"
-                            alt="Parul Sampernandu Giant Lantern"
+                            src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=400&q=80"
+                            alt="Kapampangan Crispy Pata"
                             className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
-                            onError={(e) => { e.target.src = "/attractions/giant_lantern_san_fernando.png"; }}
+                            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80"; }}
                           />
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-saffron text-charcoal text-[8px] font-black px-2 py-0.5 rounded-full border border-charcoal/10 whitespace-nowrap shadow-xs">
-                            ✨ Parul
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                            🍖 Crispy Pata
                           </span>
                         </div>
-                        <div className="pt-1.5 text-center">
-                          <span className="font-extrabold text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Giant Lantern</span>
-                          <span className="text-[9px] font-black text-[#D97706] block mt-0.5 uppercase tracking-wide">Christmas Capital</span>
+                        <div className="pt-1 text-center">
+                          <span className="font-extrabold text-[11px] text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Crispy Pata</span>
+                          <span className="text-[8.5px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Signature Meat</span>
                         </div>
                       </div>
 
-                      {/* Card 5: Majigangga Festival */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center group">
-                        <div className="h-20 rounded-xl overflow-hidden relative shadow-xs">
+                      {/* Card 4: Halo-Halo */}
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-1 hover:rotate-0 hover:-translate-y-1 text-center group">
+                        <div className="h-16 sm:h-18 rounded-xl overflow-hidden relative shadow-xs">
                           <img
-                            src="/attractions/real_majigangga.png"
-                            alt="Majigangga Festival Santa Rita Pampanga"
+                            src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=400&q=80"
+                            alt="Special Kapampangan Halo-Halo"
                             className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
-                            onError={(e) => { e.target.src = "/attractions/majigangga_festival.jpg"; }}
+                            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=400&q=80"; }}
                           />
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-[#C84B31] text-white text-[8px] font-black px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
-                            🎭 Majigangga
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                            🍧 Halo-Halo
                           </span>
                         </div>
-                        <div className="pt-1.5 text-center">
-                          <span className="font-extrabold text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Local Festivals</span>
-                          <span className="text-[8.5px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Cultural Celebrations</span>
+                        <div className="pt-1 text-center">
+                          <span className="font-extrabold text-[11px] text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Halo-Halo</span>
+                          <span className="text-[8.5px] font-black text-saffron-dark dark:text-saffron block mt-0.5 uppercase tracking-wide">Sweet Dessert</span>
                         </div>
                       </div>
                     </div>
 
+                  </div>
+
+                  {/* Bottom: Smaller Tourist Destination Image Cards Row */}
+                  <div className="mt-3 pt-2.5 border-t border-[#E9E5DE]/80 dark:border-[#2E2A24]/80 w-full max-w-lg">
+                    <div className="flex items-center justify-between mb-1.5 px-0.5">
+                      <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-charcoal-light dark:text-gray-400 flex items-center gap-1">
+                        <span>🧭</span> Top Tourist Destinations to Visit
+                      </span>
+                      <span className="text-[8.5px] font-black text-terracotta bg-terracotta/10 dark:bg-terracotta/20 px-1.5 py-0.5 rounded-md">
+                        Add to Trip
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-2">
+                      {/* Destination 1: Mt. Arayat */}
+                      <div className="bg-white dark:bg-[#1E1B18] p-1 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center">
+                        <div className="h-10 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
+                          <img
+                            src="/attractions/real_mt_arayat.png"
+                            alt="Mount Arayat"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => { e.target.src = "/attractions/mt_arayat_park.jpg"; }}
+                          />
+                          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[6.5px] font-black px-1 py-0.2 rounded whitespace-nowrap">
+                            ⛰️ Nature
+                          </span>
+                        </div>
+                        <span className="text-[9px] font-extrabold text-charcoal dark:text-gray-200 block truncate mt-1">
+                          Mt. Arayat
+                        </span>
+                      </div>
+
+                      {/* Destination 2: Betis Church */}
+                      <div className="bg-white dark:bg-[#1E1B18] p-1 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center">
+                        <div className="h-10 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
+                          <img
+                            src="/attractions/real_betis_church.jpg"
+                            alt="Betis Heritage Church"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => { e.target.src = "/attractions/betis_church_guagua.png"; }}
+                          />
+                          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[6.5px] font-black px-1 py-0.2 rounded whitespace-nowrap">
+                            🏛️ Church
+                          </span>
+                        </div>
+                        <span className="text-[9px] font-extrabold text-charcoal dark:text-gray-200 block truncate mt-1">
+                          Betis Church
+                        </span>
+                      </div>
+
+                      {/* Destination 3: Giant Lantern */}
+                      <div className="bg-white dark:bg-[#1E1B18] p-1 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center">
+                        <div className="h-10 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
+                          <img
+                            src="/attractions/giant_lantern_san_fernando.jpg"
+                            alt="Giant Lantern Parul"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => { e.target.src = "/attractions/giant_lantern_san_fernando.png"; }}
+                          />
+                          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[6.5px] font-black px-1 py-0.2 rounded whitespace-nowrap">
+                            ✨ Lanterns
+                          </span>
+                        </div>
+                        <span className="text-[9px] font-extrabold text-charcoal dark:text-gray-200 block truncate mt-1">
+                          Giant Lantern
+                        </span>
+                      </div>
+
+                      {/* Destination 4: Majigangga Festival */}
+                      <div className="bg-white dark:bg-[#1E1B18] p-1 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center">
+                        <div className="h-10 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
+                          <img
+                            src="/attractions/real_majigangga.png"
+                            alt="Majigangga Festival"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => { e.target.src = "/attractions/majigangga_festival.jpg"; }}
+                          />
+                          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[6.5px] font-black px-1 py-0.2 rounded whitespace-nowrap">
+                            🎭 Festival
+                          </span>
+                        </div>
+                        <span className="text-[9px] font-extrabold text-charcoal dark:text-gray-200 block truncate mt-1">
+                          Majigangga
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -16347,13 +16437,22 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
             <div className="bento-card p-6 sm:p-8 bg-white border-[#E9E5DE] lantern-overlay shadow-xl">
 
               <div className="text-center mb-6">
-                <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-terracotta/10 text-terracotta mb-3">
-                  <ShieldCheck className="h-6 w-6" />
-                </span>
-                <h2 className="text-2xl font-black text-charcoal tracking-tight m-0">
+                <div className="relative inline-block mb-3.5 group">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-terracotta/15 via-[#FFF8F3] to-saffron/20 dark:from-terracotta/25 dark:via-[#26211C] dark:to-saffron/25 p-1 border-2 border-terracotta/30 dark:border-terracotta/40 shadow-md flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                    <img
+                      src="/kanyamanan-logo.png"
+                      alt="Kanyamanan Emblem"
+                      className="w-full h-full object-contain rounded-xl p-0.5"
+                    />
+                  </div>
+                  <span className="absolute -bottom-1 -right-1 flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-terracotta to-[#D9531E] text-white text-[10px] shadow-xs border-2 border-white dark:border-[#1E1B18]">
+                    ✨
+                  </span>
+                </div>
+                <h2 className="text-2xl font-black text-charcoal dark:text-white tracking-tight m-0">
                   {isRegistering ? "Create Your Profile" : "Welcome Back"}
                 </h2>
-                <p className="text-xs text-charcoal-light mt-1.5">
+                <p className="text-xs text-charcoal-light dark:text-gray-400 mt-1.5">
                   {isRegistering ? "Configure dietary targets and active route constraints." : "Access your dynamic itineraries and wellness targets."}
                 </p>
               </div>
@@ -18468,9 +18567,8 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
                   alt="Kanyamanan Logo"
                   className="w-8 h-8 rounded-lg object-contain shadow-xs bg-white/5 p-0.5 border border-white/10"
                 />
-                <span className="text-lg font-black text-white tracking-tight">Kanyamanan</span>
-                <span className="px-2 py-0.5 bg-white/10 text-saffron text-[10px] font-black rounded-full border border-white/10">
-                  v1.0
+                <span className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron tracking-tight">
+                  Kanyamanan
                 </span>
               </div>
               <p className="text-xs text-gray-400 leading-relaxed max-w-sm m-0">
@@ -18486,7 +18584,7 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
             {/* Team JECCAN! Developers Column */}
             <div className="lg:col-span-8 space-y-3.5 border-t lg:border-t-0 lg:border-l border-white/10 pt-6 lg:pt-0 lg:pl-8">
               <div className="flex items-center justify-center lg:justify-start gap-2">
-                <span className="text-xs font-black text-saffron uppercase tracking-wider">Group JECCAN!</span>
+                <span className="text-xs font-black text-saffron uppercase tracking-wider">Made by JECCAN!</span>
                 <span className="px-2.5 py-0.5 bg-white/10 text-gray-300 text-[10px] font-bold rounded-full border border-white/10">
                   Project Creators &amp; Lead Developers
                 </span>
