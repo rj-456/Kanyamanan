@@ -24,6 +24,7 @@ import {
   Coffee,
   Star,
   ChevronRight,
+  ChevronDown,
   Database,
   Briefcase,
   Layers,
@@ -38,7 +39,9 @@ import {
   Users,
   UserPlus,
   Loader2,
-  Download
+  Download,
+  Menu,
+  ArrowUp
 } from 'lucide-react';
 import {
   PRESEEDED_RESTAURANTS,
@@ -424,7 +427,38 @@ function App() {
 
   // Consumer Views: 'homepage', 'auth', 'dashboard'
   const [activeView, setActiveView] = useState('homepage');
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [branchSelectTarget, setBranchSelectTarget] = useState(null);
+  const [addedStopModal, setAddedStopModal] = useState(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleWindowScroll = () => {
+      if (window.scrollY > 280) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    window.addEventListener('scroll', handleWindowScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleWindowScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  const scrollToRestaurants = () => {
+    setTimeout(() => {
+      const el = document.getElementById('restaurants-section');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 120);
+  };
 
   // Persistent Authenticated User Session
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -2002,14 +2036,9 @@ So, where do we start? 😊`,
     } catch (e) { }
   }, [tripSelectedDishes]);
 
-  const getDishQtyFor = (stopId, dishId, key = 'solo', isDefaultFirst = false) => {
+  const getDishQtyFor = (stopId, dishId, key = 'solo') => {
     const stopMap = tripSelectedDishes[stopId];
-    if (!stopMap) {
-      if (isDefaultFirst) {
-        return (key === 'solo' || key === 'shared' || key === groupMembers[0]?.id) ? 1 : 0;
-      }
-      return 0;
-    }
+    if (!stopMap) return 0;
     const entry = stopMap[dishId];
     if (entry === undefined) return 0;
     if (typeof entry === 'number') {
@@ -2021,9 +2050,9 @@ So, where do we start? 😊`,
     return 0;
   };
 
-  const getDishTotalQty = (stopId, dishId, isDefaultFirst = false) => {
+  const getDishTotalQty = (stopId, dishId) => {
     const stopMap = tripSelectedDishes[stopId];
-    if (!stopMap) return isDefaultFirst ? 1 : 0;
+    if (!stopMap) return 0;
     const entry = stopMap[dishId];
     if (entry === undefined) return 0;
     if (typeof entry === 'number') return entry;
@@ -2127,8 +2156,6 @@ So, where do we start? 😊`,
             const entry = stopSelections[dish.id];
             if (typeof entry === 'number') qty = entry;
             else if (typeof entry === 'object' && entry !== null) qty = (entry.solo ?? entry[groupMembers[0]?.id]) || 0;
-          } else {
-            qty = dIdx === 0 ? 1 : 0;
           }
 
           if (qty > 0) {
@@ -2188,9 +2215,6 @@ So, where do we start? 😊`,
               });
               dishTotalQty += sharedQty;
             }
-          } else if (dIdx === 0) {
-            sharedQty = 1;
-            dishTotalQty = 1;
           }
 
           const isPerPax = /package|bundle|buffet|unlimited|\/pax|\/head/i.test(dish.name) || dish.type === 'bundle' || dish.type === 'buffet';
@@ -2291,9 +2315,9 @@ So, where do we start? 😊`,
     });
 
     const hasBagoong = Array.from(activeAllergens).some(a => /bagoong|shrimp paste|alamang/i.test(a));
-    const hasPurines = restaurantStops.some(r => r.menu?.some(d => getDishTotalQty(r.id, d.id, r.menu[0]?.id === d.id) > 0 && /sisig|pork|liver|snout|ear|offal|bopis|dinuguan/i.test((d.ingredients || '') + ' ' + (d.name || ''))));
+    const hasPurines = restaurantStops.some(r => r.menu?.some(d => getDishTotalQty(r.id, d.id) > 0 && /sisig|pork|liver|snout|ear|offal|bopis|dinuguan/i.test((d.ingredients || '') + ' ' + (d.name || ''))));
     const hasHighLipids = tableFat >= (diningMode === 'group' ? 65 * groupCount : 65);
-    const hasHighSugar = restaurantStops.some(r => r.menu?.some(d => getDishTotalQty(r.id, d.id, r.menu[0]?.id === d.id) > 0 && /halo-halo|pastillas|tibok-tibok|ube|sweet|sugar/i.test((d.name || '') + ' ' + (d.ingredients || ''))));
+    const hasHighSugar = restaurantStops.some(r => r.menu?.some(d => getDishTotalQty(r.id, d.id) > 0 && /halo-halo|pastillas|tibok-tibok|ube|sweet|sugar/i.test((d.name || '') + ' ' + (d.ingredients || ''))));
 
     const activeCalorieLimit = diningMode === 'solo'
       ? (userProfile?.calorieLimit || 2200)
@@ -2405,6 +2429,7 @@ So, where do we start? 😊`,
   const [attractionMunFilter, setAttractionMunFilter] = useState('All');
   const [attractionTypeFilter, setAttractionTypeFilter] = useState('All');
   const [attractionSearchQuery, setAttractionSearchQuery] = useState('');
+  const [isAttractionMunOpen, setIsAttractionMunOpen] = useState(false);
   const [selectedAttraction, setSelectedAttraction] = useState(null);
 
   // Sync open attraction detail modal & active trip when attractions update
@@ -13688,45 +13713,45 @@ ${rawText}`;
     }
 
     return (
-      <div className="min-h-screen bg-ivory text-charcoal flex flex-col font-sans">
+      <div className="min-h-screen bg-ivory text-charcoal flex flex-col font-sans w-full max-w-full overflow-x-hidden">
 
-        {/* Dedicated Admin Header */}
-        <header className="bg-charcoal text-white border-b border-charcoal-dark shadow-md py-3.5 px-6 sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        {/* Dedicated Responsive Admin Header */}
+        <header className="bg-charcoal text-white border-b border-charcoal-dark shadow-md py-3 px-4 sm:px-6 sticky top-0 z-40 w-full">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
 
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-terracotta to-[#C2410C] flex items-center justify-center shadow-md border border-white/10 ring-2 ring-terracotta/25 shrink-0">
-                <Database className="h-5 w-5 text-white" />
+            <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-terracotta to-[#C2410C] flex items-center justify-center shadow-md border border-white/10 ring-2 ring-terracotta/25 shrink-0">
+                <Database className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  <h1 className="text-base sm:text-lg font-black tracking-tight text-white m-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-sm sm:text-lg font-black tracking-tight text-white m-0 truncate">
                     Kanyamanan Portal
                   </h1>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-terracotta/20 text-[#FB923C] border border-terracotta/35">
+                  <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-terracotta/20 text-[#FB923C] border border-terracotta/35 shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#FB923C] animate-pulse"></span>
                     {adminRole === 'superadmin' ? 'System Admin' : 'Merchant Owner'}
                   </span>
                 </div>
-                <p className="text-[11px] text-gray-400 font-medium tracking-normal mt-0.5 m-0 truncate">
+                <p className="text-[10px] sm:text-[11px] text-gray-400 font-medium tracking-normal mt-0.5 m-0 hidden sm:block truncate">
                   Kapampangan Restaurants Database Manager &amp; Merchant Analytics Core
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
               {/* Dark / Light Mode Toggle Button */}
               <button
                 type="button"
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className="p-2 rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all shadow-xs flex items-center justify-center cursor-pointer active:scale-95 shrink-0"
+                className="p-1.5 sm:p-2 rounded-xl border border-white/20 bg-white/10 text-white hover:bg-white/20 transition-all shadow-xs flex items-center justify-center cursor-pointer active:scale-95 shrink-0"
                 title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
                 aria-label="Toggle Theme"
               >
                 {isDarkMode ? (
-                  <Sun className="h-4 w-4 text-saffron fill-saffron/20" />
+                  <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-saffron fill-saffron/20" />
                 ) : (
-                  <Moon className="h-4 w-4 text-gray-300 hover:text-white" />
+                  <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-300 hover:text-white" />
                 )}
               </button>
 
@@ -13737,33 +13762,29 @@ ${rawText}`;
                   setAdminRole('superadmin');
                   setAdminLoginPass('');
                 }}
-                className="px-4 py-2 bg-white/10 hover:bg-terracotta text-white rounded-xl text-xs font-black transition-all flex items-center gap-1.5 border border-white/15 hover:border-terracotta shadow-xs cursor-pointer active:scale-95"
+                className="px-2.5 sm:px-4 py-1.5 sm:py-2 bg-white/10 hover:bg-terracotta text-white rounded-xl text-[11px] sm:text-xs font-black transition-all flex items-center gap-1 sm:gap-1.5 border border-white/15 hover:border-terracotta shadow-xs cursor-pointer active:scale-95 shrink-0"
               >
-                Sign Out
+                <LogOut className="h-3.5 w-3.5 sm:hidden" />
+                <span>Sign Out</span>
               </button>
             </div>
 
           </div>
         </header>
 
-
-
-
-        {/* Admin main work grid */}
-
         {/* Admin Section Navigation Tabs (Super Admin / Merchant) */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-          <div className="bg-white border border-[#E9E5DE] rounded-2xl p-1.5 shadow-sm flex flex-col sm:flex-row items-stretch gap-1.5">
+        <div className="max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+          <div className="bg-white border border-[#E9E5DE] rounded-2xl p-1.5 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-1.5">
             <button
               type="button"
               onClick={() => setAdminSectionTab('restaurants')}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${adminSectionTab === 'restaurants'
+              className={`py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${adminSectionTab === 'restaurants'
                 ? 'bg-terracotta text-white shadow-md'
                 : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
                 }`}
             >
               <span className="text-sm">🏪</span>
-              <span className="tracking-wide uppercase">Kapampangan Restaurants</span>
+              <span className="tracking-wide uppercase truncate">Restaurants</span>
               <span
                 className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${adminSectionTab === 'restaurants'
                   ? 'bg-white/20 text-white'
@@ -13779,13 +13800,13 @@ ${rawText}`;
                 <button
                   type="button"
                   onClick={() => setAdminSectionTab('requests')}
-                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${adminSectionTab === 'requests'
+                  className={`py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${adminSectionTab === 'requests'
                     ? 'bg-terracotta text-white shadow-md'
                     : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
                     }`}
                 >
                   <span className="text-sm">📋</span>
-                  <span className="tracking-wide uppercase">Change Requests</span>
+                  <span className="tracking-wide uppercase truncate">Change Requests</span>
                   {pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length > 0 ? (
                     <span className="px-2 py-0.5 text-[10px] bg-amber-500 text-white font-black rounded-full shadow-xs animate-pulse">
                       {pendingApprovals.filter(a => (a.status || 'pending') === 'pending').length} Pending
@@ -13805,13 +13826,13 @@ ${rawText}`;
                 <button
                   type="button"
                   onClick={() => setAdminSectionTab('attractions')}
-                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${adminSectionTab === 'attractions'
+                  className={`py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${adminSectionTab === 'attractions'
                     ? 'bg-terracotta text-white shadow-md'
                     : 'text-charcoal-light hover:text-charcoal hover:bg-[#FAF8F5]'
                     }`}
                 >
                   <span className="text-sm">🏛️</span>
-                  <span className="tracking-wide uppercase">Tourist Attractions</span>
+                  <span className="tracking-wide uppercase truncate">Attractions</span>
                   <span
                     className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${adminSectionTab === 'attractions'
                       ? 'bg-white/20 text-white'
@@ -13826,8 +13847,7 @@ ${rawText}`;
           </div>
         </div>
 
-
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 min-w-0">
 
           {adminSectionTab === 'restaurants' && (
             <div className="space-y-6">
@@ -15874,53 +15894,69 @@ ${rawText}`;
   // CONSUMER / PUBLIC Aggregator PORTAL VIEW
   // =========================================================================
   return (
-    <div className="min-h-screen bg-ivory dark:bg-[#121110] text-charcoal dark:text-[#F7F5F0] flex flex-col font-sans relative pb-20 sm:pb-0 transition-colors duration-200">
+    <div className="min-h-screen bg-ivory dark:bg-[#121110] text-charcoal dark:text-[#F7F5F0] flex flex-col font-sans relative transition-colors duration-200">
 
-      {/* 1. Global Navigation Header */}
-      <header className="sticky top-0 z-40 bg-white dark:bg-[#1A1714] border-b border-[#E9E5DE] dark:border-[#2E2A24] shadow-sm transition-colors duration-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      {/* 1. Global Responsive Navigation Header */}
+      <header className="sticky top-0 z-40 bg-white dark:bg-[#1A1714] border-b border-[#E9E5DE] dark:border-[#2E2A24] shadow-sm transition-colors duration-200 w-full">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
 
           {/* Logo Brand Typography */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => { setActiveView('homepage'); setSelectedMunicipality('All'); setSelectedCorridor('All'); }}>
+          <div className="flex items-center gap-2.5 sm:gap-3 cursor-pointer shrink-0 min-w-0" onClick={() => { setActiveView('homepage'); setSelectedMunicipality('All'); setSelectedCorridor('All'); setIsMobileNavOpen(false); }}>
             <img
               src="/kanyamanan-logo.png"
               alt="Kanyamanan Logo"
-              className="w-10 h-10 object-contain rounded-xl shadow-md border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 bg-white dark:bg-[#1E1B18] p-0.5"
+              className="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-xl shadow-md border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 bg-white dark:bg-[#1E1B18] p-0.5"
             />
-            <div>
-              <h1 className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron m-0 flex items-center gap-1.5 leading-none">
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron m-0 flex items-center gap-1.5 leading-none truncate">
                 Kanyamanan
               </h1>
-              <p className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium tracking-wide mt-0.5">
-                PAMPANGA HEALTH INFORMATICS & CULINARY RESTAURANT AGGREGATOR
+              <p className="text-[9px] sm:text-[10px] text-charcoal-light dark:text-gray-400 font-medium tracking-wide mt-0.5 hidden xl:block truncate">
+                PAMPANGA HEALTH INFORMATICS &amp; CULINARY AGGREGATOR
               </p>
             </div>
           </div>
 
-          {/* Centralized Search Input */}
-          <div className="hidden md:flex flex-1 max-w-md relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-charcoal-light dark:text-gray-400" />
+          {/* Centralized Search Input (Desktop/Tablet - Visible when not in Auth/Login view) */}
+          {activeView !== 'auth' && (
+            <div className="hidden md:flex flex-1 min-w-[170px] max-w-xs lg:max-w-md relative mx-1 lg:mx-3">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-charcoal-light dark:text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search dishes, kitchens, towns..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value.trim().length > 0) {
+                    if (activeView !== 'homepage') setActiveView('homepage');
+                    scrollToRestaurants();
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    if (activeView !== 'homepage') setActiveView('homepage');
+                    scrollToRestaurants();
+                  }
+                }}
+                className="block w-full pl-9 pr-8 py-2 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] text-xs sm:text-sm text-charcoal dark:text-white placeholder-charcoal-light dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-terracotta focus:border-terracotta focus:bg-white dark:focus:bg-[#1A1715] transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white"
+                  aria-label="Clear search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
-            <input
-              type="text"
-              placeholder="Search dishes, Kapampangan Restaurants, or ingredients..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] text-sm text-charcoal dark:text-white placeholder-charcoal-light dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-terracotta focus:border-terracotta focus:bg-white dark:focus:bg-[#1A1715] transition-colors"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+          )}
 
-          {/* Navigation links */}
-          <nav className="flex items-center gap-2 sm:gap-4">
+          {/* Desktop Navigation links */}
+          <nav className="hidden md:flex items-center gap-1.5 lg:gap-3 shrink-0">
             <button
               onClick={() => setActiveView('homepage')}
               className={`px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-colors ${activeView === 'homepage' ? 'text-terracotta bg-terracotta/10 dark:bg-terracotta/20 font-bold' : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white'}`}
@@ -15934,14 +15970,14 @@ ${rawText}`;
                   onClick={() => setActiveView('dashboard')}
                   className={`px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-colors ${activeView === 'dashboard' ? 'text-terracotta bg-terracotta/10 dark:bg-terracotta/20 font-bold' : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white'}`}
                 >
-                  🗺️ My Food Trip Planner
+                  🗺️ Trip Planner
                 </button>
                 <div className="h-6 w-px bg-[#E9E5DE] dark:bg-[#2E2A24] hidden sm:block"></div>
                 <div className="flex items-center gap-2 pl-1 bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-full p-0.5">
                   <div className="w-8 h-8 rounded-full bg-bananaleaf flex items-center justify-center text-white text-xs font-bold shadow-inner">
                     {userProfile.username.substring(0, 2).toUpperCase()}
                   </div>
-                  <span className="text-xs font-bold text-charcoal dark:text-white hidden sm:inline-block pr-3">
+                  <span className="text-xs font-bold text-charcoal dark:text-white hidden lg:inline-block pr-3">
                     Mangan, {userProfile.username}!
                   </span>
                   <button
@@ -15999,14 +16035,14 @@ ${rawText}`;
                   }}
                   className="px-3 py-2 rounded-xl text-xs font-semibold tracking-wide text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white transition-colors"
                 >
-                  🗺️ Plan Trip (Guest Mode)
+                  🗺️ Plan Trip
                 </button>
                 <button
                   onClick={() => setActiveView('auth')}
-                  className="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-xs font-bold rounded-xl shadow-sm text-white bg-terracotta hover:bg-terracotta-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-terracotta transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-transparent text-xs font-bold rounded-xl shadow-sm text-white bg-terracotta hover:bg-terracotta-dark focus:outline-none transition-colors"
                 >
                   <User className="h-3.5 w-3.5" />
-                  Sign In / Register
+                  Sign In
                 </button>
               </>
             )}
@@ -16026,33 +16062,157 @@ ${rawText}`;
               )}
             </button>
           </nav>
+
+          {/* Mobile Right Controls: Theme Toggle & Hamburger Menu */}
+          <div className="flex md:hidden items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-2 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] bg-[#FAF8F5] dark:bg-[#1E1B18] text-charcoal dark:text-white flex items-center justify-center cursor-pointer active:scale-95 shrink-0"
+              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDarkMode ? (
+                <Sun className="h-4 w-4 text-saffron fill-saffron/20" />
+              ) : (
+                <Moon className="h-4 w-4 text-charcoal-light" />
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+              className="p-2 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] bg-terracotta text-white flex items-center justify-center cursor-pointer active:scale-95 shrink-0 shadow-xs"
+              aria-label="Toggle Navigation Menu"
+            >
+              {isMobileNavOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </button>
+          </div>
+
         </div>
+
+        {/* Mobile Dropdown Navigation Drawer */}
+        {isMobileNavOpen && (
+          <div className="md:hidden border-t border-[#E9E5DE] dark:border-[#2E2A24] bg-white dark:bg-[#1A1714] px-4 py-3.5 space-y-3 shadow-lg animate-slide-down">
+            <div className="flex flex-col gap-1.5">
+              <button
+                onClick={() => { setActiveView('homepage'); setIsMobileNavOpen(false); }}
+                className={`w-full py-2.5 px-3.5 rounded-xl text-xs font-bold text-left flex items-center gap-2.5 transition-all ${activeView === 'homepage'
+                  ? 'bg-terracotta/10 dark:bg-terracotta/20 text-terracotta dark:text-orange-400 border border-terracotta/30 font-black'
+                  : 'text-charcoal dark:text-gray-200 hover:bg-[#FAF8F5] dark:hover:bg-[#25221E] border border-transparent'
+                  }`}
+              >
+                <span className="text-base">🍲</span>
+                <span>Explore Feed</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  if (!isAuthenticated && !isGuest) setIsGuest(true);
+                  setActiveView('dashboard');
+                  setIsMobileNavOpen(false);
+                }}
+                className={`w-full py-2.5 px-3.5 rounded-xl text-xs font-bold text-left flex items-center gap-2.5 transition-all ${activeView === 'dashboard'
+                  ? 'bg-terracotta/10 dark:bg-terracotta/20 text-terracotta dark:text-orange-400 border border-terracotta/30 font-black'
+                  : 'text-charcoal dark:text-gray-200 hover:bg-[#FAF8F5] dark:hover:bg-[#25221E] border border-transparent'
+                  }`}
+              >
+                <span className="text-base">🗺️</span>
+                <span>{isAuthenticated ? 'My Food Trip Planner' : 'Trip Planner (Guest)'}</span>
+              </button>
+
+              <div className="pt-2 border-t border-[#E9E5DE] dark:border-[#2E2A24]">
+                {isAuthenticated ? (
+                  <div className="flex items-center justify-between p-2.5 bg-[#FAF8F5] dark:bg-[#1E1B18] rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-7 h-7 rounded-full bg-bananaleaf text-white font-black text-xs flex items-center justify-center shrink-0">
+                        {userProfile.username.substring(0, 2).toUpperCase()}
+                      </div>
+                      <span className="text-xs font-bold text-charcoal dark:text-white truncate">
+                        {userProfile.username}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        try {
+                          localStorage.removeItem('kanyamanan_active_user');
+                          localStorage.removeItem('kanyamanan_user_profile');
+                        } catch (e) { }
+                        setIsAuthenticated(false);
+                        setIsGuest(false);
+                        setUserProfile({ username: 'Guest', email: '', calorieLimit: 2200, budgetLimit: 1500 });
+                        setActiveView('homepage');
+                        setActiveTrip([]);
+                        setIsMobileNavOpen(false);
+                      }}
+                      className="px-2.5 py-1 text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1"
+                    >
+                      <LogOut className="h-3.5 w-3.5" /> Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { setActiveView('auth'); setIsMobileNavOpen(false); }}
+                    className="w-full py-2.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-98 transition-transform"
+                  >
+                    <User className="h-4 w-4" /> Sign In / Register
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* Loading Toast */}
+      {/* Loading Toast - Centered in middle screen */}
       {showToast && (
-        <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 bg-charcoal text-white px-5 py-3 rounded-full flex items-center gap-2.5 shadow-2xl border border-charcoal-light animate-bounce">
-          <Coffee className="h-4 w-4 text-saffron animate-spin shrink-0" />
-          <span className="text-xs font-bold tracking-wide text-saffron">Stirring the palayok... Optimizing your routes.</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none p-4 animate-fade-in">
+          <div className="bg-charcoal/95 dark:bg-black/90 text-white px-6 py-4 rounded-3xl flex items-center gap-3.5 shadow-2xl border-2 border-saffron/40 backdrop-blur-md animate-scale-in max-w-sm text-center">
+            <Coffee className="h-6 w-6 text-saffron animate-spin shrink-0" />
+            <span className="text-sm font-black tracking-wide text-saffron">Stirring the palayok... Optimizing your routes.</span>
+          </div>
         </div>
       )}
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-20 sm:pb-12">
 
-        {/* Mobile Search input */}
-        <div className="md:hidden w-full mb-6 relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-charcoal-light dark:text-gray-400" />
+        {/* Mobile Search input - Hidden when viewing Auth/Login */}
+        {activeView !== 'auth' && (
+          <div className="md:hidden w-full mb-5 relative z-20">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-charcoal-light dark:text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search kitchens, dishes, municipalities..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (e.target.value.trim().length > 0) {
+                  if (activeView !== 'homepage') setActiveView('homepage');
+                  scrollToRestaurants();
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (activeView !== 'homepage') setActiveView('homepage');
+                  scrollToRestaurants();
+                }
+              }}
+              className="block w-full pl-10 pr-9 py-2.5 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl bg-white dark:bg-[#161412] text-xs sm:text-sm font-semibold text-charcoal dark:text-white placeholder-charcoal-light dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-terracotta shadow-2xs"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
-          <input
-            type="text"
-            placeholder="Search kitchens, dishes, municipalities..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2.5 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-white dark:bg-[#161412] text-sm text-charcoal dark:text-white placeholder-charcoal-light dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-terracotta"
-          />
-        </div>
+        )}
 
         {/* ========================================================================= */}
         {/* VIEW 1: THE PUBLIC HOMEPAGE */}
@@ -16075,29 +16235,29 @@ ${rawText}`;
                 </svg>
               </div>
 
-              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-center">
                 {/* Left Column: Rich Editorial Typography, Feature Pills & Quick Actions */}
-                <div className="lg:col-span-6 space-y-4 sm:space-y-5 text-left">
+                <div className="md:col-span-6 space-y-4 sm:space-y-5 text-left">
                   {/* Top Cultural Badge */}
-                  <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-terracotta/10 via-[#FFF8F3] to-saffron/15 dark:from-terracotta/20 dark:via-[#26211C] dark:to-saffron/20 border border-terracotta/30 dark:border-terracotta/40 text-terracotta shadow-xs whitespace-nowrap backdrop-blur-xs">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-terracotta to-[#D9531E] text-white text-[10px] shadow-xs animate-pulse">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-terracotta/15 via-[#FFF8F3]/5 to-saffron/15 dark:from-terracotta/25 dark:via-[#26211C] dark:to-saffron/25 border border-terracotta/30 dark:border-terracotta/40 shadow-xs backdrop-blur-xs w-fit">
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-terracotta to-[#D9531E] text-white text-[10px] shadow-xs shrink-0">
                       ✨
                     </span>
-                    <span className="text-[11px] sm:text-xs font-black tracking-wider uppercase text-charcoal dark:text-[#F7F5F0]">
+                    <span className="text-[11px] sm:text-xs font-black tracking-wider uppercase text-charcoal dark:text-[#F7F5F0] whitespace-nowrap">
                       Manyaman a Kayamanan
                     </span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-terracotta/50"></span>
-                    <span className="text-[10px] sm:text-[11px] font-extrabold tracking-wide uppercase text-terracotta">
+                    <span className="hidden md:inline-block w-1.5 h-1.5 rounded-full bg-terracotta/50 shrink-0"></span>
+                    <span className="hidden md:inline text-[10px] sm:text-[11px] font-extrabold tracking-wide uppercase text-terracotta whitespace-nowrap">
                       Culinary Heritage of Pampanga
                     </span>
                   </div>
 
                   {/* Main Headline */}
                   <div className="space-y-1.5">
-                    <h2 className="text-3xl sm:text-4xl lg:text-[46px] xl:text-[50px] font-black text-[#1E1915] dark:text-white tracking-tight leading-[1.1] m-0 drop-shadow-xs">
+                    <h2 className="text-3xl sm:text-4xl lg:text-[44px] xl:text-[48px] font-black text-[#1E1915] dark:text-white tracking-tight leading-[1.1] m-0 drop-shadow-xs">
                       Mekeni, Mangan Tana!
                     </h2>
-                    <div className="text-base sm:text-xl lg:text-2xl xl:text-[25px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron tracking-tight">
+                    <div className="text-base sm:text-xl lg:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron tracking-tight">
                       Explore Pampanga’s Culinary Map and more!
                     </div>
                   </div>
@@ -16108,7 +16268,7 @@ ${rawText}`;
                   </p>
 
                   {/* Fun, Fast-to-Scan Feature Cards */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 max-w-lg">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 max-w-lg md:max-w-none">
                     <div className="bg-gradient-to-b from-white to-[#FFF9F5] dark:from-[#1E1B18] dark:to-[#25201B] px-2.5 py-2 rounded-xl border border-terracotta/20 dark:border-terracotta/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
                       <span className="text-sm">🍲</span>
                       <span className="text-[10px] font-black text-charcoal dark:text-white mt-0.5">22 Towns</span>
@@ -16133,19 +16293,19 @@ ${rawText}`;
                 </div>
 
                 {/* Right Column: Kapampangan Food & Tourist Destination Showcase */}
-                <div className="lg:col-span-6 flex flex-col items-center justify-center lg:items-end">
+                <div className="md:col-span-6 flex flex-col items-center justify-center md:items-end w-full">
                   {/* Top: Iconic Kapampangan Food Showcase */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-center w-full max-w-lg">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 items-stretch w-full max-w-lg md:max-w-none">
 
                     {/* Left Flank: Authentic Culinary Classics */}
-                    <div className="flex flex-row sm:flex-col gap-2.5">
+                    <div className="flex flex-row sm:flex-col gap-2.5 justify-between">
                       {/* Card 1: Kare-Kare */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-2 hover:rotate-0 hover:-translate-y-1 text-center group">
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
                         <div className="h-16 sm:h-18 rounded-xl overflow-hidden relative shadow-xs">
                           <img
                             src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80"
                             alt="Authentic Kapampangan Kare-Kare Stew"
-                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80"; }}
                           />
                           <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
@@ -16159,12 +16319,12 @@ ${rawText}`;
                       </div>
 
                       {/* Card 2: Bringhe */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-1 hover:rotate-0 hover:-translate-y-1 text-center group">
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
                         <div className="h-16 sm:h-18 rounded-xl overflow-hidden relative shadow-xs">
                           <img
                             src="https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=400&q=80"
                             alt="Kapampangan Bringhe Fiesta Rice"
-                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80"; }}
                           />
                           <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
@@ -16179,33 +16339,33 @@ ${rawText}`;
                     </div>
 
                     {/* Center Column: Prominent Large Sisig Focal Piece */}
-                    <div className="bg-white dark:bg-[#1E1B18] p-3 rounded-2xl border-2 border-terracotta shadow-2xl ring-4 ring-terracotta/25 hover:shadow-2xl transition-all duration-300 transform sm:scale-110 z-20 text-center flex flex-col justify-between group">
-                      <div className="h-44 sm:h-48 rounded-xl overflow-hidden relative shadow-xs">
+                    <div className="bg-white dark:bg-[#1E1B18] p-2 sm:p-2.5 rounded-2xl border-2 border-terracotta shadow-md ring-2 ring-terracotta/20 hover:shadow-lg transition-all text-center flex flex-col justify-between group">
+                      <div className="h-32 sm:h-36 rounded-xl overflow-hidden relative shadow-xs flex-1">
                         <img
                           src="/restaurants/authentic_sisig.jpg"
                           alt="Authentic Kapampangan Sizzling Sisig"
-                          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"; }}
                         />
-                        <span className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[10px] font-black px-3 py-1 rounded-full shadow-md whitespace-nowrap border border-white/30">
+                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[9.5px] font-black px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap border border-white/30">
                           🔥 Sizzling Sisig
                         </span>
                       </div>
-                      <div className="pt-2 text-center">
-                        <span className="font-black text-sm text-charcoal dark:text-[#F7F5F0] block leading-tight">Culinary Capital</span>
-                        <span className="text-[10px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Authentic Food</span>
+                      <div className="pt-1.5 text-center shrink-0">
+                        <span className="font-black text-xs sm:text-sm text-charcoal dark:text-[#F7F5F0] block leading-tight">Culinary Capital</span>
+                        <span className="text-[9px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Authentic Food</span>
                       </div>
                     </div>
 
                     {/* Right Flank: Crispy Pata & Desserts */}
-                    <div className="flex flex-row sm:flex-col gap-2.5">
+                    <div className="flex flex-row sm:flex-col gap-2.5 justify-between">
                       {/* Card 3: Crispy Pata */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:rotate-2 hover:rotate-0 hover:-translate-y-1 text-center group">
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
                         <div className="h-16 sm:h-18 rounded-xl overflow-hidden relative shadow-xs">
                           <img
                             src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=400&q=80"
                             alt="Kapampangan Crispy Pata"
-                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80"; }}
                           />
                           <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
@@ -16219,12 +16379,12 @@ ${rawText}`;
                       </div>
 
                       {/* Card 4: Halo-Halo */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md hover:shadow-xl transition-all duration-300 transform sm:-rotate-1 hover:rotate-0 hover:-translate-y-1 text-center group">
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
                         <div className="h-16 sm:h-18 rounded-xl overflow-hidden relative shadow-xs">
                           <img
                             src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=400&q=80"
                             alt="Special Kapampangan Halo-Halo"
-                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=400&q=80"; }}
                           />
                           <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
@@ -16241,7 +16401,7 @@ ${rawText}`;
                   </div>
 
                   {/* Bottom: Smaller Tourist Destination Image Cards Row */}
-                  <div className="mt-3 pt-2.5 border-t border-[#E9E5DE]/80 dark:border-[#2E2A24]/80 w-full max-w-lg">
+                  <div className="mt-4 pt-3 border-t border-[#E9E5DE]/80 dark:border-[#2E2A24]/80 w-full max-w-lg md:max-w-none">
                     <div className="flex items-center justify-between mb-1.5 px-0.5">
                       <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-charcoal-light dark:text-gray-400 flex items-center gap-1">
                         <span>🧭</span> Top Tourist Destinations to Visit
@@ -16251,10 +16411,10 @@ ${rawText}`;
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {/* Destination 1: Mt. Arayat */}
-                      <div className="bg-white dark:bg-[#1E1B18] p-1 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center">
-                        <div className="h-10 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
+                      <div className="bg-white dark:bg-[#1E1B18] p-1.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center">
+                        <div className="h-12 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
                           <img
                             src="/attractions/real_mt_arayat.png"
                             alt="Mount Arayat"
@@ -16271,8 +16431,8 @@ ${rawText}`;
                       </div>
 
                       {/* Destination 2: Betis Church */}
-                      <div className="bg-white dark:bg-[#1E1B18] p-1 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center">
-                        <div className="h-10 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
+                      <div className="bg-white dark:bg-[#1E1B18] p-1.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center">
+                        <div className="h-12 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
                           <img
                             src="/attractions/real_betis_church.jpg"
                             alt="Betis Heritage Church"
@@ -16289,8 +16449,8 @@ ${rawText}`;
                       </div>
 
                       {/* Destination 3: Giant Lantern */}
-                      <div className="bg-white dark:bg-[#1E1B18] p-1 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center">
-                        <div className="h-10 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
+                      <div className="bg-white dark:bg-[#1E1B18] p-1.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center">
+                        <div className="h-12 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
                           <img
                             src="/attractions/giant_lantern_san_fernando.jpg"
                             alt="Giant Lantern Parul"
@@ -16307,8 +16467,8 @@ ${rawText}`;
                       </div>
 
                       {/* Destination 4: Majigangga Festival */}
-                      <div className="bg-white dark:bg-[#1E1B18] p-1 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center">
-                        <div className="h-10 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
+                      <div className="bg-white dark:bg-[#1E1B18] p-1.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center">
+                        <div className="h-12 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
                           <img
                             src="/attractions/real_majigangga.png"
                             alt="Majigangga Festival"
@@ -16330,13 +16490,48 @@ ${rawText}`;
             </div>
 
             {/* Bento Grid: 12-Column Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div id="restaurants-section" className="grid grid-cols-1 md:grid-cols-12 gap-6 scroll-mt-24">
 
-              {/* Sidebar: Municipalities List (col-span-3) */}
-              <div className="lg:col-span-3 space-y-6">
+              {/* Sidebar: Municipalities List */}
+              <div className="md:col-span-4 lg:col-span-3 space-y-4">
 
-                {/* Municipality Selector list in sidebar */}
-                <div className="bento-card p-5 bg-white dark:bg-[#1E1B18] space-y-4 border-[#E9E5DE] dark:border-[#2E2A24]">
+                {/* Mobile/Tablet Horizontal Municipality Chips (< md) */}
+                <div className="md:hidden space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-charcoal dark:text-white flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-terracotta" /> Municipalities ({MUNICIPALITIES.length})
+                    </span>
+                    <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">Swipe to browse ➡️</span>
+                  </div>
+                  <div className="flex overflow-x-auto gap-1.5 pb-1 no-scrollbar">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMunicipality('All')}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${selectedMunicipality === 'All'
+                        ? 'bg-terracotta text-white shadow-xs font-black'
+                        : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24]'
+                        }`}
+                    >
+                      All ({restaurants.length})
+                    </button>
+                    {MUNICIPALITIES.map(mun => (
+                      <button
+                        key={mun}
+                        type="button"
+                        onClick={() => setSelectedMunicipality(mun)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${selectedMunicipality === mun
+                          ? 'bg-terracotta text-white shadow-xs font-black'
+                          : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24]'
+                          }`}
+                      >
+                        {mun} ({municipalityCounts[mun] || 0})
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Desktop Sidebar: Vertical Municipality List (md:) */}
+                <div className="hidden md:block bento-card p-5 bg-white dark:bg-[#1E1B18] space-y-4 border-[#E9E5DE] dark:border-[#2E2A24]">
                   <div className="flex items-center justify-between pb-2 border-b border-[#E9E5DE] dark:border-[#2E2A24]">
                     <h3 className="text-xs font-extrabold text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-terracotta" /> Municipality/City Selection
@@ -16380,26 +16575,26 @@ ${rawText}`;
 
               </div>
 
-              {/* Feed Grid Area (col-span-9) */}
-              <div className="lg:col-span-9 space-y-6">
+              {/* Feed Grid Area */}
+              <div className="md:col-span-8 lg:col-span-9 space-y-6">
 
                 {/* Filter indicators */}
-                <div className="flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-[#E9E5DE]">
-                  <span className="text-xs text-charcoal-light font-medium">
-                    Showing <strong className="text-charcoal">{filteredRestaurants.length}</strong> Kapampangan Restaurants
+                <div className="flex items-center justify-between bg-white dark:bg-[#1E1B18] px-4 py-3 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
+                  <span className="text-xs text-charcoal-light dark:text-gray-300 font-medium">
+                    Showing <strong className="text-charcoal dark:text-white">{filteredRestaurants.length}</strong> Kapampangan Restaurants
                   </span>
-                  <span className="text-[10px] font-semibold text-charcoal-light uppercase bg-[#FAF8F5] px-2.5 py-1 rounded border border-[#E9E5DE] truncate max-w-xs">
+                  <span className="text-[10px] font-semibold text-charcoal-light dark:text-gray-300 uppercase bg-[#FAF8F5] dark:bg-[#161412] px-2.5 py-1 rounded border border-[#E9E5DE] dark:border-[#2E2A24] truncate max-w-xs">
                     {selectedMunicipality === 'All' ? 'All Municipalities/Cities' : selectedMunicipality}
                   </span>
                 </div>
 
                 {/* Main Feed: 3-column sub-grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   {filteredRestaurants.length === 0 ? (
-                    <div className="col-span-full bg-white p-12 rounded-2xl border border-[#E9E5DE] text-center">
+                    <div className="col-span-full bg-white dark:bg-[#1E1B18] p-12 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] text-center">
                       <AlertTriangle className="h-10 w-10 text-saffron mx-auto mb-3" />
-                      <h4 className="text-sm font-bold text-charcoal">No culinary listings matched your filter settings</h4>
-                      <p className="text-xs text-charcoal-light mt-1">Try resetting the municipalities filter or search query.</p>
+                      <h4 className="text-sm font-bold text-charcoal dark:text-white">No culinary listings matched your filter settings</h4>
+                      <p className="text-xs text-charcoal-light dark:text-gray-400 mt-1">Try resetting the municipalities filter or search query.</p>
                       <button
                         onClick={() => { setSelectedMunicipality('All'); setSearchQuery(''); }}
                         className="mt-4 px-3.5 py-2 bg-terracotta text-white rounded-lg text-xs font-bold hover:bg-terracotta-dark"
@@ -16412,11 +16607,11 @@ ${rawText}`;
                       <div
                         key={res.id}
                         onClick={() => { setSelectedRestaurant(res); setActiveImgIdx(0); }}
-                        className="bento-card bg-white p-5 flex flex-col justify-between cursor-pointer border-[#E9E5DE] hover:border-terracotta/30 group"
+                        className="bento-card bg-white dark:bg-[#1E1B18] p-5 flex flex-col justify-between cursor-pointer border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/30 dark:hover:border-terracotta/40 group transition-all"
                       >
                         <div>
                           {/* Image Box */}
-                          <div className="aspect-[4/3] w-full rounded-xl bg-[#FAF8F5] border border-[#E9E5DE] mb-4 relative overflow-hidden flex items-center justify-center text-charcoal-light group-hover:border-terracotta/25 transition-all">
+                          <div className="aspect-[4/3] w-full rounded-xl bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] mb-4 relative overflow-hidden flex items-center justify-center text-charcoal-light dark:text-gray-400 group-hover:border-terracotta/25 transition-all">
                             {res.image ? (
                               <img
                                 src={res.image}
@@ -16428,7 +16623,7 @@ ${rawText}`;
                                 <div className="absolute inset-0 bg-image opacity-15 pointer-events-none bg-center bg-no-repeat bg-cover lantern-overlay"></div>
                                 <div className="z-10 text-center p-4">
                                   <span className="block text-2xl mb-1">🏛️</span>
-                                  <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal-light block">Kapampangan Restaurant</span>
+                                  <span className="text-[10px] font-bold tracking-wider uppercase text-charcoal-light dark:text-gray-400 block">Kapampangan Restaurant</span>
                                 </div>
                               </>
                             )}
@@ -16437,21 +16632,21 @@ ${rawText}`;
                           </div>
 
                           <div className="flex items-start justify-between gap-1.5">
-                            <h3 className="text-base font-extrabold text-charcoal leading-snug group-hover:text-terracotta transition-colors m-0">
+                            <h3 className="text-base font-extrabold text-charcoal dark:text-white leading-snug group-hover:text-terracotta transition-colors m-0">
                               {res.name}
                             </h3>
-                            <span className="text-xs font-bold text-bananaleaf bg-bananaleaf/5 px-2 py-0.5 rounded border border-bananaleaf/10 shrink-0">
+                            <span className="text-xs font-bold text-bananaleaf bg-bananaleaf/5 dark:bg-bananaleaf/15 px-2 py-0.5 rounded border border-bananaleaf/10 dark:border-bananaleaf/30 shrink-0">
                               {res.priceTier}
                             </span>
                           </div>
 
-                          <p className="text-[11px] text-charcoal-light leading-relaxed mt-2 line-clamp-2">
+                          <p className="text-[11px] text-charcoal-light dark:text-gray-400 leading-relaxed mt-2 line-clamp-2">
                             {res.description}
                           </p>
                         </div>
 
                         {/* Tech metrics placeholders */}
-                        <div className="mt-4 pt-3 border-t border-[#FAF8F5] space-y-2 text-[10px] text-charcoal-light">
+                        <div className="mt-4 pt-3 border-t border-[#FAF8F5] dark:border-[#2A2621] space-y-2 text-[10px] text-charcoal-light dark:text-gray-400">
                           <div className="flex items-center justify-between font-semibold">
                             <span className="flex items-center gap-1"><Activity className="h-3.5 w-3.5 text-terracotta shrink-0" /> Crowd Forecaster:</span>
                             <span className="text-terracotta">{res.occupancy[4]}% Peak</span>
@@ -16461,15 +16656,15 @@ ${rawText}`;
                             <span className="text-bananaleaf">₱{res.menu[0]?.price || 200} base</span>
                           </div>
 
-                          <div className="flex items-center justify-between text-[10px] pt-1 border-t border-[#FAF8F5]">
-                            <div className="flex items-center gap-1.5 font-semibold text-charcoal-light min-w-0 max-w-[60%]" title={getRestaurantMunicipalities(res).join(', ')}>
+                          <div className="flex items-center justify-between text-[10px] pt-1 border-t border-[#FAF8F5] dark:border-[#2A2621]">
+                            <div className="flex items-center gap-1.5 font-semibold text-charcoal-light dark:text-gray-300 min-w-0 max-w-[60%]" title={getRestaurantMunicipalities(res).join(', ')}>
                               <MapPin className="h-3.5 w-3.5 text-saffron shrink-0" />
                               {getRestaurantMunicipalities(res).length > 1 ? (
-                                <span className="text-[10px] font-black text-terracotta truncate bg-terracotta/5 px-1.5 py-0.5 rounded border border-terracotta/15">
+                                <span className="text-[10px] font-black text-terracotta truncate bg-terracotta/5 dark:bg-terracotta/15 px-1.5 py-0.5 rounded border border-terracotta/15 dark:border-terracotta/30">
                                   {getRestaurantMunicipalities(res).length} Branches ({getRestaurantMunicipalities(res).join(' • ')})
                                 </span>
                               ) : (
-                                <span className="truncate text-xs font-bold text-charcoal">{res.municipality}</span>
+                                <span className="truncate text-xs font-bold text-charcoal dark:text-gray-200">{res.municipality}</span>
                               )}
                             </div>
                             <div className="flex items-center gap-2">
@@ -16482,10 +16677,10 @@ ${rawText}`;
                                     setBranchSelectTarget(res);
                                   } else {
                                     handleAddToItinerary(res);
-                                    alert(`✓ Added "${res.name}" to active trip itinerary!`);
+                                    setAddedStopModal(res);
                                   }
                                 }}
-                                className="px-2.5 py-1 bg-terracotta hover:bg-terracotta-dark text-white text-[10px] font-extrabold rounded-lg flex items-center gap-1 transition-colors shadow-2xs cursor-pointer"
+                                className="px-2.5 py-1 bg-terracotta hover:bg-terracotta-dark text-white text-[10px] font-extrabold rounded-lg flex items-center gap-1 transition-colors shadow-2xs cursor-pointer active:scale-95"
                               >
                                 <Plus className="h-3 w-3" /> Add Stop
                               </button>
@@ -16613,62 +16808,87 @@ ${rawText}`;
         {activeView === 'dashboard' && (
           <div className="space-y-6 animate-slide-up">
 
-            {/* Tabbed Side Menu/Navbar */}
-            <div className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl p-1.5 shadow-sm flex flex-wrap sm:flex-nowrap gap-1.5 transition-colors">
+            {/* Mobile Swipe Hint - only visible on small mobile screens (< sm) where tabs scroll */}
+            <div className="flex sm:hidden items-center justify-between px-1.5 text-xs">
+              <span className="text-[10px] font-black uppercase tracking-wider text-charcoal-light dark:text-gray-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-terracotta animate-pulse"></span>
+                <span>5 Modules Available</span>
+              </span>
+              <span className="text-[10px] font-black text-terracotta dark:text-orange-400 bg-terracotta/10 dark:bg-terracotta/20 px-2.5 py-1 rounded-full border border-terracotta/25 flex items-center gap-1 shadow-2xs">
+                <span>👉 Swipe for more tabs ➡️</span>
+              </span>
+            </div>
+
+            {/* Responsive Tabbed Menu/Navbar - 100% Full Width Balanced Segmented Navigation */}
+            <div className="bg-[#FAF8F5] dark:bg-[#141210] border border-[#E9E5DE] dark:border-[#2A2622] rounded-2xl p-1.5 shadow-sm sm:shadow flex sm:grid sm:grid-cols-5 gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar w-full transition-colors">
               <button
                 type="button"
                 onClick={() => setDashboardTab('planner')}
-                className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'planner'
-                  ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
-                  : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#282420]'
+                className={`flex-1 sm:flex-initial shrink-0 py-2.5 sm:py-3 px-3 sm:px-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] sm:min-w-0 ${dashboardTab === 'planner'
+                  ? 'bg-gradient-to-r from-terracotta to-[#E0531A] text-white shadow-md shadow-terracotta/25 border border-white/20 scale-[1.01]'
+                  : 'bg-white/90 dark:bg-[#1E1B18] text-charcoal/80 dark:text-gray-300 hover:text-terracotta dark:hover:text-white hover:bg-white dark:hover:bg-[#26221D] border border-[#E9E5DE]/80 dark:border-[#2C2723] hover:border-terracotta/30 dark:hover:border-terracotta/40 shadow-2xs'
                   }`}
               >
-                <Compass className={`h-4 w-4 transition-transform ${dashboardTab === 'planner' ? 'rotate-12' : ''}`} />
-                <span>Food Trip Planner</span>
+                <Compass className={`h-4 w-4 shrink-0 transition-transform ${dashboardTab === 'planner' ? 'rotate-12' : ''}`} />
+                <span className="xl:hidden">Trip Planner</span>
+                <span className="hidden xl:inline">Food Trip Planner</span>
+                {activeTrip.length > 0 && (
+                  <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-black leading-none ${dashboardTab === 'planner' ? 'bg-white/25 text-white' : 'bg-terracotta/15 text-terracotta dark:text-orange-400'}`}>
+                    {activeTrip.length}
+                  </span>
+                )}
               </button>
+
               <button
                 type="button"
                 onClick={() => setDashboardTab('health')}
-                className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'health'
-                  ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
-                  : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#282420]'
+                className={`flex-1 sm:flex-initial shrink-0 py-2.5 sm:py-3 px-3 sm:px-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] sm:min-w-0 ${dashboardTab === 'health'
+                  ? 'bg-gradient-to-r from-terracotta to-[#E0531A] text-white shadow-md shadow-terracotta/25 border border-white/20 scale-[1.01]'
+                  : 'bg-white/90 dark:bg-[#1E1B18] text-charcoal/80 dark:text-gray-300 hover:text-terracotta dark:hover:text-white hover:bg-white dark:hover:bg-[#26221D] border border-[#E9E5DE]/80 dark:border-[#2C2723] hover:border-terracotta/30 dark:hover:border-terracotta/40 shadow-2xs'
                   }`}
               >
-                <Heart className={`h-4 w-4 ${dashboardTab === 'health' ? 'fill-white' : ''}`} />
-                <span>Health Informatics</span>
+                <Heart className={`h-4 w-4 shrink-0 ${dashboardTab === 'health' ? 'fill-white' : ''}`} />
+                <span className="xl:hidden">Health Info</span>
+                <span className="hidden xl:inline">Health Informatics</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => setDashboardTab('assistant')}
-                className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'assistant'
-                  ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
-                  : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#282420]'
+                className={`flex-1 sm:flex-initial shrink-0 py-2.5 sm:py-3 px-3 sm:px-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] sm:min-w-0 ${dashboardTab === 'assistant'
+                  ? 'bg-gradient-to-r from-terracotta to-[#E0531A] text-white shadow-md shadow-terracotta/25 border border-white/20 scale-[1.01]'
+                  : 'bg-white/90 dark:bg-[#1E1B18] text-charcoal/80 dark:text-gray-300 hover:text-terracotta dark:hover:text-white hover:bg-white dark:hover:bg-[#26221D] border border-[#E9E5DE]/80 dark:border-[#2C2723] hover:border-terracotta/30 dark:hover:border-terracotta/40 shadow-2xs'
                   }`}
               >
-                <MessageSquare className={`h-4 w-4 ${dashboardTab === 'assistant' ? 'fill-white' : ''}`} />
-                <span>Travel Kasaup</span>
+                <MessageSquare className={`h-4 w-4 shrink-0 ${dashboardTab === 'assistant' ? 'fill-white' : ''}`} />
+                <span className="xl:hidden">AI Kasaup</span>
+                <span className="hidden xl:inline">Travel Kasaup</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => setDashboardTab('destinations')}
-                className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'destinations'
-                  ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
-                  : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#282420]'
+                className={`flex-1 sm:flex-initial shrink-0 py-2.5 sm:py-3 px-3 sm:px-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] sm:min-w-0 ${dashboardTab === 'destinations'
+                  ? 'bg-gradient-to-r from-terracotta to-[#E0531A] text-white shadow-md shadow-terracotta/25 border border-white/20 scale-[1.01]'
+                  : 'bg-white/90 dark:bg-[#1E1B18] text-charcoal/80 dark:text-gray-300 hover:text-terracotta dark:hover:text-white hover:bg-white dark:hover:bg-[#26221D] border border-[#E9E5DE]/80 dark:border-[#2C2723] hover:border-terracotta/30 dark:hover:border-terracotta/40 shadow-2xs'
                   }`}
               >
-                <MapPin className={`h-4 w-4 ${dashboardTab === 'destinations' ? 'fill-white' : ''}`} />
-                <span>Tourist Destinations</span>
+                <MapPin className={`h-4 w-4 shrink-0 ${dashboardTab === 'destinations' ? 'fill-white' : ''}`} />
+                <span className="xl:hidden">Destinations</span>
+                <span className="hidden xl:inline">Tourist Destinations</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => setDashboardTab('history')}
-                className={`flex-1 py-3 px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${dashboardTab === 'history'
-                  ? 'bg-terracotta text-white shadow-md shadow-terracotta/20 scale-[1.01]'
-                  : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#282420]'
+                className={`flex-1 sm:flex-initial shrink-0 py-2.5 sm:py-3 px-3 sm:px-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] sm:min-w-0 ${dashboardTab === 'history'
+                  ? 'bg-gradient-to-r from-terracotta to-[#E0531A] text-white shadow-md shadow-terracotta/25 border border-white/20 scale-[1.01]'
+                  : 'bg-white/90 dark:bg-[#1E1B18] text-charcoal/80 dark:text-gray-300 hover:text-terracotta dark:hover:text-white hover:bg-white dark:hover:bg-[#26221D] border border-[#E9E5DE]/80 dark:border-[#2C2723] hover:border-terracotta/30 dark:hover:border-terracotta/40 shadow-2xs'
                   }`}
               >
-                <Star className={`h-4 w-4 ${dashboardTab === 'history' ? 'fill-white' : ''}`} />
-                <span>Travel History</span>
+                <Star className={`h-4 w-4 shrink-0 ${dashboardTab === 'history' ? 'fill-white' : ''}`} />
+                <span className="xl:hidden">History</span>
+                <span className="hidden xl:inline">Travel History</span>
               </button>
             </div>
 
@@ -16703,7 +16923,7 @@ ${rawText}`;
                       <label className="block text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider">
                         Starting Location Point
                       </label>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <div className="relative flex-1">
                           <input
                             type="text"
@@ -16715,7 +16935,7 @@ ${rawText}`;
                         <button
                           type="button"
                           onClick={detectUserLocation}
-                          className="px-3.5 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 flex items-center gap-1.5 cursor-pointer active:scale-95"
+                          className="px-3.5 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 w-full sm:w-auto"
                         >
                           <span>📍</span>
                           <span>{isDetectingLocation ? "Locating..." : "Locate Me"}</span>
@@ -16728,16 +16948,16 @@ ${rawText}`;
                   </div>
 
                   {/* Quick Shortcut to Tourist Destinations Tab */}
-                  <div className="bg-gradient-to-r from-[#2C5E3B]/10 to-amber-500/10 dark:from-[#2C5E3B]/20 dark:to-amber-500/20 rounded-2xl border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 p-4 flex items-center justify-between gap-3 shadow-2xs">
+                  <div className="bg-gradient-to-r from-[#2C5E3B]/10 to-amber-500/10 dark:from-[#2C5E3B]/20 dark:to-amber-500/20 rounded-2xl border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div className="w-9 h-9 rounded-xl bg-[#2C5E3B]/15 dark:bg-[#2C5E3B]/30 flex items-center justify-center text-lg shrink-0">
                         🏛️
                       </div>
                       <div className="min-w-0">
-                        <h4 className="text-xs font-black text-charcoal dark:text-white m-0 truncate">
+                        <h4 className="text-xs font-black text-charcoal dark:text-white m-0">
                           Pampanga Heritage &amp; Tourist Sights
                         </h4>
-                        <p className="text-[10px] text-charcoal-light dark:text-gray-300 m-0 truncate">
+                        <p className="text-[10px] text-charcoal-light dark:text-gray-300 m-0">
                           Explore all {attractions.length} heritage parish churches, parks &amp; landmarks.
                         </p>
                       </div>
@@ -16745,7 +16965,7 @@ ${rawText}`;
                     <button
                       type="button"
                       onClick={() => setDashboardTab('destinations')}
-                      className="px-3 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-[10px] font-black uppercase tracking-wider shadow-xs transition-all shrink-0 cursor-pointer active:scale-95 flex items-center gap-1"
+                      className="px-3.5 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-[10px] font-black uppercase tracking-wider shadow-xs transition-all shrink-0 cursor-pointer active:scale-95 flex items-center justify-center gap-1 w-full sm:w-auto self-start sm:self-center"
                     >
                       <span>Explore Tab</span>
                       <ChevronRight className="h-3 w-3" />
@@ -16754,7 +16974,7 @@ ${rawText}`;
 
                   {/* Card 3: Live Trip Navigation & Route Controls */}
                   <div className="bg-white dark:bg-[#1E1B18] border border-[#2C5E3B]/25 dark:border-[#2C5E3B]/40 rounded-2xl p-5 space-y-4 shadow-sm">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
                         <span className="text-[9px] font-black text-terracotta dark:text-orange-400 uppercase tracking-wider block">
                           🚀 Multi-Stop Navigation Engine
@@ -16771,7 +16991,7 @@ ${rawText}`;
                         </h4>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         {!isTripActive ? (
                           <button
                             type="button"
@@ -16804,7 +17024,7 @@ ${rawText}`;
                     {/* Multi-Stop Progress Track */}
                     {computedRoutePath.length > 0 && (
                       <div className="pt-3 border-t border-[#E9E5DE] dark:border-[#2E2A24] space-y-2">
-                        <div className="flex items-center justify-between text-[10px] font-black uppercase text-charcoal-light dark:text-gray-400">
+                        <div className="flex flex-wrap items-center justify-between gap-1 text-[10px] font-black uppercase text-charcoal-light dark:text-gray-400">
                           <span>Itinerary Progress: {visitedStops.length} of {computedRoutePath.length} Visited</span>
                           {isTripActive && computedRoutePath[currentStopIndex] && (
                             <span className="text-terracotta dark:text-orange-400 font-black">
@@ -16841,8 +17061,8 @@ ${rawText}`;
 
                   {/* Live Trip Departure & ETA Navigation Banner */}
                   {computedRoutePath.length > 0 && (
-                    <div className="bg-gradient-to-br from-[#FAF6F0] via-white to-[#F5EFE6] dark:from-[#1E1B18] dark:via-[#161412] dark:to-[#12100E] border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
-                      <div className="flex flex-wrap items-center justify-between gap-3.5 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-4">
+                    <div className="bg-gradient-to-br from-[#FAF6F0] via-white to-[#F5EFE6] dark:from-[#1E1B18] dark:via-[#161412] dark:to-[#12100E] border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 rounded-3xl p-4 sm:p-6 space-y-4 shadow-sm">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-4">
                         {/* Left: Car Icon + Trip Headline */}
                         <div className="flex items-center gap-3.5 min-w-0">
                           <div className="w-12 h-12 rounded-2xl bg-terracotta/10 dark:bg-[#2A201A] border border-terracotta/20 dark:border-terracotta/40 flex items-center justify-center text-2xl shrink-0 shadow-2xs">
@@ -16859,17 +17079,17 @@ ${rawText}`;
                         </div>
 
                         {/* Right: Arrival Pill & Finish Trip Button */}
-                        <div className="flex items-center gap-2.5 shrink-0">
-                          <div className="bg-white dark:bg-[#161412] border border-[#2C5E3B]/25 dark:border-[#2C5E3B]/40 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl shadow-2xs text-right">
+                        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2.5 w-full sm:w-auto">
+                          <div className="bg-white dark:bg-[#161412] border border-[#2C5E3B]/25 dark:border-[#2C5E3B]/40 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl shadow-2xs text-left sm:text-right">
                             <span className="text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider block">Estimated Arrival</span>
-                            <strong className="text-xs sm:text-sm font-black text-[#2C5E3B] dark:text-emerald-400 flex items-center gap-1 justify-end mt-0.5">
+                            <strong className="text-xs sm:text-sm font-black text-[#2C5E3B] dark:text-emerald-400 flex items-center gap-1 justify-start sm:justify-end mt-0.5">
                               <span>⏰</span> {calculateETA(routeDurationMin)}
                             </strong>
                           </div>
                           <button
                             type="button"
                             onClick={() => setIsCompletionModalOpen(true)}
-                            className="px-3.5 py-2.5 sm:px-4 sm:py-3 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shrink-0"
+                            className="px-3.5 py-2.5 sm:px-4 sm:py-3 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shrink-0 flex-1 sm:flex-initial"
                             title="Finish and log this food trip"
                           >
                             <span>🎉</span> Finish Trip
@@ -17268,26 +17488,82 @@ ${rawText}`;
                         )}
                       </div>
 
-                      {/* Municipality Dropdown */}
-                      <div className="md:col-span-6 flex items-center gap-2">
+                      {/* Custom Styled Municipality Dropdown Selector */}
+                      <div className="md:col-span-6 flex items-center gap-2 relative">
                         <span className="text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider whitespace-nowrap shrink-0">
                           📍 Town / City:
                         </span>
-                        <select
-                          value={attractionMunFilter}
-                          onChange={(e) => setAttractionMunFilter(e.target.value)}
-                          className="w-full px-3 py-2.5 text-xs border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] font-bold text-charcoal dark:text-white focus:outline-none focus:bg-white dark:focus:bg-[#1E1B18] focus:ring-1 focus:ring-terracotta"
-                        >
-                          <option value="All">All Municipalities &amp; Cities ({attractions.length} Heritage Sites)</option>
-                          {MUNICIPALITIES.map(mun => {
-                            const count = attractions.filter(a => a.municipality === mun).length;
-                            return (
-                              <option key={mun} value={mun}>
-                                {mun} {count > 0 ? `(${count} site${count > 1 ? 's' : ''})` : ''}
-                              </option>
-                            );
-                          })}
-                        </select>
+                        <div className="relative flex-1">
+                          <button
+                            type="button"
+                            onClick={() => setIsAttractionMunOpen(!isAttractionMunOpen)}
+                            className="w-full px-3.5 py-2.5 text-xs border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] hover:bg-white dark:hover:bg-[#1E1B18] font-bold text-charcoal dark:text-white flex items-center justify-between transition-colors shadow-2xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-terracotta"
+                          >
+                            <span className="truncate">
+                              {attractionMunFilter === 'All'
+                                ? `All Municipalities & Cities (${attractions.length} Sites)`
+                                : `${attractionMunFilter} (${attractions.filter(a => a.municipality === attractionMunFilter).length} site${attractions.filter(a => a.municipality === attractionMunFilter).length !== 1 ? 's' : ''})`
+                              }
+                            </span>
+                            <ChevronDown className={`h-4 w-4 text-charcoal-light dark:text-gray-400 transition-transform duration-200 shrink-0 ml-1.5 ${isAttractionMunOpen ? 'rotate-180 text-terracotta' : ''}`} />
+                          </button>
+
+                          {isAttractionMunOpen && (
+                            <>
+                              {/* Invisible backdrop to dismiss on click outside */}
+                              <div
+                                className="fixed inset-0 z-30"
+                                onClick={() => setIsAttractionMunOpen(false)}
+                              />
+
+                              {/* Custom Styled Dropdown Menu */}
+                              <div className="absolute right-0 top-full mt-1.5 w-full min-w-[260px] max-h-64 overflow-y-auto bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl shadow-2xl p-1.5 z-40 animate-scale-in space-y-0.5 custom-scrollbar">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setAttractionMunFilter('All');
+                                    setIsAttractionMunOpen(false);
+                                  }}
+                                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${attractionMunFilter === 'All'
+                                    ? 'bg-terracotta text-white shadow-xs font-black'
+                                    : 'text-charcoal dark:text-gray-200 hover:bg-[#FAF8F5] dark:hover:bg-[#25221E] hover:text-terracotta dark:hover:text-white'
+                                    }`}
+                                >
+                                  <span>All Municipalities &amp; Cities</span>
+                                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${attractionMunFilter === 'All' ? 'bg-white/25 text-white' : 'bg-black/5 dark:bg-white/10 text-charcoal-light dark:text-gray-400'}`}>
+                                    {attractions.length} sites
+                                  </span>
+                                </button>
+
+                                <div className="h-px bg-[#E9E5DE] dark:bg-[#2E2A24] my-1" />
+
+                                {MUNICIPALITIES.map(mun => {
+                                  const count = attractions.filter(a => a.municipality === mun).length;
+                                  const isSelected = attractionMunFilter === mun;
+                                  return (
+                                    <button
+                                      key={mun}
+                                      type="button"
+                                      onClick={() => {
+                                        setAttractionMunFilter(mun);
+                                        setIsAttractionMunOpen(false);
+                                      }}
+                                      className={`w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${isSelected
+                                        ? 'bg-terracotta text-white shadow-xs font-black'
+                                        : 'text-charcoal dark:text-gray-200 hover:bg-[#FAF8F5] dark:hover:bg-[#25221E] hover:text-terracotta dark:hover:text-white'
+                                        }`}
+                                    >
+                                      <span className="truncate">{mun}</span>
+                                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold shrink-0 ml-2 ${isSelected ? 'bg-white/25 text-white' : count > 0 ? 'bg-terracotta/10 dark:bg-terracotta/20 text-terracotta dark:text-orange-400' : 'bg-black/5 dark:bg-white/10 text-charcoal-light dark:text-gray-400'}`}>
+                                        {count} {count === 1 ? 'site' : 'sites'}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -17424,7 +17700,7 @@ ${rawText}`;
                                 disabled={isAdded}
                                 onClick={() => {
                                   handleAddToItinerary(attr);
-                                  alert(`✓ Added "${attr.name}" (${attr.municipality}) to your trip itinerary!`);
+                                  setAddedStopModal(attr);
                                 }}
                                 className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${isAdded
                                   ? 'bg-bananaleaf/10 text-bananaleaf dark:text-emerald-400 border border-bananaleaf/25 font-bold cursor-default'
@@ -18092,100 +18368,148 @@ ${rawText}`;
                                         return (
                                           <div
                                             key={dish.id}
-                                            className={`p-3.5 rounded-xl border transition-all space-y-3 ${getDishTotalQty(stopId, dish.id, isDefaultFirst) > 0
-                                              ? 'bg-white dark:bg-[#1E1B18] border-emerald-500/40 dark:border-emerald-500/50 shadow-xs'
-                                              : 'bg-white/60 dark:bg-[#181614] border-[#E9E5DE] dark:border-[#282420] opacity-85 hover:opacity-100'
+                                            className={`p-4 rounded-2xl border transition-all space-y-3.5 ${getDishTotalQty(stopId, dish.id) > 0
+                                              ? 'bg-white dark:bg-[#1E1B18] border-emerald-500/50 dark:border-emerald-500/60 shadow-xs ring-1 ring-emerald-500/20'
+                                              : 'bg-white/80 dark:bg-[#181614] border-[#E9E5DE] dark:border-[#282420] opacity-90 hover:opacity-100'
                                               }`}
                                           >
-                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                                              <div className="flex items-start gap-2.5 min-w-0 flex-1">
-                                                {dish.image && (
-                                                  <img src={dish.image} alt={dish.name} className="w-12 h-12 rounded-lg object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0" />
-                                                )}
-                                                <div className="min-w-0">
-                                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                                    <strong className="text-xs font-black text-charcoal dark:text-white truncate">{dish.name}</strong>
-                                                    {/package|bundle|buffet|unlimited|\/pax|\/head/i.test(dish.name) ? (
-                                                      <span className="text-[9px] font-black uppercase bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                                                        🏷️ Package (₱{dish.price} / pax)
-                                                      </span>
-                                                    ) : (
-                                                      <span className="text-xs font-extrabold text-terracotta dark:text-orange-400 shrink-0">₱{dish.price}</span>
-                                                    )}
-                                                  </div>
-                                                  {dish.ingredients && (
-                                                    <p className="text-[10px] text-charcoal-light dark:text-gray-400 line-clamp-2 mt-0.5 m-0 italic">
-                                                      🍽️ {dish.ingredients}
-                                                    </p>
+                                            {/* Dish Header Info (Full Width) */}
+                                            <div className="flex items-start gap-3 min-w-0">
+                                              {dish.image && (
+                                                <img src={dish.image} alt={dish.name} className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 shadow-2xs" />
+                                              )}
+                                              <div className="min-w-0 flex-1">
+                                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                                  <h5 className="text-xs sm:text-sm font-black text-charcoal dark:text-white leading-snug m-0">
+                                                    {dish.name}
+                                                  </h5>
+                                                  {/package|bundle|buffet|unlimited|\/pax|\/head/i.test(dish.name) ? (
+                                                    <span className="text-[9px] font-black uppercase bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full shrink-0">
+                                                      🏷️ Package (₱{dish.price} / pax)
+                                                    </span>
+                                                  ) : (
+                                                    <span className="text-xs sm:text-sm font-black text-terracotta dark:text-orange-400 bg-terracotta/10 dark:bg-terracotta/20 px-2 py-0.5 rounded-lg shrink-0">
+                                                      ₱{dish.price}
+                                                    </span>
                                                   )}
-                                                  <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-                                                    <span className="text-[9px] font-black bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 px-1.5 py-0.2 rounded">🔥 {dishCals} kcal</span>
-                                                    <span className="text-[9px] font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 px-1.5 py-0.2 rounded">🥩 {dishProt}g P</span>
-                                                    <span className="text-[9px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 px-1.5 py-0.2 rounded">🌾 {dishCarbs}g C</span>
-                                                    <span className="text-[9px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-300 px-1.5 py-0.2 rounded">🧈 {dishFat}g F</span>
-                                                  </div>
+                                                </div>
+
+                                                {dish.ingredients && (
+                                                  <p className="text-[10px] text-charcoal-light dark:text-gray-400 line-clamp-2 mt-1 m-0 italic">
+                                                    🍽️ {dish.ingredients}
+                                                  </p>
+                                                )}
+
+                                                <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                                                  <span className="text-[9px] font-black bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 px-2 py-0.5 rounded-md">🔥 {dishCals} kcal</span>
+                                                  <span className="text-[9px] font-bold bg-blue-500/10 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-md">🥩 {dishProt}g P</span>
+                                                  <span className="text-[9px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-md">🌾 {dishCarbs}g C</span>
+                                                  <span className="text-[9px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-300 px-2 py-0.5 rounded-md">🧈 {dishFat}g F</span>
                                                 </div>
                                               </div>
-
-                                              {/* Quantity Adjusters */}
-                                              {isSolo ? (
-                                                <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                                                  <div className="flex items-center border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] p-0.5 shadow-2xs">
-                                                    <button
-                                                      type="button"
-                                                      onClick={() => handleSetDishQuantity(stopId, dish.id, 'solo', Math.max(0, getDishQtyFor(stopId, dish.id, 'solo', isDefaultFirst) - 1))}
-                                                      className="w-7 h-7 rounded-lg bg-white dark:bg-[#201D1A] hover:bg-[#E9E5DE] text-charcoal dark:text-white font-black text-xs flex items-center justify-center cursor-pointer transition-colors border border-[#E9E5DE]"
-                                                    >
-                                                      -
-                                                    </button>
-                                                    <span className="w-8 text-center text-xs font-black text-charcoal dark:text-white">
-                                                      {getDishQtyFor(stopId, dish.id, 'solo', isDefaultFirst)}
-                                                    </span>
-                                                    <button
-                                                      type="button"
-                                                      onClick={() => handleSetDishQuantity(stopId, dish.id, 'solo', getDishQtyFor(stopId, dish.id, 'solo', isDefaultFirst) + 1)}
-                                                      className="w-7 h-7 rounded-lg bg-terracotta hover:bg-terracotta-dark text-white font-black text-xs flex items-center justify-center cursor-pointer transition-colors"
-                                                    >
-                                                      +
-                                                    </button>
-                                                  </div>
-                                                </div>
-                                              ) : (
-                                                <div className="pt-2.5 border-t border-[#E9E5DE]/80 dark:border-[#2E2A24] space-y-2 w-full sm:w-auto">
-                                                  {/package|bundle|buffet|unlimited|\/pax|\/head/i.test(dish.name) && (
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                      <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                          const allHaveOne = groupMembers.every(m => getDishQtyFor(stopId, dish.id, m.id, false) >= 1);
-                                                          groupMembers.forEach(m => {
-                                                            handleSetDishQuantity(stopId, dish.id, m.id, allHaveOne ? 0 : 1);
-                                                          });
-                                                        }}
-                                                        className="text-[10px] font-black px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-300 border border-amber-500/30 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
-                                                      >
-                                                        <span>👥 {groupMembers.every(m => getDishQtyFor(stopId, dish.id, m.id, false) >= 1) ? '✓ Included for All Pax' : `Set for Entire Group (${groupMembers.length} Pax)`}</span>
-                                                      </button>
-                                                    </div>
-                                                  )}
-                                                  <div className="flex flex-wrap items-center gap-2">
-                                                    {groupMembers.map((m, mIdx) => {
-                                                      const mQty = getDishQtyFor(stopId, dish.id, m.id, isDefaultFirst && mIdx === 0);
-                                                      return (
-                                                        <div key={m.id} className="flex items-center gap-1.5 px-2 py-1 rounded-xl border bg-[#FAF8F5] border-[#E9E5DE] text-[11px]">
-                                                          <span className="truncate max-w-[60px]">{m.name}:</span>
-                                                          <div className="flex items-center gap-1">
-                                                            <button type="button" onClick={() => handleSetDishQuantity(stopId, dish.id, m.id, Math.max(0, mQty - 1))} className="w-5 h-5 rounded bg-white border border-[#E9E5DE]">-</button>
-                                                            <span className="w-4 text-center font-black">{mQty}</span>
-                                                            <button type="button" onClick={() => handleSetDishQuantity(stopId, dish.id, m.id, mQty + 1)} className="w-5 h-5 rounded bg-terracotta text-white">+</button>
-                                                          </div>
-                                                        </div>
-                                                      );
-                                                    })}
-                                                  </div>
-                                                </div>
-                                              )}
                                             </div>
+
+                                            {/* Dedicated Portion Controls Panel */}
+                                            {isSolo ? (
+                                              <div className="pt-3 border-t border-[#E9E5DE]/80 dark:border-[#282420] flex items-center justify-between gap-3">
+                                                <span className="text-[11px] font-bold text-charcoal-light dark:text-gray-400">
+                                                  Solo Diner Portion Quantity:
+                                                </span>
+                                                <div className="flex items-center border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] p-0.5 shadow-2xs">
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => handleSetDishQuantity(stopId, dish.id, 'solo', Math.max(0, getDishQtyFor(stopId, dish.id, 'solo') - 1))}
+                                                    className="w-7 h-7 rounded-lg bg-white dark:bg-[#201D1A] hover:bg-[#E9E5DE] text-charcoal dark:text-white font-black text-xs flex items-center justify-center cursor-pointer transition-colors border border-[#E9E5DE] dark:border-[#35302A]"
+                                                  >
+                                                    -
+                                                  </button>
+                                                  <span className="w-8 text-center text-xs font-black text-charcoal dark:text-white">
+                                                    {getDishQtyFor(stopId, dish.id, 'solo')}
+                                                  </span>
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => handleSetDishQuantity(stopId, dish.id, 'solo', getDishQtyFor(stopId, dish.id, 'solo') + 1)}
+                                                    className="w-7 h-7 rounded-lg bg-terracotta hover:bg-terracotta-dark text-white font-black text-xs flex items-center justify-center cursor-pointer transition-colors"
+                                                  >
+                                                    +
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            ) : (
+                                              <div className="pt-3 border-t border-[#E9E5DE]/80 dark:border-[#282420] space-y-2.5">
+                                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                                  <span className="text-[11px] font-bold text-charcoal-light dark:text-gray-400">
+                                                    Assign Portions by Member ({groupMembers.length} Diners):
+                                                  </span>
+                                                  {/package|bundle|buffet|unlimited|\/pax|\/head/i.test(dish.name) && (
+                                                    <button
+                                                      type="button"
+                                                      onClick={() => {
+                                                        const allHaveOne = groupMembers.every(m => getDishQtyFor(stopId, dish.id, m.id) >= 1);
+                                                        groupMembers.forEach(m => {
+                                                          handleSetDishQuantity(stopId, dish.id, m.id, allHaveOne ? 0 : 1);
+                                                        });
+                                                      }}
+                                                      className="text-[10px] font-black px-2.5 py-1 bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-300 border border-amber-500/30 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                                                    >
+                                                      <span>👥 {groupMembers.every(m => getDishQtyFor(stopId, dish.id, m.id) >= 1) ? '✓ Included for All Pax' : `Set for Entire Group (${groupMembers.length} Pax)`}</span>
+                                                    </button>
+                                                  )}
+                                                </div>
+
+                                                {/* Responsive Grid of Member Steppers */}
+                                                <div className="grid grid-cols-1 min-[420px]:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                                                  {groupMembers.map((m, mIdx) => {
+                                                    const mQty = getDishQtyFor(stopId, dish.id, m.id);
+                                                    const displayName = m.name?.startsWith('Person ')
+                                                      ? `P${m.name.replace('Person ', '')}`
+                                                      : m.name;
+                                                    return (
+                                                      <div
+                                                        key={m.id}
+                                                        className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl border text-xs transition-all ${mQty > 0
+                                                          ? 'bg-terracotta/10 dark:bg-terracotta/20 border-terracotta/40 shadow-2xs'
+                                                          : 'bg-[#FAF8F5] dark:bg-[#161412] border-[#E9E5DE] dark:border-[#2E2A24]'
+                                                          }`}
+                                                      >
+                                                        <div className="flex items-center gap-1.5 min-w-0">
+                                                          <span className={`w-5 h-5 rounded-md text-[10px] font-black flex items-center justify-center shrink-0 ${mQty > 0
+                                                            ? 'bg-terracotta text-white'
+                                                            : 'bg-charcoal/10 dark:bg-white/10 text-charcoal dark:text-gray-200'
+                                                            }`}>
+                                                            {mIdx + 1}
+                                                          </span>
+                                                          <span className="truncate font-bold text-charcoal dark:text-gray-200 text-xs" title={m.name}>
+                                                            {displayName}
+                                                          </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1 shrink-0">
+                                                          <button
+                                                            type="button"
+                                                            onClick={() => handleSetDishQuantity(stopId, dish.id, m.id, Math.max(0, mQty - 1))}
+                                                            className="w-5 h-5 rounded bg-white dark:bg-[#201D1A] border border-[#E9E5DE] dark:border-[#35302A] text-charcoal dark:text-white font-bold flex items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-[#2A2622] active:scale-95"
+                                                            title="Decrease portion"
+                                                          >
+                                                            -
+                                                          </button>
+                                                          <span className={`w-4 text-center font-black text-xs ${mQty > 0 ? 'text-terracotta dark:text-orange-400 font-black' : 'text-charcoal dark:text-white'}`}>
+                                                            {mQty}
+                                                          </span>
+                                                          <button
+                                                            type="button"
+                                                            onClick={() => handleSetDishQuantity(stopId, dish.id, m.id, mQty + 1)}
+                                                            className="w-5 h-5 rounded bg-terracotta hover:bg-terracotta-dark text-white font-bold flex items-center justify-center cursor-pointer shadow-2xs active:scale-95"
+                                                            title="Add portion"
+                                                          >
+                                                            +
+                                                          </button>
+                                                        </div>
+                                                      </div>
+                                                    );
+                                                  })}
+                                                </div>
+                                              </div>
+                                            )}
                                           </div>
                                         );
                                       })}
@@ -18622,6 +18946,19 @@ ${rawText}`;
           </div>
         )}
 
+        {/* Auto Scroll To Top Button - Vibrant Terracotta Theme */}
+        {showScrollTop && (
+          <button
+            type="button"
+            onClick={scrollToTop}
+            className="w-12 h-12 bg-gradient-to-br from-terracotta to-[#E0531A] hover:from-[#c24213] hover:to-terracotta text-white rounded-full flex items-center justify-center shadow-2xl border-2 border-white/80 focus:outline-none transition-all duration-300 transform hover:scale-110 active:scale-95 cursor-pointer animate-fade-in mb-3 self-end"
+            title="Scroll to top"
+            aria-label="Scroll to top"
+          >
+            <ArrowUp className="h-5 w-5" />
+          </button>
+        )}
+
         <button
           type="button"
           onClick={() => setIsChatOpen(!isChatOpen)}
@@ -18632,8 +18969,8 @@ ${rawText}`;
         </button>
       </div>
 
-      {/* Footer status bar with Group JECCAN! & Members */}
-      <footer className="bg-charcoal text-white border-t border-charcoal-dark py-10 mt-16 relative z-10">
+      {/* Footer status bar with Group JECCAN! & Members - Responsive for all screen sizes */}
+      <footer className="bg-charcoal text-white border-t border-charcoal-dark py-10 sm:py-12 pb-28 sm:pb-16 mt-16 relative z-10 font-sans">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
 
@@ -18649,58 +18986,58 @@ ${rawText}`;
                   Kanyamanan
                 </span>
               </div>
-              <p className="text-xs text-gray-400 leading-relaxed max-w-sm m-0">
+              <p className="text-xs text-gray-400 leading-relaxed max-w-sm mx-auto lg:mx-0 m-0">
                 Pampanga Provincial Culinary Tourism &amp; Health Informatics Infrastructure Platform.
               </p>
-              <div className="flex items-center justify-center lg:justify-start gap-2 text-[10px] text-gray-400 font-medium pt-1">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 text-[10px] text-gray-400 font-medium pt-1">
                 <span>© 2026 Province of Pampanga, Philippines</span>
-                <span>•</span>
+                <span className="hidden sm:inline">•</span>
                 <span className="text-bananaleaf font-semibold">100% Kapampangan By Heart</span>
               </div>
             </div>
 
             {/* Team JECCAN! Developers Column */}
             <div className="lg:col-span-8 space-y-3.5 border-t lg:border-t-0 lg:border-l border-white/10 pt-6 lg:pt-0 lg:pl-8">
-              <div className="flex items-center justify-center lg:justify-start gap-2">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
                 <span className="text-xs font-black text-saffron uppercase tracking-wider">Made by JECCAN!</span>
                 <span className="px-2.5 py-0.5 bg-white/10 text-gray-300 text-[10px] font-bold rounded-full border border-white/10">
                   Project Creators &amp; Lead Developers
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full">
                 {/* Rancis */}
-                <div className="p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-left flex items-center gap-3 group">
-                  <div className="w-9 h-9 rounded-lg bg-terracotta/20 border border-terracotta/40 flex items-center justify-center text-terracotta font-black text-xs shrink-0 group-hover:scale-105 transition-transform">
+                <div className="p-3.5 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 hover:border-terracotta/30 transition-all text-left flex items-center gap-3 group">
+                  <div className="w-10 h-10 rounded-xl bg-terracotta/20 border border-terracotta/40 flex items-center justify-center text-orange-400 font-black text-xs shrink-0 group-hover:scale-105 transition-transform">
                     RS
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <span className="font-extrabold text-xs text-white block truncate">Rancis J. Santos</span>
-                    <span className="text-[10px] font-bold text-terracotta block mt-0.5">
+                    <span className="text-[10px] font-bold text-orange-400 block mt-0.5">
                       Team Leader
                     </span>
                   </div>
                 </div>
 
                 {/* Lance */}
-                <div className="p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-left flex items-center gap-3 group">
-                  <div className="w-9 h-9 rounded-lg bg-bananaleaf/20 border border-bananaleaf/40 flex items-center justify-center text-bananaleaf font-black text-xs shrink-0 group-hover:scale-105 transition-transform">
+                <div className="p-3.5 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 hover:border-terracotta/30 transition-all text-left flex items-center gap-3 group">
+                  <div className="w-10 h-10 rounded-xl bg-terracotta/20 border border-terracotta/40 flex items-center justify-center text-orange-400 font-black text-xs shrink-0 group-hover:scale-105 transition-transform">
                     LL
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <span className="font-extrabold text-xs text-white block truncate">Lance Jerald D. Laxamana</span>
-                    <span className="text-[10px] font-medium text-gray-400 block mt-0.5">Core Developer</span>
+                    <span className="text-[10px] font-medium text-gray-300 block mt-0.5">Core Developer</span>
                   </div>
                 </div>
 
                 {/* Kirsen */}
-                <div className="p-3.5 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-left flex items-center gap-3 group">
-                  <div className="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-xs shrink-0 group-hover:scale-105 transition-transform">
+                <div className="p-3.5 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 hover:border-terracotta/30 transition-all text-left flex items-center gap-3 group sm:col-span-2 lg:col-span-1">
+                  <div className="w-10 h-10 rounded-xl bg-terracotta/20 border border-terracotta/40 flex items-center justify-center text-orange-400 font-black text-xs shrink-0 group-hover:scale-105 transition-transform">
                     KV
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <span className="font-extrabold text-xs text-white block truncate">Kirsen Yaj B. Villanueva</span>
-                    <span className="text-[10px] font-medium text-gray-400 block mt-0.5">Core Developer</span>
+                    <span className="text-[10px] font-medium text-gray-300 block mt-0.5">Core Developer</span>
                   </div>
                 </div>
               </div>
@@ -18783,7 +19120,7 @@ ${rawText}`;
                       setBranchSelectTarget(targetRes);
                     } else {
                       handleAddToItinerary(targetRes);
-                      alert(`✓ Added "${targetRes.name}" to active trip itinerary queue!`);
+                      setAddedStopModal(targetRes);
                     }
                   }}
                   className="px-3.5 sm:px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-bold rounded-xl shadow-sm hover:shadow transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
@@ -19477,11 +19814,12 @@ ${rawText}`;
               <button
                 type="button"
                 onClick={() => {
-                  handleAddToItinerary(selectedAttraction);
+                  const targetAttr = selectedAttraction;
+                  handleAddToItinerary(targetAttr);
                   setSelectedAttraction(null);
-                  alert(`✓ Added "${selectedAttraction.name}" (${selectedAttraction.municipality}) to your active trip itinerary!`);
+                  setAddedStopModal(targetAttr);
                 }}
-                className="px-5 py-2 bg-[#2C5E3B] text-white rounded-xl text-xs font-bold hover:bg-[#20452B] shadow"
+                className="px-5 py-2 bg-[#2C5E3B] text-white rounded-xl text-xs font-bold hover:bg-[#20452B] shadow cursor-pointer active:scale-95"
               >
                 + Add Side-Trip to Route
               </button>
@@ -19534,7 +19872,7 @@ ${rawText}`;
                       };
                       handleAddToItinerary(branchItem);
                       setBranchSelectTarget(null);
-                      alert(`✓ Added "${branchSelectTarget.name}" (${mun} Branch) to your active trip itinerary!`);
+                      setAddedStopModal(branchItem);
                     }}
                     className="w-full text-left p-3.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] bg-ivory/50 dark:bg-[#161412] hover:bg-terracotta/5 dark:hover:bg-terracotta/15 hover:border-terracotta dark:hover:border-terracotta transition-all cursor-pointer group flex items-start gap-3"
                   >
@@ -19982,6 +20320,57 @@ ${rawText}`;
                 className="px-4 py-2 text-xs font-black text-white bg-[#2C5E3B] hover:bg-[#20452B] rounded-xl shadow-xs active:scale-95 cursor-pointer flex items-center gap-1.5"
               >
                 <Sparkles className="h-3.5 w-3.5" /> Save & Scan 100% Exact Prices
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Stop Added Confirmation Modal - Centered Popup with navigation actions */}
+      {addedStopModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in font-sans">
+          <div className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 text-center animate-scale-in relative">
+            <button
+              type="button"
+              onClick={() => setAddedStopModal(null)}
+              className="absolute top-4 right-4 text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white w-7 h-7 rounded-full bg-ivory dark:bg-[#161412] flex items-center justify-center text-xs font-bold border border-[#E9E5DE] dark:border-[#2E2A24] cursor-pointer"
+              aria-label="Close popup"
+            >
+              ✕
+            </button>
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-bananaleaf/15 text-bananaleaf flex items-center justify-center text-2xl shadow-inner">
+              ✨
+            </div>
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-black uppercase tracking-wider text-bananaleaf bg-bananaleaf/10 px-2.5 py-0.5 rounded-full border border-bananaleaf/20 inline-block">
+                ✓ Added to Active Itinerary
+              </span>
+              <h3 className="text-base font-black text-charcoal dark:text-white m-0">
+                {addedStopModal.name}
+              </h3>
+              <p className="text-xs text-charcoal-light dark:text-gray-300 leading-relaxed m-0">
+                Successfully added{addedStopModal.municipality ? ` in ${addedStopModal.municipality}` : ''} to your Kapampangan food trip trail!
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setAddedStopModal(null);
+                  if (!isAuthenticated && !isGuest) setIsGuest(true);
+                  setActiveView('dashboard');
+                  setDashboardTab('planner');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="w-full py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              >
+                🗺️ Go to Trip Planner
+              </button>
+              <button
+                type="button"
+                onClick={() => setAddedStopModal(null)}
+                className="w-full py-2.5 bg-[#FAF8F5] dark:bg-[#25221E] hover:bg-[#E9E5DE] dark:hover:bg-[#2E2A24] text-charcoal dark:text-gray-200 rounded-xl text-xs font-bold transition-all border border-[#E9E5DE] dark:border-[#35302A] cursor-pointer active:scale-95"
+              >
+                Continue Browsing
               </button>
             </div>
           </div>
