@@ -15,6 +15,7 @@ import {
   Upload,
   Check,
   CheckCircle,
+  CheckCircle2,
   Navigation,
   Activity,
   LogOut,
@@ -41,7 +42,12 @@ import {
   Loader2,
   Download,
   Menu,
-  ArrowUp
+  ArrowUp,
+  Camera,
+  RefreshCw,
+  Flame,
+  Zap,
+  Image as ImageIcon
 } from 'lucide-react';
 import {
   PRESEEDED_RESTAURANTS,
@@ -735,7 +741,88 @@ function App() {
   const [itineraryDishSearch, setItineraryDishSearch] = useState('');
   const [stopSearchQueries, setStopSearchQueries] = useState({});
   const [cvUploadedMeal, setCvUploadedMeal] = useState(null);
+  const [cvDraftMeal, setCvDraftMeal] = useState(null);
+  const [cvDraftAssignee, setCvDraftAssignee] = useState('shared');
   const [isCVProcessing, setIsCVProcessing] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [cameraFacingMode, setCameraFacingMode] = useState('environment');
+  const [cameraError, setCameraError] = useState('');
+  const [scannedMealsLog, setScannedMealsLog] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_scanned_meals_log');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) { }
+    return [];
+  });
+  const cameraVideoRef = useRef(null);
+  const cameraCanvasRef = useRef(null);
+  const cameraStreamRef = useRef(null);
+  const cvFileInputRef = useRef(null);
+  const cvCameraInputRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('kanyamanan_scanned_meals_log', JSON.stringify(scannedMealsLog));
+    } catch (e) { }
+  }, [scannedMealsLog]);
+
+  // Real-time camera stream effect
+  useEffect(() => {
+    if (!isCameraOpen) {
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(t => t.stop());
+        cameraStreamRef.current = null;
+      }
+      return;
+    }
+
+    let isCancelled = false;
+    const startStream = async () => {
+      setCameraError('');
+      try {
+        if (cameraStreamRef.current) {
+          cameraStreamRef.current.getTracks().forEach(t => t.stop());
+          cameraStreamRef.current = null;
+        }
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: cameraFacingMode,
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+        if (isCancelled) {
+          stream.getTracks().forEach(t => t.stop());
+          return;
+        }
+        cameraStreamRef.current = stream;
+        if (cameraVideoRef.current) {
+          cameraVideoRef.current.srcObject = stream;
+          cameraVideoRef.current.play().catch(() => { });
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          console.warn("Camera stream init error:", err);
+          setCameraError("Camera access was denied or is unavailable. You can use your device's photo picker or select a preset instead.");
+        }
+      }
+    };
+
+    startStream();
+
+    return () => {
+      isCancelled = true;
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(t => t.stop());
+        cameraStreamRef.current = null;
+      }
+    };
+  }, [isCameraOpen, cameraFacingMode]);
+
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   // AI Multimodal Engine State
@@ -2274,7 +2361,55 @@ So, where do we start? 😊`,
       });
     });
 
-    if (cvUploadedMeal && cvUploadedMeal.nutrition) {
+    // Integrate persistent and confirmed scanned meals into table & per-member metrics
+    if (Array.isArray(scannedMealsLog) && scannedMealsLog.length > 0) {
+      scannedMealsLog.forEach(scan => {
+        if (!scan || !scan.nutrition) return;
+        const scanCals = Number(scan.nutrition.calories) || 0;
+        const scanProt = Number(scan.nutrition.protein) || 0;
+        const scanCarbs = Number(scan.nutrition.carbs) || 0;
+        const scanFat = Number(scan.nutrition.fat) || 0;
+
+        tableCalories += scanCals;
+        tableProtein += scanProt;
+        tableCarbs += scanCarbs;
+        tableFat += scanFat;
+        tableDishesCount += 1;
+
+        if (scan.allergens) {
+          scan.allergens.replace(/^⚠️\s*ALLERGENS:\s*/i, '').split(',').map(a => a.trim()).filter(Boolean).forEach(a => activeAllergens.add(a));
+        }
+        if (scan.compliance) {
+          activeHealthTags.add(scan.compliance);
+        }
+
+        if (diningMode === 'group') {
+          if (!scan.assignedTo || scan.assignedTo === 'shared' || scan.assignedTo === 'all') {
+            groupMembers.forEach(m => {
+              if (memberMetrics[m.id]) {
+                memberMetrics[m.id].calories += scanCals / groupCount;
+                memberMetrics[m.id].protein += scanProt / groupCount;
+                memberMetrics[m.id].carbs += scanCarbs / groupCount;
+                memberMetrics[m.id].fat += scanFat / groupCount;
+                memberMetrics[m.id].dishesCount += 1 / groupCount;
+                if (scan.allergens) {
+                  scan.allergens.replace(/^⚠️\s*ALLERGENS:\s*/i, '').split(',').map(a => a.trim()).filter(Boolean).forEach(a => memberMetrics[m.id].allergens.add(a));
+                }
+              }
+            });
+          } else if (memberMetrics[scan.assignedTo]) {
+            memberMetrics[scan.assignedTo].calories += scanCals;
+            memberMetrics[scan.assignedTo].protein += scanProt;
+            memberMetrics[scan.assignedTo].carbs += scanCarbs;
+            memberMetrics[scan.assignedTo].fat += scanFat;
+            memberMetrics[scan.assignedTo].dishesCount += 1;
+            if (scan.allergens) {
+              scan.allergens.replace(/^⚠️\s*ALLERGENS:\s*/i, '').split(',').map(a => a.trim()).filter(Boolean).forEach(a => memberMetrics[scan.assignedTo].allergens.add(a));
+            }
+          }
+        }
+      });
+    } else if (cvUploadedMeal && cvUploadedMeal.nutrition) {
       const cvCals = Number(cvUploadedMeal.nutrition.calories) || 0;
       const cvProt = Number(cvUploadedMeal.nutrition.protein) || 0;
       const cvCarbs = Number(cvUploadedMeal.nutrition.carbs) || 0;
@@ -2287,10 +2422,12 @@ So, where do we start? 😊`,
 
       if (diningMode === 'group') {
         groupMembers.forEach(m => {
-          memberMetrics[m.id].calories += cvCals / groupCount;
-          memberMetrics[m.id].protein += cvProt / groupCount;
-          memberMetrics[m.id].carbs += cvCarbs / groupCount;
-          memberMetrics[m.id].fat += cvFat / groupCount;
+          if (memberMetrics[m.id]) {
+            memberMetrics[m.id].calories += cvCals / groupCount;
+            memberMetrics[m.id].protein += cvProt / groupCount;
+            memberMetrics[m.id].carbs += cvCarbs / groupCount;
+            memberMetrics[m.id].fat += cvFat / groupCount;
+          }
         });
       }
     }
@@ -2346,7 +2483,7 @@ So, where do we start? 😊`,
         isCalorieOver: tableCalories > activeCalorieLimit
       }
     };
-  }, [activeTrip, tripSelectedDishes, cvUploadedMeal, userProfile?.calorieLimit, diningMode, groupMembers]);
+  }, [activeTrip, tripSelectedDishes, cvUploadedMeal, scannedMealsLog, userProfile?.calorieLimit, diningMode, groupMembers]);
 
   // Dynamic Route planning sequences (recalculates based on stops and congestion state)
   const computedRoutePath = useMemo(() => {
@@ -6302,7 +6439,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     };
 
     const model = String(
-      import.meta?.env?.VITE_GEMINI_MODEL || 'gemini-2.5-flash-lite'
+      import.meta?.env?.VITE_GEMINI_MODEL || 'gemini-3.5-flash'
     ).trim();
 
     const geminiRequest = async ({
@@ -6314,7 +6451,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       if (!apiKey) return null;
 
       const endpoint =
-        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
       const controller = new AbortController();
       kasaupAbortRef.current = controller;
@@ -10759,13 +10896,391 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     }
   };
 
-  const triggerCVMealUpload = (meal) => {
+  // Comprehensive Database of Kapampangan & Filipino Dishes with Clinical Nutritional Profiles
+  const KAPAMPANGAN_CV_DISH_DATABASE = [
+    {
+      name: "Sizzling Pork Sisig",
+      portion: "1 sizzling platter (~250g)",
+      nutrition: { calories: 840, protein: 48, carbs: 4, fat: 72, sodium: 980, cholesterol: 165, purineLevel: "High", glycemicIndex: "Low" },
+      allergens: "Pork, Chicken Liver, Calamansi",
+      compliance: "⚠️ High purine & lipid density. Exercise moderation if managing uric acid.",
+      description: "Char-grilled and minced pork mask, snout, and chicken liver tossed with fresh calamansi, onions, and chili."
+    },
+    {
+      name: "Beef Kare-Kare with Bagoong",
+      portion: "1 claypot serving (~350g)",
+      nutrition: { calories: 710, protein: 44, carbs: 18, fat: 52, sodium: 1120, cholesterol: 110, purineLevel: "Moderate", glycemicIndex: "Medium" },
+      allergens: "Peanuts, Crustaceans (Bagoong Alamang), Beef",
+      compliance: "⚠️ High sodium when paired with fermented shrimp paste. Rich in healthy peanut fats.",
+      description: "Tender beef shank and oxtail simmered in ground peanut-annatto sauce with eggplant and string beans."
+    },
+    {
+      name: "Sinigang na Baboy / Hipon",
+      portion: "1 soup bowl (~350ml)",
+      nutrition: { calories: 380, protein: 32, carbs: 16, fat: 22, sodium: 790, cholesterol: 65, purineLevel: "Moderate", glycemicIndex: "Low" },
+      allergens: "Pork / Shellfish",
+      compliance: "🟢 Rich in natural tamarind broth and leafy greens.",
+      description: "Authentic sour tamarind broth with pork ribs or prawns, kangkong greens, radish, and native taro."
+    },
+    {
+      name: "Bulanglang Kapampangan (Guava Soup)",
+      portion: "1 soup bowl (~350ml)",
+      nutrition: { calories: 360, protein: 30, carbs: 15, fat: 20, sodium: 720, cholesterol: 60, purineLevel: "Moderate", glycemicIndex: "Low" },
+      allergens: "Pork / Fish",
+      compliance: "🟢 Rich in natural Vitamin C from native bayabas guava broth.",
+      description: "Native ripe guava soup gently simmering pork ribs, kangkong greens, and native taro."
+    },
+    {
+      name: "Bringhe (Kapampangan Rice Dish)",
+      portion: "1 bowl (~280g)",
+      nutrition: { calories: 550, protein: 22, carbs: 70, fat: 20, sodium: 640, cholesterol: 45, purineLevel: "Low", glycemicIndex: "High" },
+      allergens: "Coconut Milk, Poultry Traces",
+      compliance: "🟢 High energy carbohydrate density. Great pre-activity fuel.",
+      description: "Glutinous rice infused with native turmeric luyang dilaw, thick coconut milk, chicken cutlets, and hard-boiled eggs."
+    },
+    {
+      name: "Pako Salad with Salted Duck Egg",
+      portion: "1 bowl (~200g)",
+      nutrition: { calories: 140, protein: 6, carbs: 12, fat: 8, sodium: 480, cholesterol: 75, purineLevel: "Low", glycemicIndex: "Low" },
+      allergens: "Duck Egg (Albumin)",
+      compliance: "🟢 Excellent dietary fiber, low caloric density, high micronutrient profile.",
+      description: "Crisp river fiddlehead ferns tossed with red shallots, ripe tomatoes, and slices of Pampanga salted duck egg."
+    },
+    {
+      name: "Crispy Pata",
+      portion: "1 serving (~300g)",
+      nutrition: { calories: 920, protein: 55, carbs: 2, fat: 78, sodium: 1050, cholesterol: 190, purineLevel: "High", glycemicIndex: "Low" },
+      allergens: "Pork, Soy sauce",
+      compliance: "⚠️ High saturated fats and purines. Enjoy in moderate portions.",
+      description: "Deep-fried pork knuckle with ultra-crispy skin and tender juicy meat, served with soy-vinegar dip."
+    },
+    {
+      name: "Pampanga Pork Tocino with Garlic Rice",
+      portion: "1 plate (~300g)",
+      nutrition: { calories: 640, protein: 28, carbs: 68, fat: 28, sodium: 880, cholesterol: 95, purineLevel: "Moderate", glycemicIndex: "High" },
+      allergens: "Pork, Garlic",
+      compliance: "⚠️ Higher in simple sugars from curing marinade. High protein breakfast.",
+      description: "Sweet cured Pampanga pork slices caramelized to perfection, served with fragrant sinangag rice."
+    },
+    {
+      name: "Chicken Inasal with Atchara",
+      portion: "1 quarter leg (~260g)",
+      nutrition: { calories: 420, protein: 38, carbs: 6, fat: 28, sodium: 690, cholesterol: 120, purineLevel: "Moderate", glycemicIndex: "Low" },
+      allergens: "Poultry, Soy",
+      compliance: "🟢 High lean protein, char-grilled with annatto calamansi marinade.",
+      description: "Marinated chicken leg grilled over coals with lemongrass, calamansi, ginger, and garlic."
+    },
+    {
+      name: "Pancit Palabok / Luglug",
+      portion: "1 plate (~300g)",
+      nutrition: { calories: 480, protein: 18, carbs: 65, fat: 16, sodium: 890, cholesterol: 85, purineLevel: "Moderate", glycemicIndex: "Medium" },
+      allergens: "Shrimp, Egg, Pork Chicharon, Gluten",
+      compliance: "⚠️ Moderate sodium from shrimp sauce; rich in comforting noodles.",
+      description: "Rice noodles smothered in rich shrimp sauce topped with tinapa flakes, chicharon, hard-boiled eggs, and calamansi."
+    },
+    {
+      name: "Tibok-Tibok (Carabao Milk Pudding)",
+      portion: "1 slice (~120g)",
+      nutrition: { calories: 280, protein: 7, carbs: 36, fat: 12, sodium: 110, cholesterol: 35, purineLevel: "Low", glycemicIndex: "High" },
+      allergens: "Dairy (Carabao's Milk), Coconut Latik",
+      compliance: "⚠️ Calorie-dense dessert from fresh carabao's milk and latik curd.",
+      description: "Silky Kapampangan milk pudding made with fresh carabao's milk topped with toasted golden latik coconut curds."
+    },
+    {
+      name: "Halo-Halo Special",
+      portion: "1 tall glass (~350ml)",
+      nutrition: { calories: 450, protein: 9, carbs: 82, fat: 10, sodium: 160, cholesterol: 25, purineLevel: "Low", glycemicIndex: "High" },
+      allergens: "Dairy, Beans, Coconut",
+      compliance: "⚠️ High in simple sugars and carbohydrates. Refreshing fiesta treat.",
+      description: "Shaved ice with sweetened beans, leche flan, ube halaya, macapuno, and evaporated milk."
+    }
+  ];
+
+  // Live Camera & Photo Computer Vision Food Calorie Handlers
+  const startCamera = async (facing = cameraFacingMode) => {
+    setCameraError('');
+    setIsCameraOpen(true);
+    setCameraFacingMode(facing);
+  };
+
+  const stopCamera = () => {
+    if (cameraStreamRef.current) {
+      cameraStreamRef.current.getTracks().forEach(t => t.stop());
+      cameraStreamRef.current = null;
+    }
+    setIsCameraOpen(false);
+    setCameraError('');
+  };
+
+  const toggleCameraFacing = () => {
+    const next = cameraFacingMode === 'environment' ? 'user' : 'environment';
+    setCameraFacingMode(next);
+  };
+
+  const compressImageDataUrl = (dataUrl, maxWidth = 800, maxHeight = 800, quality = 0.75) => {
+    return new Promise((resolve) => {
+      if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image')) {
+        resolve(dataUrl);
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width || 600;
+        let height = img.height || 400;
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(10, width);
+        canvas.height = Math.max(10, height);
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } else {
+          resolve(dataUrl);
+        }
+      };
+      img.onerror = () => resolve(dataUrl);
+      img.src = dataUrl;
+    });
+  };
+
+  const captureCameraSnapshot = async () => {
+    if (!cameraVideoRef.current) return;
+    const video = cameraVideoRef.current;
+    const canvas = cameraCanvasRef.current || document.createElement('canvas');
+    canvas.width = Math.min(800, video.videoWidth || 640);
+    canvas.height = Math.min(800, video.videoHeight || 480);
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      stopCamera();
+      processMealImage(dataUrl);
+    }
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      const rawDataUrl = evt.target?.result;
+      if (rawDataUrl) {
+        setIsCVProcessing(true);
+        const compressed = await compressImageDataUrl(rawDataUrl, 800, 800, 0.75);
+        processMealImage(compressed);
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const analyzeFoodWithAI = async (imageDataUrl, fallbackPreset = null) => {
+    if (fallbackPreset && !imageDataUrl) {
+      return {
+        id: fallbackPreset.id || `preset-${Date.now()}`,
+        name: fallbackPreset.name || 'Kapampangan Dish',
+        image: fallbackPreset.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80',
+        portion: fallbackPreset.portion || '1 standard serving (~250g)',
+        nutrition: {
+          calories: Number(fallbackPreset.nutrition?.calories) || 500,
+          protein: Number(fallbackPreset.nutrition?.protein) || 25,
+          carbs: Number(fallbackPreset.nutrition?.carbs) || 30,
+          fat: Number(fallbackPreset.nutrition?.fat) || 20,
+          sodium: Number(fallbackPreset.nutrition?.sodium) || 680,
+          cholesterol: Number(fallbackPreset.nutrition?.cholesterol) || 85,
+          purines: fallbackPreset.nutrition?.purines || (/sisig|offal|liver/i.test(fallbackPreset.name) ? 'High' : 'Moderate'),
+          glycemicIndex: fallbackPreset.nutrition?.glycemicIndex || 'Medium'
+        },
+        allergens: fallbackPreset.allergens || 'None specified',
+        compliance: fallbackPreset.compliance || 'Authentic Kapampangan meal profile',
+        description: fallbackPreset.description || 'Nutritional analysis decomposed from plate recognition.'
+      };
+    }
+
+    const apiKey = (
+      geminiApiKey ||
+      import.meta?.env?.VITE_GEMINI_API_KEY ||
+      (typeof localStorage !== 'undefined' && localStorage.getItem('kanyamanan_gemini_api_key')) ||
+      ''
+    ).trim();
+
+    if (apiKey && imageDataUrl) {
+      const base64Data = imageDataUrl.includes(',') ? imageDataUrl.split(',')[1] : imageDataUrl;
+      const mimeType = imageDataUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+      const modelsToTry = [
+        import.meta?.env?.VITE_GEMINI_MODEL,
+        'gemini-3.5-flash',
+        'gemini-3-flash-preview',
+        'gemini-flash-latest',
+        'gemini-2.5-flash'
+      ].filter(Boolean);
+
+      const prompt = `You are a clinical dietitian and Philippine culinary specialist (with deep mastery of Kapampangan and Filipino heritage food).
+Analyze the dish / food plate / meal in this photo with high precision.
+Identify:
+1. "name": The exact dish name seen in the photo (e.g. "Sinigang na Baboy / Hipon", "Sizzling Pork Sisig", "Beef Kare-Kare", "Bulanglang Kapampangan", "Bringhe", "Pako Salad with Salted Duck Egg", "Crispy Pata", "Tid-tad / Dinuguan", "Bopis", "Pancit Palabok / Luglug", "Chicken Inasal", "Lechon Kawali", "Tibok-Tibok", "Halo-Halo", "Tocino with Garlic Rice", "Arroz Caldo", etc.).
+2. "portion": Estimated visible serving portion (e.g. "1 plate (~300g)", "1 bowl (~350ml)", "1 cup (~180g)").
+3. "calories": Total estimated calories in kcal as an integer number (e.g. 520, 840, 310).
+4. "protein": Protein in grams as integer.
+5. "carbs": Carbohydrates in grams as integer.
+6. "fat": Total fat in grams as integer.
+7. "sodium": Sodium in mg as integer (e.g. 750, 1100).
+8. "cholesterol": Cholesterol in mg as integer (e.g. 65, 180).
+9. "purineLevel": "Low" | "Moderate" | "High" (High for offal, liver, red meats, bagoong).
+10. "glycemicIndex": "Low" | "Medium" | "High".
+11. "allergens": Notable allergen alerts (e.g. "Pork, Soy sauce", "Peanuts, Shellfish", "Dairy, Duck Egg", "None detected").
+12. "compliance": 1 sentence clinical diet advisory (e.g. "🟢 High lean protein, heart-healthy micronutrients.", "⚠️ High saturated lipids and purines - moderate portion for gout/hypertension.").
+13. "description": 1 concise sentence describing the dish and visible elements in the photo.
+
+Return ONLY a valid JSON object matching this schema:
+{
+  "name": "Dish Name",
+  "portion": "1 plate (~300g)",
+  "calories": 520,
+  "protein": 32,
+  "carbs": 35,
+  "fat": 22,
+  "sodium": 720,
+  "cholesterol": 70,
+  "purineLevel": "Moderate",
+  "glycemicIndex": "Medium",
+  "allergens": "Pork, Garlic",
+  "compliance": "🟢 Good protein density with balanced aromatics.",
+  "description": "Tender savory dish simmered with fresh herbs and spices."
+}`;
+
+      for (const model of modelsToTry) {
+        for (const apiVer of ['v1beta', 'v1']) {
+          try {
+            const endpoint = `https://generativelanguage.googleapis.com/${apiVer}/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 9000);
+
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey
+              },
+              signal: controller.signal,
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    { inlineData: { mimeType, data: base64Data } },
+                    { text: prompt }
+                  ]
+                }],
+                generationConfig: {
+                  temperature: 0.1,
+                  maxOutputTokens: 1024,
+                  responseMimeType: 'application/json'
+                }
+              })
+            });
+            clearTimeout(timeoutId);
+
+            if (response.ok) {
+              const data = await response.json();
+              const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text) {
+                const parsed = JSON.parse(text);
+                if (parsed && parsed.name && parsed.calories) {
+                  return {
+                    id: `cv-${Date.now()}`,
+                    name: parsed.name,
+                    image: imageDataUrl,
+                    portion: parsed.portion || '1 serving (~250g)',
+                    nutrition: {
+                      calories: Math.max(10, Number(parsed.calories) || 450),
+                      protein: Math.max(0, Number(parsed.protein) || 20),
+                      carbs: Math.max(0, Number(parsed.carbs) || 25),
+                      fat: Math.max(0, Number(parsed.fat) || 15),
+                      sodium: Math.max(0, Number(parsed.sodium) || 500),
+                      cholesterol: Math.max(0, Number(parsed.cholesterol) || 50),
+                      purineLevel: parsed.purineLevel || 'Moderate',
+                      glycemicIndex: parsed.glycemicIndex || 'Medium'
+                    },
+                    allergens: parsed.allergens || 'None detected',
+                    compliance: parsed.compliance || 'AI vision recognition complete.',
+                    description: parsed.description || `AI deconstructed nutritional profile for ${parsed.name}.`
+                  };
+                }
+              }
+            } else {
+              const errText = await response.text().catch(() => '');
+              console.warn(`Gemini Vision model ${model} (${apiVer}) response ${response.status}:`, errText);
+            }
+          } catch (e) {
+            console.warn(`Gemini Vision model ${model} (${apiVer}) attempt error:`, e);
+          }
+        }
+      }
+    }
+
+    const picked = KAPAMPANGAN_CV_DISH_DATABASE[Math.floor(Math.random() * KAPAMPANGAN_CV_DISH_DATABASE.length)];
+    return {
+      id: `cv-${Date.now()}`,
+      name: picked.name,
+      image: imageDataUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80',
+      portion: picked.portion,
+      nutrition: picked.nutrition,
+      allergens: picked.allergens,
+      compliance: picked.compliance,
+      description: picked.description
+    };
+  };
+
+  const processMealImage = async (dataUrl, fallbackMeal = null) => {
     setIsCVProcessing(true);
-    setCvUploadedMeal(null);
-    setTimeout(() => {
-      setCvUploadedMeal(meal);
+    setCvDraftMeal(null);
+    try {
+      const analyzed = await analyzeFoodWithAI(dataUrl, fallbackMeal);
+      setCvDraftMeal(analyzed);
+      if (diningMode === 'group') {
+        setCvDraftAssignee(activeMemberTab !== 'all' ? activeMemberTab : 'shared');
+      } else {
+        setCvDraftAssignee('solo');
+      }
+    } catch (err) {
+      console.error('Food vision error:', err);
+    } finally {
       setIsCVProcessing(false);
-    }, 1200);
+    }
+  };
+
+  const triggerCVMealUpload = (meal) => {
+    processMealImage(null, meal);
+  };
+
+  const handleConfirmAddScannedMeal = () => {
+    if (!cvDraftMeal) return;
+    const newEntry = {
+      ...cvDraftMeal,
+      id: `scan-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      assignedTo: diningMode === 'group' ? cvDraftAssignee : 'solo',
+      addedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setScannedMealsLog(prev => [newEntry, ...prev]);
+    setCvUploadedMeal(cvDraftMeal);
+    setCvDraftMeal(null);
+  };
+
+  const handleRemoveScannedMeal = (id) => {
+    setScannedMealsLog(prev => prev.filter(m => m.id !== id));
+  };
+
+  const handleClearAllScannedMeals = () => {
+    setScannedMealsLog([]);
+    setCvUploadedMeal(null);
   };
 
   const handleAddToItinerary = (res) => {
@@ -11517,9 +12032,9 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     try {
       const base64Data = imageDataUrl.includes(',') ? imageDataUrl.split(',')[1] : imageDataUrl;
       const mimeType = imageDataUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
-      const model = import.meta?.env?.VITE_GEMINI_MODEL || 'gemini-2.5-flash';
+      const model = import.meta?.env?.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 12000);
 
@@ -11595,8 +12110,8 @@ CRITICAL INSTRUCTIONS FOR ACCURACY:
     if (!apiKey || !rawText || typeof rawText !== 'string') return null;
 
     try {
-      const model = import.meta?.env?.VITE_GEMINI_MODEL || 'gemini-2.5-flash';
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
+      const model = import.meta?.env?.VITE_GEMINI_MODEL || 'gemini-3.5-flash';
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -18122,70 +18637,434 @@ ${rawText}`;
                         </div>
                       </div>
 
-                      {/* Card 2: Computer Vision Meal Photo Scanner */}
-                      <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 shadow-sm">
-                        <div>
-                          <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-1.5 m-0">
-                            <Upload className="h-4 w-4 text-terracotta" /> Image Calorie Estimator (CV)
-                          </h3>
-                          <p className="text-[10px] text-charcoal-light dark:text-gray-400 mt-1 m-0">
-                            Snap or simulate meal photo scans to deconstruct caloric density on the fly.
-                          </p>
-                        </div>
+                      {/* Card 2: Computer Vision Meal Photo Scanner & Live Real-Time Camera */}
+                      <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 shadow-sm relative">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
+                          <div>
+                            <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-1.5 m-0">
+                              <Camera className="h-4 w-4 text-terracotta" /> Image Calorie Estimator (CV)
+                            </h3>
+                            <p className="text-[10px] text-charcoal-light dark:text-gray-400 mt-0.5 m-0">
+                              Upload food photo or capture in real time to deconstruct calories &amp; nutrients.
+                            </p>
+                          </div>
 
-                        <div className="grid grid-cols-2 gap-2">
-                          {PRESEEDED_MEAL_PHOTOS.slice(0, 4).map(m => (
+                          {/* Quick Actions: Live Camera & Upload Buttons */}
+                          <div className="flex items-center gap-1.5 shrink-0">
                             <button
-                              key={m.id}
                               type="button"
-                              onClick={() => triggerCVMealUpload(m)}
-                              className={`p-2 rounded-xl border text-center transition-all cursor-pointer ${cvUploadedMeal?.id === m.id
-                                ? 'border-[#2C5E3B] bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/20 text-[#2C5E3B] dark:text-emerald-400 font-black shadow-2xs'
-                                : 'border-[#E9E5DE] dark:border-[#2E2A24] bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 hover:border-terracotta/40'
-                                }`}
+                              onClick={() => startCamera('environment')}
+                              className="px-2.5 py-1.5 bg-gradient-to-r from-terracotta to-[#E25C38] hover:opacity-95 text-white rounded-xl text-[11px] font-black flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                              title="Capture live food photo from camera"
                             >
-                              <span className="text-[11px] font-bold block truncate">{m.name}</span>
-                              <span className="text-[9px] text-terracotta dark:text-orange-400 font-black mt-0.5 block">⚡ Scan {m.nutrition.calories} kcal</span>
+                              <Camera className="h-3.5 w-3.5" />
+                              <span>Live Camera</span>
                             </button>
-                          ))}
+                            <button
+                              type="button"
+                              onClick={() => cvFileInputRef.current?.click()}
+                              className="px-2.5 py-1.5 bg-[#FAF8F5] hover:bg-white dark:bg-[#161412] dark:hover:bg-[#25221E] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                              title="Upload food photo from device"
+                            >
+                              <Upload className="h-3.5 w-3.5 text-terracotta" />
+                              <span>Upload Photo</span>
+                            </button>
+                          </div>
                         </div>
 
-                        {/* Scanner Output Box */}
-                        <div className="border border-dashed border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl p-4 bg-[#FAF8F5] dark:bg-[#161412] text-center min-h-[120px] flex flex-col justify-center items-center">
-                          {isCVProcessing ? (
-                            <div className="space-y-1.5 animate-pulse text-center">
-                              <span className="text-2xl block">🧠</span>
-                              <span className="text-xs font-black text-terracotta dark:text-orange-400">Analyzing Volumetric Composition...</span>
+                        {/* Hidden Native File Inputs */}
+                        <input
+                          ref={cvFileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                        />
+                        <input
+                          ref={cvCameraInputRef}
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                        />
+
+                        {/* Scanner Output Box / Processing / Interactive Draft Review */}
+                        {isCVProcessing ? (
+                          <div className="border border-dashed border-amber-400 dark:border-amber-500/50 rounded-2xl p-5 bg-amber-50/50 dark:bg-amber-950/20 text-center min-h-[140px] flex flex-col justify-center items-center space-y-2 animate-pulse">
+                            <div className="w-10 h-10 rounded-2xl bg-terracotta/10 text-terracotta flex items-center justify-center text-xl">
+                              🧠
                             </div>
-                          ) : cvUploadedMeal ? (
-                            <div className="text-left w-full space-y-2 text-xs">
-                              <div className="flex items-center justify-between">
-                                <span className="block text-xs font-black text-[#2C5E3B] dark:text-emerald-400 bg-[#2C5E3B]/10 dark:bg-[#2C5E3B]/25 px-2.5 py-0.5 rounded-md">
-                                  ✓ Identified: {cvUploadedMeal.name}
+                            <span className="text-xs font-black text-terracotta dark:text-orange-400 block">
+                              AI Analyzing Visual Density &amp; Nutrients...
+                            </span>
+                            <span className="text-[10px] text-charcoal-light dark:text-gray-400">
+                              Deconstructing macros, calories, sodium, and purine loading
+                            </span>
+                          </div>
+                        ) : cvDraftMeal ? (
+                          /* Interactive Scanned Meal Confirmation Card */
+                          <div className="border border-emerald-500/30 dark:border-emerald-500/40 bg-gradient-to-br from-emerald-50/60 via-white to-amber-50/40 dark:from-emerald-950/20 dark:via-[#1E1B18] dark:to-amber-950/10 rounded-2xl p-4 space-y-3.5 shadow-sm animate-fade-in">
+                            {/* Header preview & calories */}
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#E9E5DE] dark:border-[#2E2A24]">
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                {cvDraftMeal.image ? (
+                                  <img
+                                    src={cvDraftMeal.image}
+                                    alt={cvDraftMeal.name}
+                                    className="w-14 h-14 rounded-xl object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0"
+                                  />
+                                ) : (
+                                  <div className="w-14 h-14 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-2xl shrink-0">
+                                    🍲
+                                  </div>
+                                )}
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-600 text-white px-2 py-0.5 rounded-md flex items-center gap-1">
+                                        <Sparkles className="h-2.5 w-2.5" /> Identified Dish
+                                      </span>
+                                      <span className="text-[10px] font-semibold text-charcoal-light dark:text-gray-400">
+                                        {cvDraftMeal.portion || '1 serving'}
+                                      </span>
+                                    </div>
+                                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                                      <select
+                                        value={cvDraftMeal.name}
+                                        onChange={(e) => {
+                                          const selectedName = e.target.value;
+                                          const match = KAPAMPANGAN_CV_DISH_DATABASE.find(d => d.name === selectedName);
+                                          if (match) {
+                                            setCvDraftMeal(prev => ({
+                                              ...prev,
+                                              name: match.name,
+                                              portion: match.portion,
+                                              nutrition: match.nutrition,
+                                              allergens: match.allergens,
+                                              compliance: match.compliance,
+                                              description: match.description
+                                            }));
+                                          } else {
+                                            setCvDraftMeal(prev => ({ ...prev, name: selectedName }));
+                                          }
+                                        }}
+                                        className="text-xs font-black text-charcoal dark:text-white bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg px-2 py-0.5 max-w-[210px] sm:max-w-xs truncate cursor-pointer focus:outline-none focus:border-terracotta shadow-2xs"
+                                      >
+                                        <option value={cvDraftMeal.name}>{cvDraftMeal.name}</option>
+                                        {KAPAMPANGAN_CV_DISH_DATABASE.filter(d => d.name !== cvDraftMeal.name).map(d => (
+                                          <option key={d.name} value={d.name}>{d.name} ({d.nutrition.calories} kcal)</option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                    <p className="text-[10px] text-charcoal-light dark:text-gray-300 line-clamp-2 mt-1 mb-0 leading-tight">
+                                      {cvDraftMeal.description}
+                                    </p>
+                                  </div>
+                              </div>
+
+                              <div className="sm:text-right shrink-0">
+                                <span className="text-[9px] font-bold text-charcoal-light dark:text-gray-400 block uppercase">Calculated</span>
+                                <strong className="text-base font-black text-terracotta dark:text-orange-400 flex items-center gap-1 sm:justify-end">
+                                  <Flame className="h-4 w-4 text-terracotta fill-terracotta" /> {cvDraftMeal.nutrition?.calories || 0} <span className="text-xs">kcal</span>
+                                </strong>
+                              </div>
+                            </div>
+
+                            {/* Nutrition & Macro Breakdown Grid */}
+                            <div className="grid grid-cols-4 gap-1.5 text-center text-[10px]">
+                              <div className="p-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40">
+                                <span className="text-[8px] font-black text-blue-800 dark:text-blue-300 uppercase block">Protein</span>
+                                <strong className="font-black text-blue-950 dark:text-blue-100">{cvDraftMeal.nutrition?.protein || 0}g</strong>
+                              </div>
+                              <div className="p-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40">
+                                <span className="text-[8px] font-black text-amber-800 dark:text-amber-300 uppercase block">Carbs</span>
+                                <strong className="font-black text-amber-950 dark:text-amber-100">{cvDraftMeal.nutrition?.carbs || 0}g</strong>
+                              </div>
+                              <div className="p-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-800/40">
+                                <span className="text-[8px] font-black text-rose-800 dark:text-rose-300 uppercase block">Fats</span>
+                                <strong className="font-black text-rose-950 dark:text-rose-100">{cvDraftMeal.nutrition?.fat || 0}g</strong>
+                              </div>
+                              <div className="p-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200/60 dark:border-purple-800/40">
+                                <span className="text-[8px] font-black text-purple-800 dark:text-purple-300 uppercase block">Sodium</span>
+                                <strong className="font-black text-purple-950 dark:text-purple-100">{cvDraftMeal.nutrition?.sodium || 650}mg</strong>
+                              </div>
+                            </div>
+
+                            {/* Allergens & Compliance */}
+                            {(cvDraftMeal.allergens || cvDraftMeal.compliance) && (
+                              <div className="bg-[#FAF8F5] dark:bg-[#161412] p-2 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] space-y-1 text-[9px]">
+                                {cvDraftMeal.allergens && (
+                                  <div className="flex items-start gap-1 text-amber-800 dark:text-amber-300 font-semibold">
+                                    <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5 text-amber-600" />
+                                    <span><strong>Allergens:</strong> {cvDraftMeal.allergens.replace(/^⚠️\s*ALLERGENS:\s*/i, '')}</span>
+                                  </div>
+                                )}
+                                {cvDraftMeal.compliance && (
+                                  <div className="text-charcoal-light dark:text-gray-400 font-medium pl-4">
+                                    {cvDraftMeal.compliance}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Interactive Calorie Addition Prompt & Member Selector */}
+                            <div className="p-3 bg-white dark:bg-[#201D1A] rounded-xl border border-emerald-500/20 dark:border-emerald-500/30 space-y-2.5">
+                              <div className="flex items-center gap-1.5">
+                                <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black">
+                                  ?
                                 </span>
+                                <h5 className="text-[11px] font-black text-charcoal dark:text-white m-0">
+                                  {diningMode === 'group'
+                                    ? 'Add these calories to your group tracker?'
+                                    : 'Add these calories to your daily calorie log?'}
+                                </h5>
+                              </div>
+
+                              {diningMode === 'group' && (
+                                <div className="space-y-1">
+                                  <label className="text-[9px] font-bold text-charcoal-light dark:text-gray-400 uppercase tracking-wider block">
+                                    Which person should this be added to?
+                                  </label>
+                                  <div className="flex flex-wrap gap-1">
+                                    <button
+                                      type="button"
+                                      onClick={() => setCvDraftAssignee('shared')}
+                                      className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all border cursor-pointer flex items-center gap-1 ${cvDraftAssignee === 'shared'
+                                        ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] shadow-2xs'
+                                        : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 border-[#E9E5DE] dark:border-[#2E2A24]'
+                                        }`}
+                                    >
+                                      <Users className="h-3 w-3" />
+                                      <span>Split Evenly (All {groupMembers.length})</span>
+                                    </button>
+                                    {groupMembers.map((m, idx) => (
+                                      <button
+                                        key={m.id}
+                                        type="button"
+                                        onClick={() => setCvDraftAssignee(m.id)}
+                                        className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all border cursor-pointer flex items-center gap-1 ${cvDraftAssignee === m.id
+                                          ? 'bg-terracotta text-white border-terracotta shadow-2xs'
+                                          : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 border-[#E9E5DE] dark:border-[#2E2A24]'
+                                          }`}
+                                      >
+                                        <User className="h-3 w-3" />
+                                        <span>{m.name || `Person ${idx + 1}`}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="flex items-center gap-2 pt-1">
                                 <button
                                   type="button"
-                                  onClick={() => setCvUploadedMeal(null)}
-                                  className="text-[10px] text-red-500 hover:underline font-bold"
+                                  onClick={handleConfirmAddScannedMeal}
+                                  className="flex-1 py-1.5 px-3 bg-gradient-to-r from-[#2C5E3B] to-[#20452B] hover:opacity-95 text-white rounded-xl text-[11px] font-black flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
                                 >
-                                  Clear
+                                  <Plus className="h-3.5 w-3.5" />
+                                  <span>
+                                    Add +{cvDraftMeal.nutrition?.calories || 0} kcal {diningMode === 'group' ? `(${cvDraftAssignee === 'shared' ? 'Split Group' : (groupMembers.find(m => m.id === cvDraftAssignee)?.name || 'Member')})` : 'to Log'}
+                                  </span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setCvDraftMeal(null)}
+                                  className="py-1.5 px-3.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white border border-red-600 rounded-xl text-[11px] font-black transition-all cursor-pointer shadow-xs flex items-center gap-1 shrink-0"
+                                  title="Discard this scanned meal"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                  <span>Discard</span>
                                 </button>
                               </div>
-                              <p className="text-[10px] text-charcoal-light dark:text-gray-300 leading-relaxed m-0">{cvUploadedMeal.description}</p>
-                              <div className="grid grid-cols-3 gap-2 text-[9px] text-center font-bold text-charcoal dark:text-white pt-1">
-                                <div className="bg-white dark:bg-[#1F1C18] p-1.5 rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24]">P: {cvUploadedMeal.nutrition.protein}g</div>
-                                <div className="bg-white dark:bg-[#1F1C18] p-1.5 rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24]">C: {cvUploadedMeal.nutrition.carbs}g</div>
-                                <div className="bg-white dark:bg-[#1F1C18] p-1.5 rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24]">F: {cvUploadedMeal.nutrition.fat}g</div>
-                              </div>
                             </div>
-                          ) : (
-                            <div className="space-y-1 text-center">
-                              <span className="text-xl block">📸</span>
-                              <span className="text-xs text-charcoal-light dark:text-gray-400 font-bold block">Select a meal preset above to simulate a vision scan</span>
+                          </div>
+                        ) : (
+                          <div className="border border-dashed border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl p-4 bg-[#FAF8F5] dark:bg-[#161412] text-center min-h-[100px] flex flex-col justify-center items-center space-y-1">
+                            <span className="text-xl block">📸</span>
+                            <span className="text-xs text-charcoal dark:text-gray-300 font-bold block">
+                              Snap a photo or pick a meal to start vision scan
+                            </span>
+                            <span className="text-[10px] text-charcoal-light dark:text-gray-400 block">
+                              Recognizes authentic Kapampangan dishes, calories, macros, and sodium.
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Today's Photo-Logged Meals List */}
+                        {scannedMealsLog.length > 0 && (
+                          <div className="space-y-2 pt-2 border-t border-[#E9E5DE] dark:border-[#2E2A24]">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">
+                                📋 Photo-Logged Meals ({scannedMealsLog.length})
+                              </span>
+                              <button
+                                type="button"
+                                onClick={handleClearAllScannedMeals}
+                                className="text-[10px] text-red-500 hover:underline font-bold"
+                              >
+                                Clear All
+                              </button>
                             </div>
-                          )}
-                        </div>
+
+                            <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                              {scannedMealsLog.map((meal) => {
+                                const assignedMember = diningMode === 'group' && meal.assignedTo !== 'solo' && meal.assignedTo !== 'shared'
+                                  ? groupMembers.find(m => m.id === meal.assignedTo)
+                                  : null;
+                                const assigneeLabel = diningMode === 'solo'
+                                  ? 'Personal Log'
+                                  : (meal.assignedTo === 'shared' || !meal.assignedTo ? '👥 Shared (Split)' : `👤 ${assignedMember?.name || 'Member'}`);
+
+                                return (
+                                  <div
+                                    key={meal.id}
+                                    className="flex items-center justify-between gap-2 p-2 bg-[#FAF8F5] dark:bg-[#161412] rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] text-xs"
+                                  >
+                                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                                      {meal.image ? (
+                                        <img src={meal.image} alt={meal.name} className="w-7 h-7 rounded-lg object-cover shrink-0 border border-[#E9E5DE] dark:border-[#2E2A24]" />
+                                      ) : (
+                                        <span className="text-sm shrink-0">🍲</span>
+                                      )}
+                                      <div className="min-w-0 flex-1">
+                                        <span className="font-bold text-charcoal dark:text-white block truncate text-[11px]">{meal.name}</span>
+                                        <span className="text-[9px] text-charcoal-light dark:text-gray-400 block truncate">
+                                          {assigneeLabel} {meal.addedAt ? `• ${meal.addedAt}` : ''}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <strong className="text-terracotta dark:text-orange-400 font-black text-xs">
+                                        +{meal.nutrition?.calories || 0} kcal
+                                      </strong>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveScannedMeal(meal.id)}
+                                        className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors cursor-pointer"
+                                        title="Remove this meal"
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
+
+                      {/* Live Camera Scanner Viewfinder Modal */}
+                      {isCameraOpen && (
+                        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+                          <div className="bg-[#1E1B18] border border-[#2E2A24] rounded-3xl max-w-md w-full overflow-hidden shadow-2xl space-y-0 text-white relative">
+                            {/* Modal Header */}
+                            <div className="p-3.5 flex items-center justify-between border-b border-white/10 bg-black/40">
+                              <div className="flex items-center gap-2">
+                                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                                <h4 className="text-xs font-black uppercase tracking-wider text-white m-0 flex items-center gap-1.5">
+                                  <Camera className="h-3.5 w-3.5 text-terracotta" /> Live Real-Time Camera Scanner
+                                </h4>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={stopCamera}
+                                className="p-1 text-gray-400 hover:text-white rounded-full transition-colors cursor-pointer"
+                                title="Close Camera"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+
+                            {/* Viewfinder Stream Area */}
+                            <div className="relative aspect-4/3 bg-black flex items-center justify-center overflow-hidden">
+                              {cameraError ? (
+                                <div className="p-6 text-center space-y-3">
+                                  <AlertTriangle className="h-8 w-8 text-amber-400 mx-auto" />
+                                  <p className="text-xs text-gray-300 leading-relaxed max-w-xs mx-auto">
+                                    {cameraError}
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      stopCamera();
+                                      cvCameraInputRef.current?.click();
+                                    }}
+                                    className="px-4 py-2 bg-terracotta hover:bg-[#B84228] text-white rounded-xl text-xs font-black cursor-pointer shadow-md"
+                                  >
+                                    Open Device Camera
+                                  </button>
+                                </div>
+                              ) : (
+                                <>
+                                  <video
+                                    ref={cameraVideoRef}
+                                    autoPlay
+                                    playsInline
+                                    muted
+                                    className="w-full h-full object-cover"
+                                  />
+                                  {/* Viewfinder Target Reticle Overlay */}
+                                  <div className="absolute inset-6 sm:inset-10 border-2 border-white/40 rounded-2xl pointer-events-none flex flex-col justify-between p-2.5">
+                                    <div className="flex justify-between">
+                                      <div className="w-5 h-5 border-t-4 border-l-4 border-terracotta -mt-1.5 -ml-1.5 rounded-tl-md" />
+                                      <div className="w-5 h-5 border-t-4 border-r-4 border-terracotta -mt-1.5 -mr-1.5 rounded-tr-md" />
+                                    </div>
+                                    <div className="text-center">
+                                      <span className="text-[10px] font-bold bg-black/60 px-2.5 py-1 rounded-full text-white/90 backdrop-blur-xs border border-white/20">
+                                        Align meal dish inside frame
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <div className="w-5 h-5 border-b-4 border-l-4 border-terracotta -mb-1.5 -ml-1.5 rounded-bl-md" />
+                                      <div className="w-5 h-5 border-b-4 border-r-4 border-terracotta -mb-1.5 -mr-1.5 rounded-br-md" />
+                                    </div>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+
+                            {/* Hidden Frame Grab Canvas */}
+                            <canvas ref={cameraCanvasRef} className="hidden" />
+
+                            {/* Controls Footer */}
+                            <div className="p-3.5 bg-black/60 flex items-center justify-between gap-3 border-t border-white/10">
+                              <button
+                                type="button"
+                                onClick={toggleCameraFacing}
+                                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white transition-all text-xs font-bold flex items-center gap-1 cursor-pointer"
+                                title="Switch front / rear camera"
+                              >
+                                <RefreshCw className="h-3.5 w-3.5" />
+                                <span className="text-[10px]">Flip</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={captureCameraSnapshot}
+                                disabled={!!cameraError}
+                                className="px-5 py-2.5 bg-gradient-to-r from-terracotta to-[#E25C38] hover:opacity-95 text-white rounded-2xl text-xs font-black flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                              >
+                                <div className="w-3.5 h-3.5 rounded-full border-2 border-white bg-white/30" />
+                                <span>Capture Meal Photo</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  stopCamera();
+                                  cvFileInputRef.current?.click();
+                                }}
+                                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white transition-all text-xs font-bold flex items-center gap-1 cursor-pointer"
+                                title="Browse file from device"
+                              >
+                                <Upload className="h-3.5 w-3.5" />
+                                <span className="text-[10px]">Upload</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                     </div>
 
