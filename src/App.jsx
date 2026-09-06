@@ -17821,50 +17821,6 @@ ${rawText}`;
                     </div>
                   </div>
 
-                  {/* Card 6: Budget Allocation Settings */}
-                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-3 shadow-sm">
-                    <h3 className="text-xs font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5 border-b border-[#E9E5DE]/80 pb-2.5">
-                      <span className="text-base">💰</span> Budget Allocation Calculator
-                    </h3>
-
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[9px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                            Total Budget (PHP)
-                          </label>
-                          <input
-                            type="number"
-                            min="200"
-                            max="50000"
-                            value={userProfile.budgetLimit}
-                            onChange={(e) => setUserProfile({ ...userProfile, budgetLimit: Number(e.target.value) || 1500 })}
-                            className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs text-charcoal font-bold focus:outline-none focus:bg-white focus:ring-1 focus:ring-terracotta"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[9px] font-bold text-charcoal-light uppercase tracking-wider mb-1">
-                            Number of Persons
-                          </label>
-                          <input
-                            type="number"
-                            min="1"
-                            max="50"
-                            value={numPersons}
-                            onChange={(e) => setNumPersons(Math.max(1, Number(e.target.value) || 1))}
-                            className="block w-full px-3 py-2 border border-[#E9E5DE] rounded-xl bg-[#FAF8F5] text-xs text-charcoal font-bold focus:outline-none focus:bg-white focus:ring-1 focus:ring-terracotta"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Division Calculations */}
-                      <div className="bg-[#FAF8F5] p-3 rounded-xl border border-[#E9E5DE] text-xs flex justify-between items-center">
-                        <span className="text-charcoal-light font-bold">Per-Person Share ({numPersons} pax):</span>
-                        <strong className="text-terracotta text-sm font-black">₱{Math.round(userProfile.budgetLimit / numPersons)} <span className="text-[10px] text-charcoal-light font-medium">/ person</span></strong>
-                      </div>
-                    </div>
-                  </div>
-
                 </div>
 
                 {/* Right Pane: Accurate Map Workstation */}
