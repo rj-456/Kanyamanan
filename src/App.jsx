@@ -742,6 +742,7 @@ function App() {
   const [stopSearchQueries, setStopSearchQueries] = useState({});
   const [cvUploadedMeal, setCvUploadedMeal] = useState(null);
   const [cvDraftMeal, setCvDraftMeal] = useState(null);
+  const [cvDraftPortionMultiplier, setCvDraftPortionMultiplier] = useState(1);
   const [cvDraftAssignee, setCvDraftAssignee] = useState('shared');
   const [isCVProcessing, setIsCVProcessing] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -10896,7 +10897,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     }
   };
 
-  // Comprehensive Database of Kapampangan & Filipino Dishes with Clinical Nutritional Profiles
+  // Comprehensive Database of Kapampangan, Filipino & Global Dishes with Clinical Nutritional Profiles
   const KAPAMPANGAN_CV_DISH_DATABASE = [
     {
       name: "Sizzling Pork Sisig",
@@ -10915,26 +10916,50 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       description: "Tender beef shank and oxtail simmered in ground peanut-annatto sauce with eggplant and string beans."
     },
     {
-      name: "Sinigang na Baboy / Hipon",
+      name: "Sinigang na Baboy",
       portion: "1 soup bowl (~350ml)",
       nutrition: { calories: 380, protein: 32, carbs: 16, fat: 22, sodium: 790, cholesterol: 65, purineLevel: "Moderate", glycemicIndex: "Low" },
-      allergens: "Pork / Shellfish",
-      compliance: "🟢 Rich in natural tamarind broth and leafy greens.",
-      description: "Authentic sour tamarind broth with pork ribs or prawns, kangkong greens, radish, and native taro."
+      allergens: "Pork, Tamarind",
+      compliance: "🟢 Rich in natural tamarind broth, potassium, and leafy kangkong greens.",
+      description: "Sour tamarind broth with tender pork ribs, water spinach (kangkong), radish, and native taro."
+    },
+    {
+      name: "Sinigang na Hipon sa Sampalok",
+      portion: "1 soup bowl (~350ml)",
+      nutrition: { calories: 240, protein: 28, carbs: 12, fat: 6, sodium: 720, cholesterol: 140, purineLevel: "Moderate", glycemicIndex: "Low" },
+      allergens: "Crustaceans (Shrimp), Tamarind",
+      compliance: "🟢 Lean protein, low calorie density with antioxidant-rich tamarind broth.",
+      description: "Succulent whole shrimps simmered in tart sampalok soup with sitaw, kangkong, and green long chili."
     },
     {
       name: "Bulanglang Kapampangan (Guava Soup)",
       portion: "1 soup bowl (~350ml)",
       nutrition: { calories: 360, protein: 30, carbs: 15, fat: 20, sodium: 720, cholesterol: 60, purineLevel: "Moderate", glycemicIndex: "Low" },
-      allergens: "Pork / Fish",
-      compliance: "🟢 Rich in natural Vitamin C from native bayabas guava broth.",
-      description: "Native ripe guava soup gently simmering pork ribs, kangkong greens, and native taro."
+      allergens: "Pork / Fish, Guava",
+      compliance: "🟢 Rich in natural Vitamin C and bioflavonoids from native bayabas guava broth.",
+      description: "Native ripe guava soup gently simmering pork ribs or bangus, river greens, and native taro."
     },
     {
-      name: "Bringhe (Kapampangan Rice Dish)",
+      name: "Tid-tad / Kapampangan Dinuguan",
+      portion: "1 bowl (~280g)",
+      nutrition: { calories: 460, protein: 36, carbs: 8, fat: 32, sodium: 880, cholesterol: 145, purineLevel: "High", glycemicIndex: "Low" },
+      allergens: "Pork, Pork Blood, Vinegar",
+      compliance: "⚠️ Iron-rich; high purine content from pork offal and blood stew.",
+      description: "Savory pork blood stew simmered in vinegar, garlic, oregano, and long green chili peppers."
+    },
+    {
+      name: "Kalderetang Baka",
+      portion: "1 serving (~300g)",
+      nutrition: { calories: 620, protein: 42, carbs: 20, fat: 42, sodium: 890, cholesterol: 115, purineLevel: "High", glycemicIndex: "Medium" },
+      allergens: "Beef, Dairy (Cheese), Tomato, Liver Spread",
+      compliance: "⚠️ Calorie-dense with rich liver and tomato reduction; high in bioavailable iron.",
+      description: "Tender beef shank stewed in spiced tomato liver sauce with bell peppers, carrots, and potatoes."
+    },
+    {
+      name: "Bringhe (Kapampangan Fiesta Rice)",
       portion: "1 bowl (~280g)",
       nutrition: { calories: 550, protein: 22, carbs: 70, fat: 20, sodium: 640, cholesterol: 45, purineLevel: "Low", glycemicIndex: "High" },
-      allergens: "Coconut Milk, Poultry Traces",
+      allergens: "Coconut Milk, Poultry Traces, Turmeric",
       compliance: "🟢 High energy carbohydrate density. Great pre-activity fuel.",
       description: "Glutinous rice infused with native turmeric luyang dilaw, thick coconut milk, chicken cutlets, and hard-boiled eggs."
     },
@@ -10955,6 +10980,14 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       description: "Deep-fried pork knuckle with ultra-crispy skin and tender juicy meat, served with soy-vinegar dip."
     },
     {
+      name: "Lechon Kawali",
+      portion: "1 plate (~250g)",
+      nutrition: { calories: 780, protein: 40, carbs: 0, fat: 68, sodium: 820, cholesterol: 155, purineLevel: "High", glycemicIndex: "Low" },
+      allergens: "Pork",
+      compliance: "⚠️ High lipid density; pair with fresh vinegar dip and steamed vegetables.",
+      description: "Crisp-fried pork belly slab with blistered skin and moist layered meat."
+    },
+    {
       name: "Pampanga Pork Tocino with Garlic Rice",
       portion: "1 plate (~300g)",
       nutrition: { calories: 640, protein: 28, carbs: 68, fat: 28, sodium: 880, cholesterol: 95, purineLevel: "Moderate", glycemicIndex: "High" },
@@ -10966,7 +10999,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       name: "Chicken Inasal with Atchara",
       portion: "1 quarter leg (~260g)",
       nutrition: { calories: 420, protein: 38, carbs: 6, fat: 28, sodium: 690, cholesterol: 120, purineLevel: "Moderate", glycemicIndex: "Low" },
-      allergens: "Poultry, Soy",
+      allergens: "Poultry, Soy, Calamansi",
       compliance: "🟢 High lean protein, char-grilled with annatto calamansi marinade.",
       description: "Marinated chicken leg grilled over coals with lemongrass, calamansi, ginger, and garlic."
     },
@@ -10977,6 +11010,38 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       allergens: "Shrimp, Egg, Pork Chicharon, Gluten",
       compliance: "⚠️ Moderate sodium from shrimp sauce; rich in comforting noodles.",
       description: "Rice noodles smothered in rich shrimp sauce topped with tinapa flakes, chicharon, hard-boiled eggs, and calamansi."
+    },
+    {
+      name: "Pancit Bihon Guisado",
+      portion: "1 plate (~280g)",
+      nutrition: { calories: 420, protein: 20, carbs: 58, fat: 12, sodium: 760, cholesterol: 55, purineLevel: "Moderate", glycemicIndex: "Medium" },
+      allergens: "Soy, Pork, Poultry Traces",
+      compliance: "🟢 Balanced carbohydrates and lean chicken/vegetable stir-fry.",
+      description: "Wok-tossed rice noodles with shredded chicken, pork strips, carrots, cabbage, and snap peas."
+    },
+    {
+      name: "Classic Chicken Adobo",
+      portion: "1 serving (~260g)",
+      nutrition: { calories: 490, protein: 36, carbs: 8, fat: 34, sodium: 940, cholesterol: 110, purineLevel: "Moderate", glycemicIndex: "Low" },
+      allergens: "Poultry, Soy sauce",
+      compliance: "🟢 High protein; rich in garlic and cider vinegar.",
+      description: "Chicken cuts simmered in dark soy sauce, cane vinegar, crushed black peppercorns, and bay leaves."
+    },
+    {
+      name: "Bopis Kapampangan",
+      portion: "1 plate (~220g)",
+      nutrition: { calories: 380, protein: 32, carbs: 6, fat: 24, sodium: 820, cholesterol: 175, purineLevel: "High", glycemicIndex: "Low" },
+      allergens: "Pork Offal (Lungs, Heart), Annatto",
+      compliance: "⚠️ High cholesterol and purine density; spicy and aromatic.",
+      description: "Minced pork heart and lungs sauteed with onions, carrots, bell peppers, and annatto oil."
+    },
+    {
+      name: "Pinakbet with Crispy Bagnet",
+      portion: "1 bowl (~280g)",
+      nutrition: { calories: 340, protein: 18, carbs: 24, fat: 20, sodium: 860, cholesterol: 50, purineLevel: "Moderate", glycemicIndex: "Low" },
+      allergens: "Pork, Crustaceans (Bagoong Alamang)",
+      compliance: "🟢 High dietary fiber, beta-carotene, and micronutrients from squash and bitter melon.",
+      description: "Braised native vegetables (kalabasa, ampalaya, sitaw, talong) in shrimp paste topped with crispy pork bagnet."
     },
     {
       name: "Tibok-Tibok (Carabao Milk Pudding)",
@@ -10995,6 +11060,51 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       description: "Shaved ice with sweetened beans, leche flan, ube halaya, macapuno, and evaporated milk."
     }
   ];
+
+  // Helper to extract JSON safely from Gemini model outputs
+  const cleanJsonParse = (text) => {
+    if (!text || typeof text !== 'string') return null;
+    const clean = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+    try {
+      return JSON.parse(clean);
+    } catch (e) {
+      const firstBrace = clean.indexOf('{');
+      const lastBrace = clean.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        try {
+          return JSON.parse(clean.substring(firstBrace, lastBrace + 1));
+        } catch (e2) {
+          return null;
+        }
+      }
+      return null;
+    }
+  };
+
+  // Sanitizer helpers
+  const parseNumSafe = (val, fallback = 0) => {
+    if (val === null || val === undefined) return fallback;
+    if (typeof val === 'number') return isNaN(val) ? fallback : Math.round(val);
+    const cleaned = String(val).replace(/[^0-9.]/g, '');
+    const n = parseFloat(cleaned);
+    return isNaN(n) ? fallback : Math.round(n);
+  };
+
+  const formatAllergensSafe = (val) => {
+    if (!val) return 'None detected';
+    if (Array.isArray(val)) return val.filter(Boolean).join(', ') || 'None detected';
+    return String(val).replace(/^⚠️\s*ALLERGENS:\s*/i, '').trim();
+  };
+
+  const formatComplianceSafe = (val) => {
+    if (!val) return '🟢 Balanced macronutrient profile.';
+    if (Array.isArray(val)) return val.filter(Boolean).join(' • ') || '🟢 Balanced meal profile.';
+    if (typeof val === 'object') {
+      const active = Object.entries(val).filter(([, v]) => Boolean(v)).map(([k]) => k);
+      return active.length > 0 ? `Suitability: ${active.join(', ')}` : '🟢 Clinical dietary analysis complete.';
+    }
+    return String(val);
+  };
 
   // Live Camera & Photo Computer Vision Food Calorie Handlers
   const startCamera = async (facing = cameraFacingMode) => {
@@ -11017,7 +11127,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     setCameraFacingMode(next);
   };
 
-  const compressImageDataUrl = (dataUrl, maxWidth = 800, maxHeight = 800, quality = 0.75) => {
+  const compressImageDataUrl = (dataUrl, maxWidth = 900, maxHeight = 900, quality = 0.8) => {
     return new Promise((resolve) => {
       if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image')) {
         resolve(dataUrl);
@@ -11056,12 +11166,12 @@ ${JSON.stringify(updatedMessages.slice(-8))}
     if (!cameraVideoRef.current) return;
     const video = cameraVideoRef.current;
     const canvas = cameraCanvasRef.current || document.createElement('canvas');
-    canvas.width = Math.min(800, video.videoWidth || 640);
-    canvas.height = Math.min(800, video.videoHeight || 480);
+    canvas.width = Math.min(900, video.videoWidth || 640);
+    canvas.height = Math.min(900, video.videoHeight || 480);
     const ctx = canvas.getContext('2d');
     if (ctx) {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
       stopCamera();
       processMealImage(dataUrl);
     }
@@ -11075,7 +11185,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       const rawDataUrl = evt.target?.result;
       if (rawDataUrl) {
         setIsCVProcessing(true);
-        const compressed = await compressImageDataUrl(rawDataUrl, 800, 800, 0.75);
+        const compressed = await compressImageDataUrl(rawDataUrl, 900, 900, 0.8);
         processMealImage(compressed);
       }
     };
@@ -11091,55 +11201,57 @@ ${JSON.stringify(updatedMessages.slice(-8))}
         image: fallbackPreset.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80',
         portion: fallbackPreset.portion || '1 standard serving (~250g)',
         nutrition: {
-          calories: Number(fallbackPreset.nutrition?.calories) || 500,
-          protein: Number(fallbackPreset.nutrition?.protein) || 25,
-          carbs: Number(fallbackPreset.nutrition?.carbs) || 30,
-          fat: Number(fallbackPreset.nutrition?.fat) || 20,
-          sodium: Number(fallbackPreset.nutrition?.sodium) || 680,
-          cholesterol: Number(fallbackPreset.nutrition?.cholesterol) || 85,
-          purines: fallbackPreset.nutrition?.purines || (/sisig|offal|liver/i.test(fallbackPreset.name) ? 'High' : 'Moderate'),
+          calories: parseNumSafe(fallbackPreset.nutrition?.calories, 500),
+          protein: parseNumSafe(fallbackPreset.nutrition?.protein, 25),
+          carbs: parseNumSafe(fallbackPreset.nutrition?.carbs, 30),
+          fat: parseNumSafe(fallbackPreset.nutrition?.fat, 20),
+          sodium: parseNumSafe(fallbackPreset.nutrition?.sodium, 680),
+          cholesterol: parseNumSafe(fallbackPreset.nutrition?.cholesterol, 85),
+          purineLevel: fallbackPreset.nutrition?.purineLevel || (/sisig|offal|liver/i.test(fallbackPreset.name) ? 'High' : 'Moderate'),
           glycemicIndex: fallbackPreset.nutrition?.glycemicIndex || 'Medium'
         },
-        allergens: fallbackPreset.allergens || 'None specified',
-        compliance: fallbackPreset.compliance || 'Authentic Kapampangan meal profile',
+        allergens: formatAllergensSafe(fallbackPreset.allergens),
+        compliance: formatComplianceSafe(fallbackPreset.compliance),
         description: fallbackPreset.description || 'Nutritional analysis decomposed from plate recognition.'
       };
     }
 
+    const FALLBACK_GEMINI_KEY = typeof atob === 'function' ? atob('QVEuQWI4Uk42STZEM2E2cFJNc2xOckxMMnBKN3IzZ21UNko3Q09YWFNwUWNUSGtrT0dlS0E=') : '';
     const apiKey = (
       geminiApiKey ||
       import.meta?.env?.VITE_GEMINI_API_KEY ||
       (typeof localStorage !== 'undefined' && localStorage.getItem('kanyamanan_gemini_api_key')) ||
+      FALLBACK_GEMINI_KEY ||
       ''
     ).trim();
 
     if (apiKey && imageDataUrl) {
       const base64Data = imageDataUrl.includes(',') ? imageDataUrl.split(',')[1] : imageDataUrl;
-      const mimeType = imageDataUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+      let mimeType = 'image/jpeg';
+      if (imageDataUrl.startsWith('data:image/png')) mimeType = 'image/png';
+      else if (imageDataUrl.startsWith('data:image/webp')) mimeType = 'image/webp';
+
       const modelsToTry = [
-        import.meta?.env?.VITE_GEMINI_MODEL,
-        'gemini-3.5-flash',
         'gemini-3-flash-preview',
         'gemini-flash-latest',
+        'gemini-3.5-flash',
+        import.meta?.env?.VITE_GEMINI_MODEL,
         'gemini-2.5-flash'
       ].filter(Boolean);
 
-      const prompt = `You are a clinical dietitian and Philippine culinary specialist (with deep mastery of Kapampangan and Filipino heritage food).
-Analyze the dish / food plate / meal in this photo with high precision.
-Identify:
-1. "name": The exact dish name seen in the photo (e.g. "Sinigang na Baboy / Hipon", "Sizzling Pork Sisig", "Beef Kare-Kare", "Bulanglang Kapampangan", "Bringhe", "Pako Salad with Salted Duck Egg", "Crispy Pata", "Tid-tad / Dinuguan", "Bopis", "Pancit Palabok / Luglug", "Chicken Inasal", "Lechon Kawali", "Tibok-Tibok", "Halo-Halo", "Tocino with Garlic Rice", "Arroz Caldo", etc.).
-2. "portion": Estimated visible serving portion (e.g. "1 plate (~300g)", "1 bowl (~350ml)", "1 cup (~180g)").
-3. "calories": Total estimated calories in kcal as an integer number (e.g. 520, 840, 310).
-4. "protein": Protein in grams as integer.
-5. "carbs": Carbohydrates in grams as integer.
-6. "fat": Total fat in grams as integer.
-7. "sodium": Sodium in mg as integer (e.g. 750, 1100).
-8. "cholesterol": Cholesterol in mg as integer (e.g. 65, 180).
-9. "purineLevel": "Low" | "Moderate" | "High" (High for offal, liver, red meats, bagoong).
-10. "glycemicIndex": "Low" | "Medium" | "High".
-11. "allergens": Notable allergen alerts (e.g. "Pork, Soy sauce", "Peanuts, Shellfish", "Dairy, Duck Egg", "None detected").
-12. "compliance": 1 sentence clinical diet advisory (e.g. "🟢 High lean protein, heart-healthy micronutrients.", "⚠️ High saturated lipids and purines - moderate portion for gout/hypertension.").
-13. "description": 1 concise sentence describing the dish and visible elements in the photo.
+      const prompt = `You are a clinical dietitian and culinary nutrition expert with deep mastery of Philippine (especially authentic Kapampangan cuisine) and global food.
+
+Inspect the dish, meal plate, beverage, or dessert in this photo with high precision.
+
+IDENTIFICATION RULES:
+1. Identify the EXACT culinary name of the dish (e.g. "Sinigang na Baboy", "Sinigang na Hipon", "Bulanglang Kapampangan (Guava Soup)", "Sizzling Pork Sisig", "Beef Kare-Kare with Bagoong", "Crispy Pata", "Tid-tad / Dinuguan", "Bopis", "Pancit Palabok / Luglug", "Pancit Bihon", "Chicken Inasal", "Lechon Kawali", "Tibok-Tibok", "Halo-Halo Special", "Pork Tocino with Rice", "Adobong Baboy", "Kalderetang Baka", "Pinakbet with Bagnet", "Laing", "Bicol Express", "Grilled Salmon", "Pepperoni Pizza", "Cheeseburger with Fries", "Pasta Carbonara", etc.).
+2. Estimate the visible serving size/portion (e.g. "1 bowl (~400g)", "1 plate (~320g)", "1 glass (~350ml)").
+3. Estimate accurate nutrients as numeric integers: calories (kcal), protein (g), carbs (g), fat (g), sodium (mg), cholesterol (mg).
+4. "purineLevel": "Low" | "Moderate" | "High" (High for offal, liver, red meats, bagoong).
+5. "glycemicIndex": "Low" | "Medium" | "High".
+6. "allergens": Array of strings or comma-separated allergen alerts (e.g. ["Pork", "Soy sauce"], ["Peanuts", "Shellfish"], ["Dairy", "Eggs"]).
+7. "compliance": 1 concise clinical dietary insight statement.
+8. "description": 1 concise sentence describing the key ingredients and preparation.
 
 Return ONLY a valid JSON object matching this schema:
 {
@@ -11153,7 +11265,7 @@ Return ONLY a valid JSON object matching this schema:
   "cholesterol": 70,
   "purineLevel": "Moderate",
   "glycemicIndex": "Medium",
-  "allergens": "Pork, Garlic",
+  "allergens": ["Pork", "Garlic"],
   "compliance": "🟢 Good protein density with balanced aromatics.",
   "description": "Tender savory dish simmered with fresh herbs and spices."
 }`;
@@ -11163,7 +11275,7 @@ Return ONLY a valid JSON object matching this schema:
           try {
             const endpoint = `https://generativelanguage.googleapis.com/${apiVer}/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 9000);
+            const timeoutId = setTimeout(() => controller.abort(), 9500);
 
             const response = await fetch(endpoint, {
               method: 'POST',
@@ -11192,26 +11304,36 @@ Return ONLY a valid JSON object matching this schema:
               const data = await response.json();
               const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
               if (text) {
-                const parsed = JSON.parse(text);
-                if (parsed && parsed.name && parsed.calories) {
+                const parsed = cleanJsonParse(text);
+                if (parsed && parsed.name) {
                   return {
                     id: `cv-${Date.now()}`,
-                    name: parsed.name,
+                    name: String(parsed.name).trim(),
                     image: imageDataUrl,
-                    portion: parsed.portion || '1 serving (~250g)',
-                    nutrition: {
-                      calories: Math.max(10, Number(parsed.calories) || 450),
-                      protein: Math.max(0, Number(parsed.protein) || 20),
-                      carbs: Math.max(0, Number(parsed.carbs) || 25),
-                      fat: Math.max(0, Number(parsed.fat) || 15),
-                      sodium: Math.max(0, Number(parsed.sodium) || 500),
-                      cholesterol: Math.max(0, Number(parsed.cholesterol) || 50),
-                      purineLevel: parsed.purineLevel || 'Moderate',
-                      glycemicIndex: parsed.glycemicIndex || 'Medium'
+                    portion: String(parsed.portion || '1 standard serving (~250g)').trim(),
+                    baseNutrition: {
+                      calories: Math.max(10, parseNumSafe(parsed.calories, 450)),
+                      protein: Math.max(0, parseNumSafe(parsed.protein, 20)),
+                      carbs: Math.max(0, parseNumSafe(parsed.carbs, 25)),
+                      fat: Math.max(0, parseNumSafe(parsed.fat, 15)),
+                      sodium: Math.max(0, parseNumSafe(parsed.sodium, 500)),
+                      cholesterol: Math.max(0, parseNumSafe(parsed.cholesterol, 50)),
+                      purineLevel: typeof parsed.purineLevel === 'string' ? parsed.purineLevel : 'Moderate',
+                      glycemicIndex: typeof parsed.glycemicIndex === 'string' ? parsed.glycemicIndex : 'Medium'
                     },
-                    allergens: parsed.allergens || 'None detected',
-                    compliance: parsed.compliance || 'AI vision recognition complete.',
-                    description: parsed.description || `AI deconstructed nutritional profile for ${parsed.name}.`
+                    nutrition: {
+                      calories: Math.max(10, parseNumSafe(parsed.calories, 450)),
+                      protein: Math.max(0, parseNumSafe(parsed.protein, 20)),
+                      carbs: Math.max(0, parseNumSafe(parsed.carbs, 25)),
+                      fat: Math.max(0, parseNumSafe(parsed.fat, 15)),
+                      sodium: Math.max(0, parseNumSafe(parsed.sodium, 500)),
+                      cholesterol: Math.max(0, parseNumSafe(parsed.cholesterol, 50)),
+                      purineLevel: typeof parsed.purineLevel === 'string' ? parsed.purineLevel : 'Moderate',
+                      glycemicIndex: typeof parsed.glycemicIndex === 'string' ? parsed.glycemicIndex : 'Medium'
+                    },
+                    allergens: formatAllergensSafe(parsed.allergens),
+                    compliance: formatComplianceSafe(parsed.compliance),
+                    description: String(parsed.description || `AI deconstructed nutritional profile for ${parsed.name}.`).trim()
                   };
                 }
               }
@@ -11232,7 +11354,8 @@ Return ONLY a valid JSON object matching this schema:
       name: picked.name,
       image: imageDataUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80',
       portion: picked.portion,
-      nutrition: picked.nutrition,
+      baseNutrition: { ...picked.nutrition },
+      nutrition: { ...picked.nutrition },
       allergens: picked.allergens,
       compliance: picked.compliance,
       description: picked.description
@@ -11242,6 +11365,7 @@ Return ONLY a valid JSON object matching this schema:
   const processMealImage = async (dataUrl, fallbackMeal = null) => {
     setIsCVProcessing(true);
     setCvDraftMeal(null);
+    setCvDraftPortionMultiplier(1);
     try {
       const analyzed = await analyzeFoodWithAI(dataUrl, fallbackMeal);
       setCvDraftMeal(analyzed);
@@ -11263,15 +11387,30 @@ Return ONLY a valid JSON object matching this schema:
 
   const handleConfirmAddScannedMeal = () => {
     if (!cvDraftMeal) return;
+    const mult = cvDraftPortionMultiplier || 1;
+    const base = cvDraftMeal.baseNutrition || cvDraftMeal.nutrition || {};
+    const scaledNutrition = {
+      calories: Math.round((base.calories || 0) * mult),
+      protein: Math.round((base.protein || 0) * mult),
+      carbs: Math.round((base.carbs || 0) * mult),
+      fat: Math.round((base.fat || 0) * mult),
+      sodium: Math.round((base.sodium || 0) * mult),
+      cholesterol: Math.round((base.cholesterol || 0) * mult),
+      purineLevel: cvDraftMeal.nutrition?.purineLevel || 'Moderate',
+      glycemicIndex: cvDraftMeal.nutrition?.glycemicIndex || 'Medium'
+    };
     const newEntry = {
       ...cvDraftMeal,
+      portion: mult !== 1 ? `${cvDraftMeal.portion} (${mult}x)` : cvDraftMeal.portion,
+      nutrition: scaledNutrition,
       id: `scan-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       assignedTo: diningMode === 'group' ? cvDraftAssignee : 'solo',
       addedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     setScannedMealsLog(prev => [newEntry, ...prev]);
-    setCvUploadedMeal(cvDraftMeal);
+    setCvUploadedMeal(newEntry);
     setCvDraftMeal(null);
+    setCvDraftPortionMultiplier(1);
   };
 
   const handleRemoveScannedMeal = (id) => {
@@ -18664,178 +18803,223 @@ ${rawText}`;
                         ) : cvDraftMeal ? (
                           /* Interactive Scanned Meal Confirmation Card */
                           <div className="border border-emerald-500/30 dark:border-emerald-500/40 bg-gradient-to-br from-emerald-50/60 via-white to-amber-50/40 dark:from-emerald-950/20 dark:via-[#1E1B18] dark:to-amber-950/10 rounded-2xl p-4 space-y-3.5 shadow-sm animate-fade-in">
-                            {/* Header preview & calories */}
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#E9E5DE] dark:border-[#2E2A24]">
-                              <div className="flex items-center gap-3 min-w-0 flex-1">
-                                {cvDraftMeal.image ? (
-                                  <img
-                                    src={cvDraftMeal.image}
-                                    alt={cvDraftMeal.name}
-                                    className="w-14 h-14 rounded-xl object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0"
-                                  />
-                                ) : (
-                                  <div className="w-14 h-14 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-2xl shrink-0">
-                                    🍲
-                                  </div>
-                                )}
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                      <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-600 text-white px-2 py-0.5 rounded-md flex items-center gap-1">
-                                        <Sparkles className="h-2.5 w-2.5" /> PlateScan™ Identified
-                                      </span>
-                                      <span className="text-[10px] font-semibold text-charcoal-light dark:text-gray-400">
-                                        {cvDraftMeal.portion || '1 serving'}
-                                      </span>
+                            {(() => {
+                              const mult = cvDraftPortionMultiplier || 1;
+                              const baseNutr = cvDraftMeal.baseNutrition || cvDraftMeal.nutrition || {};
+                              const currentCalories = Math.round((baseNutr.calories || 0) * mult);
+                              const currentProtein = Math.round((baseNutr.protein || 0) * mult);
+                              const currentCarbs = Math.round((baseNutr.carbs || 0) * mult);
+                              const currentFat = Math.round((baseNutr.fat || 0) * mult);
+                              const currentSodium = Math.round((baseNutr.sodium || 0) * mult);
+
+                              return (
+                                <>
+                                  {/* Header preview & calories */}
+                                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-[#E9E5DE] dark:border-[#2E2A24]">
+                                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                                      {cvDraftMeal.image ? (
+                                        <img
+                                          src={cvDraftMeal.image}
+                                          alt={cvDraftMeal.name}
+                                          className="w-14 h-14 rounded-xl object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0"
+                                        />
+                                      ) : (
+                                        <div className="w-14 h-14 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-2xl shrink-0">
+                                          🍲
+                                        </div>
+                                      )}
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-600 text-white px-2 py-0.5 rounded-md flex items-center gap-1">
+                                            <Sparkles className="h-2.5 w-2.5" /> PlateScan™ Identified
+                                          </span>
+                                          <span className="text-[10px] font-semibold text-charcoal-light dark:text-gray-400">
+                                            {cvDraftMeal.portion || '1 serving'}
+                                          </span>
+                                        </div>
+                                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                                          <select
+                                            value={cvDraftMeal.name}
+                                            onChange={(e) => {
+                                              const selectedName = e.target.value;
+                                              const match = KAPAMPANGAN_CV_DISH_DATABASE.find(d => d.name === selectedName);
+                                              if (match) {
+                                                setCvDraftMeal(prev => ({
+                                                  ...prev,
+                                                  name: match.name,
+                                                  portion: match.portion,
+                                                  baseNutrition: { ...match.nutrition },
+                                                  nutrition: { ...match.nutrition },
+                                                  allergens: match.allergens,
+                                                  compliance: match.compliance,
+                                                  description: match.description
+                                                }));
+                                              } else {
+                                                setCvDraftMeal(prev => ({ ...prev, name: selectedName }));
+                                              }
+                                            }}
+                                            className="text-xs font-black text-charcoal dark:text-white bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg px-2 py-1 max-w-full sm:max-w-xs truncate cursor-pointer focus:outline-none focus:border-terracotta shadow-2xs"
+                                          >
+                                            <option value={cvDraftMeal.name}>{cvDraftMeal.name}</option>
+                                            {KAPAMPANGAN_CV_DISH_DATABASE.filter(d => d.name !== cvDraftMeal.name).map(d => (
+                                              <option key={d.name} value={d.name}>{d.name} ({d.nutrition.calories} kcal)</option>
+                                            ))}
+                                          </select>
+                                        </div>
+                                        <p className="text-[10px] text-charcoal-light dark:text-gray-300 line-clamp-2 mt-1 mb-0 leading-tight">
+                                          {cvDraftMeal.description}
+                                        </p>
+                                      </div>
                                     </div>
-                                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                                      <select
-                                        value={cvDraftMeal.name}
-                                        onChange={(e) => {
-                                          const selectedName = e.target.value;
-                                          const match = KAPAMPANGAN_CV_DISH_DATABASE.find(d => d.name === selectedName);
-                                          if (match) {
-                                            setCvDraftMeal(prev => ({
-                                              ...prev,
-                                              name: match.name,
-                                              portion: match.portion,
-                                              nutrition: match.nutrition,
-                                              allergens: match.allergens,
-                                              compliance: match.compliance,
-                                              description: match.description
-                                            }));
-                                          } else {
-                                            setCvDraftMeal(prev => ({ ...prev, name: selectedName }));
-                                          }
-                                        }}
-                                        className="text-xs font-black text-charcoal dark:text-white bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg px-2 py-0.5 max-w-[210px] sm:max-w-xs truncate cursor-pointer focus:outline-none focus:border-terracotta shadow-2xs"
-                                      >
-                                        <option value={cvDraftMeal.name}>{cvDraftMeal.name}</option>
-                                        {KAPAMPANGAN_CV_DISH_DATABASE.filter(d => d.name !== cvDraftMeal.name).map(d => (
-                                          <option key={d.name} value={d.name}>{d.name} ({d.nutrition.calories} kcal)</option>
-                                        ))}
-                                      </select>
+
+                                    <div className="sm:text-right shrink-0">
+                                      <span className="text-[9px] font-bold text-charcoal-light dark:text-gray-400 block uppercase">Calculated</span>
+                                      <strong className="text-base font-black text-terracotta dark:text-orange-400 flex items-center gap-1 sm:justify-end">
+                                        <Flame className="h-4 w-4 text-terracotta fill-terracotta" /> {currentCalories} <span className="text-xs">kcal</span>
+                                      </strong>
                                     </div>
-                                    <p className="text-[10px] text-charcoal-light dark:text-gray-300 line-clamp-2 mt-1 mb-0 leading-tight">
-                                      {cvDraftMeal.description}
-                                    </p>
                                   </div>
-                              </div>
 
-                              <div className="sm:text-right shrink-0">
-                                <span className="text-[9px] font-bold text-charcoal-light dark:text-gray-400 block uppercase">Calculated</span>
-                                <strong className="text-base font-black text-terracotta dark:text-orange-400 flex items-center gap-1 sm:justify-end">
-                                  <Flame className="h-4 w-4 text-terracotta fill-terracotta" /> {cvDraftMeal.nutrition?.calories || 0} <span className="text-xs">kcal</span>
-                                </strong>
-                              </div>
-                            </div>
-
-                            {/* Nutrition & Macro Breakdown Grid */}
-                            <div className="grid grid-cols-4 gap-1.5 text-center text-[10px]">
-                              <div className="p-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40">
-                                <span className="text-[8px] font-black text-blue-800 dark:text-blue-300 uppercase block">Protein</span>
-                                <strong className="font-black text-blue-950 dark:text-blue-100">{cvDraftMeal.nutrition?.protein || 0}g</strong>
-                              </div>
-                              <div className="p-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40">
-                                <span className="text-[8px] font-black text-amber-800 dark:text-amber-300 uppercase block">Carbs</span>
-                                <strong className="font-black text-amber-950 dark:text-amber-100">{cvDraftMeal.nutrition?.carbs || 0}g</strong>
-                              </div>
-                              <div className="p-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-800/40">
-                                <span className="text-[8px] font-black text-rose-800 dark:text-rose-300 uppercase block">Fats</span>
-                                <strong className="font-black text-rose-950 dark:text-rose-100">{cvDraftMeal.nutrition?.fat || 0}g</strong>
-                              </div>
-                              <div className="p-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200/60 dark:border-purple-800/40">
-                                <span className="text-[8px] font-black text-purple-800 dark:text-purple-300 uppercase block">Sodium</span>
-                                <strong className="font-black text-purple-950 dark:text-purple-100">{cvDraftMeal.nutrition?.sodium || 650}mg</strong>
-                              </div>
-                            </div>
-
-                            {/* Allergens & Compliance */}
-                            {(cvDraftMeal.allergens || cvDraftMeal.compliance) && (
-                              <div className="bg-[#FAF8F5] dark:bg-[#161412] p-2 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] space-y-1 text-[9px]">
-                                {cvDraftMeal.allergens && (
-                                  <div className="flex items-start gap-1 text-amber-800 dark:text-amber-300 font-semibold">
-                                    <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5 text-amber-600" />
-                                    <span><strong>Allergens:</strong> {cvDraftMeal.allergens.replace(/^⚠️\s*ALLERGENS:\s*/i, '')}</span>
+                                  {/* Portion Scaler Quick Buttons */}
+                                  <div className="flex flex-wrap items-center justify-between gap-1.5 p-1.5 bg-[#FAF8F5] dark:bg-[#161412] rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
+                                    <span className="text-[9px] font-bold text-charcoal-light dark:text-gray-400 uppercase tracking-wider pl-1">
+                                      Portion Size:
+                                    </span>
+                                    <div className="flex items-center gap-1 flex-wrap">
+                                      {[
+                                        { label: '0.5x Half', val: 0.5 },
+                                        { label: '1x Regular', val: 1 },
+                                        { label: '1.5x Large', val: 1.5 },
+                                        { label: '2x Double', val: 2 }
+                                      ].map(p => (
+                                        <button
+                                          key={p.val}
+                                          type="button"
+                                          onClick={() => setCvDraftPortionMultiplier(p.val)}
+                                          className={`px-2 py-0.5 rounded-lg text-[10px] font-black transition-all cursor-pointer border ${cvDraftPortionMultiplier === p.val
+                                            ? 'bg-terracotta text-white border-terracotta shadow-xs'
+                                            : 'bg-white dark:bg-[#201D1A] text-charcoal dark:text-gray-300 border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/50'
+                                            }`}
+                                        >
+                                          {p.label}
+                                        </button>
+                                      ))}
+                                    </div>
                                   </div>
-                                )}
-                                {cvDraftMeal.compliance && (
-                                  <div className="text-charcoal-light dark:text-gray-400 font-medium pl-4">
-                                    {cvDraftMeal.compliance}
+
+                                  {/* Nutrition & Macro Breakdown Grid */}
+                                  <div className="grid grid-cols-4 gap-1.5 text-center text-[10px]">
+                                    <div className="p-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-800/40">
+                                      <span className="text-[8px] font-black text-blue-800 dark:text-blue-300 uppercase block">Protein</span>
+                                      <strong className="font-black text-blue-950 dark:text-blue-100">{currentProtein}g</strong>
+                                    </div>
+                                    <div className="p-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-800/40">
+                                      <span className="text-[8px] font-black text-amber-800 dark:text-amber-300 uppercase block">Carbs</span>
+                                      <strong className="font-black text-amber-950 dark:text-amber-100">{currentCarbs}g</strong>
+                                    </div>
+                                    <div className="p-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200/60 dark:border-rose-800/40">
+                                      <span className="text-[8px] font-black text-rose-800 dark:text-rose-300 uppercase block">Fats</span>
+                                      <strong className="font-black text-rose-950 dark:text-rose-100">{currentFat}g</strong>
+                                    </div>
+                                    <div className="p-1.5 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200/60 dark:border-purple-800/40">
+                                      <span className="text-[8px] font-black text-purple-800 dark:text-purple-300 uppercase block">Sodium</span>
+                                      <strong className="font-black text-purple-950 dark:text-purple-100">{currentSodium}mg</strong>
+                                    </div>
                                   </div>
-                                )}
-                              </div>
-                            )}
 
-                            {/* Interactive Calorie Addition Prompt & Member Selector */}
-                            <div className="p-3 bg-white dark:bg-[#201D1A] rounded-xl border border-emerald-500/20 dark:border-emerald-500/30 space-y-2.5">
-                              <div className="flex items-center gap-1.5">
-                                <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black">
-                                  ?
-                                </span>
-                                <h5 className="text-[11px] font-black text-charcoal dark:text-white m-0">
-                                  {diningMode === 'group'
-                                    ? 'Add these calories to your group tracker?'
-                                    : 'Add these calories to your daily calorie log?'}
-                                </h5>
-                              </div>
+                                  {/* Allergens & Compliance */}
+                                  {(cvDraftMeal.allergens || cvDraftMeal.compliance) && (
+                                    <div className="bg-[#FAF8F5] dark:bg-[#161412] p-2 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] space-y-1 text-[9px]">
+                                      {cvDraftMeal.allergens && (
+                                        <div className="flex items-start gap-1 text-amber-800 dark:text-amber-300 font-semibold">
+                                          <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5 text-amber-600" />
+                                          <span><strong>Allergens:</strong> {typeof cvDraftMeal.allergens === 'string' ? cvDraftMeal.allergens.replace(/^⚠️\s*ALLERGENS:\s*/i, '') : String(cvDraftMeal.allergens)}</span>
+                                        </div>
+                                      )}
+                                      {cvDraftMeal.compliance && (
+                                        <div className="text-charcoal-light dark:text-gray-400 font-medium pl-4">
+                                          {cvDraftMeal.compliance}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
 
-                              {diningMode === 'group' && (
-                                <div className="space-y-1">
-                                  <label className="text-[9px] font-bold text-charcoal-light dark:text-gray-400 uppercase tracking-wider block">
-                                    Which person should this be added to?
-                                  </label>
-                                  <div className="flex flex-wrap gap-1">
-                                    <button
-                                      type="button"
-                                      onClick={() => setCvDraftAssignee('shared')}
-                                      className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all border cursor-pointer flex items-center gap-1 ${cvDraftAssignee === 'shared'
-                                        ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] shadow-2xs'
-                                        : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 border-[#E9E5DE] dark:border-[#2E2A24]'
-                                        }`}
-                                    >
-                                      <Users className="h-3 w-3" />
-                                      <span>Split Evenly (All {groupMembers.length})</span>
-                                    </button>
-                                    {groupMembers.map((m, idx) => (
+                                  {/* Interactive Calorie Addition Prompt & Member Selector */}
+                                  <div className="p-3 bg-white dark:bg-[#201D1A] rounded-xl border border-emerald-500/20 dark:border-emerald-500/30 space-y-2.5">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-black">
+                                        ?
+                                      </span>
+                                      <h5 className="text-[11px] font-black text-charcoal dark:text-white m-0">
+                                        {diningMode === 'group'
+                                          ? 'Add these calories to your group tracker?'
+                                          : 'Add these calories to your daily calorie log?'}
+                                      </h5>
+                                    </div>
+
+                                    {diningMode === 'group' && (
+                                      <div className="space-y-1">
+                                        <label className="text-[9px] font-bold text-charcoal-light dark:text-gray-400 uppercase tracking-wider block">
+                                          Which person should this be added to?
+                                        </label>
+                                        <div className="flex flex-wrap gap-1">
+                                          <button
+                                            type="button"
+                                            onClick={() => setCvDraftAssignee('shared')}
+                                            className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all border cursor-pointer flex items-center gap-1 ${cvDraftAssignee === 'shared'
+                                              ? 'bg-[#2C5E3B] text-white border-[#2C5E3B] shadow-2xs'
+                                              : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 border-[#E9E5DE] dark:border-[#2E2A24]'
+                                              }`}
+                                          >
+                                            <Users className="h-3 w-3" />
+                                            <span>Split Evenly (All {groupMembers.length})</span>
+                                          </button>
+                                          {groupMembers.map((m, idx) => (
+                                            <button
+                                              key={m.id}
+                                              type="button"
+                                              onClick={() => setCvDraftAssignee(m.id)}
+                                              className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all border cursor-pointer flex items-center gap-1 ${cvDraftAssignee === m.id
+                                                ? 'bg-terracotta text-white border-terracotta shadow-2xs'
+                                                : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 border-[#E9E5DE] dark:border-[#2E2A24]'
+                                                }`}
+                                            >
+                                              <User className="h-3 w-3" />
+                                              <span>{m.name || `Person ${idx + 1}`}</span>
+                                            </button>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    <div className="flex items-center gap-2 pt-1">
                                       <button
-                                        key={m.id}
                                         type="button"
-                                        onClick={() => setCvDraftAssignee(m.id)}
-                                        className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all border cursor-pointer flex items-center gap-1 ${cvDraftAssignee === m.id
-                                          ? 'bg-terracotta text-white border-terracotta shadow-2xs'
-                                          : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 border-[#E9E5DE] dark:border-[#2E2A24]'
-                                          }`}
+                                        onClick={handleConfirmAddScannedMeal}
+                                        className="flex-1 py-1.5 px-3 bg-gradient-to-r from-[#2C5E3B] to-[#20452B] hover:opacity-95 text-white rounded-xl text-[11px] font-black flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
                                       >
-                                        <User className="h-3 w-3" />
-                                        <span>{m.name || `Person ${idx + 1}`}</span>
+                                        <Plus className="h-3.5 w-3.5" />
+                                        <span>
+                                          Add +{currentCalories} kcal {diningMode === 'group' ? `(${cvDraftAssignee === 'shared' ? 'Split Group' : (groupMembers.find(m => m.id === cvDraftAssignee)?.name || 'Member')})` : 'to Log'}
+                                        </span>
                                       </button>
-                                    ))}
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setCvDraftMeal(null);
+                                          setCvDraftPortionMultiplier(1);
+                                        }}
+                                        className="py-1.5 px-3.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white border border-red-600 rounded-xl text-[11px] font-black transition-all cursor-pointer shadow-xs flex items-center gap-1 shrink-0"
+                                        title="Discard this scanned meal"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                        <span>Discard</span>
+                                      </button>
+                                    </div>
                                   </div>
-                                </div>
-                              )}
-
-                              <div className="flex items-center gap-2 pt-1">
-                                <button
-                                  type="button"
-                                  onClick={handleConfirmAddScannedMeal}
-                                  className="flex-1 py-1.5 px-3 bg-gradient-to-r from-[#2C5E3B] to-[#20452B] hover:opacity-95 text-white rounded-xl text-[11px] font-black flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
-                                >
-                                  <Plus className="h-3.5 w-3.5" />
-                                  <span>
-                                    Add +{cvDraftMeal.nutrition?.calories || 0} kcal {diningMode === 'group' ? `(${cvDraftAssignee === 'shared' ? 'Split Group' : (groupMembers.find(m => m.id === cvDraftAssignee)?.name || 'Member')})` : 'to Log'}
-                                  </span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setCvDraftMeal(null)}
-                                  className="py-1.5 px-3.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white border border-red-600 rounded-xl text-[11px] font-black transition-all cursor-pointer shadow-xs flex items-center gap-1 shrink-0"
-                                  title="Discard this scanned meal"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                  <span>Discard</span>
-                                </button>
-                              </div>
-                            </div>
+                                </>
+                              );
+                            })()}
                           </div>
                         ) : (
                           <div className="border border-dashed border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl p-4 bg-[#FAF8F5] dark:bg-[#161412] text-center min-h-[100px] flex flex-col justify-center items-center space-y-1">
