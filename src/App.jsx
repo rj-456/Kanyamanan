@@ -18837,35 +18837,9 @@ ${rawText}`;
                                             {cvDraftMeal.portion || '1 serving'}
                                           </span>
                                         </div>
-                                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                                          <select
-                                            value={cvDraftMeal.name}
-                                            onChange={(e) => {
-                                              const selectedName = e.target.value;
-                                              const match = KAPAMPANGAN_CV_DISH_DATABASE.find(d => d.name === selectedName);
-                                              if (match) {
-                                                setCvDraftMeal(prev => ({
-                                                  ...prev,
-                                                  name: match.name,
-                                                  portion: match.portion,
-                                                  baseNutrition: { ...match.nutrition },
-                                                  nutrition: { ...match.nutrition },
-                                                  allergens: match.allergens,
-                                                  compliance: match.compliance,
-                                                  description: match.description
-                                                }));
-                                              } else {
-                                                setCvDraftMeal(prev => ({ ...prev, name: selectedName }));
-                                              }
-                                            }}
-                                            className="text-xs font-black text-charcoal dark:text-white bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg px-2 py-1 max-w-full sm:max-w-xs truncate cursor-pointer focus:outline-none focus:border-terracotta shadow-2xs"
-                                          >
-                                            <option value={cvDraftMeal.name}>{cvDraftMeal.name}</option>
-                                            {KAPAMPANGAN_CV_DISH_DATABASE.filter(d => d.name !== cvDraftMeal.name).map(d => (
-                                              <option key={d.name} value={d.name}>{d.name} ({d.nutrition.calories} kcal)</option>
-                                            ))}
-                                          </select>
-                                        </div>
+                                        <h4 className="text-sm sm:text-base font-black text-charcoal dark:text-white mt-1 leading-snug tracking-tight m-0">
+                                          {cvDraftMeal.name}
+                                        </h4>
                                         <p className="text-[10px] text-charcoal-light dark:text-gray-300 line-clamp-2 mt-1 mb-0 leading-tight">
                                           {cvDraftMeal.description}
                                         </p>
