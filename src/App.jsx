@@ -18637,15 +18637,18 @@ ${rawText}`;
                         </div>
                       </div>
 
-                      {/* Card 2: Computer Vision Meal Photo Scanner & Live Real-Time Camera */}
+                      {/* Card 2: PlateScan AI™ — Instant Plate & Macro Scanner */}
                       <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 shadow-sm relative">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
                           <div>
-                            <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-1.5 m-0">
-                              <Camera className="h-4 w-4 text-terracotta" /> Image Calorie Estimator (CV)
+                            <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-1.5 m-0 flex-wrap">
+                              <Camera className="h-4 w-4 text-terracotta" /> PlateScan AI™
+                              <span className="text-[9px] font-extrabold normal-case tracking-normal bg-gradient-to-r from-terracotta/15 to-amber-500/15 text-terracotta px-2 py-0.5 rounded-full border border-terracotta/20">
+                                Instant Plate &amp; Macro Scanner
+                              </span>
                             </h3>
                             <p className="text-[10px] text-charcoal-light dark:text-gray-400 mt-0.5 m-0">
-                              Upload food photo or capture in real time to deconstruct calories &amp; nutrients.
+                              Snap a photo or launch the live camera to deconstruct calories, macros, and nutrients in real time.
                             </p>
                           </div>
 
@@ -18655,7 +18658,7 @@ ${rawText}`;
                               type="button"
                               onClick={() => startCamera('environment')}
                               className="px-2.5 py-1.5 bg-gradient-to-r from-terracotta to-[#E25C38] hover:opacity-95 text-white rounded-xl text-[11px] font-black flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-                              title="Capture live food photo from camera"
+                              title="Launch PlateScan AI™ live camera"
                             >
                               <Camera className="h-3.5 w-3.5" />
                               <span>Live Camera</span>
@@ -18696,7 +18699,7 @@ ${rawText}`;
                               🧠
                             </div>
                             <span className="text-xs font-black text-terracotta dark:text-orange-400 block">
-                              AI Analyzing Visual Density &amp; Nutrients...
+                              PlateScan AI™ Analyzing Visual Density &amp; Nutrients...
                             </span>
                             <span className="text-[10px] text-charcoal-light dark:text-gray-400">
                               Deconstructing macros, calories, sodium, and purine loading
@@ -18722,7 +18725,7 @@ ${rawText}`;
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-1.5 flex-wrap">
                                       <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-600 text-white px-2 py-0.5 rounded-md flex items-center gap-1">
-                                        <Sparkles className="h-2.5 w-2.5" /> Identified Dish
+                                        <Sparkles className="h-2.5 w-2.5" /> PlateScan™ Identified
                                       </span>
                                       <span className="text-[10px] font-semibold text-charcoal-light dark:text-gray-400">
                                         {cvDraftMeal.portion || '1 serving'}
@@ -18882,10 +18885,10 @@ ${rawText}`;
                           <div className="border border-dashed border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl p-4 bg-[#FAF8F5] dark:bg-[#161412] text-center min-h-[100px] flex flex-col justify-center items-center space-y-1">
                             <span className="text-xl block">📸</span>
                             <span className="text-xs text-charcoal dark:text-gray-300 font-bold block">
-                              Snap a photo or pick a meal to start vision scan
+                              Snap a photo or launch PlateScan AI™ Live Camera
                             </span>
                             <span className="text-[10px] text-charcoal-light dark:text-gray-400 block">
-                              Recognizes authentic Kapampangan dishes, calories, macros, and sodium.
+                              Recognizes authentic Kapampangan dishes, portions, calories, macros, and sodium in real time.
                             </span>
                           </div>
                         )}
@@ -18895,7 +18898,7 @@ ${rawText}`;
                           <div className="space-y-2 pt-2 border-t border-[#E9E5DE] dark:border-[#2E2A24]">
                             <div className="flex items-center justify-between">
                               <span className="text-[10px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">
-                                📋 Photo-Logged Meals ({scannedMealsLog.length})
+                                📋 PlateScan Logged Meals ({scannedMealsLog.length})
                               </span>
                               <button
                                 type="button"
@@ -18963,7 +18966,7 @@ ${rawText}`;
                               <div className="flex items-center gap-2">
                                 <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
                                 <h4 className="text-xs font-black uppercase tracking-wider text-white m-0 flex items-center gap-1.5">
-                                  <Camera className="h-3.5 w-3.5 text-terracotta" /> Live Real-Time Camera Scanner
+                                  <Camera className="h-3.5 w-3.5 text-terracotta" /> PlateScan AI™ Live Viewfinder
                                 </h4>
                               </div>
                               <button
