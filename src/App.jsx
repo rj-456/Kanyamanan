@@ -11232,26 +11232,41 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       else if (imageDataUrl.startsWith('data:image/webp')) mimeType = 'image/webp';
 
       const modelsToTry = [
+        'gemini-3.5-flash-lite',
+        'gemini-3.1-flash-lite',
+        'gemini-3.5-flash',
         'gemini-3-flash-preview',
         'gemini-flash-latest',
-        'gemini-3.5-flash',
-        import.meta?.env?.VITE_GEMINI_MODEL,
-        'gemini-2.5-flash'
+        import.meta?.env?.VITE_GEMINI_MODEL
       ].filter(Boolean);
 
-      const prompt = `You are a clinical dietitian and culinary nutrition expert with deep mastery of Philippine (especially authentic Kapampangan cuisine) and global food.
+      const prompt = `You are a clinical dietitian and master culinary nutrition vision expert with deep mastery of Philippine (especially authentic Kapampangan regional food) and global cuisine.
 
-Inspect the dish, meal plate, beverage, or dessert in this photo with high precision.
+CRITICAL VISUAL RECOGNITION RULES:
+1. Closely analyze the visible ingredients, textures, cut sizes, and broth/sauce:
+   - Squash/kalabasa cubes, string beans/sitaw, bitter melon/ampalaya, eggplant/talong, okra in savory shrimp paste/bagoong broth = "Pinakbet" or "Bulanglang Kapampangan" / "Dinengdeng".
+   - Sizzling chopped pork jowl/ears/liver with onions & calamansi = "Sizzling Pork Sisig".
+   - Rich yellow/orange thick peanut sauce with ox tripe/beef, eggplant, string beans = "Beef Kare-Kare with Bagoong".
+   - Sour tamarind or guava broth with pork/shrimp/fish & kangkong/radish = "Sinigang na Baboy" / "Sinigang na Hipon".
+   - Rice noodles with thick orange shrimp sauce, hard-boiled egg slices, crushed chicharon, tinapa = "Pancit Palabok / Luglug".
+   - Wok-tossed bihon noodles with vegetables & shredded chicken/pork = "Pancit Bihon Guisado".
+   - Dark savory chicken/pork stewed in vinegar, soy sauce, garlic, peppercorns = "Classic Chicken Adobo".
+   - Deep-fried crispy pork belly = "Lechon Kawali" / "Crispy Pata".
+   - Steamed fiddlehead ferns with salted duck egg and tomatoes = "Pako Salad with Salted Duck Egg".
+   - Yellow fiesta glutinous rice cooked in coconut milk and turmeric = "Bringhe (Kapampangan Fiesta Rice)".
+   - Taro leaves simmered in rich spicy coconut milk = "Laing" / "Bicol Express".
+   - Thick beef tomato liver sauce with potatoes and bell peppers = "Kalderetang Baka" / "Menudo".
+   - Minced pork lung and heart with chili = "Bopis Kapampangan".
+   - Dark pork blood stew with vinegar and green chili = "Tid-tad / Kapampangan Dinuguan".
+   - For global foods (e.g. Burgers, Pizza, Ramen, Sushi, Pasta Carbonara, Caesar Salad, Grilled Salmon/Steak), identify the exact dish name accurately.
 
-IDENTIFICATION RULES:
-1. Identify the EXACT culinary name of the dish (e.g. "Sinigang na Baboy", "Sinigang na Hipon", "Bulanglang Kapampangan (Guava Soup)", "Sizzling Pork Sisig", "Beef Kare-Kare with Bagoong", "Crispy Pata", "Tid-tad / Dinuguan", "Bopis", "Pancit Palabok / Luglug", "Pancit Bihon", "Chicken Inasal", "Lechon Kawali", "Tibok-Tibok", "Halo-Halo Special", "Pork Tocino with Rice", "Adobong Baboy", "Kalderetang Baka", "Pinakbet with Bagnet", "Laing", "Bicol Express", "Grilled Salmon", "Pepperoni Pizza", "Cheeseburger with Fries", "Pasta Carbonara", etc.).
-2. Estimate the visible serving size/portion (e.g. "1 bowl (~400g)", "1 plate (~320g)", "1 glass (~350ml)").
-3. Estimate accurate nutrients as numeric integers: calories (kcal), protein (g), carbs (g), fat (g), sodium (mg), cholesterol (mg).
-4. "purineLevel": "Low" | "Moderate" | "High" (High for offal, liver, red meats, bagoong).
-5. "glycemicIndex": "Low" | "Medium" | "High".
-6. "allergens": Array of strings or comma-separated allergen alerts (e.g. ["Pork", "Soy sauce"], ["Peanuts", "Shellfish"], ["Dairy", "Eggs"]).
-7. "compliance": 1 concise clinical dietary insight statement.
-8. "description": 1 concise sentence describing the key ingredients and preparation.
+2. Estimate realistic portion (e.g. "1 bowl (~350g)", "1 plate (~300g)", "1 serving (~250g)").
+3. Accurately calculate numeric macros: calories (kcal), protein (g), carbs (g), fat (g), sodium (mg), cholesterol (mg).
+4. Set "purineLevel": "Low" | "Moderate" | "High" (High for offal, liver, red meat, bagoong).
+5. Set "glycemicIndex": "Low" | "Medium" | "High".
+6. Set "allergens": Array of strings (e.g. ["Pork", "Crustaceans (Bagoong)"], ["Soy sauce"], ["Peanuts"], ["Dairy"]).
+7. Set "compliance": Concise clinical dietary summary.
+8. Set "description": Concise description of what this dish is, its key ingredients, and preparation.
 
 Return ONLY a valid JSON object matching this schema:
 {
@@ -11275,13 +11290,12 @@ Return ONLY a valid JSON object matching this schema:
           try {
             const endpoint = `https://generativelanguage.googleapis.com/${apiVer}/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 9500);
+            const timeoutId = setTimeout(() => controller.abort(), 16000);
 
             const response = await fetch(endpoint, {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json',
-                'x-goog-api-key': apiKey
+                'Content-Type': 'application/json'
               },
               signal: controller.signal,
               body: JSON.stringify({
@@ -18837,9 +18851,43 @@ ${rawText}`;
                                             {cvDraftMeal.portion || '1 serving'}
                                           </span>
                                         </div>
-                                        <h4 className="text-sm sm:text-base font-black text-charcoal dark:text-white mt-1 leading-snug tracking-tight m-0">
-                                          {cvDraftMeal.name}
-                                        </h4>
+                                        <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                                          <h4 className="text-sm sm:text-base font-black text-charcoal dark:text-white leading-snug tracking-tight m-0">
+                                            {cvDraftMeal.name}
+                                          </h4>
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              const newName = window.prompt("Edit or customize dish name:", cvDraftMeal.name);
+                                              if (newName && newName.trim() && newName.trim() !== cvDraftMeal.name) {
+                                                const trimmed = newName.trim();
+                                                const match = KAPAMPANGAN_CV_DISH_DATABASE.find(d => d.name.toLowerCase() === trimmed.toLowerCase());
+                                                if (match) {
+                                                  setCvDraftMeal(prev => ({
+                                                    ...prev,
+                                                    name: match.name,
+                                                    portion: match.portion,
+                                                    baseNutrition: { ...match.nutrition },
+                                                    nutrition: { ...match.nutrition },
+                                                    allergens: match.allergens,
+                                                    compliance: match.compliance,
+                                                    description: match.description
+                                                  }));
+                                                } else {
+                                                  setCvDraftMeal(prev => ({
+                                                    ...prev,
+                                                    name: trimmed,
+                                                    description: `Nutritional profile for ${trimmed}.`
+                                                  }));
+                                                }
+                                              }
+                                            }}
+                                            className="p-1 text-gray-400 hover:text-terracotta dark:hover:text-terracotta rounded-md transition-colors cursor-pointer"
+                                            title="Edit dish name"
+                                          >
+                                            <Edit className="h-3 w-3" />
+                                          </button>
+                                        </div>
                                         <p className="text-[10px] text-charcoal-light dark:text-gray-300 line-clamp-2 mt-1 mb-0 leading-tight">
                                           {cvDraftMeal.description}
                                         </p>
