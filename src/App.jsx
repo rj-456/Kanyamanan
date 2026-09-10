@@ -578,8 +578,8 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v11_add_sasmuan_restaurants') {
-        localStorage.setItem('kanyamanan_db_version', 'v11_add_sasmuan_restaurants');
+      if (dbVersion !== 'v19_rename_funnside_typography') {
+        localStorage.setItem('kanyamanan_db_version', 'v19_rename_funnside_typography');
         localStorage.removeItem('kanyamanan_restaurants_db');
       }
     } catch (_) {}
@@ -592,9 +592,11 @@ function App() {
           const sanitized = parsed.map((res, idx) => {
             if (!res || typeof res !== 'object' || deletedIds.includes(res.id) || isLegacyPreseeded(res)) return null;
             const preseeded = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === res.id || (p.name && res.name && p.name.toLowerCase() === res.name.toLowerCase())));
-            const menuToUse = (Array.isArray(res.menu) && res.menu.length > 0)
-              ? res.menu
-              : (preseeded?.menu || [{ id: `menu-${idx}-0`, name: 'Signature Sisig', price: 250, ingredients: 'Grilled pork snout, calamansi, onions', allergens: 'Contains Pork', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80', healthIndicators: 'Moderate Calorie', nutrition: { calories: 450, protein: 25, carbs: 10, fat: 35 } }]);
+            const menuToUse = (Array.isArray(preseeded?.menu) && preseeded.menu.length > (res.menu?.length || 0))
+              ? preseeded.menu
+              : ((Array.isArray(res.menu) && res.menu.length > 0)
+                ? res.menu
+                : (preseeded?.menu || [{ id: `menu-${idx}-0`, name: 'Signature Sisig', price: 250, ingredients: 'Grilled pork snout, calamansi, onions', allergens: 'Contains Pork', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80', healthIndicators: 'Moderate Calorie', nutrition: { calories: 450, protein: 25, carbs: 10, fat: 35 } }]));
 
             const preseededBranches = Array.isArray(preseeded?.branches) ? preseeded.branches : [];
             const cachedBranches = Array.isArray(res.branches) && res.branches.length > 0 ? res.branches : preseededBranches;
@@ -901,9 +903,13 @@ function App() {
                       }
                     });
                   }
+                  const resolvedMenu = (Array.isArray(pre?.menu) && pre.menu.length > (r.menu?.length || 0))
+                    ? pre.menu
+                    : (Array.isArray(r.menu) && r.menu.length > 0 ? r.menu : (pre?.menu || []));
                   liveDict[r.id] = {
                     ...r,
-                    branches: liveBranches.length > 0 ? liveBranches : (pre?.branches || r.branches)
+                    branches: liveBranches.length > 0 ? liveBranches : (pre?.branches || r.branches),
+                    menu: resolvedMenu
                   };
                 }
               });

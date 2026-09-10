@@ -17860,7 +17860,7 @@
   },
   {
     "id": "candaba-funnside-ningnangan",
-    "name": "FunnsiDe Ningnangan",
+    "name": "Funnside Ningnangan",
     "municipality": "Candaba",
     "corridor": "NLEX Corridor",
     "operatingHours": "10:00 AM - 11:00 PM",
@@ -17929,6 +17929,14 @@
         "operatingHours": "10:00 AM - 10:00 PM",
         "lat": 14.938,
         "lng": 120.601
+      },
+      {
+        "branchName": "Guagua Branch",
+        "municipality": "Guagua",
+        "address": "Jose Abad Santos Avenue, Guagua, Pampanga",
+        "operatingHours": "10:00 AM - 11:00 PM",
+        "lat": 14.9701,
+        "lng": 120.63
       }
     ],
     "username": "ningnangan",
@@ -36036,6 +36044,14 @@
         "operatingHours": "08:00 AM - 08:30 PM",
         "lat": 15.15,
         "lng": 120.769
+      },
+      {
+        "branchName": "Razon's of Guagua (Guagua Heritage Branch)",
+        "municipality": "Guagua",
+        "address": "Guagua, Pampanga",
+        "operatingHours": "08:00 AM - 08:30 PM",
+        "lat": 14.9701,
+        "lng": 120.63
       }
     ],
     "username": "razons_owner",
@@ -39660,12 +39676,28 @@
     ],
     "branches": [
       {
+        "branchName": "SOUQ Pampanga (San Fernando Main)",
         "municipality": "City of San Fernando",
-        "address": "Lazatin Blvd, Dolores, City of San Fernando, Pampanga"
+        "address": "Lazatin Blvd, Dolores, City of San Fernando, Pampanga",
+        "operatingHours": "11:00 AM - 10:00 PM",
+        "lat": 15.0355,
+        "lng": 120.6895
       },
       {
+        "branchName": "SOUQ Pampanga (Mexico Branch)",
         "municipality": "Mexico",
-        "address": "Jose Abad Santos Ave, Parian, Mexico, Pampanga"
+        "address": "Jose Abad Santos Ave, Parian, Mexico, Pampanga",
+        "operatingHours": "11:00 AM - 10:00 PM",
+        "lat": 15.064,
+        "lng": 120.72
+      },
+      {
+        "branchName": "SOUQ Pampanga (Guagua Branch)",
+        "municipality": "Guagua",
+        "address": "Guagua, Pampanga",
+        "operatingHours": "11:00 AM - 10:00 PM",
+        "lat": 14.9701,
+        "lng": 120.63
       }
     ],
     "username": "souqpampanga",
@@ -39689,12 +39721,192 @@
     ],
     "menu": [
       {
+        "id": "souq-tinapa-pate",
+        "name": "Tinapa Pate",
+        "price": 155,
+        "ingredients": "Smoked fish pate whipped with cream cheese, native herbs, and served with toasted crostini",
+        "allergens": "Contains Fish, Dairy, Gluten",
+        "healthIndicators": "Smoked Seafood Starter",
+        "nutrition": {
+          "calories": 260,
+          "protein": 14,
+          "carbs": 18,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-okoy",
+        "name": "Okoy",
+        "price": 195,
+        "ingredients": "Golden crisp shrimp and vegetable fritters served with spiced native cane vinegar dip",
+        "allergens": "Contains Crustaceans (Shrimp), Eggs, Gluten",
+        "healthIndicators": "Crispy Traditional Fritter",
+        "nutrition": {
+          "calories": 340,
+          "protein": 16,
+          "carbs": 32,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-sriracha-wings",
+        "name": "Sriracha Wings",
+        "price": 245,
+        "ingredients": "Crispy fried chicken wings tossed in spicy sweet sriracha glaze and sesame seeds",
+        "allergens": "Contains Soy, Sesame, Gluten",
+        "healthIndicators": "High Protein, Spicy Appetizer",
+        "nutrition": {
+          "calories": 480,
+          "protein": 34,
+          "carbs": 16,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-salted-egg-wings",
+        "name": "Salted Egg Chicken Wings",
+        "price": 245,
+        "ingredients": "Crispy chicken wings coated in rich creamy salted egg yolk sauce with curry leaves and chili",
+        "allergens": "Contains Eggs, Dairy, Gluten",
+        "healthIndicators": "Rich Salted Egg Coating",
+        "nutrition": {
+          "calories": 520,
+          "protein": 34,
+          "carbs": 12,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-firecracker-belly",
+        "name": "Firecracker Belly",
+        "price": 210,
+        "ingredients": "Crispy deep-fried pork belly cuts tossed in explosive sweet chili garlic glaze",
+        "allergens": "Contains Pork, Soy",
+        "healthIndicators": "Crispy Spicy Pork Appetizer",
+        "nutrition": {
+          "calories": 560,
+          "protein": 26,
+          "carbs": 14,
+          "fat": 46
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-fresh-spring-roll",
+        "name": "Fresh Spring Roll",
+        "price": 140,
+        "ingredients": "Fresh egg crepe filled with heart of palm (ubod), crisp lettuce, pork & shrimp, drizzled with sweet garlic sauce and crushed peanuts",
+        "allergens": "Contains Peanuts, Crustaceans, Pork, Eggs",
+        "healthIndicators": "High Fiber, Fresh Merienda",
+        "nutrition": {
+          "calories": 290,
+          "protein": 12,
+          "carbs": 36,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-shrimp-ceviche",
+        "name": "Shrimp Ceviche",
+        "price": 250,
+        "ingredients": "Fresh succulent shrimp cured in native calamansi, ginger, red onions, tomatoes, and spiced chili",
+        "allergens": "Contains Crustaceans (Shrimp)",
+        "healthIndicators": "Lean Protein, Low Calorie, Citrus Cured",
+        "nutrition": {
+          "calories": 180,
+          "protein": 28,
+          "carbs": 6,
+          "fat": 4
+        },
+        "image": "https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-prawns-aligue-thermidore",
+        "name": "Prawns Aligue Thermidore",
+        "price": 440,
+        "ingredients": "Jumbo prawns baked with rich Kapampangan crab fat (aligue), creamy bechamel, and golden melted cheese",
+        "allergens": "Contains Crustaceans (Prawns, Crab Fat), Dairy, Gluten",
+        "healthIndicators": "Indulgent Seafood Delicacy",
+        "nutrition": {
+          "calories": 580,
+          "protein": 38,
+          "carbs": 16,
+          "fat": 42
+        },
+        "image": "https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-french-fries",
+        "name": "French Fries",
+        "price": 90,
+        "ingredients": "Crisp golden shoestring potato fries lightly seasoned with sea salt",
+        "allergens": "None",
+        "healthIndicators": "Crispy Potato Snack",
+        "nutrition": {
+          "calories": 310,
+          "protein": 4,
+          "carbs": 42,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-caesar-salad",
+        "name": "Caesar Salad",
+        "price": 195,
+        "ingredients": "Crisp romaine lettuce tossed in creamy parmesan garlic dressing, bacon crisps, and herb croutons",
+        "allergens": "Contains Dairy, Eggs, Gluten, Pork",
+        "healthIndicators": "Classic Salad Favorite",
+        "nutrition": {
+          "calories": 320,
+          "protein": 12,
+          "carbs": 16,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-papaya-salad",
+        "name": "Papaya Salad",
+        "price": 195,
+        "ingredients": "Shredded crisp green papaya, julienned carrots, tomatoes, and toasted peanuts tossed in sweet-sour calamansi dressing",
+        "allergens": "Contains Peanuts",
+        "healthIndicators": "High Fiber, Low Calorie, Digestive Enzymes",
+        "nutrition": {
+          "calories": 180,
+          "protein": 6,
+          "carbs": 28,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-sicilian-salad",
+        "name": "Sicilian Salad",
+        "price": 235,
+        "ingredients": "Mixed garden greens with fresh citrus segments, red onions, kalamata olives, and herb balsamic vinaigrette",
+        "allergens": "None",
+        "healthIndicators": "Heart Healthy Antioxidants, Mediterranean Style",
+        "nutrition": {
+          "calories": 210,
+          "protein": 5,
+          "carbs": 22,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
         "id": "souq-pasta-crab",
         "name": "Pasta sa Taba ng Alimango",
         "price": 290,
         "ingredients": "Al dente fettuccine tossed in rich Kapampangan crab fat (taba ng alimango), garlic, calamansi juice, and crispy chicharon",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Crustaceans (Crab Fat), Gluten, and Pork.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Cholesterol Crab Fat. Rich Flavor Profile.",
+        "allergens": "Contains Crustaceans (Crab Fat), Gluten, Pork",
+        "healthIndicators": "SOUQ Signature Iconic Dish",
         "nutrition": {
           "calories": 680,
           "protein": 22,
@@ -39704,49 +39916,604 @@
         "image": "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=500&q=80"
       },
       {
-        "id": "souq-liempo-karekare",
-        "name": "Crispy Liempo Kare-Kare",
-        "price": 490,
-        "ingredients": "Crispy deep-fried pork belly served over creamy roasted peanut sauce, eggplant, string beans, and homemade bagoong",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Peanuts, Pork, and Crustaceans (Bagoong).",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Caloric Nut Fats & Pork Belly.",
+        "id": "souq-seafood-marinara",
+        "name": "Seafood Marinara",
+        "price": 245,
+        "ingredients": "Spaghetti tossed in rich herb-infused tomato marinara with fresh shrimp, squid rings, and mussels",
+        "allergens": "Contains Crustaceans, Molluscs, Gluten",
+        "healthIndicators": "High Protein, Mediterranean Seafood Pasta",
         "nutrition": {
-          "calories": 880,
-          "protein": 46,
-          "carbs": 22,
-          "fat": 68
+          "calories": 480,
+          "protein": 26,
+          "carbs": 68,
+          "fat": 12
         },
-        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+        "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-aglio-e-olio",
+        "name": "Aglio e Olio",
+        "price": 290,
+        "ingredients": "Classic spaghetti tossed in extra virgin olive oil, toasted garlic slivers, chili flakes, and fresh parsley",
+        "allergens": "Contains Gluten",
+        "healthIndicators": "Heart-Healthy Olive Oil",
+        "nutrition": {
+          "calories": 420,
+          "protein": 10,
+          "carbs": 62,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-pasta-negra",
+        "name": "Pasta Negra",
+        "price": 490,
+        "ingredients": "Fettuccine cooked in authentic savory squid ink reduction with tender squid rings and garlic",
+        "allergens": "Contains Molluscs (Squid Ink), Gluten",
+        "healthIndicators": "Gourmet Seafood Pasta",
+        "nutrition": {
+          "calories": 510,
+          "protein": 24,
+          "carbs": 66,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-crispy-pansit-tagalog",
+        "name": "Crispy Pansit Tagalog",
+        "price": 265,
+        "ingredients": "Crispy fried noodles smothered in savory chicken and vegetable gravy with quail eggs and pork strips",
+        "allergens": "Contains Gluten, Eggs, Pork",
+        "healthIndicators": "Crispy Noodle Specialty",
+        "nutrition": {
+          "calories": 520,
+          "protein": 22,
+          "carbs": 68,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
       },
       {
         "id": "souq-pizza-negra",
         "name": "Pizza Negra",
         "price": 490,
-        "ingredients": "Artisanal squid-ink black pizza crust, mozzarella cheese, sautéed squid, garlic, and olive oil glaze",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Mollusks (Squid Ink), Gluten, and Dairy.",
-        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Unique Gourmet Seafood Pizza.",
+        "ingredients": "Artisanal thin crust pizza brushed with savory squid ink, topped with mozzarella, squid rings, and shrimp",
+        "allergens": "Contains Gluten, Dairy, Molluscs, Crustaceans",
+        "healthIndicators": "Signature Black Pizza",
         "nutrition": {
-          "calories": 720,
-          "protein": 34,
-          "carbs": 75,
-          "fat": 30
+          "calories": 640,
+          "protein": 28,
+          "carbs": 72,
+          "fat": 26
         },
-        "image": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=500&q=80"
+        "image": "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80"
       },
       {
-        "id": "souq-buko-pie",
-        "name": "Fresh Artisanal Buko Pie (Medium)",
-        "price": 190,
-        "ingredients": "Flaky baked pastry crust filled with soft young coconut meat and cream custard",
-        "allergens": "⚠️ ALLERGEN WARNING: Contains Coconut, Gluten, Dairy, and Eggs.",
-        "healthIndicators": "🟢 LIFESTYLE COMPLIANCE: Traditional Fresh Coconut Dessert.",
+        "id": "souq-gising-gising",
+        "name": "Gising-gising with Crispy Dilis",
+        "price": 275,
+        "ingredients": "Chopped spicy green beans cooked in rich coconut milk with minced pork and topped with crunchy fried dilis",
+        "allergens": "Contains Fish (Dilis), Coconut, Pork",
+        "healthIndicators": "Spicy Vegetable Specialty",
         "nutrition": {
-          "calories": 340,
-          "protein": 5,
-          "carbs": 42,
-          "fat": 17
+          "calories": 380,
+          "protein": 18,
+          "carbs": 16,
+          "fat": 28
         },
-        "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=500&q=80"
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-pinakbet-lechon-kawali",
+        "name": "Pinakbet Lechon Kawali",
+        "price": 275,
+        "ingredients": "Native squash, eggplant, okra, and string beans sautéed in bagoong alamang, topped with crispy lechon kawali chunks",
+        "allergens": "Contains Crustaceans (Bagoong), Pork",
+        "healthIndicators": "Classic Filipino Vegetable Dish",
+        "nutrition": {
+          "calories": 440,
+          "protein": 22,
+          "carbs": 24,
+          "fat": 30
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-sweet-chili-eggplant",
+        "name": "Sizzling Sweet Chili Eggplant",
+        "price": 220,
+        "ingredients": "Grilled eggplant served on a sizzling hot plate drizzled with sweet chili garlic glaze",
+        "allergens": "Contains Soy",
+        "healthIndicators": "High Fiber, Vegetarian Friendly",
+        "nutrition": {
+          "calories": 230,
+          "protein": 6,
+          "carbs": 32,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-bokchoy-hk",
+        "name": "Bokchoy with Hong Kong Special Sauce",
+        "price": 240,
+        "ingredients": "Crisp steamed baby bokchoy drizzled with savory Hong Kong-style sweet soy-garlic oyster glaze",
+        "allergens": "Contains Soy, Molluscs",
+        "healthIndicators": "Low Calorie, Nutrient Dense Greens",
+        "nutrition": {
+          "calories": 160,
+          "protein": 6,
+          "carbs": 18,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-crispy-liempo-karekare",
+        "name": "Crispy Liempo Kare Kare",
+        "price": 490,
+        "ingredients": "Crunchy golden pork belly slab served over velvety roasted peanut-annatto vegetable stew with sautéed bagoong",
+        "allergens": "Contains Peanuts, Crustaceans (Bagoong), Pork",
+        "healthIndicators": "SOUQ Bestseller Heritage Fusion",
+        "nutrition": {
+          "calories": 710,
+          "protein": 36,
+          "carbs": 22,
+          "fat": 54
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-crispy-liempo-binagoongan",
+        "name": "Crispy Liempo Binagoongan",
+        "price": 310,
+        "ingredients": "Crispy pork belly tossed in savory sautéed fermented shrimp paste with fried eggplant and green chili",
+        "allergens": "Contains Crustaceans (Bagoong), Pork",
+        "healthIndicators": "Bold & Savory Kapampangan Classic",
+        "nutrition": {
+          "calories": 590,
+          "protein": 28,
+          "carbs": 12,
+          "fat": 48
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-crispy-adobo-liempo",
+        "name": "Crispy Adobo Liempo",
+        "price": 410,
+        "ingredients": "Crispy pork belly simmered in classic vinegar-soy garlic reduction and crisped to perfection",
+        "allergens": "Contains Soy, Pork",
+        "healthIndicators": "Crispy Twist on Traditional Adobo",
+        "nutrition": {
+          "calories": 620,
+          "protein": 30,
+          "carbs": 10,
+          "fat": 52
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-crispy-liempo-sambal",
+        "name": "Crispy Liempo in Sambal Sauce",
+        "price": 390,
+        "ingredients": "Sliced crunchy pork belly tossed in spicy-sweet Malaysian-style sambal chili sauce",
+        "allergens": "Contains Pork, Crustaceans (Traces)",
+        "healthIndicators": "Spicy Fusion Dish",
+        "nutrition": {
+          "calories": 580,
+          "protein": 28,
+          "carbs": 14,
+          "fat": 46
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-pork-sisig",
+        "name": "Pork Sisig",
+        "price": 235,
+        "ingredients": "Sizzling minced pork face and chicken liver seasoned with calamansi, onions, and chili",
+        "allergens": "Contains Pork, Poultry (Liver)",
+        "healthIndicators": "Pampanga Signature Specialty",
+        "nutrition": {
+          "calories": 490,
+          "protein": 32,
+          "carbs": 8,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-beef-brisket-kaldereta",
+        "name": "Slow Cooked Beef Brisket Kaldereta",
+        "price": 490,
+        "ingredients": "Melt-in-your-mouth slow-braised beef brisket in rich tomato-liver sauce, bell peppers, carrots, and potatoes",
+        "allergens": "Contains Beef, Liver, Dairy",
+        "healthIndicators": "Slow-Cooked Tender Beef",
+        "nutrition": {
+          "calories": 580,
+          "protein": 42,
+          "carbs": 20,
+          "fat": 36
+        },
+        "image": "https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-sizzling-garlic-chicken",
+        "name": "Sizzling Garlic Chicken",
+        "price": 310,
+        "ingredients": "Tender chicken cuts pan-roasted on a sizzling plate with loaded toasted garlic gravy",
+        "allergens": "Contains Soy",
+        "healthIndicators": "High Protein Garlic Specialty",
+        "nutrition": {
+          "calories": 420,
+          "protein": 36,
+          "carbs": 12,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-salt-pepper-chicken",
+        "name": "Salt and Pepper Fried Chicken",
+        "price": 290,
+        "ingredients": "Crispy fried chicken bites tossed with toasted garlic, sea salt, ground peppercorns, and fresh scallions",
+        "allergens": "Contains Gluten",
+        "healthIndicators": "Crispy Asian Style Chicken",
+        "nutrition": {
+          "calories": 450,
+          "protein": 34,
+          "carbs": 16,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-garlic-overload-bangus",
+        "name": "Garlic Overload Bangus at Ensalada",
+        "price": 290,
+        "ingredients": "Pan-fried deboned milkfish topped with heaps of crispy toasted garlic, served with fresh tomato-onion ensalada",
+        "allergens": "Contains Fish",
+        "healthIndicators": "Omega-3 Rich, Heart Healthy",
+        "nutrition": {
+          "calories": 410,
+          "protein": 38,
+          "carbs": 10,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-salmon-ala-pobre",
+        "name": "Sizzling Salmon Ala Pobre",
+        "price": 390,
+        "ingredients": "Seared salmon fillet served on a sizzling skillet with rich garlic-butter Worcestershire reduction",
+        "allergens": "Contains Fish, Dairy",
+        "healthIndicators": "High Omega-3 Fatty Acids",
+        "nutrition": {
+          "calories": 460,
+          "protein": 38,
+          "carbs": 6,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-salted-egg-tilapia",
+        "name": "Salted Egg Tilapia",
+        "price": 360,
+        "ingredients": "Crisp-fried tilapia fillet chunks coated in creamy salted egg yolk sauce and curry leaves",
+        "allergens": "Contains Fish, Eggs, Dairy",
+        "healthIndicators": "Savory Fish Fillet",
+        "nutrition": {
+          "calories": 430,
+          "protein": 32,
+          "carbs": 12,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-roast-pork-chicken-hk",
+        "name": "Roast Pork & Chicken in Special Hong Kong Sauce",
+        "price": 450,
+        "ingredients": "Combination platter of roasted pork char siu and chicken in sweet-savory Hong Kong glaze",
+        "allergens": "Contains Pork, Poultry, Soy",
+        "healthIndicators": "Hong Kong Roast Specialty",
+        "nutrition": {
+          "calories": 560,
+          "protein": 44,
+          "carbs": 18,
+          "fat": 34
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-solo-fiesta-bbq",
+        "name": "Fiesta Chicken BBQ (Solo Meal)",
+        "price": 190,
+        "ingredients": "Chargrilled chicken BBQ skewer basted in sweet-savory glaze, served with steamed white rice and side vegetables",
+        "allergens": "Contains Soy",
+        "healthIndicators": "Complete Balanced Solo Plate",
+        "nutrition": {
+          "calories": 510,
+          "protein": 32,
+          "carbs": 62,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-solo-chicken-katsu",
+        "name": "Chicken Katsu (Solo Meal)",
+        "price": 190,
+        "ingredients": "Panko-breaded crispy chicken breast cutlet with tonkatsu sauce, steamed rice, and salad",
+        "allergens": "Contains Gluten, Eggs",
+        "healthIndicators": "Crispy Cutlet Solo Meal",
+        "nutrition": {
+          "calories": 540,
+          "protein": 30,
+          "carbs": 68,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-solo-soy-garlic-chicken",
+        "name": "Soy Garlic Glazed Chicken (Solo Meal)",
+        "price": 220,
+        "ingredients": "Crispy chicken cuts glazed in sweet garlic-soy glaze, served with rice and pickled vegetables",
+        "allergens": "Contains Soy, Gluten",
+        "healthIndicators": "Savory Glazed Chicken Plate",
+        "nutrition": {
+          "calories": 530,
+          "protein": 32,
+          "carbs": 66,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-solo-sriracha-chicken",
+        "name": "Souq Sriracha Chicken (Solo Meal)",
+        "price": 220,
+        "ingredients": "Spicy sweet sriracha glazed chicken with steamed rice and garden vegetables",
+        "allergens": "Contains Soy",
+        "healthIndicators": "Spicy Solo Meal",
+        "nutrition": {
+          "calories": 520,
+          "protein": 32,
+          "carbs": 65,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-solo-hk-chicken-rice",
+        "name": "Hong Kong Chicken Rice (Solo Meal)",
+        "price": 205,
+        "ingredients": "Poached tender chicken served over seasoned fragrant chicken rice with ginger-scallion dipping oil",
+        "allergens": "Contains Soy, Sesame",
+        "healthIndicators": "Authentic Hainanese / HK Style",
+        "nutrition": {
+          "calories": 490,
+          "protein": 34,
+          "carbs": 58,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-solo-chowmien",
+        "name": "Stir Fried Chow Mien Noodles",
+        "price": 190,
+        "ingredients": "Stir-fried egg noodles with shredded chicken, crisp vegetables, and savory sauce",
+        "allergens": "Contains Gluten, Soy",
+        "healthIndicators": "Quick Noodle Solo Plate",
+        "nutrition": {
+          "calories": 460,
+          "protein": 20,
+          "carbs": 62,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-salmon-belly-miso",
+        "name": "Salmon Belly sa Miso",
+        "price": 380,
+        "ingredients": "Rich fatty salmon belly simmered in sour-savory tamarind broth with fermented yellow soybean miso and mustard greens",
+        "allergens": "Contains Fish, Soy",
+        "healthIndicators": "High Omega-3, Probiotic Miso Broth",
+        "nutrition": {
+          "calories": 420,
+          "protein": 32,
+          "carbs": 12,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-hotpot",
+        "name": "Hotpot (Laksa or Sukiyaki)",
+        "price": 490,
+        "ingredients": "Steaming hotpot choice of spicy Malaysian coconut curry Laksa or sweet-savory Japanese beef-tofu Sukiyaki broth",
+        "allergens": "Contains Coconut/Crustaceans (Laksa) or Soy/Beef (Sukiyaki)",
+        "healthIndicators": "Warming Broth Specialty",
+        "nutrition": {
+          "calories": 510,
+          "protein": 28,
+          "carbs": 42,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-fresh-buko-pie",
+        "name": "Fresh Buko Pie",
+        "price": 70,
+        "ingredients": "SOUQ's acclaimed signature freshly baked buko pie with young coconut meat and flaky butter crust (Slice ₱70, Small ₱190, Big Pie ₱570)",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "SOUQ Bestseller Dessert",
+        "nutrition": {
+          "calories": 290,
+          "protein": 4,
+          "carbs": 38,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-sweet-potato-pie",
+        "name": "Sweet Potato Pie",
+        "price": 60,
+        "ingredients": "Handcrafted dessert pie filled with velvety native sweet potato filling in golden crust (Slice ₱60, Small ₱150, Big Pie ₱450)",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Fiber Rich Rootcrop Pie",
+        "nutrition": {
+          "calories": 260,
+          "protein": 3,
+          "carbs": 42,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-three-flavor-pie",
+        "name": "Three Flavor Pie",
+        "price": 80,
+        "ingredients": "Trio layered artisanal pie combining buko, ube, and sweet potato (Slice ₱80, Small ₱190, Big Pie ₱570)",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Three-in-One Artisan Pie",
+        "nutrition": {
+          "calories": 310,
+          "protein": 4,
+          "carbs": 46,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-palitaw-delight",
+        "name": "Palitaw Delight",
+        "price": 90,
+        "ingredients": "Soft chewy glutinous rice cakes coated in fresh grated coconut, toasted sesame seeds, and sugar",
+        "allergens": "Contains Sesame",
+        "healthIndicators": "Traditional Kakanin Sweet",
+        "nutrition": {
+          "calories": 220,
+          "protein": 3,
+          "carbs": 44,
+          "fat": 4
+        },
+        "image": "https://images.unsplash.com/photo-1519869325930-281384150729?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-banana-flambe",
+        "name": "Banana Flambé",
+        "price": 90,
+        "ingredients": "Caramelized saba bananas flamed in local rum and brown sugar, served warm",
+        "allergens": "Contains Dairy (Butter)",
+        "healthIndicators": "Gourmet Banana Dessert",
+        "nutrition": {
+          "calories": 240,
+          "protein": 2,
+          "carbs": 48,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-soda",
+        "name": "Soda in Can",
+        "price": 60,
+        "ingredients": "Choice of chilled canned sodas (Coke, Sprite, Royal)",
+        "allergens": "None",
+        "healthIndicators": "Chilled Carbonated Drink",
+        "nutrition": {
+          "calories": 140,
+          "protein": 0,
+          "carbs": 38,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-iced-tea",
+        "name": "Iced Tea",
+        "price": 60,
+        "ingredients": "House-brewed sweetened iced tea with fresh calamansi",
+        "allergens": "None",
+        "healthIndicators": "Refreshing Calamansi Iced Tea",
+        "nutrition": {
+          "calories": 90,
+          "protein": 0,
+          "carbs": 22,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-brewed-coffee",
+        "name": "Brewed Coffee",
+        "price": 90,
+        "ingredients": "Freshly brewed Kapeng Barako native roasted coffee beans",
+        "allergens": "None",
+        "healthIndicators": "Rich Antioxidants, Zero Calorie Black",
+        "nutrition": {
+          "calories": 5,
+          "protein": 0,
+          "carbs": 1,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-dilmah-tea",
+        "name": "Dilmah Flavored Tea",
+        "price": 60,
+        "ingredients": "Hot premium Dilmah steeped Ceylon flavored tea selection",
+        "allergens": "None",
+        "healthIndicators": "Hot Herbal/Flavored Tea",
+        "nutrition": {
+          "calories": 0,
+          "protein": 0,
+          "carbs": 0,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-bottled-water",
+        "name": "Bottled Water",
+        "price": 60,
+        "ingredients": "Purified drinking water 500ml",
+        "allergens": "None",
+        "healthIndicators": "Pure Hydration",
+        "nutrition": {
+          "calories": 0,
+          "protein": 0,
+          "carbs": 0,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "souq-san-miguel-beer",
+        "name": "San Miguel Beer",
+        "price": 70,
+        "ingredients": "Chilled San Miguel Pale Pilsen or Light beer",
+        "allergens": "Contains Gluten, Alcohol",
+        "healthIndicators": "Chilled Local Beer",
+        "nutrition": {
+          "calories": 130,
+          "protein": 1,
+          "carbs": 10,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1608270104192-3a5c7f8f6155?auto=format&fit=crop&w=500&q=80"
       }
     ]
   },
@@ -56898,6 +57665,855 @@
           "fat": 34
         },
         "image": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=500&q=80"
+      }
+    ]
+  },
+  {
+    "id": "res-lurings-bbq-house-guagua",
+    "name": "Luring's BBQ House",
+    "municipality": "Guagua",
+    "corridor": "Jose Abad Santos Avenue (JASA) Line",
+    "operatingHours": "09:00 AM - 08:00 PM",
+    "priceTier": "$$",
+    "lat": 14.9685,
+    "lng": 120.6275,
+    "categories": [
+      "🥩 Sizzling & Grill",
+      "🍱 Fiesta Catering & Party Trays",
+      "🏛️ Ancestral Kitchen"
+    ],
+    "description": "Established culinary institution in San Roque, Guagua renowned across Pampanga for authentic Inihaw specialties, savory Chicken Inasal, heirloom Kapampangan viands, and generous festive party food trays featuring Pindang Damulag, Zippo (Sipo) Egg, and Crispy Lechon Kawali Pancit.",
+    "address": "San Roque, Guagua, Pampanga",
+    "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
+    "images": [
+      "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80"
+    ],
+    "branches": [
+      {
+        "branchName": "Luring's BBQ House (San Roque Main Branch)",
+        "municipality": "Guagua",
+        "address": "San Roque, Guagua, Pampanga",
+        "operatingHours": "09:00 AM - 08:00 PM",
+        "lat": 14.9685,
+        "lng": 120.6275
+      }
+    ],
+    "username": "lurings_guagua_owner",
+    "password": "password123",
+    "occupancy": [
+      15,
+      25,
+      40,
+      70,
+      95,
+      85,
+      55,
+      45,
+      60,
+      85,
+      90,
+      75,
+      45,
+      25,
+      15
+    ],
+    "menu": [
+      {
+        "id": "lurings-chicken-bbq",
+        "name": "Chicken BBQ (Party Tray)",
+        "price": 2000,
+        "ingredients": "Tender chicken marinated in calamansi, soy sauce, native garlic, and sweet-savory glaze, chargrilled over wood charcoal (Small ₱2000 for 20-25 pax / Large ₱3000 for 35-40 pax)",
+        "allergens": "Contains Soy, Garlic",
+        "healthIndicators": "High Protein, Grilled Specialty",
+        "nutrition": {
+          "calories": 420,
+          "protein": 38,
+          "carbs": 12,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-chicken-inasal",
+        "name": "Chicken Inasal (Quarter Legs)",
+        "price": 120,
+        "ingredients": "Quarter-leg chicken slow-marinated with sinamak vinegar, lemongrass, ginger, garlic, and basted in golden annatto oil",
+        "allergens": "None",
+        "healthIndicators": "High Protein, Low Sugar",
+        "nutrition": {
+          "calories": 380,
+          "protein": 35,
+          "carbs": 4,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-pindang-damulag",
+        "name": "Pindang Damulag (Carabao Beef Tapa Tray)",
+        "price": 1800,
+        "ingredients": "Authentic Kapampangan fermented carabao beef tapa, cured with native cane vinegar, garlic, salt, and black peppercorns (Small ₱1800 / Large ₱3000)",
+        "allergens": "Contains Garlic",
+        "healthIndicators": "Iron Rich, Heirloom Kapampangan Dish",
+        "nutrition": {
+          "calories": 450,
+          "protein": 42,
+          "carbs": 6,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-kare-kare",
+        "name": "Kare-Kare Oxtail or Oxtripe (Party Tray)",
+        "price": 2200,
+        "ingredients": "Slow-simmered tender oxtail or oxtripe in rich toasted peanut and annatto sauce, eggplant, string beans, banana blossom, served with Guagua bagoong alamang (Small ₱2200 / Large ₱3500)",
+        "allergens": "Contains Peanuts, Crustaceans (Bagoong)",
+        "healthIndicators": "Rich Collagen, High Protein",
+        "nutrition": {
+          "calories": 650,
+          "protein": 38,
+          "carbs": 18,
+          "fat": 46
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-beef-caldereta",
+        "name": "Beef Caldereta (Party Tray)",
+        "price": 2500,
+        "ingredients": "Tender beef shank chunks braised in rich tomato sauce, liver spread, bell peppers, carrots, potatoes, and green olives (Small ₱2500 / Large ₱3500)",
+        "allergens": "Contains Liver, Dairy",
+        "healthIndicators": "High Protein, Hearty Stew",
+        "nutrition": {
+          "calories": 580,
+          "protein": 40,
+          "carbs": 22,
+          "fat": 34
+        },
+        "image": "https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-roast-beef",
+        "name": "Roast Beef with Mashed Potato (Party Tray)",
+        "price": 2500,
+        "ingredients": "Herb-crusted slow-roasted beef slices served with rich mushroom brown gravy and buttery mashed potatoes (Small ₱2500 / Large ₱3500)",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Comfort Feast Tray",
+        "nutrition": {
+          "calories": 540,
+          "protein": 36,
+          "carbs": 28,
+          "fat": 30
+        },
+        "image": "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-beef-with-broccoli",
+        "name": "Beef with Broccoli (Party Tray)",
+        "price": 2500,
+        "ingredients": "Tender marinated flank steak strips stir-fried with crisp broccoli florets in savory oyster-garlic glaze (Small ₱2500 / Large ₱3500)",
+        "allergens": "Contains Soy, Molluscs (Oyster Sauce)",
+        "healthIndicators": "High Fiber, Iron & Protein",
+        "nutrition": {
+          "calories": 410,
+          "protein": 32,
+          "carbs": 16,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-beef-steak",
+        "name": "Beef Steak (Party Tray)",
+        "price": 2500,
+        "ingredients": "Classic Bistek Tagalog-style sliced tender beef simmered in native calamansi, dark soy sauce, and loads of sweet caramelized white onions (Small ₱2500 / Large ₱3500)",
+        "allergens": "Contains Soy",
+        "healthIndicators": "High Protein, Citrus Infused",
+        "nutrition": {
+          "calories": 460,
+          "protein": 36,
+          "carbs": 12,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-callos",
+        "name": "Callos (Party Tray)",
+        "price": 2200,
+        "ingredients": "Spanish-heritage stew of tender ox tripe, beef knuckles, chorizo de bilbao, garbanzos chickpeas, and sweet red bell peppers in piquant tomato broth (Small ₱2200 / Large ₱3500)",
+        "allergens": "Contains Pork (Chorizo)",
+        "healthIndicators": "Rich Collagen, Heritage Stew",
+        "nutrition": {
+          "calories": 520,
+          "protein": 34,
+          "carbs": 20,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-chicken-roll",
+        "name": "Chicken Roll",
+        "price": 180,
+        "ingredients": "Handcrafted savory rolled chicken stuffed with ham, egg, native sausage, carrots, and melted cheese, fried to a golden crisp",
+        "allergens": "Contains Eggs, Dairy, Pork",
+        "healthIndicators": "Savory Appetizer",
+        "nutrition": {
+          "calories": 340,
+          "protein": 26,
+          "carbs": 8,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-chicken-teriyaki",
+        "name": "Chicken Teriyaki (Party Tray)",
+        "price": 2000,
+        "ingredients": "Glazed pan-seared chicken cuts simmered in sweet mirin, soy sauce, ginger, and toasted sesame seeds (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Soy, Sesame",
+        "healthIndicators": "High Protein, Kid Friendly",
+        "nutrition": {
+          "calories": 430,
+          "protein": 36,
+          "carbs": 22,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-chicken-pastel",
+        "name": "Chicken Pastel (Party Tray)",
+        "price": 2200,
+        "ingredients": "Creamy festive stew of tender chicken chunks, chorizo, Vienna sausages, button mushrooms, carrots, and potatoes in rich cream sauce (Small ₱2200 / Large ₱3200)",
+        "allergens": "Contains Dairy, Pork",
+        "healthIndicators": "Hearty Festive Favorite",
+        "nutrition": {
+          "calories": 510,
+          "protein": 32,
+          "carbs": 24,
+          "fat": 30
+        },
+        "image": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-fried-chicken",
+        "name": "Fried Chicken (Party Tray)",
+        "price": 1800,
+        "ingredients": "Crispy skin golden fried chicken cuts seasoned in special garlic-pepper house marinade, served with savory brown gravy (Small ₱1800 / Large ₱3000)",
+        "allergens": "Contains Gluten",
+        "healthIndicators": "Crispy Party Classic",
+        "nutrition": {
+          "calories": 460,
+          "protein": 34,
+          "carbs": 14,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-zippo-egg",
+        "name": "Zippo Egg / Sipo Egg (Party Tray)",
+        "price": 2000,
+        "ingredients": "Signature festive Kapampangan vegetable dish featuring tender quail eggs, green peas, diced carrots, singkamas jicama, ham, and plump shrimp in silky white sauce (Small ₱2000 / Large ₱2800)",
+        "allergens": "Contains Eggs, Crustaceans (Shrimp), Dairy",
+        "healthIndicators": "Kapampangan Fiesta Essential",
+        "nutrition": {
+          "calories": 380,
+          "protein": 22,
+          "carbs": 26,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-chopsuey",
+        "name": "Chopsuey (Party Tray)",
+        "price": 1500,
+        "ingredients": "Crisp medley of broccoli, cauliflower, carrots, young corn, snap peas, and cabbage stir-fried with chicken liver and savory garlic glaze (Small ₱1500 / Large ₱2500)",
+        "allergens": "Contains Soy",
+        "healthIndicators": "High Fiber, Low Calorie, Vitamin Rich",
+        "nutrition": {
+          "calories": 220,
+          "protein": 12,
+          "carbs": 20,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-creamy-chopsuey",
+        "name": "Creamy Chopsuey (Party Tray)",
+        "price": 2000,
+        "ingredients": "Garden vegetables simmered in velvety white mushroom cream sauce with chicken strips and quail eggs (Small ₱2000 / Large ₱2800)",
+        "allergens": "Contains Dairy, Eggs",
+        "healthIndicators": "Creamy Vegetable Tray",
+        "nutrition": {
+          "calories": 310,
+          "protein": 14,
+          "carbs": 24,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-pinakbet",
+        "name": "Pinakbet (Party Tray)",
+        "price": 1500,
+        "ingredients": "Native bitter melon, squash, okra, eggplant, and string beans sautéed with pork belly slices in savory bagoong alamang (Small ₱1500 / Large ₱2500)",
+        "allergens": "Contains Crustaceans (Bagoong)",
+        "healthIndicators": "High Fiber, Traditional Heirloom",
+        "nutrition": {
+          "calories": 280,
+          "protein": 14,
+          "carbs": 22,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-vegetables-with-noodles",
+        "name": "Vegetables with Noodles (Party Tray)",
+        "price": 1800,
+        "ingredients": "Fresh crisp garden vegetables tossed with soft egg noodles in sweet-savory garlic sesame sauce (Small ₱1800 / Large ₱2500)",
+        "allergens": "Contains Gluten, Soy, Sesame",
+        "healthIndicators": "Vegetable & Carb Balance",
+        "nutrition": {
+          "calories": 340,
+          "protein": 10,
+          "carbs": 48,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-relyenong-bangus",
+        "name": "Relyenong Bangus",
+        "price": 320,
+        "ingredients": "Whole deboned milkfish stuffed with seasoned minced bangus meat, raisins, carrots, peas, and native spices, baked until golden brown (1 pc)",
+        "allergens": "Contains Fish, Eggs",
+        "healthIndicators": "Omega-3 Rich, Heirloom Kapampangan Dish",
+        "nutrition": {
+          "calories": 420,
+          "protein": 36,
+          "carbs": 16,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-inihaw-na-bangus",
+        "name": "Inihaw na Bangus with Steamed Vegetables",
+        "price": 300,
+        "ingredients": "Fresh whole milkfish stuffed with chopped native tomatoes, sweet onions, and calamansi, chargrilled wrapped in banana leaves and served with steamed vegetables",
+        "allergens": "Contains Fish",
+        "healthIndicators": "High Omega-3, Lean Charcoal Grilled",
+        "nutrition": {
+          "calories": 360,
+          "protein": 38,
+          "carbs": 8,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-inihaw-na-tilapia",
+        "name": "Inihaw na Tilapia with Steamed Vegetables",
+        "price": 160,
+        "ingredients": "Whole freshwater tilapia stuffed with lemongrass, fresh tomatoes, and ginger, charcoal-grilled to perfection with steamed greens",
+        "allergens": "Contains Fish",
+        "healthIndicators": "Lean Protein, Low Calorie",
+        "nutrition": {
+          "calories": 260,
+          "protein": 32,
+          "carbs": 4,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-inihaw-na-hito",
+        "name": "Inihaw na Hito with Steamed Vegetables",
+        "price": 180,
+        "ingredients": "Fresh local catfish marinated with native garlic and salt, charcoal-grilled until crispy outside, tender inside, served with steamed vegetables",
+        "allergens": "Contains Fish",
+        "healthIndicators": "High Protein, Traditional Grill",
+        "nutrition": {
+          "calories": 310,
+          "protein": 30,
+          "carbs": 4,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-fish-fillet-tartar",
+        "name": "Fish Fillet with Tartar Sauce (Party Tray)",
+        "price": 1800,
+        "ingredients": "Crispy breaded white fish fillets served with creamy caper-relish tartar dipping sauce (Small ₱1800 / Large ₱2800)",
+        "allergens": "Contains Fish, Gluten, Eggs, Dairy",
+        "healthIndicators": "Crispy Seafood Favorite",
+        "nutrition": {
+          "calories": 440,
+          "protein": 28,
+          "carbs": 32,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-sweet-sour-fish-fillet",
+        "name": "Sweet and Sour Fish Fillet (Party Tray)",
+        "price": 2000,
+        "ingredients": "Golden fried fish fillet chunks tossed with pineapple tidbits, crisp bell peppers, and sweet-sour glaze (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Fish, Gluten",
+        "healthIndicators": "Tangy Party Favorite",
+        "nutrition": {
+          "calories": 390,
+          "protein": 26,
+          "carbs": 38,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-pancit-canton-lechon-kawali",
+        "name": "Pancit Canton with Lechon Kawali (Party Tray)",
+        "price": 500,
+        "ingredients": "Stir-fried egg noodles with crisp carrots, cabbage, and savory broth topped generously with crunchy golden Lechon Kawali (Small ₱500 / Medium ₱850 / Large ₱1050)",
+        "allergens": "Contains Gluten, Soy, Pork",
+        "healthIndicators": "Bestseller Fiesta Noodle Tray",
+        "nutrition": {
+          "calories": 480,
+          "protein": 24,
+          "carbs": 52,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-pancit-guisado-lechon-kawali",
+        "name": "Pancit Guisado with Lechon Kawali (Party Tray)",
+        "price": 500,
+        "ingredients": "Bihon and canton noodle blend sautéed with chicken strips, veggies, calamansi, crowned with crispy Lechon Kawali chunks (Small ₱500 / Medium ₱850 / Large ₱1050)",
+        "allergens": "Contains Gluten, Soy, Pork",
+        "healthIndicators": "Signature Kapampangan Fiesta Noodle",
+        "nutrition": {
+          "calories": 460,
+          "protein": 22,
+          "carbs": 54,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-sotanghon-guisado",
+        "name": "Sotanghon Guisado (Party Tray)",
+        "price": 850,
+        "ingredients": "Translucent bean vermicelli slow-sautéed in annatto broth, shredded chicken, wood-ear mushrooms, garlic, and scallions (Medium ₱850 / Large ₱1200)",
+        "allergens": "Contains Soy",
+        "healthIndicators": "Light & Savory Celebration Tray",
+        "nutrition": {
+          "calories": 360,
+          "protein": 16,
+          "carbs": 52,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-baked-macaroni",
+        "name": "Baked Macaroni (Party Tray)",
+        "price": 1200,
+        "ingredients": "Elbow macaroni tossed in sweet-style meaty tomato sauce with ground beef and melted golden cheddar-mozzarella cheese topping (One size, ₱1200)",
+        "allergens": "Contains Gluten, Dairy, Beef",
+        "healthIndicators": "Classic Comfort Food Tray",
+        "nutrition": {
+          "calories": 510,
+          "protein": 24,
+          "carbs": 58,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-baked-lasagna",
+        "name": "Baked Lasagna (Party Tray)",
+        "price": 1200,
+        "ingredients": "Layered pasta sheets filled with rich beef ragu bolognese, creamy bechamel, and melted golden mozzarella crust (One size, ₱1200)",
+        "allergens": "Contains Gluten, Dairy, Beef",
+        "healthIndicators": "Rich Italian-Kapampangan Party Tray",
+        "nutrition": {
+          "calories": 560,
+          "protein": 28,
+          "carbs": 54,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-carbonara",
+        "name": "Carbonara (Party Tray)",
+        "price": 1200,
+        "ingredients": "Fettuccine pasta in rich velvety cream sauce with crispy bacon bits, sliced button mushrooms, and parmesan cheese (One size, ₱1200)",
+        "allergens": "Contains Gluten, Dairy, Pork",
+        "healthIndicators": "Creamy Party Noodle",
+        "nutrition": {
+          "calories": 530,
+          "protein": 20,
+          "carbs": 56,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-spaghetti",
+        "name": "Spaghetti (Party Tray)",
+        "price": 1200,
+        "ingredients": "Pinoy festive sweet-style spaghetti with minced beef, red hotdog slices, and abundant grated quick-melt cheese (One size, ₱1200)",
+        "allergens": "Contains Gluten, Dairy, Beef, Pork",
+        "healthIndicators": "Birthday & Celebration Staple",
+        "nutrition": {
+          "calories": 480,
+          "protein": 18,
+          "carbs": 64,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-asadong-matwa",
+        "name": "Asadong Matwa (Party Tray)",
+        "price": 2000,
+        "ingredients": "Traditional heirloom Kapampangan braised pork belly slow-cooked with calamansi, tomatoes, bay leaves, peppercorns, and liver gravy (Small ₱2000 for 20-25 pax / Large ₱3000 for 35-40 pax)",
+        "allergens": "Contains Pork, Liver",
+        "healthIndicators": "Authentic Kapampangan Heritage Dish",
+        "nutrition": {
+          "calories": 520,
+          "protein": 32,
+          "carbs": 14,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-lengua",
+        "name": "Lengua (Party Tray)",
+        "price": 2200,
+        "ingredients": "Tender slow-braised ox tongue in creamy white button mushroom gravy with green olives (Small ₱2200 / Large ₱3200)",
+        "allergens": "Contains Dairy, Beef/Offal",
+        "healthIndicators": "Rich Protein, Festive Classic",
+        "nutrition": {
+          "calories": 490,
+          "protein": 36,
+          "carbs": 12,
+          "fat": 34
+        },
+        "image": "https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-asadong-dila-ng-baboy",
+        "name": "Asadong Dila ng Baboy (Party Tray)",
+        "price": 2200,
+        "ingredients": "Melt-in-your-mouth pork tongue simmered in rich Kapampangan tomato-citrus reduction with fried potato wedges (Small ₱2200 / Large ₱3200)",
+        "allergens": "Contains Pork",
+        "healthIndicators": "Heritage Specialty",
+        "nutrition": {
+          "calories": 470,
+          "protein": 34,
+          "carbs": 14,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-menudo",
+        "name": "Menudo (Party Tray)",
+        "price": 1800,
+        "ingredients": "Diced tender pork belly and liver sautéed with potatoes, carrots, raisins, chickpeas, and sweet bell peppers in rich tomato sauce (Small ₱1800 / Large ₱3000)",
+        "allergens": "Contains Pork, Liver",
+        "healthIndicators": "High Iron, Party Tray Favorite",
+        "nutrition": {
+          "calories": 430,
+          "protein": 30,
+          "carbs": 22,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-kare-kare-bagnet",
+        "name": "Kare-Kare Bagnet (Party Tray)",
+        "price": 1800,
+        "ingredients": "Crispy golden fried pork bagnet chunks served over rich toasted peanut-annatto vegetable stew with sautéed Guagua bagoong (Small ₱1800 / Large ₱3000)",
+        "allergens": "Contains Peanuts, Crustaceans (Bagoong), Pork",
+        "healthIndicators": "Crispy Bagnet Fusion",
+        "nutrition": {
+          "calories": 680,
+          "protein": 36,
+          "carbs": 16,
+          "fat": 52
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-lechon-kawali",
+        "name": "Lechon Kawali (Party Tray)",
+        "price": 2000,
+        "ingredients": "Deep-fried crispy pork belly with blistered skin, seasoned with native spices, served with spiced vinegar and liver sauce (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Pork, Liver",
+        "healthIndicators": "Ultra Crispy Party Staple",
+        "nutrition": {
+          "calories": 640,
+          "protein": 32,
+          "carbs": 4,
+          "fat": 56
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-sisig-kapampangan",
+        "name": "Sisig Kapampangan (Party Tray)",
+        "price": 2000,
+        "ingredients": "Authentic traditional Kapampangan sisig — charcoal-grilled pork face, snout, ears, and chicken liver seasoned with fresh calamansi, native onions, and hot chili (no mayo) (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Pork, Poultry (Liver)",
+        "healthIndicators": "Authentic Kapampangan Culinary Icon",
+        "nutrition": {
+          "calories": 510,
+          "protein": 38,
+          "carbs": 6,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-sisig-tagalog",
+        "name": "Sisig Tagalog (Party Tray)",
+        "price": 2000,
+        "ingredients": "Creamy Tagalog-style sisig with crispy pork chunks, chopped onions, calamansi, sweet-tangy mayonnaise blend, and fresh chili (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Pork, Eggs, Dairy (Mayonnaise)",
+        "healthIndicators": "Creamy Sisig Style",
+        "nutrition": {
+          "calories": 560,
+          "protein": 34,
+          "carbs": 8,
+          "fat": 44
+        },
+        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-pork-binagoongan",
+        "name": "Pork Binagoongan (Party Tray)",
+        "price": 2000,
+        "ingredients": "Pork belly chunks simmered in aromatic sautéed fermented shrimp paste (bagoong alamang), garlic, chili, and fried eggplant slices (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Crustaceans (Bagoong), Pork",
+        "healthIndicators": "Bold & Savory Bestseller",
+        "nutrition": {
+          "calories": 540,
+          "protein": 30,
+          "carbs": 10,
+          "fat": 42
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-breaded-porkchop",
+        "name": "Breaded Porkchop (Party Tray)",
+        "price": 1800,
+        "ingredients": "Golden crisp panko-breaded pork chops seasoned with garlic, pepper, and native herbs, served with savory gravy (Small ₱1800 / Large ₱3000)",
+        "allergens": "Contains Gluten, Eggs, Pork",
+        "healthIndicators": "Crispy Comfort Tray",
+        "nutrition": {
+          "calories": 480,
+          "protein": 34,
+          "carbs": 22,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-pork-steak",
+        "name": "Pork Steak (Party Tray)",
+        "price": 2000,
+        "ingredients": "Sliced pork loin chops marinated in native calamansi and soy sauce, smothered in caramelized white onion rings (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Soy, Pork",
+        "healthIndicators": "High Protein, Citrus Infused",
+        "nutrition": {
+          "calories": 440,
+          "protein": 36,
+          "carbs": 12,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-bicol-express",
+        "name": "Bicol Express (Party Tray)",
+        "price": 2000,
+        "ingredients": "Pork belly strips slow-cooked in rich fresh coconut cream, spicy green finger chilies, garlic, and savory shrimp paste (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Coconut, Crustaceans (Shrimp Paste), Pork",
+        "healthIndicators": "Rich Coconut & Spicy Chili",
+        "nutrition": {
+          "calories": 580,
+          "protein": 28,
+          "carbs": 10,
+          "fat": 48
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-lumpiang-shanghai",
+        "name": "Lumpiang Shanghai (Party Tray)",
+        "price": 1800,
+        "ingredients": "Bite-sized crispy fried spring rolls packed with seasoned ground pork, minced carrots, onions, and garlic, served with sweet chili dip (Small ₱1800 / Large ₱2500)",
+        "allergens": "Contains Gluten, Eggs, Pork",
+        "healthIndicators": "Crispy Party Finger Food",
+        "nutrition": {
+          "calories": 380,
+          "protein": 22,
+          "carbs": 26,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-pata-tim",
+        "name": "Pata Tim",
+        "price": 850,
+        "ingredients": "Whole pork leg slow-braised until gelatinous and tender in sweet-savory soy-anise reduction with bok choy and shiitake mushrooms (₱850 / pc)",
+        "allergens": "Contains Soy, Pork",
+        "healthIndicators": "Rich Collagen, Centerpiece Feast Dish",
+        "nutrition": {
+          "calories": 720,
+          "protein": 52,
+          "carbs": 18,
+          "fat": 48
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-pork-caldereta",
+        "name": "Pork Caldereta (Party Tray)",
+        "price": 2000,
+        "ingredients": "Chunky pork cuts braised in piquant tomato sauce, liver spread, potatoes, carrots, and sweet bell peppers (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Pork, Liver",
+        "healthIndicators": "High Protein, Hearty Stew",
+        "nutrition": {
+          "calories": 510,
+          "protein": 34,
+          "carbs": 20,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-embotido",
+        "name": "Embotido",
+        "price": 180,
+        "ingredients": "Steamed native Kapampangan pork meatloaf rolled with raisins, sweet pickle relish, carrots, cheese, and hard-boiled eggs (₱180 / pc)",
+        "allergens": "Contains Eggs, Dairy, Pork",
+        "healthIndicators": "Classic Filipino Fiesta Meatloaf",
+        "nutrition": {
+          "calories": 320,
+          "protein": 24,
+          "carbs": 14,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-pork-adobo",
+        "name": "Pork Adobo (Party Tray)",
+        "price": 2000,
+        "ingredients": "Heritage Kapampangan-style pork belly braised in cane vinegar, garlic, bay leaves, whole black peppercorns, and pan-fried in its own savory oil (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Soy, Pork",
+        "healthIndicators": "Classic Heirloom Dish",
+        "nutrition": {
+          "calories": 540,
+          "protein": 32,
+          "carbs": 6,
+          "fat": 44
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-dinakdakan",
+        "name": "Dinakdakan (Party Tray)",
+        "price": 2000,
+        "ingredients": "Chargrilled pork mask, ears, and liver tossed with red onions, fiery bird's eye chilies, calamansi, and silky dressing (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Pork, Offal",
+        "healthIndicators": "Savory Grilled Pulutan Specialty",
+        "nutrition": {
+          "calories": 490,
+          "protein": 36,
+          "carbs": 6,
+          "fat": 36
+        },
+        "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-buttered-garlic-shrimp",
+        "name": "Buttered Garlic Shrimp (Party Tray)",
+        "price": 2000,
+        "ingredients": "Fresh plump shrimp sautéed in rich garlic butter, sweet calamansi citrus splash, and aromatic parsley (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Crustaceans (Shrimp), Dairy",
+        "healthIndicators": "High Protein, Omega-3 & Zinc Rich",
+        "nutrition": {
+          "calories": 340,
+          "protein": 32,
+          "carbs": 6,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-cajun-seafood",
+        "name": "Cajun Seafood Boil: Shrimp, Crab, Mussels & Squid (Party Tray)",
+        "price": 2500,
+        "ingredients": "Grand celebration seafood boil loaded with whole crabs, succulent prawns, black mussels, and tender squid tossed in spicy garlic cajun butter glaze (Small ₱2500 / Large ₱3500)",
+        "allergens": "Contains Crustaceans (Crab, Shrimp), Molluscs (Mussels, Squid), Dairy",
+        "healthIndicators": "Ultimate Fiesta Seafood Platter",
+        "nutrition": {
+          "calories": 460,
+          "protein": 44,
+          "carbs": 12,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-steamed-shrimp",
+        "name": "Steamed Shrimp (Party Tray)",
+        "price": 2000,
+        "ingredients": "Sweet and fresh market-fresh shrimp gently steamed with ginger and lemongrass, served with spiced vinegar garlic dip (Small ₱2000 / Large ₱3000)",
+        "allergens": "Contains Crustaceans (Shrimp)",
+        "healthIndicators": "Lean Protein, Low Fat, Low Calorie",
+        "nutrition": {
+          "calories": 190,
+          "protein": 34,
+          "carbs": 2,
+          "fat": 4
+        },
+        "image": "https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "lurings-steamed-crab",
+        "name": "Steamed Crab (Party Tray)",
+        "price": 3500,
+        "ingredients": "Whole fresh Pampanga crabs steamed to juicy perfection with lemongrass and garlic, served with spiced cane vinegar dip (Small ₱3500 / Large ₱4500-₱5000)",
+        "allergens": "Contains Crustaceans (Crab)",
+        "healthIndicators": "Sweet Fresh Meat, High Protein, Low Fat",
+        "nutrition": {
+          "calories": 240,
+          "protein": 38,
+          "carbs": 2,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=500&q=80"
       }
     ]
   }
