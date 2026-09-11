@@ -134,8 +134,7 @@ def seed():
                         'calories': int(nutrition.get('calories', 0) if isinstance(nutrition, dict) else 0),
                         'protein': int(nutrition.get('protein', 0) if isinstance(nutrition, dict) else 0),
                         'carbs': int(nutrition.get('carbs', 0) if isinstance(nutrition, dict) else 0),
-                        'fat': int(nutrition.get('fat', 0) if isinstance(nutrition, dict) else 0),
-                        'image': m.get('image', '')
+                        'fat': int(nutrition.get('fat', 0) if isinstance(nutrition, dict) else 0)
                     }
                 )
 

@@ -1061,7 +1061,6 @@ function App() {
 
   const [numPersons, setNumPersons] = useState(1);
   const [activeImgIdx, setActiveImgIdx] = useState(0);
-  const [zoomedDishImg, setZoomedDishImg] = useState(null);
   const [fullscreenImage, setFullscreenImage] = useState(null); // { images: string[], index: number, title?: string, isZoomed?: boolean }
   const [isTrackingGPS, setIsTrackingGPS] = useState(false);
 
@@ -1955,7 +1954,7 @@ function App() {
     lng: 120.6800
   });
 
-  const [adminDishes, setAdminDishes] = useState([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
+  const [adminDishes, setAdminDishes] = useState([{ name: '', price: '', ingredients: '', allergens: '', calories: '' }]);
   const [trafficNotifications, setTrafficNotifications] = useState([
     {
       id: 1,
@@ -11874,11 +11873,10 @@ Return ONLY a valid JSON object matching this schema:
         price: d.price || '',
         ingredients: d.ingredients || '',
         allergens: d.allergens || '',
-        calories: d.nutrition?.calories || d.calories || '',
-        image: d.image || ''
+        calories: d.nutrition?.calories || d.calories || ''
       })));
     } else {
-      setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
+      setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '' }]);
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -12396,106 +12394,6 @@ ${rawText}`;
     setAiOcrStatusMessage(hasRawText ? "Parsing raw menu text with AI..." : `Preparing ${imagesToScan.length} menu image(s)...`);
 
     try {
-      const DISH_PHOTO_MAP = {
-        'tokwa': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-        'tofu': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-        'tokalog': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-        'ham': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
-        'hamkalog': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
-        'shanghai': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
-        'shangkalog': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
-        'lumpia': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
-        'pata': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'patkalog': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'patty': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
-        'patties': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
-        'burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80',
-        'lunch meat': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
-        'luncheon': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
-        'lunkalog': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
-        'spam': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
-        'hotdog': 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&w=600&q=80',
-        'hotkalog': 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&w=600&q=80',
-        'siomai': 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?auto=format&fit=crop&w=600&q=80',
-        'siokalog': 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?auto=format&fit=crop&w=600&q=80',
-        'longganisa': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
-        'longanisa': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
-        'longkalog': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
-        'corned beef': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'cornkalog': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'combisilog': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
-        'silog': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
-        'sisig': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-        'pork sisig': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-        'kawali': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'crispy pata': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'bbq': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
-        'liempo': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'lechon': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'bulalo': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
-        'sinigang': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
-        'salmon': 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80',
-        'hipon': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
-        'shrimp': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
-        'prawn': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
-        'sugpo': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
-        'gambas': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
-        'chili garlic': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
-        'tahong': 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80',
-        'crab': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
-        'aligue': 'https://images.unsplash.com/photo-1559742811-822873691df8?auto=format&fit=crop&w=600&q=80',
-        'bulaklak': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'chicharon': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'tidtad': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
-        'dinuguan': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
-        'tocino': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80',
-        'asado': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'kilayin': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'pinakbet': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
-        'chopsuey': 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80',
-        'leche flan': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80',
-        'flan': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80',
-        'tibok': 'https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=600&q=80',
-        'pancit': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
-        'palabok': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
-        'luglug': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
-        'guisado': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
-        'bihon': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
-        'canton': 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=600&q=80',
-        'mami': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
-        'chicken': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
-        'inasal': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
-        'itik': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=600&q=80',
-        'murcon': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'morcon': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'tapa': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'kalabaw': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'pindang': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'kare': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
-        'bringhe': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
-        'rice': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
-        'garlic rice': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
-        'sinangag': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=600&q=80',
-        'fries': 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&q=80',
-        'french fries': 'https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=600&q=80',
-        'soup': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
-        'gravy': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80',
-        'coke': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80',
-        'royal': 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=600&q=80',
-        'sprite': 'https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?auto=format&fit=crop&w=600&q=80',
-        'soft drinks': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80',
-        'drink': 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80',
-        'water': 'https://images.unsplash.com/photo-1559839914-ba2a0f0d2c49?auto=format&fit=crop&w=600&q=80'
-      };
-
-      const getRealDishPhoto = (dishName) => {
-        const lower = (dishName || '').toLowerCase();
-        for (const [key, url] of Object.entries(DISH_PHOTO_MAP)) {
-          if (lower.includes(key)) return url;
-        }
-        return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80';
-      };
-
       const splitPreservingParentheses = (str) => {
         const results = [];
         let current = '';
@@ -13529,7 +13427,6 @@ ${rawText}`;
         price: Number(d.price) || 100,
         ingredients: d.ingredients || 'Local Kapampangan ingredients',
         allergens: d.allergens || 'None',
-        image: d.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80',
         healthIndicators: Number(d.calories) > 500 ? '⚠️ High Calories' : '🟢 Healthy Choice',
         nutrition: {
           calories: Number(d.calories) || 300,
@@ -13728,7 +13625,7 @@ ${rawText}`;
             lng: 120.6800
           }
         ]);
-        setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
+        setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '' }]);
 
         alert(`📋 Profile Changes Submitted!\n\nYour profile modifications for "${nameToSave}" have been submitted for administrator vetting. You can monitor its status under "My Change Requests Status & History" in your owner panel.`);
         return;
@@ -13778,7 +13675,7 @@ ${rawText}`;
           lng: 120.6800
         }
       ]);
-      setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
+      setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '' }]);
 
       alert(`✅ Update Saved!\n\nThe restaurant information for "${nameToSave}" has been successfully updated and published live.`);
       return;
@@ -13820,34 +13717,25 @@ ${rawText}`;
         }
 
         if (dishNames.includes('sisig') || dishNames.includes('bbq') || dishNames.includes('beer') || dishNames.includes('pata') || dishNames.includes('grill')) {
-          base[11] = Math.min(95, base[11] + 15);
-          base[12] = Math.min(90, base[12] + 25);
-          base[13] = Math.min(75, base[13] + 30);
-          base[14] = Math.min(60, base[14] + 25);
+          base[10] = Math.min(95, base[10] + 15);
+          base[11] = Math.min(95, base[11] + 20);
+          base[12] = Math.min(80, base[12] + 25);
         }
 
-        if (priceTier === '$$$' || priceTier === '$$$$') {
-          base[0] = 5;
-          base[1] = 5;
-          base[2] = 15;
-          base[10] = 95;
-          base[11] = 95;
-          base[12] = 85;
-        }
-
-        return base.map(v => Math.max(5, Math.min(98, v + (Math.floor(Math.random() * 7) - 3))));
+        return base;
       };
 
       const newRes = {
-        id: 'res-' + Date.now(),
+        id: `res-${Date.now()}`,
         name: nameToSave,
         municipality: primaryMun,
+        corridor: adminForm.corridor || 'MacArthur Highway Line',
         operatingHours: primaryBranch?.operatingHours || adminForm.operatingHours || '09:00 AM - 09:00 PM',
         priceTier: adminForm.priceTier || '$$',
         lat: primaryLat,
         lng: primaryLng,
-        categories: ['🏛️ Ancestral Kitchen'],
-        description: adminForm.description || 'Kapampangan Restaurant in Pampanga',
+        categories: Array.isArray(adminForm.categories) && adminForm.categories.length > 0 ? adminForm.categories : ['Heritage Kapampangan'],
+        description: (adminForm.description || '').trim() || `${nameToSave} offers authentic Kapampangan dining and local specialties in ${primaryMun}.`,
         address: (primaryBranch?.address || adminForm.address || `${primaryMun}, Pampanga`).trim(),
         image: adminForm.image || (adminForm.images && adminForm.images[0]) || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80',
         images: adminForm.images && adminForm.images.length > 0 ? adminForm.images : [
@@ -13856,21 +13744,8 @@ ${rawText}`;
         branches: updatedBranches,
         username: usernameToSave,
         password: passwordToSave,
-        isCustom: true,
-        userCreated: true,
         occupancy: generateOccupancyCurve(adminForm.priceTier, formattedMenu),
-        menu: formattedMenu.length > 0 ? formattedMenu : [
-          {
-            id: 'm-default',
-            name: 'Signature Sisig',
-            price: 250,
-            ingredients: 'Pork, citrus, soy sauce',
-            allergens: 'Contains Pork',
-            healthIndicators: 'High Lipids',
-            nutrition: { calories: 500, protein: 25, carbs: 5, fat: 40 },
-            image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80'
-          }
-        ]
+        menu: formattedMenu
       };
       setRestaurants(prev => {
         const next = [newRes, ...prev];
@@ -13904,7 +13779,7 @@ ${rawText}`;
         lng: 120.6800
       }
     ]);
-    setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
+    setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '' }]);
   };
 
 
@@ -15274,7 +15149,7 @@ ${rawText}`;
                           </button>
                           <button
                             type="button"
-                            onClick={() => setAdminDishes([...adminDishes, { name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }])}
+                            onClick={() => setAdminDishes([...adminDishes, { name: '', price: '', ingredients: '', allergens: '', calories: '' }])}
                             className="px-2.5 py-1 bg-terracotta text-white text-[10px] font-black rounded-lg hover:bg-terracotta-dark transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
                           >
                             <Plus className="h-3 w-3" /> Add Dish
@@ -15327,7 +15202,7 @@ ${rawText}`;
                               </div>
                               <input
                                 type="text"
-                                placeholder={isThisPackage ? "Included dishes (e.g. Sisig, Chicken, Rice, Drinks)" : "Ingredients list"}
+                                placeholder={isThisPackage ? "Included dishes (e.g. Sisig, Chicken, Rice, Drinks)" : "Ingredients / Description"}
                                 value={dish.ingredients}
                                 onChange={(e) => {
                                   const updated = [...adminDishes];
@@ -15360,50 +15235,9 @@ ${rawText}`;
                                   className="px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white"
                                 />
                               </div>
-                            <div className="space-y-1">
-                              <label className="block text-[9px] font-bold text-charcoal-light uppercase tracking-wider">
-                                Upload Dish Photo (Required)
-                              </label>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => {
-                                  const file = e.target.files[0];
-                                  if (file) {
-                                    const reader = new FileReader();
-                                    reader.onloadend = () => {
-                                      const updated = [...adminDishes];
-                                      updated[idx] = { ...updated[idx], image: reader.result };
-                                      setAdminDishes(updated);
-                                    };
-                                    reader.readAsDataURL(file);
-                                  }
-                                }}
-                                className="block w-full px-2 py-1 text-[10px] border border-[#E9E5DE] rounded bg-white text-charcoal focus:outline-none focus:ring-1 focus:ring-terracotta"
-                              />
-                              {dish.image && (
-                                <div className="flex items-center justify-between gap-2 mt-1 p-1 bg-[#F9F7F3] rounded border border-[#E9E5DE]">
-                                  <div className="flex items-center gap-1.5 min-w-0">
-                                    <img src={dish.image} className="w-6 h-6 rounded object-cover border border-[#E9E5DE] shrink-0" alt="Preview" />
-                                    <span className="text-[8px] text-bananaleaf font-black truncate">✓ Photo Uploaded</span>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const updated = [...adminDishes];
-                                      updated[idx] = { ...updated[idx], image: '' };
-                                      setAdminDishes(updated);
-                                    }}
-                                    className="text-[8px] text-red-600 hover:text-red-800 font-bold px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors cursor-pointer"
-                                  >
-                                    ✕ Remove
-                                  </button>
-                                </div>
-                              )}
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -15429,7 +15263,7 @@ ${rawText}`;
                                   lng: 120.6800
                                 }
                               ]);
-                              setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '', image: '' }]);
+                              setAdminDishes([{ name: '', price: '', ingredients: '', allergens: '', calories: '' }]);
                             }}
                             className="px-4 py-2 border border-[#E9E5DE] rounded-xl text-xs font-bold text-charcoal hover:bg-[#FAF8F5] cursor-pointer"
                           >
@@ -16591,9 +16425,9 @@ ${rawText}`;
             </div>
           </div>
 
-          {/* Centralized Search Input (Desktop/Tablet - Visible when not in Auth/Login view) */}
+          {/* Centralized Search Input (Desktop - Visible when not in Auth/Login view) */}
           {activeView !== 'auth' && (
-            <div className="hidden md:flex flex-1 min-w-[170px] max-w-xs lg:max-w-md relative mx-1 lg:mx-3">
+            <div className="hidden xl:flex flex-1 min-w-[200px] max-w-sm relative mx-3">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-4 w-4 text-charcoal-light dark:text-gray-400" />
               </div>
@@ -16629,8 +16463,8 @@ ${rawText}`;
             </div>
           )}
 
-          {/* Desktop Navigation links */}
-          <nav className="hidden md:flex items-center gap-1.5 lg:gap-3 shrink-0">
+          {/* Desktop Navigation links (>= 1024px) */}
+          <nav className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
             <button
               onClick={() => setActiveView('homepage')}
               className={`px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-colors ${activeView === 'homepage' ? 'text-terracotta bg-terracotta/10 dark:bg-terracotta/20 font-bold' : 'text-charcoal-light dark:text-gray-300 hover:text-charcoal dark:hover:text-white'}`}
@@ -16646,12 +16480,12 @@ ${rawText}`;
                 >
                   🗺️ Trip Planner
                 </button>
-                <div className="h-6 w-px bg-[#E9E5DE] dark:bg-[#2E2A24] hidden sm:block"></div>
+                <div className="h-6 w-px bg-[#E9E5DE] dark:bg-[#2E2A24]"></div>
                 <div className="flex items-center gap-2 pl-1 bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-full p-0.5">
                   <div className="w-8 h-8 rounded-full bg-bananaleaf flex items-center justify-center text-white text-xs font-bold shadow-inner">
                     {userProfile.username.substring(0, 2).toUpperCase()}
                   </div>
-                  <span className="text-xs font-bold text-charcoal dark:text-white hidden lg:inline-block pr-3">
+                  <span className="text-xs font-bold text-charcoal dark:text-white hidden xl:inline-block pr-3">
                     Mangan, {userProfile.username}!
                   </span>
                   <button
@@ -16737,8 +16571,8 @@ ${rawText}`;
             </button>
           </nav>
 
-          {/* Mobile Right Controls: Theme Toggle & Hamburger Menu */}
-          <div className="flex md:hidden items-center gap-1.5 shrink-0">
+          {/* Mobile/Tablet Controls (< 1024px): Theme Toggle & Hamburger Menu */}
+          <div className="flex lg:hidden items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={() => setIsDarkMode(!isDarkMode)}
@@ -16764,9 +16598,9 @@ ${rawText}`;
 
         </div>
 
-        {/* Mobile Dropdown Navigation Drawer */}
+        {/* Mobile/Tablet Dropdown Navigation Drawer */}
         {isMobileNavOpen && (
-          <div className="md:hidden border-t border-[#E9E5DE] dark:border-[#2E2A24] bg-white dark:bg-[#1A1714] px-4 py-3.5 space-y-3 shadow-lg animate-slide-down">
+          <div className="lg:hidden border-t border-[#E9E5DE] dark:border-[#2E2A24] bg-white dark:bg-[#1A1714] px-4 py-3.5 space-y-3 shadow-lg animate-slide-down">
             <div className="flex flex-col gap-1.5">
               <button
                 onClick={() => { setActiveView('homepage'); setIsMobileNavOpen(false); }}
@@ -16909,19 +16743,19 @@ ${rawText}`;
                 </svg>
               </div>
 
-              <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8 items-center">
+              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
                 {/* Left Column: Rich Editorial Typography, Feature Pills & Quick Actions */}
-                <div className="md:col-span-6 space-y-4 sm:space-y-5 text-left">
+                <div className="lg:col-span-6 space-y-4 sm:space-y-5 text-left">
                   {/* Top Cultural Badge */}
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-terracotta/15 via-[#FFF8F3]/5 to-saffron/15 dark:from-terracotta/25 dark:via-[#26211C] dark:to-saffron/25 border border-terracotta/30 dark:border-terracotta/40 shadow-xs backdrop-blur-xs w-fit">
+                  <div className="inline-flex flex-wrap items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-gradient-to-r from-terracotta/15 via-[#FFF8F3]/5 to-saffron/15 dark:from-terracotta/25 dark:via-[#26211C] dark:to-saffron/25 border border-terracotta/30 dark:border-terracotta/40 shadow-xs backdrop-blur-xs max-w-full">
                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-terracotta to-[#D9531E] text-white text-[10px] shadow-xs shrink-0">
                       ✨
                     </span>
                     <span className="text-[11px] sm:text-xs font-black tracking-wider uppercase text-charcoal dark:text-[#F7F5F0] whitespace-nowrap">
                       Manyaman a Kayamanan
                     </span>
-                    <span className="hidden md:inline-block w-1.5 h-1.5 rounded-full bg-terracotta/50 shrink-0"></span>
-                    <span className="hidden md:inline text-[10px] sm:text-[11px] font-extrabold tracking-wide uppercase text-terracotta whitespace-nowrap">
+                    <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-terracotta/50 shrink-0"></span>
+                    <span className="hidden sm:inline text-[10px] sm:text-[11px] font-extrabold tracking-wide uppercase text-terracotta whitespace-nowrap">
                       Culinary Heritage of Pampanga
                     </span>
                   </div>
@@ -16942,7 +16776,7 @@ ${rawText}`;
                   </p>
 
                   {/* Fun, Fast-to-Scan Feature Cards */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 max-w-lg md:max-w-none">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 w-full max-w-lg lg:max-w-none">
                     <div className="bg-gradient-to-b from-white to-[#FFF9F5] dark:from-[#1E1B18] dark:to-[#25201B] px-2.5 py-2 rounded-xl border border-terracotta/20 dark:border-terracotta/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
                       <span className="text-sm">🍲</span>
                       <span className="text-[10px] font-black text-charcoal dark:text-white mt-0.5">22 Towns</span>
@@ -16967,9 +16801,9 @@ ${rawText}`;
                 </div>
 
                 {/* Right Column: Kapampangan Food & Tourist Destination Showcase */}
-                <div className="md:col-span-6 flex flex-col items-center justify-center md:items-end w-full">
+                <div className="lg:col-span-6 flex flex-col items-center lg:items-end w-full">
                   {/* Top: Iconic Kapampangan Food Showcase */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 items-stretch w-full max-w-lg md:max-w-none">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 items-stretch w-full max-w-lg lg:max-w-none">
 
                     {/* Left Flank: Authentic Culinary Classics */}
                     <div className="flex flex-row sm:flex-col gap-2.5 justify-between">
@@ -17482,8 +17316,8 @@ ${rawText}`;
         {activeView === 'dashboard' && (
           <div className="space-y-6 animate-slide-up">
 
-            {/* Mobile Swipe Hint - only visible on small mobile screens (< sm) where tabs scroll */}
-            <div className="flex sm:hidden items-center justify-between px-1.5 text-xs">
+            {/* Mobile/Tablet Swipe Hint - visible on screens < lg where tab bar scrolls horizontally */}
+            <div className="flex lg:hidden items-center justify-between px-1 text-xs">
               <span className="text-[10px] font-black uppercase tracking-wider text-charcoal-light dark:text-gray-400 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-terracotta animate-pulse"></span>
                 <span>5 Modules Available</span>
@@ -17493,12 +17327,12 @@ ${rawText}`;
               </span>
             </div>
 
-            {/* Responsive Tabbed Menu/Navbar - 100% Full Width Balanced Segmented Navigation */}
-            <div className="bg-[#FAF8F5] dark:bg-[#141210] border border-[#E9E5DE] dark:border-[#2A2622] rounded-2xl p-1.5 shadow-sm sm:shadow flex sm:grid sm:grid-cols-5 gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar w-full transition-colors">
+            {/* Responsive Tabbed Menu/Navbar - Smooth scroll on mobile/tablet, full grid on desktop */}
+            <div className="bg-[#FAF8F5] dark:bg-[#141210] border border-[#E9E5DE] dark:border-[#2A2622] rounded-2xl p-1.5 shadow-sm flex lg:grid lg:grid-cols-5 gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none w-full transition-colors">
               <button
                 type="button"
                 onClick={() => setDashboardTab('planner')}
-                className={`flex-1 sm:flex-initial shrink-0 py-2.5 sm:py-3 px-3 sm:px-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] sm:min-w-0 ${dashboardTab === 'planner'
+                className={`flex-1 lg:flex-initial shrink-0 py-2.5 sm:py-3 px-3.5 sm:px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] lg:min-w-0 ${dashboardTab === 'planner'
                   ? 'bg-gradient-to-r from-terracotta to-[#E0531A] text-white shadow-md shadow-terracotta/25 border border-white/20 scale-[1.01]'
                   : 'bg-white/90 dark:bg-[#1E1B18] text-charcoal/80 dark:text-gray-300 hover:text-terracotta dark:hover:text-white hover:bg-white dark:hover:bg-[#26221D] border border-[#E9E5DE]/80 dark:border-[#2C2723] hover:border-terracotta/30 dark:hover:border-terracotta/40 shadow-2xs'
                   }`}
@@ -17516,7 +17350,7 @@ ${rawText}`;
               <button
                 type="button"
                 onClick={() => setDashboardTab('health')}
-                className={`flex-1 sm:flex-initial shrink-0 py-2.5 sm:py-3 px-3 sm:px-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] sm:min-w-0 ${dashboardTab === 'health'
+                className={`flex-1 lg:flex-initial shrink-0 py-2.5 sm:py-3 px-3.5 sm:px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] lg:min-w-0 ${dashboardTab === 'health'
                   ? 'bg-gradient-to-r from-terracotta to-[#E0531A] text-white shadow-md shadow-terracotta/25 border border-white/20 scale-[1.01]'
                   : 'bg-white/90 dark:bg-[#1E1B18] text-charcoal/80 dark:text-gray-300 hover:text-terracotta dark:hover:text-white hover:bg-white dark:hover:bg-[#26221D] border border-[#E9E5DE]/80 dark:border-[#2C2723] hover:border-terracotta/30 dark:hover:border-terracotta/40 shadow-2xs'
                   }`}
@@ -17529,7 +17363,7 @@ ${rawText}`;
               <button
                 type="button"
                 onClick={() => setDashboardTab('assistant')}
-                className={`flex-1 sm:flex-initial shrink-0 py-2.5 sm:py-3 px-3 sm:px-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] sm:min-w-0 ${dashboardTab === 'assistant'
+                className={`flex-1 lg:flex-initial shrink-0 py-2.5 sm:py-3 px-3.5 sm:px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] lg:min-w-0 ${dashboardTab === 'assistant'
                   ? 'bg-gradient-to-r from-terracotta to-[#E0531A] text-white shadow-md shadow-terracotta/25 border border-white/20 scale-[1.01]'
                   : 'bg-white/90 dark:bg-[#1E1B18] text-charcoal/80 dark:text-gray-300 hover:text-terracotta dark:hover:text-white hover:bg-white dark:hover:bg-[#26221D] border border-[#E9E5DE]/80 dark:border-[#2C2723] hover:border-terracotta/30 dark:hover:border-terracotta/40 shadow-2xs'
                   }`}
@@ -17542,7 +17376,7 @@ ${rawText}`;
               <button
                 type="button"
                 onClick={() => setDashboardTab('destinations')}
-                className={`flex-1 sm:flex-initial shrink-0 py-2.5 sm:py-3 px-3 sm:px-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] sm:min-w-0 ${dashboardTab === 'destinations'
+                className={`flex-1 lg:flex-initial shrink-0 py-2.5 sm:py-3 px-3.5 sm:px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] lg:min-w-0 ${dashboardTab === 'destinations'
                   ? 'bg-gradient-to-r from-terracotta to-[#E0531A] text-white shadow-md shadow-terracotta/25 border border-white/20 scale-[1.01]'
                   : 'bg-white/90 dark:bg-[#1E1B18] text-charcoal/80 dark:text-gray-300 hover:text-terracotta dark:hover:text-white hover:bg-white dark:hover:bg-[#26221D] border border-[#E9E5DE]/80 dark:border-[#2C2723] hover:border-terracotta/30 dark:hover:border-terracotta/40 shadow-2xs'
                   }`}
@@ -17555,7 +17389,7 @@ ${rawText}`;
               <button
                 type="button"
                 onClick={() => setDashboardTab('history')}
-                className={`flex-1 sm:flex-initial shrink-0 py-2.5 sm:py-3 px-3 sm:px-2 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] sm:min-w-0 ${dashboardTab === 'history'
+                className={`flex-1 lg:flex-initial shrink-0 py-2.5 sm:py-3 px-3.5 sm:px-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap min-w-[130px] lg:min-w-0 ${dashboardTab === 'history'
                   ? 'bg-gradient-to-r from-terracotta to-[#E0531A] text-white shadow-md shadow-terracotta/25 border border-white/20 scale-[1.01]'
                   : 'bg-white/90 dark:bg-[#1E1B18] text-charcoal/80 dark:text-gray-300 hover:text-terracotta dark:hover:text-white hover:bg-white dark:hover:bg-[#26221D] border border-[#E9E5DE]/80 dark:border-[#2C2723] hover:border-terracotta/30 dark:hover:border-terracotta/40 shadow-2xs'
                   }`}
@@ -17573,249 +17407,95 @@ ${rawText}`;
                 {/* Left Pane: Config fields & Itinerary Controls */}
                 <div className="lg:col-span-5 space-y-5">
 
-                  {/* Card 1: Itinerary Config & Starting Location */}
+                  {/* Card 1: Route Planner & Stops Studio */}
                   <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-4 shadow-sm">
+                    {/* Header: Title + Stop Counter */}
                     <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 dark:border-[#2E2A24] pb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-xl bg-terracotta/10 dark:bg-terracotta/20 flex items-center justify-center text-terracotta">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-terracotta/10 dark:bg-terracotta/20 flex items-center justify-center text-terracotta shrink-0">
                           <Sliders className="h-4 w-4" />
                         </div>
                         <div>
                           <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">
-                            Itinerary Setup
+                            Route Planner
                           </h3>
-                          <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">Starting point &amp; routing base</span>
+                          <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">
+                            Starting point &amp; destination sequence
+                          </span>
                         </div>
                       </div>
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-terracotta bg-terracotta/10 dark:bg-terracotta/20 px-2 py-0.5 rounded-full border border-terracotta/20 dark:border-terracotta/30">
-                        GPS Active
+                      <span className="text-[10px] font-black text-[#2C5E3B] dark:text-emerald-400 bg-[#2C5E3B]/10 dark:bg-emerald-500/15 px-2.5 py-1 rounded-full border border-[#2C5E3B]/20 dark:border-emerald-500/30">
+                        {activeTrip.length} {activeTrip.length === 1 ? 'Stop' : 'Stops'}
                       </span>
                     </div>
 
-                    {/* Geolocation Starting Point */}
-                    <div className="space-y-1.5">
-                      <label className="block text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider">
-                        Starting Location Point
-                      </label>
+                    {/* Departure Point Row */}
+                    <div className="bg-[#FAF8F5] dark:bg-[#161412] p-3 rounded-xl border border-[#E9E5DE] dark:border-[#2A2621] space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-black text-charcoal-light dark:text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-terracotta inline-block"></span>
+                          Departure Point
+                        </label>
+                        <span className="text-[9px] font-bold text-terracotta dark:text-orange-400">GPS Calibrated</span>
+                      </div>
                       <div className="flex flex-col sm:flex-row gap-2">
-                        <div className="relative flex-1">
-                          <input
-                            type="text"
-                            readOnly
-                            value={userLocation.name === "Your Detected Location" ? `📍 Detected (${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)})` : userLocation.name}
-                            className="w-full pl-3 pr-3 py-2 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] text-xs font-bold text-charcoal dark:text-white focus:outline-none"
-                          />
-                        </div>
+                        <input
+                          type="text"
+                          readOnly
+                          value={userLocation.name === "Your Detected Location" ? `📍 Detected (${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)})` : userLocation.name}
+                          className="flex-1 px-3 py-1.5 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg bg-white dark:bg-[#1F1C18] text-xs font-bold text-charcoal dark:text-white focus:outline-none truncate"
+                        />
                         <button
                           type="button"
                           onClick={detectUserLocation}
-                          className="px-3.5 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 w-full sm:w-auto"
+                          className="px-3 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-xs font-bold transition-all shadow-2xs shrink-0 flex items-center justify-center gap-1 cursor-pointer active:scale-95"
                         >
                           <span>📍</span>
                           <span>{isDetectingLocation ? "Locating..." : "Locate Me"}</span>
                         </button>
                       </div>
-                      <p className="text-[10px] text-charcoal-light dark:text-gray-400 m-0 font-medium">
-                        Calibrates starting coordinates point via browser GPS.
-                      </p>
                     </div>
-                  </div>
 
-                  {/* Quick Shortcut to Tourist Destinations Tab */}
-                  <div className="bg-gradient-to-r from-[#2C5E3B]/10 to-amber-500/10 dark:from-[#2C5E3B]/20 dark:to-amber-500/20 rounded-2xl border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-[#2C5E3B]/15 dark:bg-[#2C5E3B]/30 flex items-center justify-center text-lg shrink-0">
-                        🏛️
-                      </div>
-                      <div className="min-w-0">
-                        <h4 className="text-xs font-black text-charcoal dark:text-white m-0">
-                          Pampanga Heritage &amp; Tourist Sights
-                        </h4>
-                        <p className="text-[10px] text-charcoal-light dark:text-gray-300 m-0">
-                          Explore all {attractions.length} heritage parish churches, parks &amp; landmarks.
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setDashboardTab('destinations')}
-                      className="px-3.5 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-[10px] font-black uppercase tracking-wider shadow-xs transition-all shrink-0 cursor-pointer active:scale-95 flex items-center justify-center gap-1 w-full sm:w-auto self-start sm:self-center"
-                    >
-                      <span>Explore Tab</span>
-                      <ChevronRight className="h-3 w-3" />
-                    </button>
-                  </div>
-
-                  {/* Card 3: Live Trip Navigation & Route Controls */}
-                  <div className="bg-white dark:bg-[#1E1B18] border border-[#2C5E3B]/25 dark:border-[#2C5E3B]/40 rounded-2xl p-5 space-y-4 shadow-sm">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <span className="text-[9px] font-black text-terracotta dark:text-orange-400 uppercase tracking-wider block">
-                          🚀 Multi-Stop Navigation Engine
+                    {/* Stops List */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black text-charcoal dark:text-gray-300 uppercase tracking-wider">
+                          Itinerary Stops ({activeTrip.length})
                         </span>
-                        <h4 className="text-sm font-black text-charcoal dark:text-white m-0 flex items-center gap-2 mt-0.5">
-                          {isTripActive ? (
-                            <span className="flex items-center gap-1.5 text-bananaleaf dark:text-emerald-400">
-                              <span className="w-2.5 h-2.5 rounded-full bg-bananaleaf dark:bg-emerald-400 animate-ping inline-block"></span>
-                              Live Navigation Active
-                            </span>
-                          ) : (
-                            "Start Your Kapampangan Crawl"
-                          )}
-                        </h4>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2">
-                        {!isTripActive ? (
-                          <button
-                            type="button"
-                            onClick={handleStartLiveTrip}
-                            className="px-4 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
-                          >
-                            🚀 Start Navigation
-                          </button>
-                        ) : (
-                          <>
-                            <button
-                              type="button"
-                              onClick={handleAdvanceNextStop}
-                              className="px-3.5 py-2 bg-saffron hover:bg-saffron-dark text-charcoal text-xs font-extrabold rounded-xl shadow-xs transition-colors cursor-pointer"
-                            >
-                              ✓ Next Stop ➡️
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleEndLiveTrip}
-                              className="px-3 py-2 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
-                            >
-                              ⏹️ End Trip
-                            </button>
-                          </>
+                        {activeTrip.length > 1 && (
+                          <span className="text-[9px] font-bold text-charcoal-light dark:text-gray-400">
+                            🖐️ Drag or ▲ ▼ to reorder
+                          </span>
                         )}
                       </div>
-                    </div>
 
-                    {/* Multi-Stop Progress Track */}
-                    {computedRoutePath.length > 0 && (
-                      <div className="pt-3 border-t border-[#E9E5DE] dark:border-[#2E2A24] space-y-2">
-                        <div className="flex flex-wrap items-center justify-between gap-1 text-[10px] font-black uppercase text-charcoal-light dark:text-gray-400">
-                          <span>Itinerary Progress: {visitedStops.length} of {computedRoutePath.length} Visited</span>
-                          {isTripActive && computedRoutePath[currentStopIndex] && (
-                            <span className="text-terracotta dark:text-orange-400 font-black">
-                              Target: {computedRoutePath[currentStopIndex].name} ({distanceToTargetKm ? `${distanceToTargetKm} km` : 'Navigating'})
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Progress Stepper Pills */}
-                        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
-                          {computedRoutePath.map((stop, idx) => {
-                            const isVisited = visitedStops.includes(stop.id);
-                            const isCurrentTarget = isTripActive && idx === currentStopIndex;
-
-                            return (
-                              <div
-                                key={stop.id}
-                                className={`px-3 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 shrink-0 transition-all ${isVisited
-                                  ? 'bg-bananaleaf/10 text-bananaleaf dark:text-emerald-400 border-bananaleaf/30 font-bold'
-                                  : isCurrentTarget
-                                    ? 'bg-terracotta text-white border-terracotta font-black shadow-xs animate-pulse'
-                                    : 'bg-[#FAF8F5] dark:bg-[#161412] border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal-light dark:text-gray-300 font-semibold'
-                                  }`}
-                              >
-                                <span>{isVisited ? '✓' : isCurrentTarget ? '🎯' : idx + 1}</span>
-                                <span className="truncate max-w-[130px]">{stop.name}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Live Trip Departure & ETA Navigation Banner */}
-                  {computedRoutePath.length > 0 && (
-                    <div className="bg-gradient-to-br from-[#FAF6F0] via-white to-[#F5EFE6] dark:from-[#1E1B18] dark:via-[#161412] dark:to-[#12100E] border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 rounded-3xl p-4 sm:p-6 space-y-4 shadow-sm">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-4">
-                        {/* Left: Car Icon + Trip Headline */}
-                        <div className="flex items-center gap-3.5 min-w-0">
-                          <div className="w-12 h-12 rounded-2xl bg-terracotta/10 dark:bg-[#2A201A] border border-terracotta/20 dark:border-terracotta/40 flex items-center justify-center text-2xl shrink-0 shadow-2xs">
-                            🚗
+                      {activeTrip.length === 0 ? (
+                        <div className="bg-[#FAF8F5] dark:bg-[#161412] border border-dashed border-[#E9E5DE] dark:border-[#2E2A24] p-5 rounded-xl text-center space-y-2.5">
+                          <div className="w-9 h-9 rounded-full bg-terracotta/10 text-terracotta flex items-center justify-center mx-auto text-base">
+                            🗺️
                           </div>
-                          <div className="min-w-0">
-                            <h4 className="text-sm font-black text-charcoal dark:text-white uppercase tracking-wider m-0 leading-tight">
-                              Live Trip ETA
-                            </h4>
-                            <span className="text-[11px] text-charcoal-light dark:text-gray-300 font-semibold block mt-1 truncate">
-                              {isSimulating ? '⚡ Live Route Simulation Active' : '📍 Start: ' + userLocation.name}
-                            </span>
+                          <div>
+                            <p className="text-xs font-bold text-charcoal dark:text-white m-0">No stops added yet</p>
+                            <p className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium mt-0.5 m-0">
+                              Browse local dishes or discover heritage landmarks.
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                            <button
+                              onClick={() => setActiveView('homepage')}
+                              className="px-3 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                            >
+                              🍽️ Browse Food
+                            </button>
+                            <button
+                              onClick={() => setDashboardTab('destinations')}
+                              className="px-3 py-1.5 bg-white dark:bg-[#201D1A] hover:bg-[#FAF8F5] dark:hover:bg-[#2A2622] text-charcoal dark:text-white border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                            >
+                              🏛️ Heritage Sites
+                            </button>
                           </div>
                         </div>
-
-                        {/* Right: Arrival Pill & Finish Trip Button */}
-                        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2.5 w-full sm:w-auto">
-                          <div className="bg-white dark:bg-[#161412] border border-[#2C5E3B]/25 dark:border-[#2C5E3B]/40 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl shadow-2xs text-left sm:text-right">
-                            <span className="text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider block">Estimated Arrival</span>
-                            <strong className="text-xs sm:text-sm font-black text-[#2C5E3B] dark:text-emerald-400 flex items-center gap-1 justify-start sm:justify-end mt-0.5">
-                              <span>⏰</span> {calculateETA(routeDurationMin)}
-                            </strong>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setIsCompletionModalOpen(true)}
-                            className="px-3.5 py-2.5 sm:px-4 sm:py-3 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shrink-0 flex-1 sm:flex-initial"
-                            title="Finish and log this food trip"
-                          >
-                            <span>🎉</span> Finish Trip
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* 3 Metric Pills Grid */}
-                      <div className="grid grid-cols-3 gap-3 text-center">
-                        <div className="bg-white dark:bg-[#161412] p-3 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs">
-                          <span className="block text-[9px] sm:text-[10px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Total Distance</span>
-                          <strong className="text-xs sm:text-sm font-black text-charcoal dark:text-white block mt-1">{routeDistanceKm > 0 ? `${routeDistanceKm} km` : '~12.5 km'}</strong>
-                        </div>
-                        <div className="bg-white dark:bg-[#161412] p-3 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs">
-                          <span className="block text-[9px] sm:text-[10px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Drive Duration</span>
-                          <strong className="text-xs sm:text-sm font-black text-terracotta dark:text-orange-400 block mt-1">
-                            {routeDurationMin > 0 ? `${isTrafficCongested ? Math.round(routeDurationMin * 1.35) : routeDurationMin} mins` : '~25 mins'}
-                          </strong>
-                        </div>
-                        <div className="bg-white dark:bg-[#161412] p-3 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs">
-                          <span className="block text-[9px] sm:text-[10px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Traffic Status</span>
-                          <strong className={`text-xs sm:text-sm font-black block mt-1 ${isTrafficCongested ? 'text-red-500 dark:text-red-400' : 'text-bananaleaf dark:text-emerald-400'}`}>
-                            {isTrafficCongested ? '⚠️ Congested' : '🟢 Smooth Flow'}
-                          </strong>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Card 4: Active Route Nodes List */}
-                  <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-5 space-y-3.5 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 dark:border-[#2E2A24] pb-2.5">
-                      <h4 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">
-                        Active Route Nodes ({activeTrip.length} Stops)
-                      </h4>
-                      <span className="text-[9px] font-bold text-terracotta bg-terracotta/5 dark:bg-terracotta/15 px-2.5 py-1 rounded-full border border-terracotta/15 dark:border-terracotta/30">
-                        🖐️ Drag cards or use ▲ ▼ to reorder
-                      </span>
-                    </div>
-
-                    {activeTrip.length === 0 ? (
-                      <div className="bg-[#FAF8F5] dark:bg-[#161412] border border-dashed border-[#E9E5DE] dark:border-[#2E2A24] p-6 rounded-xl text-center space-y-2">
-                        <p className="text-xs text-charcoal-light dark:text-gray-400 font-medium m-0">No destinations or restaurants added yet.</p>
-                        <button
-                          onClick={() => setActiveView('homepage')}
-                          className="px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
-                        >
-                          Browse Food Feed
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
+                      ) : (
                         <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
                           {computedRoutePath.map((res, index) => (
                             <div
@@ -17830,14 +17510,14 @@ ${rawText}`;
                                   setDraggedIndex(null);
                                 }
                               }}
-                              className={`bg-[#FAF8F5] dark:bg-[#161412] p-3 rounded-xl border transition-all flex items-center justify-between gap-3 shadow-2xs group cursor-grab active:cursor-grabbing ${draggedIndex === index ? 'border-terracotta bg-terracotta/5 opacity-50 scale-[0.98]' : 'border-[#E9E5DE] dark:border-[#2A2621] hover:border-terracotta/40 dark:hover:border-terracotta/40 hover:bg-white dark:hover:bg-[#1F1C18]'
+                              className={`bg-[#FAF8F5] dark:bg-[#161412] p-2.5 rounded-xl border transition-all flex items-center justify-between gap-2.5 shadow-2xs group cursor-grab active:cursor-grabbing ${draggedIndex === index ? 'border-terracotta bg-terracotta/5 opacity-50 scale-[0.98]' : 'border-[#E9E5DE] dark:border-[#2A2621] hover:border-terracotta/40 dark:hover:border-terracotta/40 hover:bg-white dark:hover:bg-[#1F1C18]'
                                 }`}
                             >
-                              <div className="flex items-center gap-3 min-w-0">
-                                <span className="text-charcoal-light/60 dark:text-gray-500 group-hover:text-terracotta font-bold text-sm select-none shrink-0" title="Drag to reorder">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <span className="text-charcoal-light/50 dark:text-gray-600 group-hover:text-terracotta font-bold text-xs select-none shrink-0" title="Drag to reorder">
                                   ⋮⋮
                                 </span>
-                                <span className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#2C5E3B] to-bananaleaf text-white text-xs font-black flex items-center justify-center shrink-0 shadow-xs">
+                                <span className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#2C5E3B] to-bananaleaf text-white text-[11px] font-black flex items-center justify-center shrink-0 shadow-xs">
                                   {index + 1}
                                 </span>
                                 <div className="min-w-0">
@@ -17853,7 +17533,7 @@ ${rawText}`;
                                   type="button"
                                   disabled={index === 0}
                                   onClick={() => moveItineraryItem(index, index - 1)}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24] bg-white dark:bg-[#221F1C] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#2D2924] text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  className="w-6 h-6 flex items-center justify-center rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24] bg-white dark:bg-[#221F1C] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white text-[10px] font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                   title="Move Up"
                                 >
                                   ▲
@@ -17862,7 +17542,7 @@ ${rawText}`;
                                   type="button"
                                   disabled={index === computedRoutePath.length - 1}
                                   onClick={() => moveItineraryItem(index, index + 1)}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24] bg-white dark:bg-[#221F1C] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white hover:bg-[#FAF8F5] dark:hover:bg-[#2D2924] text-xs font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                  className="w-6 h-6 flex items-center justify-center rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24] bg-white dark:bg-[#221F1C] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white text-[10px] font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                   title="Move Down"
                                 >
                                   ▼
@@ -17870,7 +17550,7 @@ ${rawText}`;
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveFromItinerary(res.id)}
-                                  className="w-7 h-7 flex items-center justify-center rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors ml-0.5"
+                                  className="w-6 h-6 flex items-center justify-center rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors ml-0.5 text-xs"
                                   title="Remove stop"
                                 >
                                   ✕
@@ -17879,14 +17559,39 @@ ${rawText}`;
                             </div>
                           ))}
                         </div>
+                      )}
 
-                        {/* Save & Manage Plan Form */}
-                        {loadedItineraryId ? (
-                          <div className="pt-3 border-t border-[#E9E5DE] dark:border-[#2E2A24] space-y-2.5">
-                            <div className="p-3.5 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/20 border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 rounded-2xl space-y-2">
+                      {/* Integrated Heritage & Sights Shortcut */}
+                      <div className="bg-gradient-to-r from-[#2C5E3B]/10 to-amber-500/10 dark:from-[#2C5E3B]/20 dark:to-amber-500/20 rounded-xl border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 p-2.5 flex items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-base shrink-0">🏛️</span>
+                          <div className="min-w-0">
+                            <span className="block text-[11px] font-black text-charcoal dark:text-white truncate">
+                              Explore Pampanga Heritage Sights
+                            </span>
+                            <span className="block text-[9px] text-charcoal-light dark:text-gray-300 truncate">
+                              Add from {attractions.length} historic churches, parks &amp; sights.
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setDashboardTab('destinations')}
+                          className="px-2.5 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-[10px] font-black uppercase tracking-wider shadow-2xs transition-all shrink-0 cursor-pointer active:scale-95 flex items-center gap-1"
+                        >
+                          <span>Explore</span>
+                          <ChevronRight className="h-3 w-3" />
+                        </button>
+                      </div>
+
+                      {/* Save & Manage Plan Form */}
+                      {activeTrip.length > 0 && (
+                        loadedItineraryId ? (
+                          <div className="pt-2.5 border-t border-[#E9E5DE] dark:border-[#2E2A24] space-y-2">
+                            <div className="p-3 bg-[#2C5E3B]/5 dark:bg-[#2C5E3B]/20 border border-[#2C5E3B]/20 dark:border-[#2C5E3B]/40 rounded-xl space-y-1.5">
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black text-[#2C5E3B] dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                                  <span>📂</span> Currently Editing: <strong className="text-charcoal dark:text-white underline">{loadedItineraryName}</strong>
+                                <span className="text-[10px] font-black text-[#2C5E3B] dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+                                  <span>📂</span> Editing: <strong className="text-charcoal dark:text-white underline">{loadedItineraryName}</strong>
                                 </span>
                                 <button
                                   type="button"
@@ -17897,7 +17602,7 @@ ${rawText}`;
                                   }}
                                   className="text-[10px] font-bold text-terracotta dark:text-orange-400 hover:underline cursor-pointer"
                                 >
-                                  + Save as New Instead
+                                  + New Plan
                                 </button>
                               </div>
                               <input
@@ -17905,29 +17610,29 @@ ${rawText}`;
                                 value={newItineraryName}
                                 onChange={(e) => setNewItineraryName(e.target.value)}
                                 placeholder="Itinerary Name"
-                                className="px-3.5 py-2 text-xs font-bold text-charcoal dark:text-white border border-[#2C5E3B]/30 dark:border-[#2C5E3B]/50 rounded-xl bg-white dark:bg-[#161412] w-full focus:outline-none focus:ring-1 focus:ring-[#2C5E3B]"
+                                className="px-3 py-1.5 text-xs font-bold text-charcoal dark:text-white border border-[#2C5E3B]/30 dark:border-[#2C5E3B]/50 rounded-lg bg-white dark:bg-[#161412] w-full focus:outline-none focus:ring-1 focus:ring-[#2C5E3B]"
                               />
                             </div>
 
-                            <div className="flex flex-wrap gap-2 justify-end">
+                            <div className="flex gap-2 justify-end">
                               <button
                                 type="button"
                                 onClick={handleUpdateLoadedItinerary}
-                                className="px-4 py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                                className="px-3 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-xs font-black transition-all shadow-xs flex items-center gap-1 cursor-pointer active:scale-95 flex-1"
                               >
-                                <span>💾</span> Update Plan ({activeTrip.length} Stops)
+                                <span>💾</span> Update Plan
                               </button>
                               <button
                                 type="button"
                                 onClick={handleSaveActiveTrip}
-                                className="px-4 py-2.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
+                                className="px-3 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer active:scale-95"
                               >
                                 + Save Copy
                               </button>
                             </div>
                           </div>
                         ) : (
-                          <form onSubmit={handleSaveActiveTrip} className="pt-3 border-t border-[#E9E5DE] dark:border-[#2E2A24] space-y-2">
+                          <form onSubmit={handleSaveActiveTrip} className="pt-2.5 border-t border-[#E9E5DE] dark:border-[#2E2A24] space-y-1.5">
                             <label className="block text-[10px] font-black text-charcoal-light dark:text-gray-300 uppercase tracking-wider">
                               Name and Store Your Plan
                             </label>
@@ -17935,66 +17640,178 @@ ${rawText}`;
                               <input
                                 type="text"
                                 required
-                                placeholder="e.g. My Heritage Weekend Crawl"
+                                placeholder="e.g. My Pampanga Weekend Crawl"
                                 value={newItineraryName}
                                 onChange={(e) => setNewItineraryName(e.target.value)}
-                                className="flex-1 px-3.5 py-2 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl bg-[#FAF8F5] dark:bg-[#161412] text-xs font-semibold text-charcoal dark:text-white focus:outline-none focus:bg-white dark:focus:bg-[#1A1815] focus:ring-1 focus:ring-terracotta"
+                                className="flex-1 px-3 py-1.5 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg bg-[#FAF8F5] dark:bg-[#161412] text-xs font-semibold text-charcoal dark:text-white focus:outline-none focus:bg-white dark:focus:bg-[#1A1815] focus:ring-1 focus:ring-terracotta"
                               />
                               <button
                                 type="submit"
-                                className="px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer active:scale-95"
+                                className="px-3.5 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-lg text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer active:scale-95"
                               >
                                 Save Route
                               </button>
                             </div>
                           </form>
+                        )
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card 2: Live Trip Navigation & HUD */}
+                  {computedRoutePath.length > 0 && (
+                    <div className="bg-white dark:bg-[#1E1B18] border border-[#2C5E3B]/25 dark:border-[#2C5E3B]/40 rounded-2xl p-5 space-y-4 shadow-sm">
+                      {/* Header: Title + Status */}
+                      <div className="flex items-center justify-between border-b border-[#E9E5DE] dark:border-[#2E2A24] pb-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 rounded-xl bg-terracotta/10 dark:bg-terracotta/20 flex items-center justify-center text-lg shrink-0">
+                            🚗
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">
+                              Live Trip Navigation
+                            </h4>
+                            <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">
+                              Real-time provincial routing engine
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          {isTripActive ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                              Active
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold text-charcoal-light dark:text-gray-400 bg-[#FAF8F5] dark:bg-[#161412] px-2.5 py-0.5 rounded-full border border-[#E9E5DE] dark:border-[#2E2A24]">
+                              Ready
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Primary Navigation Controls */}
+                      <div>
+                        {!isTripActive ? (
+                          <button
+                            type="button"
+                            onClick={handleStartLiveTrip}
+                            className="w-full py-2.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                          >
+                            <span>🚀</span>
+                            <span>Start Navigation Crawl</span>
+                          </button>
+                        ) : (
+                          <div className="grid grid-cols-3 gap-2">
+                            <button
+                              type="button"
+                              onClick={handleAdvanceNextStop}
+                              className="col-span-1 px-3 py-2 bg-saffron hover:bg-saffron-dark text-charcoal text-xs font-black rounded-xl shadow-xs transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+                            >
+                              <span>✓</span> Next
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setIsCompletionModalOpen(true)}
+                              className="col-span-1 px-3 py-2 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl shadow-xs transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+                              title="Finish and log this food trip"
+                            >
+                              <span>🎉</span> Finish
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleEndLiveTrip}
+                              className="col-span-1 px-3 py-2 bg-[#FAF8F5] dark:bg-[#161412] hover:bg-white dark:hover:bg-[#201D1A] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal-light dark:text-gray-300 hover:text-red-500 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center"
+                              title="End navigation"
+                            >
+                              ⏹️ End
+                            </button>
+                          </div>
                         )}
                       </div>
-                    )}
-                  </div>
 
-                  {/* Card 5: Traffic Simulation & Highway Status */}
-                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-5 space-y-3 shadow-sm">
-                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 pb-2.5">
-                      <h3 className="text-xs font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5">
-                        <Activity className="h-4 w-4 text-terracotta animate-pulse" /> Traffic Flow Simulator
-                      </h3>
-                      <button
-                        onClick={() => setIsTrafficCongested(!isTrafficCongested)}
-                        className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase border tracking-wider transition-colors cursor-pointer ${isTrafficCongested ? 'bg-terracotta text-white border-terracotta' : 'bg-[#FAF8F5] text-terracotta border-terracotta/30 hover:bg-white'}`}
-                      >
-                        {isTrafficCongested ? "Clear Jams" : "Simulate Congestion"}
-                      </button>
-                    </div>
-
-                    <div className="space-y-2">
-                      {trafficNotifications.slice(0, 2).map(n => (
-                        <div
-                          key={n.id}
-                          className={`p-2.5 rounded-xl border text-xs leading-normal flex gap-2.5 items-center ${n.type === 'danger' ? 'bg-terracotta/5 border-terracotta/20 text-terracotta font-semibold' : 'bg-bananaleaf/5 border-bananaleaf/20 text-bananaleaf font-semibold'}`}
-                        >
-                          <span className="text-base shrink-0">{n.type === 'danger' ? '⚠️' : '🟢'}</span>
-                          <span className="text-[11px]">{n.message}</span>
+                      {/* 4 Metric Pills Grid */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                        <div className="bg-[#FAF8F5] dark:bg-[#161412] p-2.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
+                          <span className="block text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Distance</span>
+                          <strong className="text-xs sm:text-sm font-black text-charcoal dark:text-white block mt-0.5">
+                            {routeDistanceKm > 0 ? `${routeDistanceKm} km` : '~12.5 km'}
+                          </strong>
                         </div>
-                      ))}
+                        <div className="bg-[#FAF8F5] dark:bg-[#161412] p-2.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
+                          <span className="block text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Drive Time</span>
+                          <strong className="text-xs sm:text-sm font-black text-terracotta dark:text-orange-400 block mt-0.5">
+                            {routeDurationMin > 0 ? `${isTrafficCongested ? Math.round(routeDurationMin * 1.35) : routeDurationMin} mins` : '~25 mins'}
+                          </strong>
+                        </div>
+                        <div className="bg-[#FAF8F5] dark:bg-[#161412] p-2.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
+                          <span className="block text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Traffic</span>
+                          <strong className={`text-xs sm:text-sm font-black block mt-0.5 ${isTrafficCongested ? 'text-red-500 dark:text-red-400' : 'text-bananaleaf dark:text-emerald-400'}`}>
+                            {isTrafficCongested ? '⚠️ Slow' : '🟢 Smooth'}
+                          </strong>
+                        </div>
+                        <div className="bg-[#FAF8F5] dark:bg-[#161412] p-2.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
+                          <span className="block text-[9px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider">Arrival ETA</span>
+                          <strong className="text-xs sm:text-sm font-black text-[#2C5E3B] dark:text-emerald-400 block mt-0.5">
+                            {calculateETA(routeDurationMin)}
+                          </strong>
+                        </div>
+                      </div>
+
+                      {/* Multi-Stop Progress Track Stepper */}
+                      <div className="pt-2 border-t border-[#E9E5DE] dark:border-[#2E2A24] space-y-2">
+                        <div className="flex flex-wrap items-center justify-between gap-1 text-[10px] font-bold text-charcoal-light dark:text-gray-400">
+                          <span>Progress: <strong className="text-charcoal dark:text-white">{visitedStops.length} of {computedRoutePath.length}</strong> visited</span>
+                          {isTripActive && computedRoutePath[currentStopIndex] && (
+                            <span className="text-terracotta dark:text-orange-400 font-bold truncate max-w-[260px]">
+                              🎯 Target: <span className="underline">{computedRoutePath[currentStopIndex].name}</span> {distanceToTargetKm ? `(${distanceToTargetKm} km)` : ''}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Progress Stepper Pills */}
+                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                          {computedRoutePath.map((stop, idx) => {
+                            const isVisited = visitedStops.includes(stop.id);
+                            const isCurrentTarget = isTripActive && idx === currentStopIndex;
+
+                            return (
+                              <div
+                                key={stop.id}
+                                className={`px-2.5 py-1.5 rounded-xl border text-xs flex items-center gap-1.5 shrink-0 transition-all ${isVisited
+                                  ? 'bg-bananaleaf/10 text-bananaleaf dark:text-emerald-400 border-bananaleaf/30 font-bold'
+                                  : isCurrentTarget
+                                    ? 'bg-terracotta text-white border-terracotta font-black shadow-xs ring-2 ring-terracotta/30'
+                                    : 'bg-[#FAF8F5] dark:bg-[#161412] border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal-light dark:text-gray-300 font-semibold'
+                                  }`}
+                              >
+                                <span>{isVisited ? '✓' : isCurrentTarget ? '🎯' : idx + 1}</span>
+                                <span className="truncate max-w-[150px]">{stop.name}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                 </div>
 
-                {/* Right Pane: Accurate Map Workstation */}
-                <div className="lg:col-span-7">
-                  <div className="bg-white rounded-2xl border border-[#E9E5DE] p-4 sm:p-5 shadow-sm sticky top-20 flex flex-col min-h-[620px] lg:h-[calc(100vh-140px)]">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#E9E5DE]/80 pb-3 mb-3">
+                {/* Right Pane: Accurate Map Workstation & Highway Corridor Monitor */}
+                <div className="lg:col-span-7 space-y-4">
+                  {/* Map Card */}
+                  <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-4 sm:p-5 shadow-sm flex flex-col min-h-[560px]">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#E9E5DE]/80 dark:border-[#2E2A24] pb-3 mb-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-xl bg-terracotta/10 flex items-center justify-center text-terracotta">
+                        <div className="w-8 h-8 rounded-xl bg-terracotta/10 dark:bg-terracotta/20 flex items-center justify-center text-terracotta">
                           <MapIcon className="h-4.5 w-4.5" />
                         </div>
                         <div>
-                          <h3 className="text-xs font-black text-charcoal uppercase tracking-wider m-0">
+                          <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">
                             Provincial Route Mapping Engine
                           </h3>
-                          <span className="text-[10px] text-charcoal-light font-medium">Pampanga interactive transit network</span>
+                          <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">Pampanga interactive transit network</span>
                         </div>
                       </div>
 
@@ -18003,7 +17820,7 @@ ${rawText}`;
                         <button
                           type="button"
                           onClick={toggleGPSWatch}
-                          className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-1.5 border cursor-pointer ${isTrackingGPS ? 'bg-bananaleaf text-white border-bananaleaf shadow-xs' : 'bg-[#FAF8F5] text-charcoal-light border-[#E9E5DE] hover:text-charcoal hover:bg-white'}`}
+                          className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-1.5 border cursor-pointer ${isTrackingGPS ? 'bg-bananaleaf text-white border-bananaleaf shadow-xs' : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal-light dark:text-gray-300 border-[#E9E5DE] dark:border-[#2E2A24] hover:text-charcoal dark:hover:text-white hover:bg-white dark:hover:bg-[#201D1A]'}`}
                         >
                           🌐 {isTrackingGPS ? "Tracking GPS..." : "Track My GPS"}
                         </button>
@@ -18011,7 +17828,7 @@ ${rawText}`;
                           <button
                             type="button"
                             onClick={startRouteSimulation}
-                            className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-1.5 border cursor-pointer ${isSimulating ? 'bg-terracotta text-white border-terracotta shadow-xs animate-pulse' : 'bg-[#FAF8F5] text-charcoal-light border-[#E9E5DE] hover:text-charcoal hover:bg-white'}`}
+                            className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-1.5 border cursor-pointer ${isSimulating ? 'bg-terracotta text-white border-terracotta shadow-xs animate-pulse' : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal-light dark:text-gray-300 border-[#E9E5DE] dark:border-[#2E2A24] hover:text-charcoal dark:hover:text-white hover:bg-white dark:hover:bg-[#201D1A]'}`}
                           >
                             🚗 {isSimulating ? "Navigating..." : "Simulate Trip"}
                           </button>
@@ -18019,10 +17836,71 @@ ${rawText}`;
                       </div>
                     </div>
 
-                    <div className="relative flex-1 min-h-[480px] rounded-2xl overflow-hidden shadow-inner border border-[#E9E5DE]">
-                      <div id="leaflet-map" className="w-full h-full min-h-[480px] rounded-2xl z-10"></div>
+                    <div className="relative flex-1 min-h-[460px] rounded-2xl overflow-hidden shadow-inner border border-[#E9E5DE] dark:border-[#2E2A24]">
+                      <div id="leaflet-map" className="w-full h-full min-h-[460px] rounded-2xl z-10"></div>
                     </div>
                   </div>
+
+                  {/* Live Highway & Corridor Traffic Monitor (Under Map) */}
+                  <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-4 shadow-sm space-y-3">
+                    <div className="flex items-center justify-between border-b border-[#E9E5DE]/80 dark:border-[#2E2A24] pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <Activity className={`h-4 w-4 ${activeTrip?.length > 0 ? 'text-terracotta animate-pulse' : 'text-charcoal-light dark:text-gray-500'}`} />
+                        <div>
+                          <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider m-0">
+                            Live Highway &amp; Corridor Traffic Radar
+                          </h3>
+                          <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">
+                            {activeTrip?.length > 0 
+                              ? "Real-time Pampanga transit status & arterial congestion telemetry"
+                              : "Corridor telemetry radar on standby"}
+                          </span>
+                        </div>
+                      </div>
+                      {activeTrip?.length > 0 && (
+                        <button
+                          onClick={() => setIsTrafficCongested(!isTrafficCongested)}
+                          className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border tracking-wider transition-all cursor-pointer ${isTrafficCongested ? 'bg-terracotta text-white border-terracotta shadow-xs' : 'bg-[#FAF8F5] dark:bg-[#161412] text-terracotta border-terracotta/30 hover:bg-white dark:hover:bg-[#201D1A]'}`}
+                        >
+                          {isTrafficCongested ? "Clear Congestion" : "Simulate Congestion"}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Responsive Traffic Content: Standby vs Active Grid */}
+                    {activeTrip?.length === 0 ? (
+                      <div className="py-4 px-3 rounded-xl border border-dashed border-[#E9E5DE] dark:border-[#2E2A24] bg-[#FAF8F5]/60 dark:bg-[#161412]/60 text-center flex flex-col items-center justify-center gap-1.5">
+                        <div className="w-8 h-8 rounded-full bg-terracotta/10 dark:bg-terracotta/20 flex items-center justify-center text-terracotta text-sm">
+                          📡
+                        </div>
+                        <span className="text-xs font-bold text-charcoal dark:text-white">
+                          Radar Standby &bull; No Active Route
+                        </span>
+                        <p className="text-[11px] text-charcoal-light dark:text-gray-400 max-w-md m-0 leading-relaxed">
+                          Add dining stops or heritage attractions to your itinerary above to activate real-time corridor monitoring and dynamic traffic rerouting.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {Array.from(new Map(trafficNotifications.map(item => [item.message, item])).values()).slice(0, 2).map(n => (
+                          <div
+                            key={n.id}
+                            className={`p-3 rounded-xl border text-xs leading-normal flex items-start gap-3 transition-all ${n.type === 'danger' ? 'bg-terracotta/5 border-terracotta/25 text-terracotta dark:text-orange-400 font-semibold' : 'bg-bananaleaf/5 border-bananaleaf/25 text-[#2C5E3B] dark:text-emerald-400 font-semibold'}`}
+                          >
+                            <span className="text-base shrink-0 mt-0.5">{n.type === 'danger' ? '⚠️' : '🟢'}</span>
+                            <div className="min-w-0 flex-1 space-y-0.5">
+                              <div className="flex items-center justify-between gap-1">
+                                <span className="text-[10px] font-black uppercase tracking-wider opacity-80">{n.corridor || 'Corridor Route'}</span>
+                                <span className="text-[9px] opacity-60 font-medium">{n.timestamp || 'Live'}</span>
+                              </div>
+                              <p className="text-[11px] leading-snug m-0 text-charcoal dark:text-gray-200">{n.message}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                 </div>
 
               </div>
@@ -19417,7 +19295,7 @@ ${rawText}`;
 
                                         return (
                                           <div
-                                            key={dish.id}
+                                            key={dish.id ? `${dish.id}-${dIdx}` : dIdx}
                                             className={`p-4 rounded-2xl border transition-all space-y-3.5 ${getDishTotalQty(stopId, dish.id) > 0
                                               ? 'bg-white dark:bg-[#1E1B18] border-emerald-500/50 dark:border-emerald-500/60 shadow-xs ring-1 ring-emerald-500/20'
                                               : 'bg-white/80 dark:bg-[#181614] border-[#E9E5DE] dark:border-[#282420] opacity-90 hover:opacity-100'
@@ -19425,9 +19303,6 @@ ${rawText}`;
                                           >
                                             {/* Dish Header Info (Full Width) */}
                                             <div className="flex items-start gap-3 min-w-0">
-                                              {dish.image && (
-                                                <img src={dish.image} alt={dish.name} className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 shadow-2xs" />
-                                              )}
                                               <div className="min-w-0 flex-1">
                                                 <div className="flex items-center justify-between gap-2 flex-wrap">
                                                   <h5 className="text-xs sm:text-sm font-black text-charcoal dark:text-white leading-snug m-0">
@@ -20104,58 +19979,25 @@ ${rawText}`;
 
           <div className="relative w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col z-10 animate-slide-in overflow-y-auto">
 
-            {/* Header */}
-            <div className="sticky top-0 bg-white border-b border-[#E9E5DE] p-5 flex items-center justify-between gap-4 z-20">
-              <div>
-
-                <h2 className="text-xl font-black text-charcoal mt-1.5 m-0 leading-tight">{selectedRestaurant.name}</h2>
-                <div className="text-xs text-charcoal-light mt-1 space-y-2">
-                  <div className="flex items-center gap-1 font-semibold">
-                    <span>Locations ({getRestaurantMunicipalities(selectedRestaurant).length}):</span>
-                    <strong className="text-charcoal">{getRestaurantMunicipalities(selectedRestaurant).join(' • ')}</strong>
-                  </div>
-
-                  {getRestaurantMunicipalities(selectedRestaurant).length > 1 ? (
-                    <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] space-y-1.5 text-left">
-                      <span className="text-[10px] font-black text-terracotta uppercase tracking-wider block">
-                        🏪 All Active Branches ({getRestaurantMunicipalities(selectedRestaurant).length} Locations)
-                      </span>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        {getRestaurantMunicipalities(selectedRestaurant).map((mun, idx) => {
-                          const branchAddr = getBranchAddressForMunicipality(selectedRestaurant, mun);
-                          const branchLat = getBranchLat(selectedRestaurant, mun);
-                          const branchLng = getBranchLng(selectedRestaurant, mun);
-                          const branchHours = getBranchOperatingHours(selectedRestaurant, mun);
-                          return (
-                            <div key={idx} className="p-2.5 bg-white rounded-lg border border-[#E9E5DE] flex items-start gap-2 shadow-2xs">
-                              <span className="text-terracotta font-bold text-xs shrink-0 mt-0.5">📍</span>
-                              <div className="min-w-0 flex-1">
-                                <strong className="text-[11px] font-black text-charcoal block leading-tight">{mun} Branch</strong>
-                                <span className="text-[9px] text-charcoal-light font-medium block truncate mt-0.5">
-                                  {branchAddr}
-                                </span>
-                                <div className="flex flex-wrap items-center gap-2 mt-1 text-[8px] font-mono text-charcoal-light">
-                                  <span className="bg-ivory px-1.5 py-0.5 rounded border border-[#E9E5DE] font-bold text-terracotta">
-                                    GPS: {branchLat.toFixed(4)}°, {branchLng.toFixed(4)}°
-                                  </span>
-                                  <span className="text-[8px] font-sans text-charcoal-light">
-                                    🕒 {branchHours}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ) : (
-                    selectedRestaurant.address && (
-                      <span className="text-[11px] text-charcoal-light font-medium flex items-center gap-1">
-                        📍 {selectedRestaurant.address}
-                      </span>
-                    )
+            {/* Compact Sticky Header */}
+            <div className="sticky top-0 bg-white/95 backdrop-blur-md border-b border-[#E9E5DE] px-5 py-3.5 flex items-center justify-between gap-3 z-30 shadow-2xs">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-lg font-black text-charcoal m-0 leading-tight truncate">{selectedRestaurant.name}</h2>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-terracotta/10 text-terracotta border border-terracotta/20 shrink-0">
+                    {selectedRestaurant.priceTier === '$' ? '$ Budget' : selectedRestaurant.priceTier === '$$' ? '$$ Moderate' : selectedRestaurant.priceTier === '$$$' ? '$$$ Premium' : '$$$$ Fine Degustation'}
+                  </span>
+                  {getRestaurantMunicipalities(selectedRestaurant).length > 1 && (
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-800 border border-amber-500/30 shrink-0">
+                      🏪 {getRestaurantMunicipalities(selectedRestaurant).length} Branches
+                    </span>
                   )}
                 </div>
+                <p className="text-[11px] text-charcoal-light mt-0.5 m-0 truncate">
+                  📍 {getRestaurantMunicipalities(selectedRestaurant).length > 1 
+                    ? `${getRestaurantMunicipalities(selectedRestaurant).join(' • ')}` 
+                    : (selectedRestaurant.address || `${selectedRestaurant.municipality}, Pampanga`)}
+                </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -20173,13 +20015,13 @@ ${rawText}`;
                       setAddedStopModal(targetRes);
                     }
                   }}
-                  className="px-3.5 sm:px-4 py-2 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-bold rounded-xl shadow-sm hover:shadow transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
+                  className="px-3.5 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-bold rounded-xl shadow-xs hover:shadow transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
                 >
                   <span>➕</span> Add to Trip
                 </button>
                 <button
                   onClick={() => { setSelectedRestaurant(null); setActiveDish(null); setCvUploadedMeal(null); }}
-                  className="p-2 text-charcoal-light hover:text-charcoal rounded-full hover:bg-ivory cursor-pointer"
+                  className="p-1.5 text-charcoal-light hover:text-charcoal rounded-full hover:bg-ivory transition-colors cursor-pointer"
                   title="Close"
                 >
                   <X className="h-5 w-5" />
@@ -20187,8 +20029,8 @@ ${rawText}`;
               </div>
             </div>
 
-            {/* Body */}
-            <div className="p-6 space-y-6 flex-1">
+            {/* Scrollable Body with Generous Bottom Clearance */}
+            <div className="p-5 sm:p-6 space-y-6 flex-1 pb-32">
 
               {/* Restaurant Cover Image Carousel */}
               {selectedRestaurant.images && selectedRestaurant.images.length > 0 ? (
@@ -20285,13 +20127,52 @@ ${rawText}`;
                     {selectedRestaurant.priceTier === '$' ? 'Budget ($)' : selectedRestaurant.priceTier === '$$' ? 'Moderate ($$)' : selectedRestaurant.priceTier === '$$$' ? 'Premium ($$$)' : selectedRestaurant.priceTier === '$$$$' ? 'Fine Degustation ($$$$)' : selectedRestaurant.priceTier || 'Budget ($)'}
                   </div>
                   <div>
-                    <strong className="block text-charcoal">GPS Coordinates:</strong>
+                    <strong className="block text-charcoal">Primary GPS:</strong>
                     <span className="font-mono font-bold text-charcoal block">
                       {(selectedRestaurant.lat || 15.0300).toFixed(4)}°, {(selectedRestaurant.lng || 120.6800).toFixed(4)}°
                     </span>
                   </div>
                 </div>
               </div>
+
+              {/* All Active Branch Locations (In Body - Scrolls Naturally) */}
+              {getRestaurantMunicipalities(selectedRestaurant).length > 1 && (
+                <div className="p-4 bg-[#FAF8F5] rounded-2xl border border-[#E9E5DE] space-y-2.5 text-left">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black text-terracotta uppercase tracking-wider block">
+                      🏪 All Active Branch Locations ({getRestaurantMunicipalities(selectedRestaurant).length} Locations in Pampanga)
+                    </span>
+                    <span className="text-[10px] text-charcoal-light font-medium">Select location when adding to trip</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                    {getRestaurantMunicipalities(selectedRestaurant).map((mun, idx) => {
+                      const branchAddr = getBranchAddressForMunicipality(selectedRestaurant, mun);
+                      const branchLat = getBranchLat(selectedRestaurant, mun);
+                      const branchLng = getBranchLng(selectedRestaurant, mun);
+                      const branchHours = getBranchOperatingHours(selectedRestaurant, mun);
+                      return (
+                        <div key={idx} className="p-3 bg-white rounded-xl border border-[#E9E5DE] flex items-start gap-2.5 shadow-2xs">
+                          <span className="text-terracotta font-bold text-sm shrink-0 mt-0.5">📍</span>
+                          <div className="min-w-0 flex-1">
+                            <strong className="text-xs font-black text-charcoal block leading-tight">{mun} Branch</strong>
+                            <span className="text-[10px] text-charcoal-light font-medium block truncate mt-0.5" title={branchAddr}>
+                              {branchAddr}
+                            </span>
+                            <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-[9px] font-mono text-charcoal-light">
+                              <span className="bg-ivory px-1.5 py-0.5 rounded border border-[#E9E5DE] font-bold text-terracotta">
+                                GPS: {branchLat.toFixed(4)}°, {branchLng.toFixed(4)}°
+                              </span>
+                              <span className="text-[9px] font-sans text-charcoal-light">
+                                🕒 {branchHours}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
 
 
@@ -20402,38 +20283,15 @@ ${rawText}`;
 
                   return (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {filteredMenu.map(dish => {
+                      {filteredMenu.map((dish, idx) => {
                         const isPkg = /package|bundle|buffet|unlimited|\/pax|\/head/i.test(dish.name) || dish.type === 'bundle' || dish.type === 'buffet';
                         return (
                           <div
-                            key={dish.id}
+                            key={dish.id ? `${dish.id}-${idx}` : idx}
                             onClick={() => setActiveDish(dish)}
-                            className={`p-3 rounded-xl border transition-all text-left cursor-pointer flex gap-3 items-center ${activeDish?.id === dish.id ? 'bg-terracotta/5 border-terracotta shadow-sm' : isPkg ? 'bg-amber-50/30 dark:bg-amber-950/15 border-amber-300/70 dark:border-amber-700/50 hover:border-amber-500' : 'bg-white dark:bg-[#1E1B18] border-[#E9E5DE] dark:border-[#282420] hover:border-terracotta/40'}`}
+                            className={`p-3.5 rounded-xl border transition-all text-left cursor-pointer flex flex-col justify-between ${activeDish?.id === dish.id ? 'bg-terracotta/5 border-terracotta shadow-sm' : isPkg ? 'bg-amber-50/30 dark:bg-amber-950/15 border-amber-300/70 dark:border-amber-700/50 hover:border-amber-500' : 'bg-white dark:bg-[#1E1B18] border-[#E9E5DE] dark:border-[#282420] hover:border-terracotta/40'}`}
                           >
-                            {dish.image && (
-                              <div
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setFullscreenImage({
-                                    images: [dish.image],
-                                    index: 0,
-                                    title: `${dish.name} (₱${dish.price})`
-                                  });
-                                }}
-                                className="w-16 h-16 rounded-lg overflow-hidden shrink-0 border border-[#E9E5DE] dark:border-[#282420] cursor-zoom-in hover:opacity-90 transition-opacity relative group/dishimg"
-                                title="Click for full view"
-                              >
-                                <img
-                                  src={dish.image}
-                                  alt={dish.name}
-                                  className="w-full h-full object-cover"
-                                />
-                                <div className="absolute inset-0 bg-charcoal/30 opacity-0 group-hover/dishimg:opacity-100 flex items-center justify-center transition-opacity text-white text-[11px] font-bold">
-                                  🔍
-                                </div>
-                              </div>
-                            )}
-                            <div className="flex-1 min-w-0">
+                            <div className="w-full min-w-0">
                               <div className="flex justify-between items-start gap-1">
                                 <div className="min-w-0">
                                   {isPkg && (
@@ -20502,28 +20360,8 @@ ${rawText}`;
                       </button>
                     </div>
 
-                    {/* Dish Image & Ingredients */}
+                    {/* Dish Ingredients & Information */}
                     <div className="flex items-start gap-3">
-                      {activeDish.image && (
-                        <div
-                          onClick={() => setFullscreenImage({
-                            images: [activeDish.image],
-                            index: 0,
-                            title: `${activeDish.name} (₱${activeDish.price})`
-                          })}
-                          className="w-16 h-16 rounded-xl overflow-hidden border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 cursor-zoom-in relative group/deconimg"
-                          title="Click for full view"
-                        >
-                          <img
-                            src={activeDish.image}
-                            alt={activeDish.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover/deconimg:opacity-100 flex items-center justify-center transition-opacity text-white text-[10px] font-bold">
-                            🔍
-                          </div>
-                        </div>
-                      )}
                       {/package|bundle|buffet|unlimited|\/pax|\/head/i.test(activeDish.name) ? (
                         <div className="space-y-1.5 flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
@@ -20788,23 +20626,7 @@ ${rawText}`;
         </div>
       )}
 
-      {/* Legacy Zoomed Dish Image Modal Fallback */}
-      {zoomedDishImg && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-charcoal/85 backdrop-blur-sm p-4 cursor-zoom-out animate-fade-in"
-          onClick={() => setZoomedDishImg(null)}
-        >
-          <div className="relative max-w-3xl w-full bg-white p-3 rounded-2xl shadow-2xl animate-scale-up" onClick={(e) => e.stopPropagation()}>
-            <img src={zoomedDishImg} alt="Zoomed dish" className="w-full h-auto rounded-xl object-contain max-h-[80vh] border border-[#E9E5DE]" />
-            <button
-              onClick={() => setZoomedDishImg(null)}
-              className="absolute top-5 right-5 bg-charcoal/80 hover:bg-charcoal text-white rounded-full w-8 h-8 flex items-center justify-center font-black focus:outline-none transition-colors border border-white/20 text-xs"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
+      
 
 
       {/* ── Multi-Branch Location Choice Modal ── */}

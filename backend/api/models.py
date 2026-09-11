@@ -75,7 +75,6 @@ class MenuItem(models.Model):
     protein = models.IntegerField(default=0)
     carbs = models.IntegerField(default=0)
     fat = models.IntegerField(default=0)
-    image = models.URLField(max_length=1000, blank=True, default='')
 
     class Meta:
         ordering = ['name']
