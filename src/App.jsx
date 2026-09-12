@@ -578,8 +578,8 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v19_rename_funnside_typography') {
-        localStorage.setItem('kanyamanan_db_version', 'v19_rename_funnside_typography');
+      if (dbVersion !== 'v27_cakes_and_creams_full_menu') {
+        localStorage.setItem('kanyamanan_db_version', 'v27_cakes_and_creams_full_menu');
         localStorage.removeItem('kanyamanan_restaurants_db');
       }
     } catch (_) {}
@@ -611,6 +611,19 @@ function App() {
               }
             });
 
+            const isPlaceholderImg = (img) => !img || 
+              img.includes('photo-1552566626-52f8b828add9') || 
+              img.includes('photo-1555396273-367ea4eb4db5') || 
+              img.includes('photo-1517248135467-4c7edcad34c4');
+
+            const resolvedImage = (preseeded?.image && (isPlaceholderImg(res.image) || preseeded.image.startsWith('/')))
+              ? preseeded.image
+              : (res.image || preseeded?.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80');
+
+            const resolvedImages = (preseeded?.image && preseeded.image.startsWith('/'))
+              ? [preseeded.image, ...(Array.isArray(res.images) ? res.images.filter(img => img !== preseeded.image && !isPlaceholderImg(img)) : (preseeded.images || []))]
+              : (Array.isArray(res.images) && res.images.length > 0 ? res.images : (preseeded?.images || [resolvedImage]));
+
             return {
               ...(preseeded || {}),
               ...res,
@@ -622,6 +635,8 @@ function App() {
               priceTier: res.priceTier || preseeded?.priceTier || '$',
               branches: mergedBranches.length > 0 ? mergedBranches : [{ branchName: `${res.name || 'Restaurant'} (Main Branch)`, municipality: res.municipality || 'City of San Fernando', address: res.address || 'Pampanga', operatingHours: res.operatingHours || '09:00 AM - 09:00 PM', lat: res.lat || 15.0300, lng: res.lng || 120.6800 }],
               menu: menuToUse,
+              image: resolvedImage,
+              images: resolvedImages,
               username: res.username || preseeded?.username || `${(res.name || 'res').toLowerCase().replace(/[^a-z0-9]/g, '_')}_owner`,
               password: res.password || preseeded?.password || 'password123'
             };
@@ -906,10 +921,26 @@ function App() {
                   const resolvedMenu = (Array.isArray(pre?.menu) && pre.menu.length > (r.menu?.length || 0))
                     ? pre.menu
                     : (Array.isArray(r.menu) && r.menu.length > 0 ? r.menu : (pre?.menu || []));
+
+                  const isPlaceholderImg = (img) => !img || 
+                    img.includes('photo-1552566626-52f8b828add9') || 
+                    img.includes('photo-1555396273-367ea4eb4db5') || 
+                    img.includes('photo-1517248135467-4c7edcad34c4');
+
+                  const resolvedImage = (pre?.image && (isPlaceholderImg(r.image) || pre.image.startsWith('/')))
+                    ? pre.image
+                    : (r.image || pre?.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80');
+
+                  const resolvedImages = (pre?.image && pre.image.startsWith('/'))
+                    ? [pre.image, ...(Array.isArray(r.images) ? r.images.filter(img => img !== pre.image && !isPlaceholderImg(img)) : (pre?.images || []))]
+                    : (Array.isArray(r.images) && r.images.length > 0 ? r.images : (pre?.images || [resolvedImage]));
+
                   liveDict[r.id] = {
                     ...r,
                     branches: liveBranches.length > 0 ? liveBranches : (pre?.branches || r.branches),
-                    menu: resolvedMenu
+                    menu: resolvedMenu,
+                    image: resolvedImage,
+                    images: resolvedImages
                   };
                 }
               });
@@ -1235,7 +1266,18 @@ function App() {
               if (r && r.id && !deletedIds.includes(r.id) && !isLegacyPreseeded(r)) {
                 const pre = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === r.id || (p.name && r.name && p.name.toLowerCase() === r.name.toLowerCase())));
                 const isValidImg = r.image && (r.image.startsWith('http') || r.image.startsWith('data:') || r.image.startsWith('/'));
-                const cleanedImg = isValidImg ? r.image : (pre?.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80');
+                const isPlaceholderImg = (img) => !img || 
+                  img.includes('photo-1552566626-52f8b828add9') || 
+                  img.includes('photo-1555396273-367ea4eb4db5') || 
+                  img.includes('photo-1517248135467-4c7edcad34c4');
+
+                const cleanedImg = (pre?.image && (isPlaceholderImg(r.image) || pre.image.startsWith('/')))
+                  ? pre.image
+                  : (isValidImg ? r.image : (pre?.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80'));
+
+                const cleanedImages = (pre?.image && pre.image.startsWith('/'))
+                  ? [pre.image, ...(Array.isArray(r.images) ? r.images.filter(img => img !== pre.image && !isPlaceholderImg(img)) : (pre?.images || []))]
+                  : (Array.isArray(r.images) && r.images.length > 0 ? r.images : [cleanedImg]);
 
                 // Ensure all preseeded branches (including newly registered branches like Lubao) are merged
                 const cloudBranches = Array.isArray(r.branches) ? [...r.branches] : [];
@@ -1255,7 +1297,7 @@ function App() {
                   ...r,
                   branches: cloudBranches.length > 0 ? cloudBranches : (pre?.branches || r.branches),
                   image: cleanedImg,
-                  images: Array.isArray(r.images) && r.images.length > 0 ? r.images : [cleanedImg],
+                  images: cleanedImages,
                   municipality: r.municipality || pre?.municipality || 'City of San Fernando'
                 };
               }
@@ -17157,7 +17199,7 @@ ${rawText}`;
                         <div className="mt-4 pt-3 border-t border-[#FAF8F5] dark:border-[#2A2621] space-y-2 text-[10px] text-charcoal-light dark:text-gray-400">
                           <div className="flex items-center justify-between font-semibold">
                             <span className="flex items-center gap-1"><Activity className="h-3.5 w-3.5 text-terracotta shrink-0" /> Crowd Forecaster:</span>
-                            <span className="text-terracotta">{res.occupancy[4]}% Peak</span>
+                            <span className="text-terracotta">{(res.occupancy?.[4] ?? res.branches?.[0]?.occupancy?.[4] ?? 85)}% Peak</span>
                           </div>
                           <div className="flex items-center justify-between font-semibold">
                             <span className="flex items-center gap-1"><DollarSign className="h-3.5 w-3.5 text-bananaleaf shrink-0" /> Est. Cost:</span>
@@ -20189,7 +20231,7 @@ ${rawText}`;
 
                 <div className="h-28 w-full bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] p-3 flex flex-col justify-between">
                   <div className="flex-1 flex items-end justify-between gap-1">
-                    {selectedRestaurant.occupancy.map((val, idx) => (
+                    {(selectedRestaurant.occupancy || selectedRestaurant.branches?.[0]?.occupancy || [20, 40, 60, 80, 90, 85, 70, 60, 75, 85, 90, 70]).map((val, idx) => (
                       <div
                         key={idx}
                         style={{ height: `${val}%` }}

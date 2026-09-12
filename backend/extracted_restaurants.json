@@ -16780,9 +16780,9 @@
     ],
     "description": "Open-air native Kapampangan ihaw-ihaw restaurant specializing in fresh grilled seafoods, inihaw na liempo, paco fern salad, cajun seafood buckets, and fried Candaba itik.",
     "address": "Barangay Del Pilar, Candaba, Pampanga",
-    "image": "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
+    "image": "/restaurants/ningnangan_cover.jpg",
     "images": [
-      "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80",
+      "/restaurants/ningnangan_cover.jpg",
       "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
@@ -33850,9 +33850,9 @@
     ],
     "description": "Legendary Guagua-heritage brand known across Pampanga for minimal, ultra-fine shaved ice Halo-Halo (macapuno, saba, leche flan), spicy Pancit Palabok, Sizzling Sisig, and hearty combo meals.",
     "address": "Barangay San Agustin, Arayat, Pampanga",
-    "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+    "image": "/restaurants/razons_cover.jpg",
     "images": [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
+      "/restaurants/razons_cover.jpg",
       "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1581349485608-947ab4a53e5e?auto=format&fit=crop&w=800&q=80"
@@ -37267,9 +37267,9 @@
     ],
     "description": "Rustic-chic fusion dining destination in San Fernando famous for Pasta sa Taba ng Alimango, Crispy Liempo Kare-Kare, Pizza Negra, and artisanal Buko Pie.",
     "address": "Barangay San Nicolas, City of San Fernando, Pampanga",
-    "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+    "image": "/restaurants/souq_cover.jpg",
     "images": [
-      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+      "/restaurants/souq_cover.jpg",
       "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80"
@@ -54961,6 +54961,3533 @@
           "carbs": 2,
           "fat": 6
         }
+      }
+    ]
+  },
+  {
+    "id": "res-conchings-restaurant-guagua",
+    "name": "Conching's Restaurant & Native Foods",
+    "municipality": "Guagua",
+    "corridor": "Jose Abad Santos Avenue (JASA) Line",
+    "operatingHours": "07:00 AM - 10:00 PM",
+    "priceTier": "$",
+    "lat": 14.9665,
+    "lng": 120.632,
+    "categories": [
+      "🏛️ Heritage Institution",
+      "🍲 Kapampangan Home-Style (Lutung Bale)",
+      "🥩 Sizzling & Grill",
+      "🍧 Halo-Halo & Desserts",
+      "🍱 Fiesta Catering & Party Trays"
+    ],
+    "description": "Beloved Guagua institution renowned across western Pampanga for all-day breakfast silog combos with unlimited rice, Tsokolateng Batirol, traditional goto, family boodle fights, sizzling specials, and classic Kapampangan native viands.",
+    "address": "San Matias / Poblacion, Guagua, Pampanga",
+    "image": "/restaurants/guagua/conchings_cover.jpg",
+    "images": [
+      "/restaurants/guagua/conchings_cover.jpg",
+      "/restaurants/guagua/conchings_menu4.jpg",
+      "/restaurants/guagua/conchings_menu3.jpg",
+      "/restaurants/guagua/conchings_menu1.jpg",
+      "/restaurants/guagua/conchings_menu2.jpg"
+    ],
+    "branches": [
+      {
+        "branchName": "Conching's Restaurant (Guagua Main Branch)",
+        "municipality": "Guagua",
+        "address": "San Matias / Poblacion, Guagua, Pampanga",
+        "operatingHours": "07:00 AM - 10:00 PM",
+        "lat": 14.9665,
+        "lng": 120.632,
+        "occupancy": [
+          20,
+          45,
+          65,
+          85,
+          95,
+          90,
+          70,
+          60,
+          75,
+          85,
+          95,
+          80,
+          50,
+          30,
+          15
+        ]
+      }
+    ],
+    "username": "conchings_guagua_owner",
+    "password": "password123",
+    "occupancy": [
+      20,
+      45,
+      65,
+      85,
+      95,
+      90,
+      70,
+      60,
+      75,
+      85,
+      95,
+      80,
+      50,
+      30,
+      15
+    ],
+    "menu": [
+      {
+        "id": "conching-cm-1",
+        "name": "TAP HOT Silog (C.M.1)",
+        "price": 145,
+        "ingredients": "Marinated beef tapa, tender juicy red hotdogs, sunny-side up egg, unlimited garlic fried rice, sliced fresh tomatoes and cucumbers",
+        "allergens": "Contains Eggs, Soy, Gluten",
+        "healthIndicators": "High Protein, Unlimited Rice Combo",
+        "nutrition": {
+          "calories": 680,
+          "protein": 32,
+          "carbs": 75,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-cm-2",
+        "name": "HOT MA Silog (C.M.2)",
+        "price": 140,
+        "ingredients": "Pan-fried hotdog, savory Maling pork luncheon meat slices, fried egg, unlimited garlic rice, fresh tomato garnish",
+        "allergens": "Contains Eggs, Soy, Gluten",
+        "healthIndicators": "High Protein, Hearty Breakfast",
+        "nutrition": {
+          "calories": 650,
+          "protein": 26,
+          "carbs": 72,
+          "fat": 30
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-cm-3",
+        "name": "MA LONG Silog (C.M.3)",
+        "price": 140,
+        "ingredients": "Maling pork luncheon meat, native Kapampangan garlic-sweet longganisa, fried egg, unlimited garlic rice",
+        "allergens": "Contains Eggs, Soy, Gluten",
+        "healthIndicators": "High Protein, Classic Filipino Pair",
+        "nutrition": {
+          "calories": 690,
+          "protein": 28,
+          "carbs": 74,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-cm-4",
+        "name": "HOT CORN Silog (C.M.4)",
+        "price": 140,
+        "ingredients": "Pan-fried hotdog, savory sauteed corned beef with onions, sunny-side up egg, unlimited garlic rice",
+        "allergens": "Contains Eggs, Soy",
+        "healthIndicators": "High Protein, Rich Iron",
+        "nutrition": {
+          "calories": 660,
+          "protein": 30,
+          "carbs": 70,
+          "fat": 29
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-cm-5",
+        "name": "PORK HAM Silog (C.M.5)",
+        "price": 155,
+        "ingredients": "Crispy breaded golden porkchop, sweet cured ham slices, sunny-side up egg, unlimited garlic rice",
+        "allergens": "Contains Eggs, Gluten",
+        "healthIndicators": "High Protein, Crispy Feast",
+        "nutrition": {
+          "calories": 730,
+          "protein": 36,
+          "carbs": 75,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-cm-6",
+        "name": "TAP SHANG Silog (C.M.6)",
+        "price": 145,
+        "ingredients": "Tender beef tapa strips, crispy golden pork lumpiang shanghai rolls, fried egg, unlimited garlic rice, sweet chili dip",
+        "allergens": "Contains Eggs, Gluten, Soy",
+        "healthIndicators": "High Protein, Best-Selling Combo",
+        "nutrition": {
+          "calories": 710,
+          "protein": 34,
+          "carbs": 76,
+          "fat": 31
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-cm-7",
+        "name": "DA CORN Silog (C.M.7)",
+        "price": 155,
+        "ingredients": "Golden crispy daing na bangus (marinated milkfish), sauteed corned beef with sliced onions, fried egg, unlimited garlic rice",
+        "allergens": "Contains Fish, Eggs, Soy",
+        "healthIndicators": "High Protein, Omega-3 Rich",
+        "nutrition": {
+          "calories": 670,
+          "protein": 38,
+          "carbs": 68,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-silog-tapsilog",
+        "name": "Tapsilog (Solo)",
+        "price": 89,
+        "ingredients": "Marinated savory beef tapa, garlic fried rice, sunny-side up egg, spiced vinegar dip",
+        "allergens": "Contains Eggs, Soy",
+        "healthIndicators": "High Protein, All-Day Breakfast",
+        "nutrition": {
+          "calories": 510,
+          "protein": 26,
+          "carbs": 55,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-silog-longsilog",
+        "name": "Longsilog (Solo)",
+        "price": 85,
+        "ingredients": "Kapampangan native sweet garlic pork longganisa, garlic rice, sunny-side up egg",
+        "allergens": "Contains Eggs",
+        "healthIndicators": "High Protein, Native Classic",
+        "nutrition": {
+          "calories": 540,
+          "protein": 22,
+          "carbs": 55,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-silog-hotsilog",
+        "name": "Hotsilog (Solo)",
+        "price": 85,
+        "ingredients": "Pan-fried red hotdogs, garlic fried rice, sunny-side up egg",
+        "allergens": "Contains Eggs, Soy, Gluten",
+        "healthIndicators": "Quick Breakfast Favorite",
+        "nutrition": {
+          "calories": 480,
+          "protein": 18,
+          "carbs": 54,
+          "fat": 21
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-silog-malingsilog",
+        "name": "Malingsilog (Solo)",
+        "price": 85,
+        "ingredients": "Pan-fried Maling luncheon meat slices, garlic fried rice, sunny-side up egg",
+        "allergens": "Contains Eggs, Soy, Gluten",
+        "healthIndicators": "Comfort Food",
+        "nutrition": {
+          "calories": 510,
+          "protein": 19,
+          "carbs": 53,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-silog-cornsilog",
+        "name": "Cornsilog (Solo)",
+        "price": 85,
+        "ingredients": "Sauteed corned beef with onions and garlic, garlic fried rice, sunny-side up egg",
+        "allergens": "Contains Eggs, Soy",
+        "healthIndicators": "High Protein, Iron Rich",
+        "nutrition": {
+          "calories": 500,
+          "protein": 23,
+          "carbs": 54,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-silog-hamsilog",
+        "name": "Hamsilog (Solo)",
+        "price": 85,
+        "ingredients": "Sweet cured sliced ham, garlic fried rice, sunny-side up egg",
+        "allergens": "Contains Eggs",
+        "healthIndicators": "Classic Breakfast",
+        "nutrition": {
+          "calories": 460,
+          "protein": 20,
+          "carbs": 53,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-silog-shanghaisilog",
+        "name": "Shanghaisilog (Solo)",
+        "price": 85,
+        "ingredients": "Crispy fried minced pork lumpiang shanghai, garlic fried rice, sunny-side up egg, sweet chili dip",
+        "allergens": "Contains Eggs, Gluten",
+        "healthIndicators": "Crispy Classic",
+        "nutrition": {
+          "calories": 530,
+          "protein": 21,
+          "carbs": 57,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-silog-daingsilog",
+        "name": "Daingsilog (Solo)",
+        "price": 99,
+        "ingredients": "Crispy fried garlic-marinated daing na bangus, garlic fried rice, sunny-side up egg",
+        "allergens": "Contains Fish, Eggs",
+        "healthIndicators": "Pescatarian, Omega-3 Rich",
+        "nutrition": {
+          "calories": 490,
+          "protein": 29,
+          "carbs": 52,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-silog-porksilog",
+        "name": "Porksilog (Solo)",
+        "price": 99,
+        "ingredients": "Pan-fried seasoned porkchop cutlet, garlic fried rice, sunny-side up egg",
+        "allergens": "Contains Eggs",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 570,
+          "protein": 31,
+          "carbs": 53,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-goto",
+        "name": "Goto",
+        "price": 49,
+        "ingredients": "Slow-simmered glutinous rice porridge, tender beef tripe, ginger, toasted garlic bits, scallions, calamansi",
+        "allergens": "None",
+        "healthIndicators": "Warm Comfort Soup, Digestive Friendly",
+        "nutrition": {
+          "calories": 280,
+          "protein": 16,
+          "carbs": 42,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-arrozcaldo",
+        "name": "Arrozcaldo",
+        "price": 49,
+        "ingredients": "Fragrant chicken rice congee infused with ginger, saffron/kasubha, roasted garlic, spring onions",
+        "allergens": "None",
+        "healthIndicators": "Comfort Soup, High Protein",
+        "nutrition": {
+          "calories": 310,
+          "protein": 20,
+          "carbs": 44,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-goto-egg",
+        "name": "Goto with Egg",
+        "price": 45,
+        "ingredients": "Slow-cooked beef tripe rice congee topped with a whole hard-boiled egg and golden garlic flakes",
+        "allergens": "Contains Eggs",
+        "healthIndicators": "High Protein, Hearty",
+        "nutrition": {
+          "calories": 340,
+          "protein": 22,
+          "carbs": 42,
+          "fat": 11
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-plain-lugaw",
+        "name": "Plain Lugaw",
+        "price": 35,
+        "ingredients": "Traditional comforting ginger rice porridge topped with crunchy fried garlic and green scallions",
+        "allergens": "None",
+        "healthIndicators": "Low Fat, Soothing",
+        "nutrition": {
+          "calories": 210,
+          "protein": 5,
+          "carbs": 43,
+          "fat": 2
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-beef-mami",
+        "name": "Beef Mami",
+        "price": 65,
+        "ingredients": "Fresh egg noodles in rich clear beef broth, tender braised beef slices, hard-boiled egg, scallions, toasted garlic",
+        "allergens": "Contains Eggs, Gluten, Soy",
+        "healthIndicators": "Comforting Noodle Soup, High Protein",
+        "nutrition": {
+          "calories": 420,
+          "protein": 24,
+          "carbs": 54,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-lomi",
+        "name": "Lomi Special",
+        "price": 120,
+        "ingredients": "Thick egg noodles in piping-hot starchy broth, meatballs, kikiam, pork liver slices, crushed chicharon, poached egg",
+        "allergens": "Contains Eggs, Gluten, Soy",
+        "healthIndicators": "Hearty Kapampangan Noodle Bowl",
+        "nutrition": {
+          "calories": 560,
+          "protein": 30,
+          "carbs": 64,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-pancit-guisado",
+        "name": "Pancit Guisado",
+        "price": 75,
+        "ingredients": "Wok-tossed bihon and canton noodles, shredded pork, chicken strips, cabbage, carrots, green beans, calamansi",
+        "allergens": "Contains Gluten, Soy",
+        "healthIndicators": "Fiesta Classic, Fiber Rich",
+        "nutrition": {
+          "calories": 390,
+          "protein": 18,
+          "carbs": 58,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-pancit-palabok",
+        "name": "Pancit Palabok",
+        "price": 75,
+        "ingredients": "Rice noodles coated in savory orange shrimp-achiote sauce, crushed chicharon, tinapa flakes, boiled egg slices, scallions, calamansi",
+        "allergens": "Contains Crustaceans, Eggs, Fish, Gluten",
+        "healthIndicators": "Kapampangan Classic",
+        "nutrition": {
+          "calories": 410,
+          "protein": 17,
+          "carbs": 60,
+          "fat": 11
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-pancit-canton",
+        "name": "Pancit Canton",
+        "price": 175,
+        "ingredients": "Stir-fried thick flour egg noodles with pork slices, chicken liver, plump shrimps, cabbage, bell peppers in rich oyster sauce",
+        "allergens": "Contains Gluten, Crustaceans, Soy",
+        "healthIndicators": "Savory & Hearty",
+        "nutrition": {
+          "calories": 490,
+          "protein": 26,
+          "carbs": 65,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-bulalo-solo",
+        "name": "Bulalo (Solo)",
+        "price": 195,
+        "ingredients": "Tender beef shank with rich marrow simmered in clear seasoned broth, sweet corn on cob, pechay, green beans",
+        "allergens": "None",
+        "healthIndicators": "Collagen & Iron Rich, Hearty",
+        "nutrition": {
+          "calories": 520,
+          "protein": 38,
+          "carbs": 12,
+          "fat": 36
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-papaitan-solo",
+        "name": "Papaitan (Solo)",
+        "price": 85,
+        "ingredients": "Authentic Kapampangan sour-bitter soup made with tender beef tripe, meat strips, ginger, onions, and calamansi",
+        "allergens": "None",
+        "healthIndicators": "Traditional Native Delicacy",
+        "nutrition": {
+          "calories": 290,
+          "protein": 28,
+          "carbs": 6,
+          "fat": 17
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-fried-wings",
+        "name": "Fried Wings",
+        "price": 145,
+        "ingredients": "Seasoned crispy fried chicken wings served with house gravy dip",
+        "allergens": "Contains Gluten",
+        "healthIndicators": "High Protein, Finger-Licking",
+        "nutrition": {
+          "calories": 460,
+          "protein": 32,
+          "carbs": 14,
+          "fat": 30
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-buffalo-wings",
+        "name": "Buffalo Wings",
+        "price": 175,
+        "ingredients": "Crispy fried chicken wings tossed in spicy, buttery cayenne pepper buffalo glaze",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Spicy & Savory",
+        "nutrition": {
+          "calories": 490,
+          "protein": 33,
+          "carbs": 16,
+          "fat": 33
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-tokwat-baboy-solo",
+        "name": "Tokwa't Baboy (Solo)",
+        "price": 75,
+        "ingredients": "Deep-fried golden tofu cubes, tender boiled pork slices, spiced soy-vinegar marinade, red onions, finger chili",
+        "allergens": "Contains Soy, Gluten",
+        "healthIndicators": "High Protein Pulutan",
+        "nutrition": {
+          "calories": 340,
+          "protein": 22,
+          "carbs": 12,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-tokwat-tokwa",
+        "name": "Tokwa't Tokwa",
+        "price": 55,
+        "ingredients": "Crispy fried firm tofu cubes served with spiced garlic-soy vinegar dip",
+        "allergens": "Contains Soy, Gluten",
+        "healthIndicators": "Vegetarian Friendly, High Plant Protein",
+        "nutrition": {
+          "calories": 240,
+          "protein": 18,
+          "carbs": 10,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-ham-cheese",
+        "name": "Ham & Cheese Sandwich",
+        "price": 75,
+        "ingredients": "Layered sliced sweet ham, cheddar cheese slice, creamy mayo spread between toasted white bread",
+        "allergens": "Contains Dairy, Gluten, Eggs",
+        "healthIndicators": "Quick Snack",
+        "nutrition": {
+          "calories": 340,
+          "protein": 15,
+          "carbs": 36,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-ham-egg",
+        "name": "Ham & Egg Sandwich",
+        "price": 79,
+        "ingredients": "Toasted sandwich with sweet cured ham slice, fried egg, mayonnaise",
+        "allergens": "Contains Eggs, Gluten",
+        "healthIndicators": "High Protein Snack",
+        "nutrition": {
+          "calories": 360,
+          "protein": 17,
+          "carbs": 35,
+          "fat": 17
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-french-fries",
+        "name": "French Fries",
+        "price": 115,
+        "ingredients": "Deep-fried golden potato shoestrings lightly salted, served with ketchup or mayo",
+        "allergens": "None",
+        "healthIndicators": "Crispy Finger Food",
+        "nutrition": {
+          "calories": 320,
+          "protein": 4,
+          "carbs": 44,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-carbonara",
+        "name": "Creamy Carbonara",
+        "price": 169,
+        "ingredients": "Spaghetti pasta enveloped in rich garlic cream sauce, crispy bacon bits, grated parmesan cheese, served with garlic bread",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Comforting Merienda Meal",
+        "nutrition": {
+          "calories": 580,
+          "protein": 22,
+          "carbs": 64,
+          "fat": 27
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-batirol",
+        "name": "Tsokolateng Batirol",
+        "price": 89,
+        "ingredients": "Pure native Kapampangan cacao tablea frothed traditionally with fresh carabao milk using a wooden batirol molinillo",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Antioxidant Rich, Pampanga's Famous Hot Chocolate",
+        "nutrition": {
+          "calories": 230,
+          "protein": 6,
+          "carbs": 28,
+          "fat": 11
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-halo-halo",
+        "name": "Conching's Special Halo-Halo",
+        "price": 125,
+        "ingredients": "Finely crushed ice, sweet white & red beans, nata de coco, kaong, ube halaya, rich leche flan topping, creamy evaporated milk",
+        "allergens": "Contains Dairy, Eggs",
+        "healthIndicators": "Signature Kapampangan Cooler",
+        "nutrition": {
+          "calories": 360,
+          "protein": 8,
+          "carbs": 62,
+          "fat": 9
+        },
+        "image": "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-leche-flan",
+        "name": "Leche Flan",
+        "price": 149,
+        "ingredients": "Velvety smooth steamed caramel custard prepared with farm-fresh egg yolks, condensed milk, and amber sugar syrup",
+        "allergens": "Contains Dairy, Eggs",
+        "healthIndicators": "Traditional Kapampangan Fiesta Dessert",
+        "nutrition": {
+          "calories": 320,
+          "protein": 7,
+          "carbs": 45,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-singaporean-shrimp",
+        "name": "Singaporean Shrimp",
+        "price": 420,
+        "ingredients": "Fresh succulent whole shrimps wok-tossed in sweet, spicy, and tangy chili-egg Singaporean seafood glaze with green onions",
+        "allergens": "Contains Crustaceans, Eggs",
+        "healthIndicators": "High Protein, Chef's House Special",
+        "nutrition": {
+          "calories": 430,
+          "protein": 36,
+          "carbs": 22,
+          "fat": 19
+        },
+        "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-nilasing-hipon",
+        "name": "Nilasing na Hipon",
+        "price": 240,
+        "ingredients": "Crispy batter-coated whole river shrimps marinated in native spirits, deep-fried crunchy, served with spiced vinegar",
+        "allergens": "Contains Crustaceans, Gluten",
+        "healthIndicators": "Crispy Seafood Favorite",
+        "nutrition": {
+          "calories": 380,
+          "protein": 28,
+          "carbs": 18,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-gambas",
+        "name": "Shrimp Gambas",
+        "price": 340,
+        "ingredients": "Sautéed plump shrimp swimming in garlic-infused olive oil, butter, Spanish paprika, sweet chili flakes, and scallions",
+        "allergens": "Contains Crustaceans, Dairy",
+        "healthIndicators": "High Protein, Spanish-Filipino Classic",
+        "nutrition": {
+          "calories": 390,
+          "protein": 32,
+          "carbs": 12,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-calamares",
+        "name": "Calamares",
+        "price": 239,
+        "ingredients": "Tender squid rings coated in seasoned crispy breading, served with homemade garlic-mayonnaise tartar dip",
+        "allergens": "Contains Mollusks, Gluten, Eggs",
+        "healthIndicators": "Crispy Seafood Pulutan",
+        "nutrition": {
+          "calories": 360,
+          "protein": 22,
+          "carbs": 26,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-sweet-sour-fish",
+        "name": "Sweet and Sour Fish Fillet",
+        "price": 229,
+        "ingredients": "Golden fried white fish fillet chunks tossed in bright sweet and sour sauce with bell peppers, onions, and pineapple tidbits",
+        "allergens": "Contains Fish, Gluten",
+        "healthIndicators": "Pescatarian, Tangy Classic",
+        "nutrition": {
+          "calories": 390,
+          "protein": 28,
+          "carbs": 38,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-boodle-fight",
+        "name": "Conching's Grand Boodle Fight (5-8 Pax)",
+        "price": 1350,
+        "ingredients": "Generous fiesta banquet on fresh banana leaves: Unlimited Steamed Rice, grilled liempo, grilled tilapia/bangus, chicken inasal cuts, crispy lumpiang shanghai, salted duck eggs with tomatoes, paco fern salad, ensaladang buro, and native dips",
+        "allergens": "Contains Fish, Eggs, Gluten, Crustaceans, Soy",
+        "healthIndicators": "Iconic Kapampangan Feasting Tradition, Good for 5-8 Persons",
+        "nutrition": {
+          "calories": 2450,
+          "protein": 145,
+          "carbs": 280,
+          "fat": 85
+        },
+        "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-soup-bulalo-special",
+        "name": "Bulalo Special (House Feast)",
+        "price": 359,
+        "ingredients": "Simmered beef shank marrow bone in rich savory beef broth, cabbage, pechay, sweet corn on the cob, green peppercorns",
+        "allergens": "None",
+        "healthIndicators": "Hearty Beef Broth, High Protein",
+        "nutrition": {
+          "calories": 620,
+          "protein": 46,
+          "carbs": 16,
+          "fat": 42
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-soup-papaitan-feast",
+        "name": "Papaitan Special (Sharing)",
+        "price": 149,
+        "ingredients": "Rich traditional Kapampangan beef tripe and offal soup simmered with ginger, bile, and aromatic spices",
+        "allergens": "None",
+        "healthIndicators": "Traditional Offal Delicacy",
+        "nutrition": {
+          "calories": 340,
+          "protein": 32,
+          "carbs": 8,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-sinigang-baka",
+        "name": "Sinigang na Baka",
+        "price": 369,
+        "ingredients": "Tender beef short ribs poached in mouth-puckering tamarind broth with kangkong, white radish, string beans, green chili",
+        "allergens": "None",
+        "healthIndicators": "Sour Comfort Broth, High Protein",
+        "nutrition": {
+          "calories": 480,
+          "protein": 38,
+          "carbs": 14,
+          "fat": 31
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-sinigang-hipon",
+        "name": "Sinigang na Hipon",
+        "price": 439,
+        "ingredients": "Plump fresh river prawns cooked in sour sampaloc broth with native vegetables and okra",
+        "allergens": "Contains Crustaceans",
+        "healthIndicators": "Low Fat, High Protein, Pescatarian",
+        "nutrition": {
+          "calories": 320,
+          "protein": 34,
+          "carbs": 16,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-salmon-head",
+        "name": "Salmon Head Sinigang sa Miso",
+        "price": 230,
+        "ingredients": "Fresh salmon head simmered in savory sour fermented soybean miso broth with mustard leaves and tomatoes",
+        "allergens": "Contains Fish, Soy",
+        "healthIndicators": "Omega-3 Rich, Anti-Inflammatory",
+        "nutrition": {
+          "calories": 380,
+          "protein": 32,
+          "carbs": 15,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-karekare-lechon",
+        "name": "Kare-Kare Lechon",
+        "price": 379,
+        "ingredients": "Crispy golden lechon pork belly cuts served on thick roasted peanut and toasted rice sauce, eggplant, pechay, sitaw, bagoong alamang",
+        "allergens": "Contains Peanuts, Crustaceans",
+        "healthIndicators": "Kapampangan Classic",
+        "nutrition": {
+          "calories": 690,
+          "protein": 38,
+          "carbs": 24,
+          "fat": 48
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-karekare-beef",
+        "name": "Kare-Kare Beef w/ Oxtripe",
+        "price": 389,
+        "ingredients": "Braised beef shanks and tender honeycomb tripe slow-cooked in rich savory peanut stew with native vegetables and sauteed shrimp paste",
+        "allergens": "Contains Peanuts, Crustaceans",
+        "healthIndicators": "Heritage Recipe, High Protein",
+        "nutrition": {
+          "calories": 640,
+          "protein": 42,
+          "carbs": 22,
+          "fat": 42
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-karekare-ribs",
+        "name": "Kare-Kare Ribs",
+        "price": 469,
+        "ingredients": "Succulent fall-off-the-bone ribs in authentic nutty peanut sauce with banana blossom, eggplant, string beans, and bagoong",
+        "allergens": "Contains Peanuts, Crustaceans",
+        "healthIndicators": "Rich Feast Main",
+        "nutrition": {
+          "calories": 720,
+          "protein": 44,
+          "carbs": 22,
+          "fat": 50
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-chicken-roll",
+        "name": "Chicken Roll",
+        "price": 219,
+        "ingredients": "Seasoned ground chicken meat wrapped with sausage and carrots, fried golden and sliced",
+        "allergens": "Contains Eggs, Gluten",
+        "healthIndicators": "Lean Poultry Choice",
+        "nutrition": {
+          "calories": 380,
+          "protein": 29,
+          "carbs": 14,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-kalderetang-kambing",
+        "name": "Kalderetang Kambing",
+        "price": 420,
+        "ingredients": "Tender local goat meat stewed in spiced tomato liver paste, bell peppers, potatoes, carrots, and green olives",
+        "allergens": "None",
+        "healthIndicators": "Authentic Kapampangan Specialty, High Iron",
+        "nutrition": {
+          "calories": 510,
+          "protein": 40,
+          "carbs": 18,
+          "fat": 30
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-lechon-kawali",
+        "name": "Lechon Kawali",
+        "price": 450,
+        "ingredients": "Crispy pan-fried pork belly slab with crunchy crackling skin and tender meat, served with Mang Tomas liver gravy and spiced vinegar",
+        "allergens": "Contains Soy (in sauce)",
+        "healthIndicators": "Indulgent Crispy Specialty",
+        "nutrition": {
+          "calories": 680,
+          "protein": 34,
+          "carbs": 6,
+          "fat": 58
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-crispy-pata",
+        "name": "Crispy Pata Special",
+        "price": 649,
+        "ingredients": "Whole pork knuckle boiled in aromatics and deep-fried to crispy blistered perfection, served with toyomansi dipping sauce",
+        "allergens": "Contains Soy (in dip)",
+        "healthIndicators": "Fiesta Centerpiece, High Protein",
+        "nutrition": {
+          "calories": 920,
+          "protein": 68,
+          "carbs": 4,
+          "fat": 72
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-sizzling-sisig",
+        "name": "Sizzling Sisig (Signature)",
+        "price": 269,
+        "ingredients": "Authentic Kapampangan sisig of boiled and charcoal-grilled minced pig head cuts and chicken liver, seasoned with calamansi, red onions, and bird's eye chilies on a smoking cast-iron platter",
+        "allergens": "Contains Soy",
+        "healthIndicators": "Pampanga's #1 Culinary Treasure",
+        "nutrition": {
+          "calories": 560,
+          "protein": 36,
+          "carbs": 8,
+          "fat": 42
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-sizzling-pusit",
+        "name": "Sizzling Pusit",
+        "price": 359,
+        "ingredients": "Fresh whole squid simmered and charred in garlic-butter soy glaze on a sizzling iron skillet",
+        "allergens": "Contains Mollusks, Dairy, Soy",
+        "healthIndicators": "High Protein, Low Carb",
+        "nutrition": {
+          "calories": 340,
+          "protein": 32,
+          "carbs": 12,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-sizzling-chicken",
+        "name": "Sizzling Chicken",
+        "price": 269,
+        "ingredients": "Pan-grilled marinated chicken quarters served bubbling on a hot platter with savory mushroom gravy",
+        "allergens": "Contains Gluten, Dairy",
+        "healthIndicators": "High Protein",
+        "nutrition": {
+          "calories": 480,
+          "protein": 38,
+          "carbs": 14,
+          "fat": 31
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-sizzling-hotdog",
+        "name": "Sizzling Hotdog",
+        "price": 175,
+        "ingredients": "Sliced cocktail hotdogs tossed in sweet-savory ketchup glaze with sliced white onions on a sizzling plate",
+        "allergens": "Contains Soy, Gluten",
+        "healthIndicators": "Pulutan Favorite",
+        "nutrition": {
+          "calories": 390,
+          "protein": 16,
+          "carbs": 24,
+          "fat": 25
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-sizzling-daing",
+        "name": "Sizzling Daing na Bangus",
+        "price": 199,
+        "ingredients": "Flaked garlic-marinated boneless milkfish served sizzling with fried garlic bits and calamansi",
+        "allergens": "Contains Fish",
+        "healthIndicators": "Omega-3 Rich, Heart Healthy",
+        "nutrition": {
+          "calories": 380,
+          "protein": 32,
+          "carbs": 8,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-sizzling-corn",
+        "name": "Sizzling Kernel Corn",
+        "price": 160,
+        "ingredients": "Sweet golden corn kernels sauteed in creamy butter and cheese seasonings on a hot skillet",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Sweet & Savory Side",
+        "nutrition": {
+          "calories": 260,
+          "protein": 5,
+          "carbs": 36,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-chicharon-bulaklak",
+        "name": "Chicharon Bulaklak",
+        "price": 199,
+        "ingredients": "Crispy deep-fried ruffled pork mesentery cracklings served with spicy garlic pinakurat vinegar",
+        "allergens": "None",
+        "healthIndicators": "Crunchy Pulutan Classic",
+        "nutrition": {
+          "calories": 490,
+          "protein": 28,
+          "carbs": 2,
+          "fat": 42
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-fried-pugo",
+        "name": "Fried Pugo",
+        "price": 139,
+        "ingredients": "Marinated native quail fried golden crisp, served with spiced vinegar dip",
+        "allergens": "None",
+        "healthIndicators": "Traditional Native Game Bird",
+        "nutrition": {
+          "calories": 310,
+          "protein": 29,
+          "carbs": 4,
+          "fat": 19
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-caesar-salad",
+        "name": "Caesar Salad",
+        "price": 159,
+        "ingredients": "Fresh crisp romaine lettuce, toasted garlic croutons, crispy bacon bits, creamy Caesar dressing, grated parmesan",
+        "allergens": "Contains Dairy, Gluten, Eggs",
+        "healthIndicators": "Fresh Greens, Vitamin Rich",
+        "nutrition": {
+          "calories": 260,
+          "protein": 8,
+          "carbs": 16,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-paco-salad",
+        "name": "Paco Salad (Wild Fern)",
+        "price": 169,
+        "ingredients": "Fresh indigenous wild fiddlehead ferns (paco), sliced salted duck eggs, ripe native tomatoes, red onions, light calamansi vinaigrette",
+        "allergens": "Contains Eggs",
+        "healthIndicators": "Native Superfood, High Iron & Fiber",
+        "nutrition": {
+          "calories": 170,
+          "protein": 7,
+          "carbs": 18,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-lumpiang-ubod",
+        "name": "Lumpiang Ubod",
+        "price": 120,
+        "ingredients": "Fresh heart of palm (ubod) with carrots, minced pork, and shrimp rolled in soft egg crepe wrapper, savory garlic brown sauce, crushed roasted peanuts",
+        "allergens": "Contains Peanuts, Eggs, Crustaceans",
+        "healthIndicators": "High Fiber, Traditional Kapampangan Treat",
+        "nutrition": {
+          "calories": 280,
+          "protein": 12,
+          "carbs": 36,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-nilagang-gule-buro",
+        "name": "Nilagang Gule with Buro",
+        "price": 120,
+        "ingredients": "Steamed seasonal native vegetables (eggplant, okra, bitter melon, mustasa leaves) paired with authentic Kapampangan fermented rice and shrimp paste (tagilo / buro)",
+        "allergens": "Contains Crustaceans",
+        "healthIndicators": "Gut Healthy Probiotics, Plant Rich",
+        "nutrition": {
+          "calories": 190,
+          "protein": 6,
+          "carbs": 32,
+          "fat": 4
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-chop-seuy",
+        "name": "Chop Seuy",
+        "price": 239,
+        "ingredients": "Stir-fried medley of cauliflower, broccoli, carrots, snow peas, bell peppers, chicken liver, and quail eggs in savory garlic glaze",
+        "allergens": "Contains Eggs, Soy",
+        "healthIndicators": "Vitamin & Mineral Packed",
+        "nutrition": {
+          "calories": 270,
+          "protein": 14,
+          "carbs": 22,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-pinakbet",
+        "name": "Kapampangan Pinakbet",
+        "price": 239,
+        "ingredients": "Native squash, eggplant, okra, sitaw, and ampalaya sauteed in fermented bagoong alamang with crispy pork belly cracklings",
+        "allergens": "Contains Crustaceans",
+        "healthIndicators": "High Fiber, Nutrient Dense",
+        "nutrition": {
+          "calories": 290,
+          "protein": 13,
+          "carbs": 26,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-bilao-palabok",
+        "name": "Pancit Palabok Bilao (Party Size)",
+        "price": 500,
+        "ingredients": "Generous traditional woven bamboo bilao filled with rice noodles, rich shrimp sauce, tinapa flakes, boiled egg slices, and chicharon (Serves 5-10)",
+        "allergens": "Contains Crustaceans, Eggs, Fish, Gluten",
+        "healthIndicators": "Fiesta Gathering Special",
+        "nutrition": {
+          "calories": 1850,
+          "protein": 65,
+          "carbs": 260,
+          "fat": 55
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-bilao-guisado",
+        "name": "Pancit Guisado Bilao (Party Size)",
+        "price": 500,
+        "ingredients": "Party bilao of stir-fried bihon and canton noodles with pork, chicken, julienned vegetables, and calamansi (Serves 5-10)",
+        "allergens": "Contains Gluten, Soy",
+        "healthIndicators": "Fiesta Gathering Special",
+        "nutrition": {
+          "calories": 1750,
+          "protein": 68,
+          "carbs": 250,
+          "fat": 45
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-beer-bucket-promo",
+        "name": "Beer Bucket Promo (6 Bottles + Pulutan)",
+        "price": 468,
+        "ingredients": "6 ice-cold bottles of beer (choice of San Mig Light, Pale Pilsen, San Mig Apple, or Red Horse) served with your choice of Sizzling Sisig, French Fries, Caesar Salad, or Papaitan",
+        "allergens": "Contains Gluten, Alcohol (for adults 18+)",
+        "healthIndicators": "Night Pulutan Promo",
+        "nutrition": {
+          "calories": 980,
+          "protein": 32,
+          "carbs": 70,
+          "fat": 40
+        },
+        "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-houseblend-iced-tea",
+        "name": "Houseblend Iced Tea (Carafe)",
+        "price": 120,
+        "ingredients": "Signature freshly brewed black tea sweetened with native honey and infused with fresh calamansi juice",
+        "allergens": "None",
+        "healthIndicators": "Refreshing Citrus Cooler",
+        "nutrition": {
+          "calories": 140,
+          "protein": 0,
+          "carbs": 36,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-brewed-coffee",
+        "name": "Kapeng Barako / Brewed Coffee",
+        "price": 45,
+        "ingredients": "Freshly brewed aromatic native Kapampangan ground coffee beans served piping hot",
+        "allergens": "None",
+        "healthIndicators": "Zero Calorie / Boost Energy",
+        "nutrition": {
+          "calories": 10,
+          "protein": 1,
+          "carbs": 2,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "conching-pineapple-juice",
+        "name": "Pineapple Juice",
+        "price": 45,
+        "ingredients": "Chilled pure pineapple juice packed with Vitamin C",
+        "allergens": "None",
+        "healthIndicators": "Vitamin C Rich",
+        "nutrition": {
+          "calories": 120,
+          "protein": 1,
+          "carbs": 29,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      }
+    ]
+  },
+  {
+    "id": "res-cakes-and-creams-cafe-san-simon",
+    "name": "Cakes and Creams Cafe",
+    "municipality": "San Simon",
+    "corridor": "NLEX / MacArthur Highway Corridor",
+    "operatingHours": "10:00 AM - 09:00 PM",
+    "priceTier": "$",
+    "lat": 14.9985,
+    "lng": 120.781,
+    "categories": [
+      "☕ Cafe & Specialty Coffee",
+      "🧋 Milktea & Blended Drinks",
+      "🍝 Pasta & Comfort Meals",
+      "🥩 Sizzling & Rice Bowls",
+      "🥪 Sandwiches & Snacks"
+    ],
+    "description": "Charming cafe and dining destination in San Simon offering artisanal hot & iced espresso lattes, blended frappes, premium milk teas, comforting rice meals, sizzling specials, savory ala carte, pasta, crisp salads, and loaded snack platters.",
+    "address": "San Simon, Pampanga",
+    "image": "/restaurants/san_simon/cakes_and_creams_cover.jpg",
+    "images": [
+      "/restaurants/san_simon/cakes_and_creams_cover.jpg",
+      "/restaurants/san_simon/cakes_and_creams_menu1.jpg",
+      "/restaurants/san_simon/cakes_and_creams_menu2.jpg",
+      "/restaurants/san_simon/cakes_and_creams_menu3.jpg"
+    ],
+    "branches": [
+      {
+        "branchName": "Cakes and Creams Cafe (San Simon Main)",
+        "municipality": "San Simon",
+        "address": "San Simon, Pampanga",
+        "operatingHours": "10:00 AM - 09:00 PM",
+        "lat": 14.9985,
+        "lng": 120.781,
+        "occupancy": [
+          15,
+          30,
+          50,
+          70,
+          85,
+          80,
+          65,
+          50,
+          65,
+          80,
+          85,
+          75,
+          55,
+          35,
+          20,
+          10,
+          5,
+          0,
+          0,
+          0,
+          0,
+          0,
+          5,
+          10
+        ]
+      }
+    ],
+    "dishes": [
+      {
+        "id": "cnc-lemonade",
+        "name": "Lemonade",
+        "price": 90,
+        "ingredients": "Freshly squeezed lemon juice, simple syrup, filtered water, chilled ice, lemon slice garnish",
+        "allergens": "None",
+        "healthIndicators": "Vitamin C Rich, Hydrating",
+        "nutrition": {
+          "calories": 110,
+          "protein": 1,
+          "carbs": 28,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-lemon-cucumber",
+        "name": "Lemon Cucumber Juice",
+        "price": 110,
+        "ingredients": "Fresh crisp cucumber extract, zesty lemon juice, natural cane sugar, chilled filtered water, mint leaf",
+        "allergens": "None",
+        "healthIndicators": "Detoxifying, Antioxidant Packed, Refreshing",
+        "nutrition": {
+          "calories": 95,
+          "protein": 1,
+          "carbs": 24,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-green-apple-juice",
+        "name": "Green Apple Juice",
+        "price": 60,
+        "ingredients": "Tart and sweet green apple juice blend served cold over cracked ice",
+        "allergens": "None",
+        "healthIndicators": "Refreshing Fruit Drink, Vitamin Rich",
+        "nutrition": {
+          "calories": 120,
+          "protein": 0,
+          "carbs": 30,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-green-apple-yogurt",
+        "name": "Green Apple Yogurt Smoothie",
+        "price": 140,
+        "ingredients": "Tangy green apple puree blended with probiotic creamy yogurt and crushed ice",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Probiotics & Gut Friendly, Calcium Rich",
+        "nutrition": {
+          "calories": 210,
+          "protein": 6,
+          "carbs": 42,
+          "fat": 3
+        },
+        "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-strawberry-yogurt",
+        "name": "Strawberry Yogurt Smoothie",
+        "price": 140,
+        "ingredients": "Real strawberry reduction whipped with probiotic creamy yogurt and crushed ice",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Antioxidants, Probiotic Culture",
+        "nutrition": {
+          "calories": 220,
+          "protein": 6,
+          "carbs": 44,
+          "fat": 3
+        },
+        "image": "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blueberry-yogurt",
+        "name": "Blueberry Yogurt Smoothie",
+        "price": 140,
+        "ingredients": "Lush blueberry compote blended smoothly with wholesome probiotic yogurt",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Brain Health, High Anthocyanins",
+        "nutrition": {
+          "calories": 215,
+          "protein": 6,
+          "carbs": 43,
+          "fat": 3
+        },
+        "image": "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-classic-milktea",
+        "name": "Classic Milktea",
+        "price": 70,
+        "ingredients": "Slow-brewed black Ceylon tea, creamy non-dairy milk blend, caramelized brown sugar syrup (Regular: ₱70 | Large: ₱80)",
+        "allergens": "Dairy (Optional)",
+        "healthIndicators": "Classic Comfort Drink",
+        "nutrition": {
+          "calories": 240,
+          "protein": 2,
+          "carbs": 48,
+          "fat": 5
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-wintermelon-milktea",
+        "name": "Wintermelon Milktea",
+        "price": 90,
+        "ingredients": "Rich brewed black tea infused with fragrant wintermelon syrup and velvety milk (Regular: ₱90 | Large: ₱100)",
+        "allergens": "Dairy (Optional)",
+        "healthIndicators": "Fragrant Caramel-Melon Notes",
+        "nutrition": {
+          "calories": 260,
+          "protein": 2,
+          "carbs": 54,
+          "fat": 5
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-okinawa-milktea",
+        "name": "Okinawa Milktea",
+        "price": 90,
+        "ingredients": "Robust black tea sweetened with authentic roasted brown sugar syrup and milk (Regular: ₱90 | Large: ₱100)",
+        "allergens": "Dairy (Optional)",
+        "healthIndicators": "Deep Roasted Molasses Sweetness",
+        "nutrition": {
+          "calories": 270,
+          "protein": 2,
+          "carbs": 56,
+          "fat": 5
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-matcha-milktea",
+        "name": "Matcha Milktea",
+        "price": 110,
+        "ingredients": "Stone-ground Japanese green tea matcha whisked with fresh milk and mild cane syrup (Regular: ₱110 | Large: ₱120)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Antioxidant Rich, EGCG Polyphenols",
+        "nutrition": {
+          "calories": 250,
+          "protein": 4,
+          "carbs": 46,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-dark-chocolate-milktea",
+        "name": "Dark Chocolate Milktea",
+        "price": 110,
+        "ingredients": "Intense premium Dutch dark cocoa melted into brewed black tea and velvety cream (Regular: ₱110 | Large: ₱120)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Rich Flavonoids, Deep Cacao Indulgence",
+        "nutrition": {
+          "calories": 290,
+          "protein": 5,
+          "carbs": 52,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1541658016709-82535e94bc69?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chocomalt-milktea",
+        "name": "Chocomalt Milktea",
+        "price": 105,
+        "ingredients": "Creamy malted chocolate powder shaken with freshly steeped black tea and milk (Regular: ₱105 | Large: ₱115)",
+        "allergens": "Contains Gluten, Dairy",
+        "healthIndicators": "Malty Chocolate Classic",
+        "nutrition": {
+          "calories": 280,
+          "protein": 4,
+          "carbs": 55,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1541658016709-82535e94bc69?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-taro-milktea",
+        "name": "Taro Milktea",
+        "price": 90,
+        "ingredients": "Sweet earthy purple taro root blend infused with creamy milk and jasmine green tea (Regular: ₱90 | Large: ₱100)",
+        "allergens": "Dairy (Optional)",
+        "healthIndicators": "Sweet Nutty Aroma",
+        "nutrition": {
+          "calories": 265,
+          "protein": 2,
+          "carbs": 54,
+          "fat": 5
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-addon-nata",
+        "name": "Add-On: Nata de Coco",
+        "price": 15,
+        "ingredients": "Chewy fermented coconut water jelly cubes",
+        "allergens": "None",
+        "healthIndicators": "Low Calorie Fiber",
+        "nutrition": {
+          "calories": 35,
+          "protein": 0,
+          "carbs": 9,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-addon-coffee-jelly",
+        "name": "Add-On: Coffee Jelly",
+        "price": 15,
+        "ingredients": "Handmade espresso-infused agar jelly cubes with a bittersweet aroma",
+        "allergens": "None",
+        "healthIndicators": "Artisanal Coffee Texture",
+        "nutrition": {
+          "calories": 25,
+          "protein": 0,
+          "carbs": 6,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-addon-pearl",
+        "name": "Add-On: Tapioca Pearls",
+        "price": 10,
+        "ingredients": "Freshly boiled chewy black boba tapioca pearls soaked in brown sugar syrup",
+        "allergens": "None",
+        "healthIndicators": "Traditional Boba Topping",
+        "nutrition": {
+          "calories": 75,
+          "protein": 0,
+          "carbs": 19,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-addon-oreo",
+        "name": "Add-On: Crushed Oreo",
+        "price": 15,
+        "ingredients": "Crumbled chocolate sandwich cookies with vanilla cream filling",
+        "allergens": "Contains Gluten, Soy",
+        "healthIndicators": "Cookie Crunch Topping",
+        "nutrition": {
+          "calories": 65,
+          "protein": 1,
+          "carbs": 10,
+          "fat": 3
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-addon-creampuff",
+        "name": "Add-On: CreamPuff Cheese Cloud",
+        "price": 15,
+        "ingredients": "Velvety salted cheese mousse and sweet whipped cream puff layer",
+        "allergens": "Contains Dairy, Eggs",
+        "healthIndicators": "Creamy Salted Layer",
+        "nutrition": {
+          "calories": 85,
+          "protein": 2,
+          "carbs": 6,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-addon-espresso",
+        "name": "Add-On: Extra Espresso Shot",
+        "price": 50,
+        "ingredients": "Fresh pulled single shot of dark roasted espresso beans",
+        "allergens": "None",
+        "healthIndicators": "Zero Calorie Caffeine Boost",
+        "nutrition": {
+          "calories": 5,
+          "protein": 0,
+          "carbs": 1,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-hot-americano",
+        "name": "Hot Americano",
+        "price": 80,
+        "ingredients": "Double shot of rich espresso poured over steaming hot purified water (Regular: ₱80 | Large: ₱90)",
+        "allergens": "None",
+        "healthIndicators": "Zero Sugar, Keto Friendly, Clean Energy",
+        "nutrition": {
+          "calories": 5,
+          "protein": 0,
+          "carbs": 1,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-hot-cafe-latte",
+        "name": "Hot Cafe Latte",
+        "price": 120,
+        "ingredients": "Smooth espresso pulled over freshly steamed velvety micro-foam milk (Regular: ₱120 | Large: ₱130)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Rich Calcium, Balanced Coffee",
+        "nutrition": {
+          "calories": 150,
+          "protein": 8,
+          "carbs": 12,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-hot-cappuccino",
+        "name": "Hot Cappuccino",
+        "price": 120,
+        "ingredients": "Equal parts bold espresso, hot steamed milk, and a thick airy crown of frothed foam dusted with cocoa (Regular: ₱120 | Large: ₱130)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Aromatic Italian Classic",
+        "nutrition": {
+          "calories": 130,
+          "protein": 7,
+          "carbs": 10,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-hot-cafe-mocha",
+        "name": "Hot Cafe Mocha",
+        "price": 140,
+        "ingredients": "Rich espresso combined with dark chocolate ganache and steamed milk, capped with light foam (Regular: ₱140 | Large: ₱150)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Antioxidant Cocoa & Caffeine Fusion",
+        "nutrition": {
+          "calories": 260,
+          "protein": 9,
+          "carbs": 32,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-hot-caramel-latte",
+        "name": "Hot Caramel Latte",
+        "price": 140,
+        "ingredients": "Full-bodied espresso infused with buttery caramel syrup and steamed whole milk (Regular: ₱140 | Large: ₱150)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Warm Sweet Caramel Indulgence",
+        "nutrition": {
+          "calories": 230,
+          "protein": 7,
+          "carbs": 34,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-hot-matcha",
+        "name": "Hot Matcha Latte",
+        "price": 140,
+        "ingredients": "Pure ceremonial-grade matcha steamed with sweet whole milk into a frothy jade green cup (Regular: ₱140 | Large: ₱150)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Rich in Catechins, Calm Focus",
+        "nutrition": {
+          "calories": 180,
+          "protein": 7,
+          "carbs": 24,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-americano",
+        "name": "Iced Americano",
+        "price": 90,
+        "ingredients": "Double espresso shots poured over cold purified water and crystallized ice cubes (Regular: ₱90 | Large: ₱100)",
+        "allergens": "None",
+        "healthIndicators": "Zero Sugar, Refreshing Clean Caffeine",
+        "nutrition": {
+          "calories": 5,
+          "protein": 0,
+          "carbs": 1,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-latte",
+        "name": "Iced Latte",
+        "price": 130,
+        "ingredients": "Fresh espresso poured over cold fresh milk and cracked ice (Regular: ₱130 | Large: ₱140)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Smooth Refreshing Calcium",
+        "nutrition": {
+          "calories": 140,
+          "protein": 7,
+          "carbs": 12,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-mocha",
+        "name": "Iced Mocha",
+        "price": 150,
+        "ingredients": "Double espresso blended with premium dark chocolate syrup, chilled milk, and ice (Regular: ₱150 | Large: ₱160)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Chocolate & Coffee Fusion",
+        "nutrition": {
+          "calories": 250,
+          "protein": 8,
+          "carbs": 35,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-matcha-latte",
+        "name": "Iced Matcha Latte",
+        "price": 160,
+        "ingredients": "Whisked Japanese green tea matcha layered over sweetened chilled fresh milk and ice (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Green Tea Antioxidants, Sustained Energy",
+        "nutrition": {
+          "calories": 200,
+          "protein": 6,
+          "carbs": 28,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-spanish-latte",
+        "name": "Iced Spanish Latte",
+        "price": 170,
+        "ingredients": "Signature rich espresso poured over sweet condensed milk, fresh milk, and cracked ice (Regular: ₱170 | Large: ₱180)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Sweet Creamy Barista Favorite",
+        "nutrition": {
+          "calories": 270,
+          "protein": 7,
+          "carbs": 42,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-seasalt-latte",
+        "name": "Iced SeaSalt Latte",
+        "price": 170,
+        "ingredients": "Chilled iced espresso and milk topped with a decadent whipped sea-salt cream cheese foam (Regular: ₱170 | Large: ₱180)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Savory Sweet Gourmet Foam",
+        "nutrition": {
+          "calories": 280,
+          "protein": 6,
+          "carbs": 32,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-caramel-latte",
+        "name": "Iced Caramel Latte",
+        "price": 160,
+        "ingredients": "Bold espresso blended with rich amber caramel syrup, chilled milk, and crushed ice (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Silky Caramel Sweetness",
+        "nutrition": {
+          "calories": 240,
+          "protein": 6,
+          "carbs": 38,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-curly-tops",
+        "name": "Blended Curly Tops Frappe",
+        "price": 140,
+        "ingredients": "Iconic Filipino Curly Tops milk chocolates blended into rich icy shake, topped with whipped cream (Regular: ₱140 | Large: ₱150)",
+        "allergens": "Contains Dairy, Soy",
+        "healthIndicators": "Nostalgic Chocolate Treat",
+        "nutrition": {
+          "calories": 360,
+          "protein": 6,
+          "carbs": 54,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-choco-oreo",
+        "name": "Blended Choco Oreo Frappe",
+        "price": 140,
+        "ingredients": "Crisp Oreo cookie bits blended with dark chocolate and ice cream base, topped with cookie crunch (Regular: ₱140 | Large: ₱150)",
+        "allergens": "Contains Dairy, Gluten, Soy",
+        "healthIndicators": "Indulgent Cookies & Cream",
+        "nutrition": {
+          "calories": 380,
+          "protein": 6,
+          "carbs": 58,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-dark-choco",
+        "name": "Blended Dark Choco Frappe",
+        "price": 140,
+        "ingredients": "Decadent Dutch cocoa blended ice frappe with whipped cream and chocolate drizzle (Regular: ₱140 | Large: ₱150)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Deep Cacao Flavonoids",
+        "nutrition": {
+          "calories": 350,
+          "protein": 7,
+          "carbs": 52,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-matcha-vanilla",
+        "name": "Blended Matcha Vanilla Frappe",
+        "price": 150,
+        "ingredients": "Japanese green matcha blended with smooth French vanilla ice cream base and whipped cream (Regular: ₱150 | Large: ₱160)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Matcha Antioxidants, Smooth Vanilla",
+        "nutrition": {
+          "calories": 340,
+          "protein": 6,
+          "carbs": 50,
+          "fat": 13
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-matcha-oreo",
+        "name": "Blended Matcha Oreo Frappe",
+        "price": 160,
+        "ingredients": "Earthy matcha green tea frappe loaded with crushed Oreo cookie chunks and whipped cream (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy, Gluten, Soy",
+        "healthIndicators": "Matcha & Oreo Cookie Fusion",
+        "nutrition": {
+          "calories": 390,
+          "protein": 6,
+          "carbs": 58,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-matcha-choco-chip",
+        "name": "Blended Matcha Choco Chip Frappe",
+        "price": 160,
+        "ingredients": "Fragrant matcha frappe with crunchy dark chocolate chips dispersed throughout (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy, Soy",
+        "healthIndicators": "Textured Green Tea Frappe",
+        "nutrition": {
+          "calories": 380,
+          "protein": 6,
+          "carbs": 55,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-matcha-strawberry",
+        "name": "Blended Matcha Strawberry Frappe",
+        "price": 160,
+        "ingredients": "Layered matcha green tea and sweet real strawberry puree blended with cream (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Antioxidant Duo: Matcha & Strawberry",
+        "nutrition": {
+          "calories": 360,
+          "protein": 5,
+          "carbs": 56,
+          "fat": 13
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-strawberry",
+        "name": "Blended Strawberry Frappe",
+        "price": 150,
+        "ingredients": "Real strawberry puree blended with creamy milk base and topped with sweet whipped cream (Regular: ₱150 | Large: ₱160)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Vitamin C, Fruity Indulgence",
+        "nutrition": {
+          "calories": 320,
+          "protein": 5,
+          "carbs": 52,
+          "fat": 11
+        },
+        "image": "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-strawberry-cookie",
+        "name": "Blended Strawberry Cookie Frappe",
+        "price": 160,
+        "ingredients": "Strawberry ice cream frappe blended with buttery shortbread cookies and whipped cream (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Strawberry Shortcake in a Glass",
+        "nutrition": {
+          "calories": 380,
+          "protein": 5,
+          "carbs": 59,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-blueberry",
+        "name": "Blended Blueberry Frappe",
+        "price": 150,
+        "ingredients": "Antioxidant rich blueberry compote spun into velvety icy frappe with whipped swirl (Regular: ₱150 | Large: ₱160)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Anthocyanins Rich, Berry Boost",
+        "nutrition": {
+          "calories": 330,
+          "protein": 5,
+          "carbs": 54,
+          "fat": 11
+        },
+        "image": "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-coffee-jelly",
+        "name": "Blended Coffee Jelly Frappe",
+        "price": 170,
+        "ingredients": "Espresso frappe loaded with handmade chewy coffee jelly cubes and crowned with whipped cream (Regular: ₱170 | Large: ₱180)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Double Coffee Infusion",
+        "nutrition": {
+          "calories": 360,
+          "protein": 6,
+          "carbs": 52,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-java-chips",
+        "name": "Blended Java Chips Frappe",
+        "price": 160,
+        "ingredients": "Bold espresso blended with chocolate chips, dark mocha sauce, ice, and whipped cream (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy, Soy",
+        "healthIndicators": "Caffeinated Chocolate Crunch",
+        "nutrition": {
+          "calories": 410,
+          "protein": 7,
+          "carbs": 58,
+          "fat": 17
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-salted-caramel",
+        "name": "Blended Salted Caramel Frappe",
+        "price": 150,
+        "ingredients": "Artisanal espresso blended with rich buttery sea-salted caramel syrup, milk, and whipped swirl (Regular: ₱150 | Large: ₱160)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Gourmet Sweet-Salty Roast",
+        "nutrition": {
+          "calories": 370,
+          "protein": 6,
+          "carbs": 55,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-oreo-caramel",
+        "name": "Blended Oreo Caramel Frappe",
+        "price": 170,
+        "ingredients": "Espresso coffee frappe blended with Oreo cookies and golden caramel drizzle (Regular: ₱170 | Large: ₱180)",
+        "allergens": "Contains Dairy, Gluten, Soy",
+        "healthIndicators": "Cookie Caramel Espresso Delight",
+        "nutrition": {
+          "calories": 420,
+          "protein": 6,
+          "carbs": 62,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-dark-chocolate-coffee",
+        "name": "Blended Dark Chocolate Coffee Frappe",
+        "price": 160,
+        "ingredients": "Double espresso infused with heavy dark Dutch cocoa, blended with crushed ice and cream (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Rich Mocha Energy",
+        "nutrition": {
+          "calories": 380,
+          "protein": 7,
+          "carbs": 54,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-choco-oreo-coffee",
+        "name": "Blended Choco Oreo Coffee Frappe",
+        "price": 150,
+        "ingredients": "Smooth espresso blended with Oreo cookie crumbles and milk chocolate sauce (Regular: ₱150 | Large: ₱160)",
+        "allergens": "Contains Dairy, Gluten, Soy",
+        "healthIndicators": "Caffeinated Cookies & Cream",
+        "nutrition": {
+          "calories": 390,
+          "protein": 6,
+          "carbs": 59,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-beef-tapa-rice",
+        "name": "Beef Tapa Rice Meal",
+        "price": 180,
+        "ingredients": "Tender cured sirloin beef strips marinated in garlic and calamansi, served with fried garlic rice and fried egg",
+        "allergens": "Contains Eggs, Soy",
+        "healthIndicators": "High Protein, Classic Filipino Favorite",
+        "nutrition": {
+          "calories": 580,
+          "protein": 34,
+          "carbs": 58,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-sisig-rice",
+        "name": "Sisig Rice Meal",
+        "price": 150,
+        "ingredients": "Sizzling minced pork belly and jowl tossed with onions, chili peppers, and calamansi, served with steamed rice and egg",
+        "allergens": "Contains Eggs",
+        "healthIndicators": "Authentic Kapampangan Sizzle",
+        "nutrition": {
+          "calories": 620,
+          "protein": 28,
+          "carbs": 55,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-tonkatsu-rice",
+        "name": "Tonkatsu Rice Meal",
+        "price": 160,
+        "ingredients": "Panko breaded deep-fried pork cutlet drizzled with Japanese tonkatsu glaze, served with steamed rice and coleslaw",
+        "allergens": "Contains Gluten, Eggs, Soy",
+        "healthIndicators": "Crispy Japanese Comfort Food",
+        "nutrition": {
+          "calories": 650,
+          "protein": 32,
+          "carbs": 64,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chicken-fillet-rice",
+        "name": "Chicken Fillet Rice Meal",
+        "price": 150,
+        "ingredients": "Golden fried crispy boneless chicken breast fillet served with creamy savory gravy and steamed white rice",
+        "allergens": "Contains Gluten, Dairy",
+        "healthIndicators": "High Lean Protein",
+        "nutrition": {
+          "calories": 560,
+          "protein": 35,
+          "carbs": 58,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-sizzling-porkchop-rice",
+        "name": "Sizzling Porkchop Rice Meal",
+        "price": 160,
+        "ingredients": "Tender bone-in porkchop seared on hot skillet with rich pepper mushroom gravy, served with hot rice",
+        "allergens": "Contains Gluten, Soy",
+        "healthIndicators": "Hearty Savory Dinner",
+        "nutrition": {
+          "calories": 640,
+          "protein": 38,
+          "carbs": 54,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chicken-pop-rice",
+        "name": "Chicken Pop Rice Meal",
+        "price": 90,
+        "ingredients": "Bite-sized crispy popcorn chicken bites tossed in your choice of Soy Garlic, BBQ, or Garlic Parmesan sauce with rice",
+        "allergens": "Contains Gluten, Dairy (Garlic Parm), Soy",
+        "healthIndicators": "Crispy Flavorful Bites",
+        "nutrition": {
+          "calories": 490,
+          "protein": 24,
+          "carbs": 56,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-mixed-seafoods-oyster",
+        "name": "Mixed Seafoods with Oyster Sauce",
+        "price": 390,
+        "ingredients": "Plump shrimp, tender squid rings, and seasonal fish stir-fried with bell peppers, onions, and mushrooms in savory garlic oyster sauce",
+        "allergens": "Contains Crustaceans, Molluscs, Fish, Soy",
+        "healthIndicators": "High Lean Protein, Omega-3 Fatty Acids",
+        "nutrition": {
+          "calories": 420,
+          "protein": 44,
+          "carbs": 22,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-pigar-pigar",
+        "name": "Pigar-Pigar",
+        "price": 350,
+        "ingredients": "Thinly sliced premium beef tenderloin flash-fried with cabbage, sweet white onions, and garlic in light seasonings",
+        "allergens": "Contains Soy",
+        "healthIndicators": "High Protein, Traditional Northern Delicacy",
+        "nutrition": {
+          "calories": 460,
+          "protein": 42,
+          "carbs": 14,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-sisig-alacarte",
+        "name": "Sisig (Ala Carte)",
+        "price": 180,
+        "ingredients": "Generous sizzling platter of chopped crispy pork mask, chicken liver, toasted garlic, red onions, fresh chili peppers, and calamansi",
+        "allergens": "Contains Eggs (Optional)",
+        "healthIndicators": "Quintessential Kapampangan Specialty",
+        "nutrition": {
+          "calories": 680,
+          "protein": 38,
+          "carbs": 12,
+          "fat": 52
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-crispy-kare-kare",
+        "name": "Crispy Kare-Kare",
+        "price": 350,
+        "ingredients": "Deep-fried golden crispy pork belly cuts served over rich peanut annatto stew with eggplant, string beans, bok choy, and sauteed bagoong alamang",
+        "allergens": "Contains Peanuts, Crustaceans",
+        "healthIndicators": "Rich Peanut Flavonoids & Fiber",
+        "nutrition": {
+          "calories": 780,
+          "protein": 46,
+          "carbs": 32,
+          "fat": 54
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chicken-fillet-alacarte",
+        "name": "Chicken Fillet (Ala Carte)",
+        "price": 180,
+        "ingredients": "Golden breaded boneless chicken breast fillets served with creamy white mushroom pepper dipping gravy",
+        "allergens": "Contains Gluten, Dairy",
+        "healthIndicators": "Crispy Lean Poultry",
+        "nutrition": {
+          "calories": 520,
+          "protein": 48,
+          "carbs": 24,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-tonkatsu-coleslaw-alacarte",
+        "name": "Tonkatsu with Coleslaw (Ala Carte)",
+        "price": 290,
+        "ingredients": "Twin crispy Japanese panko pork cutlets served with sweet savory bulldog sauce and fresh shredded cabbage carrot coleslaw",
+        "allergens": "Contains Gluten, Eggs, Soy",
+        "healthIndicators": "Crispy Sharing Platter",
+        "nutrition": {
+          "calories": 690,
+          "protein": 45,
+          "carbs": 36,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-carbonara",
+        "name": "Creamy Carbonara",
+        "price": 170,
+        "ingredients": "Fettuccine pasta tossed in rich parmesan cream sauce, crispy smoked bacon bits, sliced button mushrooms, and garlic bread",
+        "allergens": "Contains Dairy, Gluten, Eggs",
+        "healthIndicators": "Hearty Italian Comfort",
+        "nutrition": {
+          "calories": 540,
+          "protein": 18,
+          "carbs": 62,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chicken-pesto",
+        "name": "Chicken Pesto Pasta",
+        "price": 190,
+        "ingredients": "Al dente penne pasta enrobed in fragrant fresh basil pesto, extra virgin olive oil, grilled chicken strips, and parmesan shavings",
+        "allergens": "Contains Dairy, Gluten, Tree Nuts",
+        "healthIndicators": "Heart-Healthy Monounsaturated Fats, Antioxidants",
+        "nutrition": {
+          "calories": 510,
+          "protein": 26,
+          "carbs": 54,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-filipino-spaghetti",
+        "name": "Filipino Style Spaghetti",
+        "price": 160,
+        "ingredients": "Spaghetti noodles in signature sweet tomato sauce with ground pork, sliced red hotdogs, and a generous mound of cheddar cheese",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Sweet Fiesta Classic",
+        "nutrition": {
+          "calories": 530,
+          "protein": 20,
+          "carbs": 74,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1621996346565-e3d5d6281696?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-shrimp-spaghetti",
+        "name": "Shrimp Spaghetti",
+        "price": 235,
+        "ingredients": "Succulent sauteed shrimp tossed with garlic, crushed red pepper flakes, sweet cherry tomatoes, and white wine butter sauce over spaghetti",
+        "allergens": "Contains Crustaceans, Gluten, Dairy",
+        "healthIndicators": "Lean Marine Protein, Heart Healthy Olive Oil",
+        "nutrition": {
+          "calories": 480,
+          "protein": 25,
+          "carbs": 58,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-caesar-salad",
+        "name": "Caesar Salad",
+        "price": 180,
+        "ingredients": "Crisp romaine lettuce hearts, herb garlic croutons, crispy bacon lardons, shaved parmesan, and creamy anchovy Caesar dressing",
+        "allergens": "Contains Dairy, Gluten, Eggs, Fish",
+        "healthIndicators": "Fresh Leafy Greens, High Fiber",
+        "nutrition": {
+          "calories": 280,
+          "protein": 8,
+          "carbs": 16,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chicken-caesar-salad",
+        "name": "Chicken Caesar Salad",
+        "price": 250,
+        "ingredients": "Tender grilled herb chicken breast strips layered over crisp romaine, garlic croutons, crispy bacon, and creamy parmesan Caesar dressing",
+        "allergens": "Contains Dairy, Gluten, Eggs, Fish",
+        "healthIndicators": "High Lean Protein, Vitamin K & A",
+        "nutrition": {
+          "calories": 380,
+          "protein": 32,
+          "carbs": 18,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-tempura-salad",
+        "name": "Tempura Salad",
+        "price": 250,
+        "ingredients": "Crispy golden Japanese shrimp tempura nestled on a vibrant bed of mixed salad greens, cucumber ribbons, and sweet sesame dressing",
+        "allergens": "Contains Crustaceans, Gluten, Sesame, Soy",
+        "healthIndicators": "Crisp Seafood & Fresh Greens",
+        "nutrition": {
+          "calories": 360,
+          "protein": 18,
+          "carbs": 32,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-nachos",
+        "name": "Loaded Nachos",
+        "price": 190,
+        "ingredients": "Crispy corn tortilla chips piled high with seasoned ground beef, fresh tomato onion salsa, melted cheese sauce, and jalapeno slices",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Sharing Snack Platter",
+        "nutrition": {
+          "calories": 580,
+          "protein": 20,
+          "carbs": 56,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-flavored-fries",
+        "name": "Flavored French Fries",
+        "price": 90,
+        "ingredients": "Crispy golden shoestring potato fries tossed in your choice of Cheese, BBQ, or Sour Cream flavoring powder",
+        "allergens": "Contains Dairy (Cheese & Sour Cream)",
+        "healthIndicators": "Classic Comfort Crunch",
+        "nutrition": {
+          "calories": 320,
+          "protein": 4,
+          "carbs": 42,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-clubhouse-sandwich",
+        "name": "Clubhouse Sandwich",
+        "price": 180,
+        "ingredients": "Triple-decker toasted wheat bread packed with roasted chicken spread, sweet ham, sliced cheddar, fried egg, lettuce, tomato, served with potato chips",
+        "allergens": "Contains Dairy, Gluten, Eggs",
+        "healthIndicators": "Hearty Multi-Layer Protein",
+        "nutrition": {
+          "calories": 520,
+          "protein": 26,
+          "carbs": 48,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chicken-sandwich",
+        "name": "Crispy Chicken Sandwich",
+        "price": 235,
+        "ingredients": "Crispy buttermilk fried chicken breast fillet, creamy coleslaw, dill pickles, and house special sauce in a toasted brioche bun with fries",
+        "allergens": "Contains Gluten, Dairy, Eggs",
+        "healthIndicators": "High Protein, Satisfying Meal",
+        "nutrition": {
+          "calories": 590,
+          "protein": 34,
+          "carbs": 52,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-grilled-double-cheese",
+        "name": "Grilled Double Cheese Sandwich",
+        "price": 130,
+        "ingredients": "Thick-sliced buttery artisanal bread griddled golden with melted sharp cheddar and creamy mozzarella cheese",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Warm Melted Comfort",
+        "nutrition": {
+          "calories": 430,
+          "protein": 16,
+          "carbs": 36,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-savory-fries",
+        "name": "Savory Fries",
+        "price": 160,
+        "ingredients": "Crisp golden fries drizzled with savory garlic herb butter, grated parmesan cheese, and house aioli dip",
+        "allergens": "Contains Dairy, Eggs",
+        "healthIndicators": "Artisanal Loaded Fries",
+        "nutrition": {
+          "calories": 420,
+          "protein": 6,
+          "carbs": 46,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-beefy-fries",
+        "name": "Beefy Loaded Fries",
+        "price": 160,
+        "ingredients": "Crispy French fries smothered with seasoned ground beef, warm cheese sauce, diced red onions, and parsley",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Hearty Loaded Snack",
+        "nutrition": {
+          "calories": 480,
+          "protein": 16,
+          "carbs": 48,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=500&q=80"
+      }
+    ],
+    "occupancy": [
+      15,
+      30,
+      50,
+      70,
+      85,
+      80,
+      65,
+      50,
+      65,
+      80,
+      85,
+      75,
+      55,
+      35,
+      20,
+      10,
+      5,
+      0,
+      0,
+      0,
+      0,
+      0,
+      5,
+      10
+    ],
+    "menu": [
+      {
+        "id": "cnc-lemonade",
+        "name": "Lemonade",
+        "price": 90,
+        "ingredients": "Freshly squeezed lemon juice, simple syrup, filtered water, chilled ice, lemon slice garnish",
+        "allergens": "None",
+        "healthIndicators": "Vitamin C Rich, Hydrating",
+        "nutrition": {
+          "calories": 110,
+          "protein": 1,
+          "carbs": 28,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-lemon-cucumber",
+        "name": "Lemon Cucumber Juice",
+        "price": 110,
+        "ingredients": "Fresh crisp cucumber extract, zesty lemon juice, natural cane sugar, chilled filtered water, mint leaf",
+        "allergens": "None",
+        "healthIndicators": "Detoxifying, Antioxidant Packed, Refreshing",
+        "nutrition": {
+          "calories": 95,
+          "protein": 1,
+          "carbs": 24,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-green-apple-juice",
+        "name": "Green Apple Juice",
+        "price": 60,
+        "ingredients": "Tart and sweet green apple juice blend served cold over cracked ice",
+        "allergens": "None",
+        "healthIndicators": "Refreshing Fruit Drink, Vitamin Rich",
+        "nutrition": {
+          "calories": 120,
+          "protein": 0,
+          "carbs": 30,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-green-apple-yogurt",
+        "name": "Green Apple Yogurt Smoothie",
+        "price": 140,
+        "ingredients": "Tangy green apple puree blended with probiotic creamy yogurt and crushed ice",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Probiotics & Gut Friendly, Calcium Rich",
+        "nutrition": {
+          "calories": 210,
+          "protein": 6,
+          "carbs": 42,
+          "fat": 3
+        },
+        "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-strawberry-yogurt",
+        "name": "Strawberry Yogurt Smoothie",
+        "price": 140,
+        "ingredients": "Real strawberry reduction whipped with probiotic creamy yogurt and crushed ice",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Antioxidants, Probiotic Culture",
+        "nutrition": {
+          "calories": 220,
+          "protein": 6,
+          "carbs": 44,
+          "fat": 3
+        },
+        "image": "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blueberry-yogurt",
+        "name": "Blueberry Yogurt Smoothie",
+        "price": 140,
+        "ingredients": "Lush blueberry compote blended smoothly with wholesome probiotic yogurt",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Brain Health, High Anthocyanins",
+        "nutrition": {
+          "calories": 215,
+          "protein": 6,
+          "carbs": 43,
+          "fat": 3
+        },
+        "image": "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-classic-milktea",
+        "name": "Classic Milktea",
+        "price": 70,
+        "ingredients": "Slow-brewed black Ceylon tea, creamy non-dairy milk blend, caramelized brown sugar syrup (Regular: ₱70 | Large: ₱80)",
+        "allergens": "Dairy (Optional)",
+        "healthIndicators": "Classic Comfort Drink",
+        "nutrition": {
+          "calories": 240,
+          "protein": 2,
+          "carbs": 48,
+          "fat": 5
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-wintermelon-milktea",
+        "name": "Wintermelon Milktea",
+        "price": 90,
+        "ingredients": "Rich brewed black tea infused with fragrant wintermelon syrup and velvety milk (Regular: ₱90 | Large: ₱100)",
+        "allergens": "Dairy (Optional)",
+        "healthIndicators": "Fragrant Caramel-Melon Notes",
+        "nutrition": {
+          "calories": 260,
+          "protein": 2,
+          "carbs": 54,
+          "fat": 5
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-okinawa-milktea",
+        "name": "Okinawa Milktea",
+        "price": 90,
+        "ingredients": "Robust black tea sweetened with authentic roasted brown sugar syrup and milk (Regular: ₱90 | Large: ₱100)",
+        "allergens": "Dairy (Optional)",
+        "healthIndicators": "Deep Roasted Molasses Sweetness",
+        "nutrition": {
+          "calories": 270,
+          "protein": 2,
+          "carbs": 56,
+          "fat": 5
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-matcha-milktea",
+        "name": "Matcha Milktea",
+        "price": 110,
+        "ingredients": "Stone-ground Japanese green tea matcha whisked with fresh milk and mild cane syrup (Regular: ₱110 | Large: ₱120)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Antioxidant Rich, EGCG Polyphenols",
+        "nutrition": {
+          "calories": 250,
+          "protein": 4,
+          "carbs": 46,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-dark-chocolate-milktea",
+        "name": "Dark Chocolate Milktea",
+        "price": 110,
+        "ingredients": "Intense premium Dutch dark cocoa melted into brewed black tea and velvety cream (Regular: ₱110 | Large: ₱120)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Rich Flavonoids, Deep Cacao Indulgence",
+        "nutrition": {
+          "calories": 290,
+          "protein": 5,
+          "carbs": 52,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1541658016709-82535e94bc69?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chocomalt-milktea",
+        "name": "Chocomalt Milktea",
+        "price": 105,
+        "ingredients": "Creamy malted chocolate powder shaken with freshly steeped black tea and milk (Regular: ₱105 | Large: ₱115)",
+        "allergens": "Contains Gluten, Dairy",
+        "healthIndicators": "Malty Chocolate Classic",
+        "nutrition": {
+          "calories": 280,
+          "protein": 4,
+          "carbs": 55,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1541658016709-82535e94bc69?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-taro-milktea",
+        "name": "Taro Milktea",
+        "price": 90,
+        "ingredients": "Sweet earthy purple taro root blend infused with creamy milk and jasmine green tea (Regular: ₱90 | Large: ₱100)",
+        "allergens": "Dairy (Optional)",
+        "healthIndicators": "Sweet Nutty Aroma",
+        "nutrition": {
+          "calories": 265,
+          "protein": 2,
+          "carbs": 54,
+          "fat": 5
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-addon-nata",
+        "name": "Add-On: Nata de Coco",
+        "price": 15,
+        "ingredients": "Chewy fermented coconut water jelly cubes",
+        "allergens": "None",
+        "healthIndicators": "Low Calorie Fiber",
+        "nutrition": {
+          "calories": 35,
+          "protein": 0,
+          "carbs": 9,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-addon-coffee-jelly",
+        "name": "Add-On: Coffee Jelly",
+        "price": 15,
+        "ingredients": "Handmade espresso-infused agar jelly cubes with a bittersweet aroma",
+        "allergens": "None",
+        "healthIndicators": "Artisanal Coffee Texture",
+        "nutrition": {
+          "calories": 25,
+          "protein": 0,
+          "carbs": 6,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-addon-pearl",
+        "name": "Add-On: Tapioca Pearls",
+        "price": 10,
+        "ingredients": "Freshly boiled chewy black boba tapioca pearls soaked in brown sugar syrup",
+        "allergens": "None",
+        "healthIndicators": "Traditional Boba Topping",
+        "nutrition": {
+          "calories": 75,
+          "protein": 0,
+          "carbs": 19,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-addon-oreo",
+        "name": "Add-On: Crushed Oreo",
+        "price": 15,
+        "ingredients": "Crumbled chocolate sandwich cookies with vanilla cream filling",
+        "allergens": "Contains Gluten, Soy",
+        "healthIndicators": "Cookie Crunch Topping",
+        "nutrition": {
+          "calories": 65,
+          "protein": 1,
+          "carbs": 10,
+          "fat": 3
+        },
+        "image": "https://images.unsplash.com/photo-1558857563-b37fe78a7f4e?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-addon-creampuff",
+        "name": "Add-On: CreamPuff Cheese Cloud",
+        "price": 15,
+        "ingredients": "Velvety salted cheese mousse and sweet whipped cream puff layer",
+        "allergens": "Contains Dairy, Eggs",
+        "healthIndicators": "Creamy Salted Layer",
+        "nutrition": {
+          "calories": 85,
+          "protein": 2,
+          "carbs": 6,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-addon-espresso",
+        "name": "Add-On: Extra Espresso Shot",
+        "price": 50,
+        "ingredients": "Fresh pulled single shot of dark roasted espresso beans",
+        "allergens": "None",
+        "healthIndicators": "Zero Calorie Caffeine Boost",
+        "nutrition": {
+          "calories": 5,
+          "protein": 0,
+          "carbs": 1,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-hot-americano",
+        "name": "Hot Americano",
+        "price": 80,
+        "ingredients": "Double shot of rich espresso poured over steaming hot purified water (Regular: ₱80 | Large: ₱90)",
+        "allergens": "None",
+        "healthIndicators": "Zero Sugar, Keto Friendly, Clean Energy",
+        "nutrition": {
+          "calories": 5,
+          "protein": 0,
+          "carbs": 1,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-hot-cafe-latte",
+        "name": "Hot Cafe Latte",
+        "price": 120,
+        "ingredients": "Smooth espresso pulled over freshly steamed velvety micro-foam milk (Regular: ₱120 | Large: ₱130)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Rich Calcium, Balanced Coffee",
+        "nutrition": {
+          "calories": 150,
+          "protein": 8,
+          "carbs": 12,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-hot-cappuccino",
+        "name": "Hot Cappuccino",
+        "price": 120,
+        "ingredients": "Equal parts bold espresso, hot steamed milk, and a thick airy crown of frothed foam dusted with cocoa (Regular: ₱120 | Large: ₱130)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Aromatic Italian Classic",
+        "nutrition": {
+          "calories": 130,
+          "protein": 7,
+          "carbs": 10,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-hot-cafe-mocha",
+        "name": "Hot Cafe Mocha",
+        "price": 140,
+        "ingredients": "Rich espresso combined with dark chocolate ganache and steamed milk, capped with light foam (Regular: ₱140 | Large: ₱150)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Antioxidant Cocoa & Caffeine Fusion",
+        "nutrition": {
+          "calories": 260,
+          "protein": 9,
+          "carbs": 32,
+          "fat": 10
+        },
+        "image": "https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-hot-caramel-latte",
+        "name": "Hot Caramel Latte",
+        "price": 140,
+        "ingredients": "Full-bodied espresso infused with buttery caramel syrup and steamed whole milk (Regular: ₱140 | Large: ₱150)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Warm Sweet Caramel Indulgence",
+        "nutrition": {
+          "calories": 230,
+          "protein": 7,
+          "carbs": 34,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-hot-matcha",
+        "name": "Hot Matcha Latte",
+        "price": 140,
+        "ingredients": "Pure ceremonial-grade matcha steamed with sweet whole milk into a frothy jade green cup (Regular: ₱140 | Large: ₱150)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Rich in Catechins, Calm Focus",
+        "nutrition": {
+          "calories": 180,
+          "protein": 7,
+          "carbs": 24,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-americano",
+        "name": "Iced Americano",
+        "price": 90,
+        "ingredients": "Double espresso shots poured over cold purified water and crystallized ice cubes (Regular: ₱90 | Large: ₱100)",
+        "allergens": "None",
+        "healthIndicators": "Zero Sugar, Refreshing Clean Caffeine",
+        "nutrition": {
+          "calories": 5,
+          "protein": 0,
+          "carbs": 1,
+          "fat": 0
+        },
+        "image": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-latte",
+        "name": "Iced Latte",
+        "price": 130,
+        "ingredients": "Fresh espresso poured over cold fresh milk and cracked ice (Regular: ₱130 | Large: ₱140)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Smooth Refreshing Calcium",
+        "nutrition": {
+          "calories": 140,
+          "protein": 7,
+          "carbs": 12,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-mocha",
+        "name": "Iced Mocha",
+        "price": 150,
+        "ingredients": "Double espresso blended with premium dark chocolate syrup, chilled milk, and ice (Regular: ₱150 | Large: ₱160)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Chocolate & Coffee Fusion",
+        "nutrition": {
+          "calories": 250,
+          "protein": 8,
+          "carbs": 35,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-matcha-latte",
+        "name": "Iced Matcha Latte",
+        "price": 160,
+        "ingredients": "Whisked Japanese green tea matcha layered over sweetened chilled fresh milk and ice (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Green Tea Antioxidants, Sustained Energy",
+        "nutrition": {
+          "calories": 200,
+          "protein": 6,
+          "carbs": 28,
+          "fat": 6
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-spanish-latte",
+        "name": "Iced Spanish Latte",
+        "price": 170,
+        "ingredients": "Signature rich espresso poured over sweet condensed milk, fresh milk, and cracked ice (Regular: ₱170 | Large: ₱180)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Sweet Creamy Barista Favorite",
+        "nutrition": {
+          "calories": 270,
+          "protein": 7,
+          "carbs": 42,
+          "fat": 8
+        },
+        "image": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-seasalt-latte",
+        "name": "Iced SeaSalt Latte",
+        "price": 170,
+        "ingredients": "Chilled iced espresso and milk topped with a decadent whipped sea-salt cream cheese foam (Regular: ₱170 | Large: ₱180)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Savory Sweet Gourmet Foam",
+        "nutrition": {
+          "calories": 280,
+          "protein": 6,
+          "carbs": 32,
+          "fat": 12
+        },
+        "image": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-iced-caramel-latte",
+        "name": "Iced Caramel Latte",
+        "price": 160,
+        "ingredients": "Bold espresso blended with rich amber caramel syrup, chilled milk, and crushed ice (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Silky Caramel Sweetness",
+        "nutrition": {
+          "calories": 240,
+          "protein": 6,
+          "carbs": 38,
+          "fat": 7
+        },
+        "image": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-curly-tops",
+        "name": "Blended Curly Tops Frappe",
+        "price": 140,
+        "ingredients": "Iconic Filipino Curly Tops milk chocolates blended into rich icy shake, topped with whipped cream (Regular: ₱140 | Large: ₱150)",
+        "allergens": "Contains Dairy, Soy",
+        "healthIndicators": "Nostalgic Chocolate Treat",
+        "nutrition": {
+          "calories": 360,
+          "protein": 6,
+          "carbs": 54,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-choco-oreo",
+        "name": "Blended Choco Oreo Frappe",
+        "price": 140,
+        "ingredients": "Crisp Oreo cookie bits blended with dark chocolate and ice cream base, topped with cookie crunch (Regular: ₱140 | Large: ₱150)",
+        "allergens": "Contains Dairy, Gluten, Soy",
+        "healthIndicators": "Indulgent Cookies & Cream",
+        "nutrition": {
+          "calories": 380,
+          "protein": 6,
+          "carbs": 58,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-dark-choco",
+        "name": "Blended Dark Choco Frappe",
+        "price": 140,
+        "ingredients": "Decadent Dutch cocoa blended ice frappe with whipped cream and chocolate drizzle (Regular: ₱140 | Large: ₱150)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Deep Cacao Flavonoids",
+        "nutrition": {
+          "calories": 350,
+          "protein": 7,
+          "carbs": 52,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-matcha-vanilla",
+        "name": "Blended Matcha Vanilla Frappe",
+        "price": 150,
+        "ingredients": "Japanese green matcha blended with smooth French vanilla ice cream base and whipped cream (Regular: ₱150 | Large: ₱160)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Matcha Antioxidants, Smooth Vanilla",
+        "nutrition": {
+          "calories": 340,
+          "protein": 6,
+          "carbs": 50,
+          "fat": 13
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-matcha-oreo",
+        "name": "Blended Matcha Oreo Frappe",
+        "price": 160,
+        "ingredients": "Earthy matcha green tea frappe loaded with crushed Oreo cookie chunks and whipped cream (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy, Gluten, Soy",
+        "healthIndicators": "Matcha & Oreo Cookie Fusion",
+        "nutrition": {
+          "calories": 390,
+          "protein": 6,
+          "carbs": 58,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-matcha-choco-chip",
+        "name": "Blended Matcha Choco Chip Frappe",
+        "price": 160,
+        "ingredients": "Fragrant matcha frappe with crunchy dark chocolate chips dispersed throughout (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy, Soy",
+        "healthIndicators": "Textured Green Tea Frappe",
+        "nutrition": {
+          "calories": 380,
+          "protein": 6,
+          "carbs": 55,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-matcha-strawberry",
+        "name": "Blended Matcha Strawberry Frappe",
+        "price": 160,
+        "ingredients": "Layered matcha green tea and sweet real strawberry puree blended with cream (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Antioxidant Duo: Matcha & Strawberry",
+        "nutrition": {
+          "calories": 360,
+          "protein": 5,
+          "carbs": 56,
+          "fat": 13
+        },
+        "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-strawberry",
+        "name": "Blended Strawberry Frappe",
+        "price": 150,
+        "ingredients": "Real strawberry puree blended with creamy milk base and topped with sweet whipped cream (Regular: ₱150 | Large: ₱160)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Vitamin C, Fruity Indulgence",
+        "nutrition": {
+          "calories": 320,
+          "protein": 5,
+          "carbs": 52,
+          "fat": 11
+        },
+        "image": "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-strawberry-cookie",
+        "name": "Blended Strawberry Cookie Frappe",
+        "price": 160,
+        "ingredients": "Strawberry ice cream frappe blended with buttery shortbread cookies and whipped cream (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Strawberry Shortcake in a Glass",
+        "nutrition": {
+          "calories": 380,
+          "protein": 5,
+          "carbs": 59,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-blueberry",
+        "name": "Blended Blueberry Frappe",
+        "price": 150,
+        "ingredients": "Antioxidant rich blueberry compote spun into velvety icy frappe with whipped swirl (Regular: ₱150 | Large: ₱160)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Anthocyanins Rich, Berry Boost",
+        "nutrition": {
+          "calories": 330,
+          "protein": 5,
+          "carbs": 54,
+          "fat": 11
+        },
+        "image": "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-coffee-jelly",
+        "name": "Blended Coffee Jelly Frappe",
+        "price": 170,
+        "ingredients": "Espresso frappe loaded with handmade chewy coffee jelly cubes and crowned with whipped cream (Regular: ₱170 | Large: ₱180)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Double Coffee Infusion",
+        "nutrition": {
+          "calories": 360,
+          "protein": 6,
+          "carbs": 52,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-java-chips",
+        "name": "Blended Java Chips Frappe",
+        "price": 160,
+        "ingredients": "Bold espresso blended with chocolate chips, dark mocha sauce, ice, and whipped cream (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy, Soy",
+        "healthIndicators": "Caffeinated Chocolate Crunch",
+        "nutrition": {
+          "calories": 410,
+          "protein": 7,
+          "carbs": 58,
+          "fat": 17
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-salted-caramel",
+        "name": "Blended Salted Caramel Frappe",
+        "price": 150,
+        "ingredients": "Artisanal espresso blended with rich buttery sea-salted caramel syrup, milk, and whipped swirl (Regular: ₱150 | Large: ₱160)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Gourmet Sweet-Salty Roast",
+        "nutrition": {
+          "calories": 370,
+          "protein": 6,
+          "carbs": 55,
+          "fat": 14
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-oreo-caramel",
+        "name": "Blended Oreo Caramel Frappe",
+        "price": 170,
+        "ingredients": "Espresso coffee frappe blended with Oreo cookies and golden caramel drizzle (Regular: ₱170 | Large: ₱180)",
+        "allergens": "Contains Dairy, Gluten, Soy",
+        "healthIndicators": "Cookie Caramel Espresso Delight",
+        "nutrition": {
+          "calories": 420,
+          "protein": 6,
+          "carbs": 62,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-dark-chocolate-coffee",
+        "name": "Blended Dark Chocolate Coffee Frappe",
+        "price": 160,
+        "ingredients": "Double espresso infused with heavy dark Dutch cocoa, blended with crushed ice and cream (Regular: ₱160 | Large: ₱170)",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Rich Mocha Energy",
+        "nutrition": {
+          "calories": 380,
+          "protein": 7,
+          "carbs": 54,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-blended-choco-oreo-coffee",
+        "name": "Blended Choco Oreo Coffee Frappe",
+        "price": 150,
+        "ingredients": "Smooth espresso blended with Oreo cookie crumbles and milk chocolate sauce (Regular: ₱150 | Large: ₱160)",
+        "allergens": "Contains Dairy, Gluten, Soy",
+        "healthIndicators": "Caffeinated Cookies & Cream",
+        "nutrition": {
+          "calories": 390,
+          "protein": 6,
+          "carbs": 59,
+          "fat": 15
+        },
+        "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-beef-tapa-rice",
+        "name": "Beef Tapa Rice Meal",
+        "price": 180,
+        "ingredients": "Tender cured sirloin beef strips marinated in garlic and calamansi, served with fried garlic rice and fried egg",
+        "allergens": "Contains Eggs, Soy",
+        "healthIndicators": "High Protein, Classic Filipino Favorite",
+        "nutrition": {
+          "calories": 580,
+          "protein": 34,
+          "carbs": 58,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-sisig-rice",
+        "name": "Sisig Rice Meal",
+        "price": 150,
+        "ingredients": "Sizzling minced pork belly and jowl tossed with onions, chili peppers, and calamansi, served with steamed rice and egg",
+        "allergens": "Contains Eggs",
+        "healthIndicators": "Authentic Kapampangan Sizzle",
+        "nutrition": {
+          "calories": 620,
+          "protein": 28,
+          "carbs": 55,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-tonkatsu-rice",
+        "name": "Tonkatsu Rice Meal",
+        "price": 160,
+        "ingredients": "Panko breaded deep-fried pork cutlet drizzled with Japanese tonkatsu glaze, served with steamed rice and coleslaw",
+        "allergens": "Contains Gluten, Eggs, Soy",
+        "healthIndicators": "Crispy Japanese Comfort Food",
+        "nutrition": {
+          "calories": 650,
+          "protein": 32,
+          "carbs": 64,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chicken-fillet-rice",
+        "name": "Chicken Fillet Rice Meal",
+        "price": 150,
+        "ingredients": "Golden fried crispy boneless chicken breast fillet served with creamy savory gravy and steamed white rice",
+        "allergens": "Contains Gluten, Dairy",
+        "healthIndicators": "High Lean Protein",
+        "nutrition": {
+          "calories": 560,
+          "protein": 35,
+          "carbs": 58,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-sizzling-porkchop-rice",
+        "name": "Sizzling Porkchop Rice Meal",
+        "price": 160,
+        "ingredients": "Tender bone-in porkchop seared on hot skillet with rich pepper mushroom gravy, served with hot rice",
+        "allergens": "Contains Gluten, Soy",
+        "healthIndicators": "Hearty Savory Dinner",
+        "nutrition": {
+          "calories": 640,
+          "protein": 38,
+          "carbs": 54,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chicken-pop-rice",
+        "name": "Chicken Pop Rice Meal",
+        "price": 90,
+        "ingredients": "Bite-sized crispy popcorn chicken bites tossed in your choice of Soy Garlic, BBQ, or Garlic Parmesan sauce with rice",
+        "allergens": "Contains Gluten, Dairy (Garlic Parm), Soy",
+        "healthIndicators": "Crispy Flavorful Bites",
+        "nutrition": {
+          "calories": 490,
+          "protein": 24,
+          "carbs": 56,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-mixed-seafoods-oyster",
+        "name": "Mixed Seafoods with Oyster Sauce",
+        "price": 390,
+        "ingredients": "Plump shrimp, tender squid rings, and seasonal fish stir-fried with bell peppers, onions, and mushrooms in savory garlic oyster sauce",
+        "allergens": "Contains Crustaceans, Molluscs, Fish, Soy",
+        "healthIndicators": "High Lean Protein, Omega-3 Fatty Acids",
+        "nutrition": {
+          "calories": 420,
+          "protein": 44,
+          "carbs": 22,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-pigar-pigar",
+        "name": "Pigar-Pigar",
+        "price": 350,
+        "ingredients": "Thinly sliced premium beef tenderloin flash-fried with cabbage, sweet white onions, and garlic in light seasonings",
+        "allergens": "Contains Soy",
+        "healthIndicators": "High Protein, Traditional Northern Delicacy",
+        "nutrition": {
+          "calories": 460,
+          "protein": 42,
+          "carbs": 14,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-sisig-alacarte",
+        "name": "Sisig (Ala Carte)",
+        "price": 180,
+        "ingredients": "Generous sizzling platter of chopped crispy pork mask, chicken liver, toasted garlic, red onions, fresh chili peppers, and calamansi",
+        "allergens": "Contains Eggs (Optional)",
+        "healthIndicators": "Quintessential Kapampangan Specialty",
+        "nutrition": {
+          "calories": 680,
+          "protein": 38,
+          "carbs": 12,
+          "fat": 52
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-crispy-kare-kare",
+        "name": "Crispy Kare-Kare",
+        "price": 350,
+        "ingredients": "Deep-fried golden crispy pork belly cuts served over rich peanut annatto stew with eggplant, string beans, bok choy, and sauteed bagoong alamang",
+        "allergens": "Contains Peanuts, Crustaceans",
+        "healthIndicators": "Rich Peanut Flavonoids & Fiber",
+        "nutrition": {
+          "calories": 780,
+          "protein": 46,
+          "carbs": 32,
+          "fat": 54
+        },
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chicken-fillet-alacarte",
+        "name": "Chicken Fillet (Ala Carte)",
+        "price": 180,
+        "ingredients": "Golden breaded boneless chicken breast fillets served with creamy white mushroom pepper dipping gravy",
+        "allergens": "Contains Gluten, Dairy",
+        "healthIndicators": "Crispy Lean Poultry",
+        "nutrition": {
+          "calories": 520,
+          "protein": 48,
+          "carbs": 24,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-tonkatsu-coleslaw-alacarte",
+        "name": "Tonkatsu with Coleslaw (Ala Carte)",
+        "price": 290,
+        "ingredients": "Twin crispy Japanese panko pork cutlets served with sweet savory bulldog sauce and fresh shredded cabbage carrot coleslaw",
+        "allergens": "Contains Gluten, Eggs, Soy",
+        "healthIndicators": "Crispy Sharing Platter",
+        "nutrition": {
+          "calories": 690,
+          "protein": 45,
+          "carbs": 36,
+          "fat": 38
+        },
+        "image": "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-carbonara",
+        "name": "Creamy Carbonara",
+        "price": 170,
+        "ingredients": "Fettuccine pasta tossed in rich parmesan cream sauce, crispy smoked bacon bits, sliced button mushrooms, and garlic bread",
+        "allergens": "Contains Dairy, Gluten, Eggs",
+        "healthIndicators": "Hearty Italian Comfort",
+        "nutrition": {
+          "calories": 540,
+          "protein": 18,
+          "carbs": 62,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chicken-pesto",
+        "name": "Chicken Pesto Pasta",
+        "price": 190,
+        "ingredients": "Al dente penne pasta enrobed in fragrant fresh basil pesto, extra virgin olive oil, grilled chicken strips, and parmesan shavings",
+        "allergens": "Contains Dairy, Gluten, Tree Nuts",
+        "healthIndicators": "Heart-Healthy Monounsaturated Fats, Antioxidants",
+        "nutrition": {
+          "calories": 510,
+          "protein": 26,
+          "carbs": 54,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1612874742237-6526221588e3?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-filipino-spaghetti",
+        "name": "Filipino Style Spaghetti",
+        "price": 160,
+        "ingredients": "Spaghetti noodles in signature sweet tomato sauce with ground pork, sliced red hotdogs, and a generous mound of cheddar cheese",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Sweet Fiesta Classic",
+        "nutrition": {
+          "calories": 530,
+          "protein": 20,
+          "carbs": 74,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1621996346565-e3d5d6281696?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-shrimp-spaghetti",
+        "name": "Shrimp Spaghetti",
+        "price": 235,
+        "ingredients": "Succulent sauteed shrimp tossed with garlic, crushed red pepper flakes, sweet cherry tomatoes, and white wine butter sauce over spaghetti",
+        "allergens": "Contains Crustaceans, Gluten, Dairy",
+        "healthIndicators": "Lean Marine Protein, Heart Healthy Olive Oil",
+        "nutrition": {
+          "calories": 480,
+          "protein": 25,
+          "carbs": 58,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-caesar-salad",
+        "name": "Caesar Salad",
+        "price": 180,
+        "ingredients": "Crisp romaine lettuce hearts, herb garlic croutons, crispy bacon lardons, shaved parmesan, and creamy anchovy Caesar dressing",
+        "allergens": "Contains Dairy, Gluten, Eggs, Fish",
+        "healthIndicators": "Fresh Leafy Greens, High Fiber",
+        "nutrition": {
+          "calories": 280,
+          "protein": 8,
+          "carbs": 16,
+          "fat": 20
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chicken-caesar-salad",
+        "name": "Chicken Caesar Salad",
+        "price": 250,
+        "ingredients": "Tender grilled herb chicken breast strips layered over crisp romaine, garlic croutons, crispy bacon, and creamy parmesan Caesar dressing",
+        "allergens": "Contains Dairy, Gluten, Eggs, Fish",
+        "healthIndicators": "High Lean Protein, Vitamin K & A",
+        "nutrition": {
+          "calories": 380,
+          "protein": 32,
+          "carbs": 18,
+          "fat": 22
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-tempura-salad",
+        "name": "Tempura Salad",
+        "price": 250,
+        "ingredients": "Crispy golden Japanese shrimp tempura nestled on a vibrant bed of mixed salad greens, cucumber ribbons, and sweet sesame dressing",
+        "allergens": "Contains Crustaceans, Gluten, Sesame, Soy",
+        "healthIndicators": "Crisp Seafood & Fresh Greens",
+        "nutrition": {
+          "calories": 360,
+          "protein": 18,
+          "carbs": 32,
+          "fat": 18
+        },
+        "image": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-nachos",
+        "name": "Loaded Nachos",
+        "price": 190,
+        "ingredients": "Crispy corn tortilla chips piled high with seasoned ground beef, fresh tomato onion salsa, melted cheese sauce, and jalapeno slices",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Sharing Snack Platter",
+        "nutrition": {
+          "calories": 580,
+          "protein": 20,
+          "carbs": 56,
+          "fat": 32
+        },
+        "image": "https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-flavored-fries",
+        "name": "Flavored French Fries",
+        "price": 90,
+        "ingredients": "Crispy golden shoestring potato fries tossed in your choice of Cheese, BBQ, or Sour Cream flavoring powder",
+        "allergens": "Contains Dairy (Cheese & Sour Cream)",
+        "healthIndicators": "Classic Comfort Crunch",
+        "nutrition": {
+          "calories": 320,
+          "protein": 4,
+          "carbs": 42,
+          "fat": 16
+        },
+        "image": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-clubhouse-sandwich",
+        "name": "Clubhouse Sandwich",
+        "price": 180,
+        "ingredients": "Triple-decker toasted wheat bread packed with roasted chicken spread, sweet ham, sliced cheddar, fried egg, lettuce, tomato, served with potato chips",
+        "allergens": "Contains Dairy, Gluten, Eggs",
+        "healthIndicators": "Hearty Multi-Layer Protein",
+        "nutrition": {
+          "calories": 520,
+          "protein": 26,
+          "carbs": 48,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-chicken-sandwich",
+        "name": "Crispy Chicken Sandwich",
+        "price": 235,
+        "ingredients": "Crispy buttermilk fried chicken breast fillet, creamy coleslaw, dill pickles, and house special sauce in a toasted brioche bun with fries",
+        "allergens": "Contains Gluten, Dairy, Eggs",
+        "healthIndicators": "High Protein, Satisfying Meal",
+        "nutrition": {
+          "calories": 590,
+          "protein": 34,
+          "carbs": 52,
+          "fat": 28
+        },
+        "image": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-grilled-double-cheese",
+        "name": "Grilled Double Cheese Sandwich",
+        "price": 130,
+        "ingredients": "Thick-sliced buttery artisanal bread griddled golden with melted sharp cheddar and creamy mozzarella cheese",
+        "allergens": "Contains Dairy, Gluten",
+        "healthIndicators": "Warm Melted Comfort",
+        "nutrition": {
+          "calories": 430,
+          "protein": 16,
+          "carbs": 36,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-savory-fries",
+        "name": "Savory Fries",
+        "price": 160,
+        "ingredients": "Crisp golden fries drizzled with savory garlic herb butter, grated parmesan cheese, and house aioli dip",
+        "allergens": "Contains Dairy, Eggs",
+        "healthIndicators": "Artisanal Loaded Fries",
+        "nutrition": {
+          "calories": 420,
+          "protein": 6,
+          "carbs": 46,
+          "fat": 24
+        },
+        "image": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        "id": "cnc-beefy-fries",
+        "name": "Beefy Loaded Fries",
+        "price": 160,
+        "ingredients": "Crispy French fries smothered with seasoned ground beef, warm cheese sauce, diced red onions, and parsley",
+        "allergens": "Contains Dairy",
+        "healthIndicators": "Hearty Loaded Snack",
+        "nutrition": {
+          "calories": 480,
+          "protein": 16,
+          "carbs": 48,
+          "fat": 26
+        },
+        "image": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=500&q=80"
       }
     ]
   }
