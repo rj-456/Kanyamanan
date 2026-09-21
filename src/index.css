@@ -168,3 +168,28 @@ html.dark [class*="to-[#F5EFEB]"] {
 html.dark [class*="via-\[\#FFF8F3\]"] {
   background-image: linear-gradient(to right, rgba(217, 93, 57, 0.2), #26211C, rgba(242, 184, 36, 0.2)) !important;
 }
+
+/* ========================================================================= */
+/* Global Close & X Button Hover Effect: Vibrant Red on Hover */
+/* ========================================================================= */
+button[aria-label*="close" i]:hover,
+button[title*="close" i]:hover,
+button[aria-label*="clear" i]:hover,
+button[title*="clear" i]:hover,
+button[aria-label*="remove" i]:hover,
+button[title*="remove" i]:hover,
+.close-btn:hover,
+button:has(svg.lucide-x):hover,
+button:has(svg[data-lucide="x"]):hover {
+  color: #DC2626 !important;
+}
+
+button[aria-label*="close" i]:hover svg,
+button[title*="close" i]:hover svg,
+button[aria-label*="clear" i]:hover svg,
+button[title*="clear" i]:hover svg,
+button:has(svg.lucide-x):hover svg,
+button:has(svg[data-lucide="x"]):hover svg {
+  stroke: #DC2626 !important;
+  color: #DC2626 !important;
+}

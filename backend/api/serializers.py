@@ -1,13 +1,28 @@
 from rest_framework import serializers
-from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary
+from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview
 
 class BranchSerializer(serializers.ModelSerializer):
     branchName = serializers.CharField(source='branch_name')
     operatingHours = serializers.CharField(source='operating_hours')
+    facebookUrl = serializers.CharField(source='facebook_url', required=False, allow_blank=True, default='')
+    instagramUrl = serializers.CharField(source='instagram_url', required=False, allow_blank=True, default='')
+    tiktokUrl = serializers.CharField(source='tiktok_url', required=False, allow_blank=True, default='')
+    phoneNumber = serializers.CharField(source='phone_number', required=False, allow_blank=True, default='')
+    reservationInfo = serializers.CharField(source='reservation_info', required=False, allow_blank=True, default='')
 
     class Meta:
         model = Branch
-        fields = ['branchName', 'municipality', 'address', 'operatingHours', 'lat', 'lng']
+        fields = ['branchName', 'municipality', 'address', 'operatingHours', 'lat', 'lng', 'facebookUrl', 'instagramUrl', 'tiktokUrl', 'phoneNumber', 'email', 'reservationInfo']
+
+class RestaurantReviewSerializer(serializers.ModelSerializer):
+    reviewerName = serializers.CharField(source='reviewer_name', required=False, default='Food Explorer')
+    isVerifiedDiner = serializers.BooleanField(source='is_verified_diner', required=False, default=True)
+    tripId = serializers.CharField(source='trip_id', required=False, allow_blank=True, default='')
+    createdAt = serializers.DateTimeField(source='created_at', format="%Y-%m-%d %H:%M", read_only=True)
+
+    class Meta:
+        model = RestaurantReview
+        fields = ['id', 'reviewerName', 'rating', 'comment', 'isVerifiedDiner', 'tripId', 'createdAt']
 
 class MenuItemSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='item_id')
@@ -30,17 +45,31 @@ class RestaurantSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='restaurant_id')
     operatingHours = serializers.CharField(source='operating_hours', required=False, default='09:00 AM - 09:00 PM')
     priceTier = serializers.CharField(source='price_tier', required=False, default='$')
+    facebookUrl = serializers.CharField(source='facebook_url', required=False, allow_blank=True, default='')
+    instagramUrl = serializers.CharField(source='instagram_url', required=False, allow_blank=True, default='')
+    tiktokUrl = serializers.CharField(source='tiktok_url', required=False, allow_blank=True, default='')
+    phoneNumber = serializers.CharField(source='phone_number', required=False, allow_blank=True, default='')
+    reservationInfo = serializers.CharField(source='reservation_info', required=False, allow_blank=True, default='')
     branches = BranchSerializer(many=True, required=False)
     menu = MenuItemSerializer(many=True, required=False)
+    reviews = RestaurantReviewSerializer(many=True, read_only=True)
+    averageRating = serializers.SerializerMethodField()
 
     class Meta:
         model = Restaurant
         fields = [
             'id', 'name', 'municipality', 'operatingHours',
             'priceTier', 'lat', 'lng', 'categories', 'description',
-            'address', 'image', 'images', 'username', 'password',
-            'occupancy', 'branches', 'menu'
+            'address', 'image', 'images', 'facebookUrl', 'instagramUrl', 'tiktokUrl', 'phoneNumber',
+            'email', 'reservationInfo', 'username', 'password',
+            'occupancy', 'branches', 'menu', 'reviews', 'averageRating'
         ]
+
+    def get_averageRating(self, obj):
+        revs = obj.reviews.all()
+        if not revs.exists():
+            return 4.8  # default baseline
+        return round(sum(r.rating for r in revs) / revs.count(), 1)
 
     def create(self, validated_data):
         branches_data = self.initial_data.get('branches', [])
@@ -82,7 +111,13 @@ class RestaurantSerializer(serializers.ModelSerializer):
                         address=b.get('address', restaurant.address),
                         operating_hours=b.get('operatingHours', restaurant.operating_hours),
                         lat=b.get('lat', restaurant.lat),
-                        lng=b.get('lng', restaurant.lng)
+                        lng=b.get('lng', restaurant.lng),
+                        facebook_url=b.get('facebookUrl', restaurant.facebook_url),
+                        instagram_url=b.get('instagramUrl', restaurant.instagram_url if hasattr(restaurant, 'instagram_url') else ''),
+                        tiktok_url=b.get('tiktokUrl', restaurant.tiktok_url if hasattr(restaurant, 'tiktok_url') else ''),
+                        phone_number=b.get('phoneNumber', restaurant.phone_number),
+                        email=b.get('email', restaurant.email),
+                        reservation_info=b.get('reservationInfo', restaurant.reservation_info)
                     )
 
         if menu_data is not None:
@@ -99,10 +134,10 @@ class RestaurantSerializer(serializers.ModelSerializer):
                         ingredients=m.get('ingredients', ''),
                         allergens=m.get('allergens', ''),
                         health_indicators=m.get('healthIndicators', ''),
-                        calories=int(nutrition.get('calories', 0) if isinstance(nutrition, dict) else 0),
-                        protein=int(nutrition.get('protein', 0) if isinstance(nutrition, dict) else 0),
-                        carbs=int(nutrition.get('carbs', 0) if isinstance(nutrition, dict) else 0),
-                        fat=int(nutrition.get('fat', 0) if isinstance(nutrition, dict) else 0)
+                        calories=int((nutrition.get('calories') if isinstance(nutrition, dict) else None) or m.get('calories') or 0),
+                        protein=int((nutrition.get('protein') if isinstance(nutrition, dict) else None) or m.get('protein') or 0),
+                        carbs=int((nutrition.get('carbs') if isinstance(nutrition, dict) else None) or m.get('carbs') or 0),
+                        fat=int((nutrition.get('fat') if isinstance(nutrition, dict) else None) or m.get('fat') or 0)
                     )
 
 class MunicipalitySerializer(serializers.ModelSerializer):

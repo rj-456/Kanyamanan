@@ -32,6 +32,14 @@ class Restaurant(models.Model):
     image = models.URLField(max_length=1000, blank=True, default='')
     images = models.JSONField(default=list, blank=True)
     
+    # Social Media & Contact / Booking Information (Optional)
+    facebook_url = models.URLField(max_length=500, blank=True, default='')
+    instagram_url = models.URLField(max_length=500, blank=True, default='')
+    tiktok_url = models.URLField(max_length=500, blank=True, default='')
+    phone_number = models.CharField(max_length=100, blank=True, default='')
+    email = models.EmailField(blank=True, default='')
+    reservation_info = models.TextField(blank=True, default='')
+    
     # Merchant Account Credentials
     username = models.CharField(max_length=100, unique=True, default='owner')
     password = models.CharField(max_length=100, default='password123')
@@ -56,12 +64,35 @@ class Branch(models.Model):
     operating_hours = models.CharField(max_length=100, default='09:00 AM - 08:00 PM')
     lat = models.FloatField(default=15.0320)
     lng = models.FloatField(default=120.6860)
+    
+    # Optional Branch-Specific Social & Booking Info
+    facebook_url = models.URLField(max_length=500, blank=True, default='')
+    instagram_url = models.URLField(max_length=500, blank=True, default='')
+    tiktok_url = models.URLField(max_length=500, blank=True, default='')
+    phone_number = models.CharField(max_length=100, blank=True, default='')
+    email = models.EmailField(blank=True, default='')
+    reservation_info = models.TextField(blank=True, default='')
 
     class Meta:
         ordering = ['branch_name']
 
     def __str__(self):
         return f"{self.branch_name} - {self.municipality}"
+
+class RestaurantReview(models.Model):
+    restaurant = models.ForeignKey(Restaurant, related_name='reviews', on_delete=models.CASCADE)
+    reviewer_name = models.CharField(max_length=150, default='Food Explorer')
+    rating = models.IntegerField(default=5)  # 1 to 5 stars
+    comment = models.TextField(blank=True, default='')
+    is_verified_diner = models.BooleanField(default=True)
+    trip_id = models.CharField(max_length=100, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.reviewer_name} - {self.rating}★ for {self.restaurant.name}"
 
 class MenuItem(models.Model):
     restaurant = models.ForeignKey(Restaurant, related_name='menu', on_delete=models.CASCADE)
