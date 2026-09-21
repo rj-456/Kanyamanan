@@ -3931,6 +3931,10 @@ So, where do we start? 😊`,
 
   // Handle Manual Finish Trip (Automatically identifies and marks visited destinations & restaurants verified, prompting reviews even for guests)
   const handleFinishTrip = () => {
+    if (!isTripActive) {
+      alert("Please start your food crawl first before finishing the trip!");
+      return;
+    }
     setIsTripActive(false);
     setIsSimulating(false);
     if (simIntervalRef.current) {
@@ -19951,7 +19955,7 @@ ${rawText}`;
                           Itinerary Stops ({activeTrip.length})
                         </span>
                         <div className="flex items-center gap-2">
-                          {activeTrip.length > 0 && (
+                          {isTripActive && activeTrip.length > 0 && (
                             <button
                               type="button"
                               onClick={handleFinishTrip}
@@ -20195,23 +20199,14 @@ ${rawText}`;
                       {/* Primary Navigation Controls */}
                       <div>
                         {!isTripActive ? (
-                          <div className="grid grid-cols-2 gap-2">
+                          <div>
                             <button
                               type="button"
                               onClick={handleStartLiveTrip}
-                              className="py-2.5 px-3 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                              className="w-full py-2.5 px-3 bg-[#2C5E3B] hover:bg-[#20452B] text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
                             >
                               <span>🚀</span>
                               <span>Start Crawl</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleFinishTrip}
-                              className="py-2.5 px-3 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
-                              title="Mark food trip as completed and rate your visited spots"
-                            >
-                              <span>🎉</span>
-                              <span>Finish Trip</span>
                             </button>
                           </div>
                         ) : (
