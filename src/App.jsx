@@ -652,8 +652,8 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v30_aling_lucing_full_menu_and_attractions') {
-        localStorage.setItem('kanyamanan_db_version', 'v30_aling_lucing_full_menu_and_attractions');
+      if (dbVersion !== 'v32_aling_lucing_full_menu_and_dish_deconstruct_fix') {
+        localStorage.setItem('kanyamanan_db_version', 'v32_aling_lucing_full_menu_and_dish_deconstruct_fix');
         localStorage.removeItem('kanyamanan_restaurants_db');
         localStorage.removeItem('kanyamanan_attractions_db');
       }
@@ -693,17 +693,28 @@ function App() {
               if (!exists) baseUserDishes.push(cDish);
             });
 
-            // Non-destructively merge with preseeded dishes so official dishes are present, but user-added dishes are NEVER removed
+            // Authoritative merge with preseeded dishes so official updated menus (like Aling Lucing's 27 authentic dishes) are fully updated, while user-added dishes are preserved
             const preseededMenu = Array.isArray(preseeded?.menu) ? preseeded.menu : [];
-            const mergedMenu = [...baseUserDishes];
-            preseededMenu.forEach(pDish => {
-              if (!pDish || !pDish.name) return;
-              const exists = mergedMenu.some(d =>
-                (d.id && pDish.id && String(d.id) === String(pDish.id)) ||
-                (d.name && d.name.trim().toLowerCase() === pDish.name.trim().toLowerCase())
-              );
-              if (!exists) mergedMenu.push(pDish);
-            });
+            let mergedMenu;
+            if (preseededMenu.length > 0) {
+              mergedMenu = preseededMenu.map(pDish => {
+                const userMatch = baseUserDishes.find(d =>
+                  (d.id && pDish.id && String(d.id) === String(pDish.id)) ||
+                  (d.name && pDish.name && d.name.trim().toLowerCase() === pDish.name.trim().toLowerCase())
+                );
+                return userMatch ? { ...pDish, ...userMatch, ingredients: pDish.ingredients || userMatch.ingredients, nutrition: { ...userMatch.nutrition, ...pDish.nutrition } } : pDish;
+              });
+              baseUserDishes.forEach(uDish => {
+                if (!uDish || !uDish.name) return;
+                const inOfficial = mergedMenu.some(m =>
+                  (m.id && uDish.id && String(m.id) === String(uDish.id)) ||
+                  (m.name && m.name.trim().toLowerCase() === uDish.name.trim().toLowerCase())
+                );
+                if (!inOfficial) mergedMenu.push(uDish);
+              });
+            } else {
+              mergedMenu = [...baseUserDishes];
+            }
 
             const menuToUse = (mergedMenu.length > 0
               ? mergedMenu
@@ -23208,7 +23219,16 @@ ${rawText}`;
 
                                   <div className="flex items-center justify-between text-[9px] text-charcoal-light dark:text-gray-400 mt-2 pt-2 border-t border-[#FAF8F5] dark:border-[#282420]">
                                     <span>Caloric: <b>{dish.nutrition?.calories || 450} kcal</b></span>
-                                    <span className="text-terracotta dark:text-orange-400 font-bold">{isPkg ? 'View Inclusions →' : 'Deconstruct →'}</span>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveDish(dish);
+                                      }}
+                                      className="text-terracotta dark:text-orange-400 font-bold hover:underline cursor-pointer flex items-center gap-0.5 bg-transparent border-none p-0 text-[9px]"
+                                    >
+                                      {isPkg ? 'View Inclusions →' : 'Deconstruct →'}
+                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -24739,7 +24759,7 @@ ${rawText}`;
       {/* Global Interactive Ingredient Deconstructor Modal (Viewport-level, glitch-free) */}
       {activeDish && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 animate-fade-in font-sans"
+          className="fixed inset-0 z-[260] flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 animate-fade-in font-sans"
           onClick={() => setActiveDish(null)}
         >
           <div
@@ -24772,6 +24792,18 @@ ${rawText}`;
               </button>
             </div>
 
+            {/* Culinary Overview Description if Available */}
+            {activeDish.description && (
+              <div className="p-3.5 bg-amber-50/60 dark:bg-amber-950/25 border border-amber-200/80 dark:border-amber-900/40 rounded-2xl space-y-1">
+                <span className="text-[9px] font-black uppercase text-terracotta dark:text-orange-400 tracking-wider block">
+                  📖 Culinary Profile & Overview:
+                </span>
+                <p className="text-xs text-charcoal dark:text-gray-200 leading-relaxed m-0 font-medium">
+                  {activeDish.description}
+                </p>
+              </div>
+            )}
+
             {/* Dish Ingredients & Information */}
             <div className="flex items-start gap-3">
               {/package|bundle|buffet|unlimited|\/pax|\/head/i.test(activeDish.name || '') ? (
@@ -24800,7 +24832,7 @@ ${rawText}`;
               ) : (
                 <div className="space-y-1 flex-1 min-w-0">
                   <strong className="text-[10px] font-black uppercase text-charcoal-light block">
-                    Raw Components:
+                    Raw Components & Seasoning:
                   </strong>
                   <p className="text-xs text-charcoal dark:text-gray-200 leading-relaxed m-0">
                     {activeDish.ingredients || 'Traditional Kapampangan heritage seasoning, native herbs, garlic, onions.'}
@@ -24862,6 +24894,18 @@ ${rawText}`;
                 </div>
               </div>
             </div>
+
+            {/* Micronutrient Profile if Available */}
+            {(activeDish.nutrition?.nutrients || activeDish.nutrients) && (
+              <div className="p-3 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-900/40 rounded-2xl space-y-1">
+                <span className="text-[9px] font-black uppercase text-emerald-800 dark:text-emerald-300 tracking-wider block">
+                  🌿 Micro-Nutrient & Mineral Profile:
+                </span>
+                <p className="text-[11px] text-emerald-900 dark:text-emerald-200 font-bold m-0 leading-relaxed">
+                  {activeDish.nutrition?.nutrients || activeDish.nutrients}
+                </p>
+              </div>
+            )}
 
             {/* Close Button */}
             <button
