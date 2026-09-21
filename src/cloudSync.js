@@ -79,8 +79,8 @@ export const startCloudSync = (onDataReceived) => {
   // Initial immediate sync
   sync();
 
-  // Periodic polling interval (every 4 seconds)
-  const intervalId = setInterval(sync, 4000);
+  // Periodic polling interval (every 60 seconds to protect rate limits)
+  const intervalId = setInterval(sync, 60000);
 
   // Sync immediately when user switches tabs or wakes device
   const onFocus = () => sync();
@@ -172,8 +172,8 @@ export const startCloudReviewsSync = (onReviewsReceived) => {
   // Initial immediate sync
   sync();
 
-  // Periodic polling interval (every 4 seconds)
-  const intervalId = setInterval(sync, 4000);
+  // Periodic polling interval (every 60 seconds to protect rate limits)
+  const intervalId = setInterval(sync, 60000);
 
   // Sync immediately when user switches tabs or wakes device
   const onFocus = () => sync();

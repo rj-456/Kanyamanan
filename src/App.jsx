@@ -652,8 +652,8 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v29_authentic_culinary_engine_v1') {
-        localStorage.setItem('kanyamanan_db_version', 'v29_authentic_culinary_engine_v1');
+      if (dbVersion !== 'v30_aling_lucing_full_menu_and_attractions') {
+        localStorage.setItem('kanyamanan_db_version', 'v30_aling_lucing_full_menu_and_attractions');
         localStorage.removeItem('kanyamanan_restaurants_db');
         localStorage.removeItem('kanyamanan_attractions_db');
       }
@@ -853,6 +853,26 @@ function App() {
       });
     }
 
+    try {
+      const savedModified = localStorage.getItem('kanyamanan_modified_restaurants');
+      if (savedModified) {
+        const parsedMod = JSON.parse(savedModified);
+        if (parsedMod && typeof parsedMod === 'object') {
+          Object.keys(parsedMod).forEach(modId => {
+            const modRes = parsedMod[modId];
+            if (modRes && modRes.id && !deletedIds.includes(modRes.id)) {
+              const idx = initialList.findIndex(r => r && r.id === modId);
+              if (idx !== -1) {
+                initialList[idx] = { ...initialList[idx], ...modRes };
+              } else {
+                initialList.push(modRes);
+              }
+            }
+          });
+        }
+      }
+    } catch (e) { }
+
     const finalList = [...initialList].filter(r => r && r.id && !deletedIds.includes(r.id)).map(res => ({
       ...res,
       menu: Array.isArray(res.menu)
@@ -886,24 +906,35 @@ function App() {
           const missingPreseeded = (PRESEEDED_ATTRACTIONS || []).filter(a => a && a.id && !existingIds.has(a.id) && !deletedIds.includes(a.id));
           const combined = [...parsed, ...missingPreseeded];
 
+          let savedModifiedAttrs = {};
+          try {
+            const modRaw = localStorage.getItem('kanyamanan_modified_attractions');
+            if (modRaw) {
+              const parsedMod = JSON.parse(modRaw);
+              if (parsedMod && typeof parsedMod === 'object') savedModifiedAttrs = parsedMod;
+            }
+          } catch (e) { }
+
           const sanitized = combined.map((attr, idx) => {
             if (!attr || typeof attr !== 'object' || (attr.id && deletedIds.includes(attr.id))) return null;
+            if (attr.id && savedModifiedAttrs[attr.id]) {
+              return { ...attr, ...savedModifiedAttrs[attr.id] };
+            }
             // Merge official preseeded fields & real authentic images
             const preMatch = (PRESEEDED_ATTRACTIONS || []).find(p => p && (p.id === attr.id || p.name === attr.name));
 
             const isOutdatedOrPlaceholder = (img) => !img ||
               img.includes('images.unsplash.com') ||
-              img === '/attractions/mt_arayat_park.jpg' ||
               img === '/attractions/san_fernando_cathedral.jpg' ||
               img === '/attractions/santa_rita_church.jpg';
 
-            const resolvedImage = (preMatch && preMatch.image && (isOutdatedOrPlaceholder(attr.image) || preMatch.image.startsWith('/attractions/real_')))
+            const resolvedImage = (preMatch && preMatch.image && isOutdatedOrPlaceholder(attr.image))
               ? preMatch.image
               : (attr.image || (preMatch && preMatch.image) || '/attractions/san_fernando_cathedral.jpg');
 
-            const resolvedImages = (preMatch && preMatch.image && preMatch.image.startsWith('/attractions/real_'))
-              ? [resolvedImage]
-              : (Array.isArray(attr.images) && attr.images.length > 0 ? attr.images : [resolvedImage]);
+            const resolvedImages = Array.isArray(attr.images) && attr.images.length > 0
+              ? attr.images
+              : (preMatch && Array.isArray(preMatch.images) && preMatch.images.length > 0 ? preMatch.images : [resolvedImage]);
 
             return {
               ...attr,
@@ -928,6 +959,14 @@ function App() {
             };
           }).filter(Boolean);
 
+          // Merge any custom added attractions from savedModifiedAttrs not in preseeded
+          Object.keys(savedModifiedAttrs).forEach(modId => {
+            const mAttr = savedModifiedAttrs[modId];
+            if (mAttr && mAttr.id && !deletedIds.includes(mAttr.id) && !sanitized.some(a => a.id === mAttr.id)) {
+              sanitized.push(mAttr);
+            }
+          });
+
           const sortedSanitized = sanitized.sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
           try {
             localStorage.setItem('kanyamanan_attractions_db', JSON.stringify(sortedSanitized));
@@ -940,7 +979,7 @@ function App() {
       console.error("LocalStorage attractions load error:", e);
       try { localStorage.removeItem('kanyamanan_attractions_db'); } catch (err) { }
     }
-    const preseeded = (PRESEEDED_ATTRACTIONS || []).filter(a => a && a.id && !deletedIds.includes(a.id)).map(a => ({
+    let preseeded = (PRESEEDED_ATTRACTIONS || []).filter(a => a && a.id && !deletedIds.includes(a.id)).map(a => ({
       ...a,
       isFestival: Boolean(a.isFestival || (a.type && a.type.includes('Festival'))),
       eventDate: a.eventDate || '',
@@ -949,11 +988,33 @@ function App() {
       sampleActiveDate: a.sampleActiveDate || '',
       scheduleNote: a.scheduleNote || '',
       announcementNote: a.announcementNote || 'Wait for further announcements and updates here'
-    })).sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
+    }));
+
     try {
-      localStorage.setItem('kanyamanan_attractions_db', JSON.stringify(preseeded));
+      const modRaw = localStorage.getItem('kanyamanan_modified_attractions');
+      if (modRaw) {
+        const parsedMod = JSON.parse(modRaw);
+        if (parsedMod && typeof parsedMod === 'object') {
+          Object.keys(parsedMod).forEach(modId => {
+            const mAttr = parsedMod[modId];
+            if (mAttr && mAttr.id && !deletedIds.includes(mAttr.id)) {
+              const pIdx = preseeded.findIndex(p => p.id === modId);
+              if (pIdx !== -1) {
+                preseeded[pIdx] = { ...preseeded[pIdx], ...mAttr };
+              } else {
+                preseeded.push(mAttr);
+              }
+            }
+          });
+        }
+      }
     } catch (e) { }
-    return preseeded;
+
+    const sortedPreseeded = preseeded.sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
+    try {
+      localStorage.setItem('kanyamanan_attractions_db', JSON.stringify(sortedPreseeded));
+    } catch (e) { }
+    return sortedPreseeded;
   });
 
   // Search & Filtering States
@@ -1041,6 +1102,18 @@ function App() {
     return [];
   });
 
+  // Track stops already reviewed by this user/device (Strict 1 rating permitted)
+  const [ratedStops, setRatedStops] = useState(() => {
+    try {
+      const saved = localStorage.getItem('kanyamanan_rated_stops');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) { }
+    return [];
+  });
+
   // Track unrated visits per destination / restaurant (1 rating permitted per completed trip)
   const [unratedVisits, setUnratedVisits] = useState(() => {
     try {
@@ -1065,11 +1138,21 @@ function App() {
       return updated;
     });
 
-    // 2. Grant 1 unrated review credit for this specific stop from this completed trip
+    // 2. Grant 1 unrated review credit ONLY if diner hasn't already submitted a rating for this stop
     setUnratedVisits(prev => {
+      try {
+        const savedRated = localStorage.getItem('kanyamanan_rated_stops');
+        if (savedRated) {
+          const parsed = JSON.parse(savedRated);
+          if (Array.isArray(parsed) && parsed.includes(stopId)) {
+            return prev;
+          }
+        }
+      } catch (e) { }
+
       const updated = {
         ...prev,
-        [stopId]: (Number(prev[stopId]) || 0) + 1
+        [stopId]: 1
       };
       try {
         localStorage.setItem('kanyamanan_unrated_visits', JSON.stringify(updated));
@@ -1298,8 +1381,15 @@ function App() {
     };
 
     setDestinationReviews(prev => [newRev, ...prev]);
-    // Consume 1 unrated visit credit so visitor cannot rate again until making another trip to this destination
+    // Consume 1 unrated visit credit and permanently register as rated
     consumeUnratedVisit(attractionId);
+    setRatedStops(prev => {
+      const next = Array.from(new Set([...prev, attractionId]));
+      try {
+        localStorage.setItem('kanyamanan_rated_stops', JSON.stringify(next));
+      } catch (e) { }
+      return next;
+    });
 
     if (customComment === undefined) {
       setNewDestComment('');
@@ -1654,8 +1744,15 @@ function App() {
       pushCloudReviews(updated);
       return updated;
     });
-    // Consume 1 unrated visit credit so diner cannot rate again until making another trip to this restaurant
+    // Consume 1 unrated visit credit and permanently register as rated
     consumeUnratedVisit(restaurantId);
+    setRatedStops(prev => {
+      const next = Array.from(new Set([...prev, restaurantId]));
+      try {
+        localStorage.setItem('kanyamanan_rated_stops', JSON.stringify(next));
+      } catch (e) { }
+      return next;
+    });
 
     if (customComment === undefined) {
       setNewReviewComment('');
@@ -1846,11 +1943,23 @@ function App() {
                   };
                 }
               });
+              let savedModifiedRes = {};
+              try {
+                const modRaw = localStorage.getItem('kanyamanan_modified_restaurants');
+                if (modRaw) {
+                  const parsedMod = JSON.parse(modRaw);
+                  if (parsedMod && typeof parsedMod === 'object') savedModifiedRes = parsedMod;
+                }
+              } catch (e) { }
+
               const currentList = Array.isArray(prev) && prev.length > 0 ? prev.filter(r => r && r.id && !deletedIds.includes(r.id) && !isLegacyPreseeded(r)) : [];
-              const merged = currentList.map(r => (r && r.id && liveDict[r.id]) || r).filter(r => r && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
+              const merged = currentList.map(r => {
+                if (r && r.id && savedModifiedRes[r.id]) return { ...r, ...savedModifiedRes[r.id] };
+                return (r && r.id && liveDict[r.id]) || r;
+              }).filter(r => r && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
               valid.forEach(vr => {
                 if (vr && vr.id && !deletedIds.includes(vr.id) && !isLegacyPreseeded(vr) && !merged.some(m => m && (m.id === vr.id || (m.name && vr.name && m.name.toLowerCase() === vr.name.toLowerCase())))) {
-                  merged.push(liveDict[vr.id] || vr);
+                  merged.push(savedModifiedRes[vr.id] || liveDict[vr.id] || vr);
                 }
               });
               try {
@@ -15034,6 +15143,9 @@ ${rawText}`;
         const next = prev.map(res => res.id === adminEditingId ? updatedResObj : res);
         try {
           localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(next));
+          const mod = JSON.parse(localStorage.getItem('kanyamanan_modified_restaurants') || '{}');
+          mod[adminEditingId] = updatedResObj;
+          localStorage.setItem('kanyamanan_modified_restaurants', JSON.stringify(mod));
         } catch (e) { }
         return next;
       });
@@ -15158,6 +15270,9 @@ ${rawText}`;
         const next = [newRes, ...prev];
         try {
           localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(next));
+          const mod = JSON.parse(localStorage.getItem('kanyamanan_modified_restaurants') || '{}');
+          mod[newRes.id] = newRes;
+          localStorage.setItem('kanyamanan_modified_restaurants', JSON.stringify(mod));
         } catch (e) { }
         return next;
       });
@@ -15365,7 +15480,16 @@ ${rawText}`;
       if (!confirmSave) return;
 
       const updatedAttrFull = { id: adminEditingAttractionId, ...updatedAttrObj };
-      setAttractions(prev => prev.map(a => a.id === adminEditingAttractionId ? updatedAttrFull : a));
+      setAttractions(prev => {
+        const next = prev.map(a => a.id === adminEditingAttractionId ? updatedAttrFull : a);
+        try {
+          localStorage.setItem('kanyamanan_attractions_db', JSON.stringify(next));
+          const mod = JSON.parse(localStorage.getItem('kanyamanan_modified_attractions') || '{}');
+          mod[adminEditingAttractionId] = updatedAttrFull;
+          localStorage.setItem('kanyamanan_modified_attractions', JSON.stringify(mod));
+        } catch (e) { }
+        return next;
+      });
 
       if (selectedAttraction && selectedAttraction.id === adminEditingAttractionId) {
         setSelectedAttraction(updatedAttrFull);
@@ -15384,7 +15508,16 @@ ${rawText}`;
         id: `attr-${Date.now()}`,
         ...updatedAttrObj
       };
-      setAttractions(prev => [newAttr, ...prev]);
+      setAttractions(prev => {
+        const next = [newAttr, ...prev];
+        try {
+          localStorage.setItem('kanyamanan_attractions_db', JSON.stringify(next));
+          const mod = JSON.parse(localStorage.getItem('kanyamanan_modified_attractions') || '{}');
+          mod[newAttr.id] = newAttr;
+          localStorage.setItem('kanyamanan_modified_attractions', JSON.stringify(mod));
+        } catch (e) { }
+        return next;
+      });
       alert(`✅ Destination Registered!\n\nThe new tourist destination "${nameToSave}" has been published live.`);
     }
 
@@ -15420,6 +15553,9 @@ ${rawText}`;
         const parsedDel = savedDel ? JSON.parse(savedDel) : [];
         const updatedDeletedIds = Array.from(new Set([...(Array.isArray(parsedDel) ? parsedDel : []), id]));
         localStorage.setItem('kanyamanan_deleted_attractions_ids', JSON.stringify(updatedDeletedIds));
+        const mod = JSON.parse(localStorage.getItem('kanyamanan_modified_attractions') || '{}');
+        delete mod[id];
+        localStorage.setItem('kanyamanan_modified_attractions', JSON.stringify(mod));
       } catch (e) {
         console.error("Error updating deleted attractions ids:", e);
       }
@@ -15592,6 +15728,12 @@ ${rawText}`;
     try {
       localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(updatedRestaurants));
       localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(updatedPending));
+      const mod = JSON.parse(localStorage.getItem('kanyamanan_modified_restaurants') || '{}');
+      const approvedTarget = updatedRestaurants.find(r => r.id === req.restaurantId || r.name === req.restaurantName) || req.fullUpdatedRes;
+      if (approvedTarget && (approvedTarget.id || req.restaurantId)) {
+        mod[approvedTarget.id || req.restaurantId] = approvedTarget;
+        localStorage.setItem('kanyamanan_modified_restaurants', JSON.stringify(mod));
+      }
     } catch (e) {
       console.error("Save error during approval:", e);
     }

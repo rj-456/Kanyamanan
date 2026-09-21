@@ -25,7 +25,10 @@
         "address": "98 Livestock Village, Barangay Ayala, Magalang, Pampanga, Magalang, Philippines",
         "operatingHours": "08:00 AM - 08:00 PM",
         "lat": 15.227,
-        "lng": 120.705
+        "lng": 120.705,
+        "facebookUrl": "https://www.facebook.com/abesfarm/",
+        "instagramUrl": "https://www.instagram.com/abesfarm/",
+        "tiktokUrl": "https://www.tiktok.com/@abesfarm"
       }
     ],
     "username": "abesfarm_owner",
@@ -2218,7 +2221,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/abesfarm/",
+    "instagramUrl": "https://www.instagram.com/abesfarm/",
+    "tiktokUrl": "https://www.tiktok.com/@abesfarm"
   },
   {
     "id": "res-1787676121810",
@@ -2247,7 +2253,10 @@
         "address": "Poblacion, Macabebe, Philippines, 2018",
         "operatingHours": "07:00 AM - 06:00 PM",
         "lat": 14.908,
-        "lng": 120.715
+        "lng": 120.715,
+        "facebookUrl": "https://www.facebook.com/acekitchenette/",
+        "instagramUrl": "https://www.instagram.com/acekitchenette/",
+        "tiktokUrl": "https://www.tiktok.com/@acekitchenette"
       }
     ],
     "username": "acekitchenette_owner",
@@ -2844,7 +2853,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/acekitchenette/",
+    "instagramUrl": "https://www.instagram.com/acekitchenette/",
+    "tiktokUrl": "https://www.tiktok.com/@acekitchenette"
   },
   {
     "id": "res-1787651893436",
@@ -2871,7 +2883,10 @@
         "address": "General Luna Street, Babo Sacan, Porac, Philippines, 2008",
         "operatingHours": "04:00 PM - 12:00 AM",
         "lat": 15.071,
-        "lng": 120.543
+        "lng": 120.543,
+        "facebookUrl": "https://www.facebook.com/akugastropub/",
+        "instagramUrl": "https://www.instagram.com/akugastropub/",
+        "tiktokUrl": "https://www.tiktok.com/@akugastropub"
       }
     ],
     "username": "akugastropub_owner",
@@ -4294,7 +4309,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/akugastropub/",
+    "instagramUrl": "https://www.instagram.com/akugastropub/",
+    "tiktokUrl": "https://www.tiktok.com/@akugastropub"
   },
   {
     "id": "aling-lucing-sisig",
@@ -4324,7 +4342,10 @@
         "address": "Barangay Sto. Niño, Angeles City, Pampanga",
         "operatingHours": "09:00 AM - 10:00 PM",
         "lat": 15.1328,
-        "lng": 120.5976
+        "lng": 120.5976,
+        "facebookUrl": "https://www.facebook.com/alinglucingssisig/",
+        "instagramUrl": "https://www.instagram.com/alinglucingssisig/",
+        "tiktokUrl": "https://www.tiktok.com/@alinglucingssisig"
       }
     ],
     "username": "aling_lucing_s_sisig_owner",
@@ -4348,34 +4369,414 @@
     ],
     "menu": [
       {
-        "id": "al-sisig",
-        "name": "Original Sizzling Sisig",
-        "price": 280,
-        "ingredients": "Grilled pig ears, cheeks, snout, chicken liver, calamansi, onions, chili",
-        "allergens": "⚠️ ALLERGEN WARNING: Traces of Poultry (Chicken liver) and Pork.",
-        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Very High Saturated Fats and Purines. High Cholesterol Trigger.",
+        "id": "al-bulalo",
+        "name": "Bulalo",
+        "category": "Soup",
+        "price": 380,
+        "ingredients": "Slow-simmered beef shank with rich bone marrow in savory clear beef broth with sweet native corn, pechay, and peppercorns",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Rich Bone Marrow & Collagen. High Purines and Saturated Fats.",
         "nutrition": {
-          "calories": 840,
+          "calories": 650,
           "protein": 48,
+          "carbs": 14,
+          "fat": 46
+        }
+      },
+      {
+        "id": "al-chicharon-bulaklak",
+        "name": "Chicharon Bulaklak",
+        "category": "Main Dish",
+        "price": 220,
+        "ingredients": "Deep-fried seasoned pork mesentery (ruffle fat) crisped golden-brown, spiced native vinegar dip",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Cholesterol and Saturated Fats. High Purines.",
+        "nutrition": {
+          "calories": 620,
+          "protein": 22,
+          "carbs": 2,
+          "fat": 58
+        }
+      },
+      {
+        "id": "al-chicken-ass",
+        "name": "Chicken Ass",
+        "category": "Barbeque",
+        "price": 110,
+        "ingredients": "Skewered seasoned chicken tails (pwet ng manok) marinated in native garlic and soy, grilled until edges are crisp and tender",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry and Soy.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Fat and Calorie Street-Food Delicacy.",
+        "nutrition": {
+          "calories": 340,
+          "protein": 14,
+          "carbs": 2,
+          "fat": 32
+        }
+      },
+      {
+        "id": "al-chicken-bbq",
+        "name": "Chicken BBQ",
+        "category": "Barbeque",
+        "price": 130,
+        "ingredients": "Flame-grilled chicken quarter basted in sweet-savory garlic annatto barbecue sauce",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry and Soy.",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Lean High Protein, Moderate Fat.",
+        "nutrition": {
+          "calories": 390,
+          "protein": 38,
+          "carbs": 9,
+          "fat": 22
+        }
+      },
+      {
+        "id": "al-chicken-heart",
+        "name": "Chicken Heart (minimum 3 sticks)",
+        "category": "Barbeque",
+        "price": 40,
+        "ingredients": "Skewered fresh chicken hearts marinated with garlic, black pepper, and calamansi, grilled tender over charcoal",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry and Soy.",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Excellent source of CoQ10, Iron, and Lean Muscle Protein.",
+        "nutrition": {
+          "calories": 110,
+          "protein": 15,
+          "carbs": 2,
+          "fat": 5
+        }
+      },
+      {
+        "id": "al-chicken-liver",
+        "name": "Chicken Liver (minimum 3 sticks)",
+        "category": "Barbeque",
+        "price": 60,
+        "ingredients": "Skewered fresh chicken livers marinated and flame-grilled with savory sweet barbecue glaze",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry and Soy.",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Tremendous source of Vitamin A, Iron, and Folate. High in Purines.",
+        "nutrition": {
+          "calories": 130,
+          "protein": 18,
           "carbs": 4,
-          "fat": 72
+          "fat": 4
+        }
+      },
+      {
+        "id": "al-chicken-skin",
+        "name": "Chicken Skin",
+        "category": "Main Dish",
+        "price": 280,
+        "ingredients": "Extra-crispy deep-fried seasoned chicken skins dusted with sea salt and garlic, served with spiced sukang sasa (cane vinegar)",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Poultry.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Fat, Crispy Pulutan Specialty.",
+        "nutrition": {
+          "calories": 540,
+          "protein": 18,
+          "carbs": 8,
+          "fat": 48
+        }
+      },
+      {
+        "id": "al-crispy-kare-kare",
+        "name": "Crispy Kare-Kare",
+        "category": "Main Dish",
+        "price": 285,
+        "ingredients": "Crispy pork belly cracklings, savory peanut and annatto stew, string beans, eggplant, pechay, served with Guagua bagoong alamang",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Peanuts, Crustaceans (Bagoong Alamang), and Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Calorie. Rich in Protein and Peanut Healthy Fats.",
+        "nutrition": {
+          "calories": 720,
+          "protein": 38,
+          "carbs": 26,
+          "fat": 52
+        }
+      },
+      {
+        "id": "al-crispy-pata",
+        "name": "Crispy Pata",
+        "category": "Main Dish",
+        "price": 680,
+        "ingredients": "Deep-fried whole pork shank boiled with garlic, peppercorns, and bay leaf until tender with blistered crackling skin, served with soy-vinegar dip",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork and Soy (dipping sauce).",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fat and Purines. Generous festive sharing portion.",
+        "nutrition": {
+          "calories": 1450,
+          "protein": 98,
+          "carbs": 0,
+          "fat": 118
+        }
+      },
+      {
+        "id": "al-dinuguan",
+        "name": "Dinuguan",
+        "category": "Main Dish",
+        "price": 140,
+        "ingredients": "Kapampangan tid-tad pork blood stew cooked with tender pork cuts, native cane vinegar, siling haba (finger chili), garlic, and whole peppercorns",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Exceptionally rich in dietary Iron and Protein, Low Carbohydrate.",
+        "nutrition": {
+          "calories": 380,
+          "protein": 32,
+          "carbs": 6,
+          "fat": 24
+        }
+      },
+      {
+        "id": "al-grilled-hito",
+        "name": "Grilled Hito",
+        "category": "Barbeque",
+        "price": 190,
+        "ingredients": "Fresh freshwater catfish marinated with native seasonings and basted over hot charcoal, served with calamansi soy dip",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Fish and Soy (dip).",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Great source of Lean Protein and Essential Minerals.",
+        "nutrition": {
+          "calories": 290,
+          "protein": 32,
+          "carbs": 4,
+          "fat": 16
+        }
+      },
+      {
+        "id": "al-grilled-liempo",
+        "name": "Grilled Liempo",
+        "category": "Barbeque",
+        "price": 250,
+        "ingredients": "Thick-cut pork belly marinated in calamansi, garlic, soy sauce, and black pepper, char-broiled over hardwood coals",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork and Soy.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fat, High Protein, Smoky Charcoal Grilled.",
+        "nutrition": {
+          "calories": 620,
+          "protein": 36,
+          "carbs": 10,
+          "fat": 48
+        }
+      },
+      {
+        "id": "al-hotdog",
+        "name": "Hotdog (minimum 3 sticks)",
+        "category": "Barbeque",
+        "price": 40,
+        "ingredients": "Classic skewered Filipino red hotdog flame-grilled with sweet barbecue basting",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork/Poultry, Nitrites.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Processed Meat, Sodium Content.",
+        "nutrition": {
+          "calories": 160,
+          "protein": 8,
+          "carbs": 6,
+          "fat": 12
+        }
+      },
+      {
+        "id": "al-isaw",
+        "name": "Isaw (minimum 3 sticks)",
+        "category": "Barbeque",
+        "price": 40,
+        "ingredients": "Meticulously cleaned intestines skewered and flame-grilled until slightly crispy, basted with spiced barbecue marinade",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork / Poultry.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Purines & Cholesterol. Iconic Pinoy Inihaw.",
+        "nutrition": {
+          "calories": 120,
+          "protein": 12,
+          "carbs": 3,
+          "fat": 7
+        }
+      },
+      {
+        "id": "al-lechon-kawali",
+        "name": "Lechon Kawali",
+        "category": "Main Dish",
+        "price": 320,
+        "ingredients": "Crisp deep-fried slab of seasoned pork belly with golden blistered crackling skin, served with spiced cane vinegar and liver gravy",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fats and Sodium.",
+        "nutrition": {
+          "calories": 690,
+          "protein": 34,
+          "carbs": 2,
+          "fat": 62
+        }
+      },
+      {
+        "id": "al-papaitan",
+        "name": "Papaitan",
+        "category": "Soup",
+        "price": 185,
+        "ingredients": "Authentic bitter and sour soup made with beef/goat tripe, intestines, and heart infused with bile, ginger, siling labuyo, and calamansi",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Beef.",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Digestive-stimulating bitter compounds, High Protein, Low Carbohydrate.",
+        "nutrition": {
+          "calories": 320,
+          "protein": 34,
+          "carbs": 5,
+          "fat": 18
+        }
+      },
+      {
+        "id": "al-pinaputok-na-bangus",
+        "name": "Pinaputok na Bangus",
+        "category": "Main Dish",
+        "price": 250,
+        "ingredients": "Fresh milkfish loaded with diced tomatoes, native onions, ginger, and cilantro, foil-wrapped and charcoal-grilled to aromatic perfection",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Fish (Bangus).",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Rich in Omega-3 Fatty Acids and Heart-Protective Lipids.",
+        "nutrition": {
+          "calories": 360,
+          "protein": 38,
+          "carbs": 6,
+          "fat": 20
+        }
+      },
+      {
+        "id": "al-pinaputok-na-tilapia",
+        "name": "Pinaputok na Tilapia",
+        "category": "Main Dish",
+        "price": 130,
+        "ingredients": "Fresh whole tilapia stuffed with minced native tomatoes, onions, ginger, and green chilies, wrapped and flame-grilled",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Freshwater Fish.",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Lean Heart-Healthy Protein, Low Fat, Low Carb, Diabetic-Friendly.",
+        "nutrition": {
+          "calories": 280,
+          "protein": 34,
+          "carbs": 6,
+          "fat": 12
+        }
+      },
+      {
+        "id": "al-pork-bbq",
+        "name": "Pork BBQ (minimum 3 sticks)",
+        "category": "Barbeque",
+        "price": 60,
+        "ingredients": "Tender pork skewer slices marinated in sweet and tangy Kapampangan barbecue sauce, flame-grilled over live embers",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork and Soy.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Sweet glaze (sugar), Moderate Protein.",
+        "nutrition": {
+          "calories": 180,
+          "protein": 16,
+          "carbs": 8,
+          "fat": 10
+        }
+      },
+      {
+        "id": "al-relyeno-bangus",
+        "name": "Relyeno Bangus",
+        "category": "Main Dish",
+        "price": 290,
+        "ingredients": "Whole debagged milkfish filled with sautéed flaked bangus meat, minced carrots, bell peppers, raisins, onions, and garlic, baked golden",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Fish and Eggs (binding).",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Nutrient-Dense Kapampangan Heirloom Recipe rich in Vitamin A and Protein.",
+        "nutrition": {
+          "calories": 440,
+          "protein": 40,
+          "carbs": 18,
+          "fat": 22
+        }
+      },
+      {
+        "id": "al-sinigang-na-hipon",
+        "name": "Sinigang na Hipon",
+        "category": "Soup",
+        "price": 285,
+        "ingredients": "Fresh plump prawns cooked in a sour tamarind broth with native tomatoes, radish, kangkong, and long green chili peppers",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Crustaceans (Shrimp).",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Lean Protein, Low Calorie, High Minerals and Antioxidants.",
+        "nutrition": {
+          "calories": 260,
+          "protein": 30,
+          "carbs": 14,
+          "fat": 8
+        }
+      },
+      {
+        "id": "al-sinigang-na-liempo",
+        "name": "Sinigang na Liempo",
+        "category": "Soup",
+        "price": 285,
+        "ingredients": "Tender pork belly simmered in sour native tamarind broth with kangkong (water spinach), radish, okra, sitaw, and green finger chili",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Natural Vitamin C from Tamarind, High Fiber Vegetables, Moderate Fat.",
+        "nutrition": {
+          "calories": 510,
+          "protein": 32,
+          "carbs": 16,
+          "fat": 36
+        }
+      },
+      {
+        "id": "al-sizzling-kilayin",
+        "name": "Sizzling Kilayin",
+        "category": "Main Dish",
+        "price": 185,
+        "ingredients": "Traditional Kapampangan braised pork tenderloin, pork liver, and spleen simmered in native cane vinegar, garlic, black peppercorns, served sizzling",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork.",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Exceptional source of natural heme Iron and Vitamin B12.",
+        "nutrition": {
+          "calories": 480,
+          "protein": 42,
+          "carbs": 8,
+          "fat": 30
+        }
+      },
+      {
+        "id": "al-sizzling-pusit",
+        "name": "Sizzling Pusit",
+        "category": "Main Dish",
+        "price": 350,
+        "ingredients": "Whole fresh tender squid grilled and served on a sizzling hot plate with sautéed onions, garlic, bell peppers, sweet-savory soy reduction",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Molluscs (Squid) and Soy.",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Lean High Protein, Low Saturated Fat, Contains Dietary Cholesterol.",
+        "nutrition": {
+          "calories": 320,
+          "protein": 36,
+          "carbs": 14,
+          "fat": 12
+        }
+      },
+      {
+        "id": "al-sizzling-sisig",
+        "name": "Sizzling Sisig",
+        "category": "Main Dish",
+        "price": 250,
+        "ingredients": "Grilled pig ears, cheeks, snout, chicken liver, calamansi, onions, fresh chili",
+        "allergens": "⚠️ ALLERGEN WARNING: Traces of Poultry (Chicken liver) and Pork.",
+        "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: High Saturated Fats & Purines. Rich in natural collagen.",
+        "nutrition": {
+          "calories": 780,
+          "protein": 46,
+          "carbs": 5,
+          "fat": 65
+        }
+      },
+      {
+        "id": "al-tenga",
+        "name": "Tenga (minimum 3 sticks)",
+        "category": "Barbeque",
+        "price": 60,
+        "ingredients": "Boiled and tenderized pork ears skewered and glazed with sweet-spicy barbecue sauce over live charcoal",
+        "allergens": "⚠️ ALLERGEN WARNING: Contains Pork and Soy.",
+        "healthIndicators": "🟢 HEALTH INSIGHT: Rich in natural Gelatin and Collagen, Moderate Calorie.",
+        "nutrition": {
+          "calories": 150,
+          "protein": 14,
+          "carbs": 4,
+          "fat": 9
         }
       },
       {
         "id": "al-tokwat-baboy",
-        "name": "Mila's Style Tokwa't Baboy",
-        "price": 180,
-        "ingredients": "Deep fried tofu, boiled pork snout, soy-vinegar sauce, local celery",
+        "name": "Tokwa't Baboy",
+        "category": "Main Dish",
+        "price": 220,
+        "ingredients": "Deep-fried firm tofu cubes, boiled tender pork snout and ears, native onions, chili in garlic soy-vinegar dressing",
         "allergens": "⚠️ ALLERGEN WARNING: Contains Soy and Pork.",
         "healthIndicators": "⚠️ LIFESTYLE COMPLIANCE: Moderate Saturated Fats, Soy Isoflavones present.",
         "nutrition": {
-          "calories": 450,
+          "calories": 420,
           "protein": 28,
-          "carbs": 14,
-          "fat": 31
+          "carbs": 12,
+          "fat": 28
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/alinglucingssisig/",
+    "instagramUrl": "https://www.instagram.com/alinglucingssisig/",
+    "tiktokUrl": "https://www.tiktok.com/@alinglucingssisig"
   },
   {
     "id": "res-1787686280226",
@@ -4405,7 +4806,10 @@
         "address": "Orchard village, Brgy Ayala, Magalang, Philippines, 2011",
         "operatingHours": "07:00 AM - 10:00 PM",
         "lat": 15.22,
-        "lng": 120.719
+        "lng": 120.719,
+        "facebookUrl": "https://www.facebook.com/altezzacabinsrestaurant/",
+        "instagramUrl": "https://www.instagram.com/altezzacabinsrestaurant/",
+        "tiktokUrl": "https://www.tiktok.com/@altezzacabinsrestaurant"
       }
     ],
     "username": "altezza_owner",
@@ -5380,7 +5784,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/altezzacabinsrestaurant/",
+    "instagramUrl": "https://www.instagram.com/altezzacabinsrestaurant/",
+    "tiktokUrl": "https://www.tiktok.com/@altezzacabinsrestaurant"
   },
   {
     "id": "apalit-lechon",
@@ -5410,7 +5817,10 @@
         "address": "Barangay San Nicolas, Apalit, Pampanga",
         "operatingHours": "09:00 AM - 09:00 PM",
         "lat": 14.9654,
-        "lng": 120.7602
+        "lng": 120.7602,
+        "facebookUrl": "https://www.facebook.com/apagapalitlechongrill/",
+        "instagramUrl": "https://www.instagram.com/apagapalitlechongrill/",
+        "tiktokUrl": "https://www.tiktok.com/@apagapalitlechongrill"
       }
     ],
     "username": "apag_apalit_lechon___grill_owner",
@@ -5461,7 +5871,10 @@
           "fat": 18
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/apagapalitlechongrill/",
+    "instagramUrl": "https://www.instagram.com/apagapalitlechongrill/",
+    "tiktokUrl": "https://www.tiktok.com/@apagapalitlechongrill"
   },
   {
     "id": "abag-marangle-lubao",
@@ -5491,7 +5904,10 @@
         "address": "Barangay Lourdes, Lubao, Pampanga",
         "operatingHours": "10:00 AM - 09:00 PM",
         "lat": 14.9452,
-        "lng": 120.5982
+        "lng": 120.5982,
+        "facebookUrl": "https://www.facebook.com/apagmarangle/",
+        "instagramUrl": "https://www.instagram.com/apagmarangle/",
+        "tiktokUrl": "https://www.tiktok.com/@apagmarangle"
       }
     ],
     "username": "apag_marangle_owner",
@@ -5528,7 +5944,10 @@
           "fat": 22
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/apagmarangle/",
+    "instagramUrl": "https://www.instagram.com/apagmarangle/",
+    "tiktokUrl": "https://www.tiktok.com/@apagmarangle"
   },
   {
     "id": "res-apung-otings-floridablanca",
@@ -5559,7 +5978,10 @@
         "address": "Valdez, Floridablanca, Pampanga",
         "operatingHours": "10:00 AM - 09:00 PM",
         "lat": 14.975,
-        "lng": 120.531
+        "lng": 120.531,
+        "facebookUrl": "https://www.facebook.com/apungotingsheritagerestaurant/",
+        "instagramUrl": "https://www.instagram.com/apungotingsheritagerestaurant/",
+        "tiktokUrl": "https://www.tiktok.com/@apungotingsheritagerestaurant"
       }
     ],
     "username": "apung_oting_owner",
@@ -5610,7 +6032,10 @@
           "fat": 46
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/apungotingsheritagerestaurant/",
+    "instagramUrl": "https://www.instagram.com/apungotingsheritagerestaurant/",
+    "tiktokUrl": "https://www.tiktok.com/@apungotingsheritagerestaurant"
   },
   {
     "id": "magalang-kitchen",
@@ -5640,7 +6065,10 @@
         "address": "Barangay Santo Rosario, Magalang, Pampanga",
         "operatingHours": "10:00 AM - 05:00 PM",
         "lat": 15.2215,
-        "lng": 120.6612
+        "lng": 120.6612,
+        "facebookUrl": "https://www.facebook.com/atchinglilliansancestralkitchen/",
+        "instagramUrl": "https://www.instagram.com/atchinglilliansancestralkitchen/",
+        "tiktokUrl": "https://www.tiktok.com/@atchinglilliansancestralkitchen"
       }
     ],
     "username": "atching_lillian_s_ancestral_kitchen_owner",
@@ -5677,7 +6105,10 @@
           "fat": 36
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/atchinglilliansancestralkitchen/",
+    "instagramUrl": "https://www.instagram.com/atchinglilliansancestralkitchen/",
+    "tiktokUrl": "https://www.tiktok.com/@atchinglilliansancestralkitchen"
   },
   {
     "id": "candaba-b-farm-cafe",
@@ -5708,7 +6139,10 @@
         "address": "Barangay Santa Lucia, Candaba, Pampanga",
         "operatingHours": "09:00 AM - 09:00 PM",
         "lat": 15.0935,
-        "lng": 120.8268
+        "lng": 120.8268,
+        "facebookUrl": "https://www.facebook.com/bfarmcafebyalexaskitchen/",
+        "instagramUrl": "https://www.instagram.com/bfarmcafebyalexaskitchen/",
+        "tiktokUrl": "https://www.tiktok.com/@bfarmcafebyalexaskitchen"
       }
     ],
     "username": "b_farm_cafe_by_alexa_s_kitchen_owner",
@@ -5843,7 +6277,10 @@
           "fat": 25
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/bfarmcafebyalexaskitchen/",
+    "instagramUrl": "https://www.instagram.com/bfarmcafebyalexaskitchen/",
+    "tiktokUrl": "https://www.tiktok.com/@bfarmcafebyalexaskitchen"
   },
   {
     "id": "san-fernando-bale-capampangan",
@@ -5870,7 +6307,10 @@
     "branches": [
       {
         "municipality": "Bacolor",
-        "address": "Megadike Access Road, Bacolor, Pampanga"
+        "address": "Megadike Access Road, Bacolor, Pampanga",
+        "facebookUrl": "https://www.facebook.com/balecapampangan/",
+        "instagramUrl": "https://www.instagram.com/balecapampangan/",
+        "tiktokUrl": "https://www.tiktok.com/@balecapampangan"
       }
     ],
     "username": "balecapampangan",
@@ -5991,7 +6431,10 @@
           "fat": 55
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/balecapampangan/",
+    "instagramUrl": "https://www.instagram.com/balecapampangan/",
+    "tiktokUrl": "https://www.tiktok.com/@balecapampangan"
   },
   {
     "id": "res-bariotik-kitchen-floridablanca",
@@ -6022,7 +6465,10 @@
         "address": "Bariotik Garden, Floridablanca, Pampanga",
         "operatingHours": "10:00 AM - 08:30 PM",
         "lat": 14.978,
-        "lng": 120.535
+        "lng": 120.535,
+        "facebookUrl": "https://www.facebook.com/bariotikkitchenandgarden/",
+        "instagramUrl": "https://www.instagram.com/bariotikkitchenandgarden/",
+        "tiktokUrl": "https://www.tiktok.com/@bariotikkitchenandgarden"
       }
     ],
     "username": "bariotik_owner",
@@ -6059,7 +6505,10 @@
           "fat": 50
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/bariotikkitchenandgarden/",
+    "instagramUrl": "https://www.instagram.com/bariotikkitchenandgarden/",
+    "tiktokUrl": "https://www.tiktok.com/@bariotikkitchenandgarden"
   },
   {
     "id": "res-blessys-cuisine-arayat",
@@ -6091,7 +6540,10 @@
         "address": "Poblacion, Arayat, Pampanga",
         "operatingHours": "08:00 AM - 09:00 PM",
         "lat": 15.1492,
-        "lng": 120.7694
+        "lng": 120.7694,
+        "facebookUrl": "https://www.facebook.com/blessyscuisine/",
+        "instagramUrl": "https://www.instagram.com/blessyscuisine/",
+        "tiktokUrl": "https://www.tiktok.com/@blessyscuisine"
       }
     ],
     "username": "blessys_owner",
@@ -6954,7 +7406,10 @@
           "fat": 160
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/blessyscuisine/",
+    "instagramUrl": "https://www.instagram.com/blessyscuisine/",
+    "tiktokUrl": "https://www.tiktok.com/@blessyscuisine"
   },
   {
     "id": "res-1787654534742",
@@ -6982,7 +7437,10 @@
         "address": "San Nicolas, Minalin, Pampanga",
         "operatingHours": "08:00 AM - 11:00 PM",
         "lat": 15.02295779308414,
-        "lng": 120.67440551726227
+        "lng": 120.67440551726227,
+        "facebookUrl": "https://www.facebook.com/bogsilog/",
+        "instagramUrl": "https://www.instagram.com/bogsilog/",
+        "tiktokUrl": "https://www.tiktok.com/@bogsilog"
       }
     ],
     "username": "bogsilog_owner",
@@ -7761,7 +8219,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/bogsilog/",
+    "instagramUrl": "https://www.instagram.com/bogsilog/",
+    "tiktokUrl": "https://www.tiktok.com/@bogsilog"
   },
   {
     "id": "res-1787742713321",
@@ -7790,7 +8251,10 @@
         "address": "Poblacion, Primark, Macabebe, Pampanga",
         "operatingHours": "07:00 AM - 11:00 PM",
         "lat": 14.906,
-        "lng": 120.715
+        "lng": 120.715,
+        "facebookUrl": "https://www.facebook.com/bosstapsilogan/",
+        "instagramUrl": "https://www.instagram.com/bosstapsilogan/",
+        "tiktokUrl": "https://www.tiktok.com/@bosstapsilogan"
       }
     ],
     "username": "bosstapsi_owner",
@@ -8415,7 +8879,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/bosstapsilogan/",
+    "instagramUrl": "https://www.instagram.com/bosstapsilogan/",
+    "tiktokUrl": "https://www.tiktok.com/@bosstapsilogan"
   },
   {
     "id": "san-fernando-bubusuk-goto-anne",
@@ -8446,7 +8913,10 @@
         "address": "Barangay San Agustin, City of San Fernando, Pampanga",
         "operatingHours": "08:00 AM - 10:00 PM",
         "lat": 15.034,
-        "lng": 120.684
+        "lng": 120.684,
+        "facebookUrl": "https://www.facebook.com/bubusukgotoannecorner/",
+        "instagramUrl": "https://www.instagram.com/bubusukgotoannecorner/",
+        "tiktokUrl": "https://www.tiktok.com/@bubusukgotoannecorner"
       }
     ],
     "username": "bubusuk",
@@ -8525,7 +8995,10 @@
           "fat": 38
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/bubusukgotoannecorner/",
+    "instagramUrl": "https://www.instagram.com/bubusukgotoannecorner/",
+    "tiktokUrl": "https://www.tiktok.com/@bubusukgotoannecorner"
   },
   {
     "id": "res-1787685401361",
@@ -8554,7 +9027,10 @@
         "address": "Skytech I.T Park, MacArthur Highway Camachiles, Mabalacat, Philippines, 2010",
         "operatingHours": "OPEN 24 HOURS",
         "lat": 15.191,
-        "lng": 120.583
+        "lng": 120.583,
+        "facebookUrl": "https://www.facebook.com/cafbniskytech/",
+        "instagramUrl": "https://www.instagram.com/cafbniskytech/",
+        "tiktokUrl": "https://www.tiktok.com/@cafbniskytech"
       }
     ],
     "username": "cafebeni_owner",
@@ -10327,7 +10803,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/cafbniskytech/",
+    "instagramUrl": "https://www.instagram.com/cafbniskytech/",
+    "tiktokUrl": "https://www.tiktok.com/@cafbniskytech"
   },
   {
     "id": "res-1787688860124",
@@ -10355,7 +10834,10 @@
         "address": "San Pedro II, Magalang, Philippines, 2011",
         "operatingHours": "03:00 PM - 10:00 PM",
         "lat": 15.211,
-        "lng": 120.652
+        "lng": 120.652,
+        "facebookUrl": "https://www.facebook.com/campobistro/",
+        "instagramUrl": "https://www.instagram.com/campobistro/",
+        "tiktokUrl": "https://www.tiktok.com/@campobistro"
       }
     ],
     "username": "campobistro_owner",
@@ -11064,7 +11546,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/campobistro/",
+    "instagramUrl": "https://www.instagram.com/campobistro/",
+    "tiktokUrl": "https://www.tiktok.com/@campobistro"
   },
   {
     "id": "res-1787748533441",
@@ -11094,7 +11579,10 @@
         "address": "Poblacion, Macabebe, Philippines, 2018",
         "operatingHours": "09:00 AM - 10:00 PM",
         "lat": 14.908,
-        "lng": 120.714
+        "lng": 120.714,
+        "facebookUrl": "https://www.facebook.com/chops/",
+        "instagramUrl": "https://www.instagram.com/chops/",
+        "tiktokUrl": "https://www.tiktok.com/@chops"
       }
     ],
     "username": "chops_owner",
@@ -12335,7 +12823,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/chops/",
+    "instagramUrl": "https://www.instagram.com/chops/",
+    "tiktokUrl": "https://www.tiktok.com/@chops"
   },
   {
     "id": "res-1787656052444",
@@ -12365,7 +12856,10 @@
         "address": "# 76 JASA, Sto Cristo, Mexico, Pampanga in-front of DANONOS DOUGHNUTS  Mexico &!besides WINGFLIX UNLIMITED",
         "operatingHours": "09:00 AM - 10:00 PM",
         "lat": 15.061,
-        "lng": 120.718
+        "lng": 120.718,
+        "facebookUrl": "https://www.facebook.com/cusinangmatuangatchinglillianborromeo/",
+        "instagramUrl": "https://www.instagram.com/cusinangmatuangatchinglillianborromeo/",
+        "tiktokUrl": "https://www.tiktok.com/@cusinangmatuangatchinglillianborromeo"
       }
     ],
     "username": "cusinangmatua_owner",
@@ -14026,7 +14520,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/cusinangmatuangatchinglillianborromeo/",
+    "instagramUrl": "https://www.instagram.com/cusinangmatuangatchinglillianborromeo/",
+    "tiktokUrl": "https://www.tiktok.com/@cusinangmatuangatchinglillianborromeo"
   },
   {
     "id": "res-1787650517358",
@@ -14053,7 +14550,10 @@
         "address": "General Luna St. Babo Sacan , Porac, Pampanga 2008, Philippines",
         "operatingHours": "09:30 AM - 10:00 PM",
         "lat": 15.07,
-        "lng": 120.53
+        "lng": 120.53,
+        "facebookUrl": "https://www.facebook.com/dsehosrestaurant/",
+        "instagramUrl": "https://www.instagram.com/dsehosrestaurant/",
+        "tiktokUrl": "https://www.tiktok.com/@dsehosrestaurant"
       }
     ],
     "username": "dsehos_owner",
@@ -15280,7 +15780,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/dsehosrestaurant/",
+    "instagramUrl": "https://www.instagram.com/dsehosrestaurant/",
+    "tiktokUrl": "https://www.tiktok.com/@dsehosrestaurant"
   },
   {
     "id": "res-1787741952298",
@@ -15308,7 +15811,10 @@
         "address": "217 Angeles - Porac - Floridablanca - Dinalupihan Rd, Porac, Pampanga",
         "operatingHours": "06:00 AM - 06:30 PM",
         "lat": 15.071,
-        "lng": 120.543
+        "lng": 120.543,
+        "facebookUrl": "https://www.facebook.com/dollybscarinderia/",
+        "instagramUrl": "https://www.instagram.com/dollybscarinderia/",
+        "tiktokUrl": "https://www.tiktok.com/@dollybscarinderia"
       }
     ],
     "username": "dollyb_owner",
@@ -15345,7 +15851,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/dollybscarinderia/",
+    "instagramUrl": "https://www.instagram.com/dollybscarinderia/",
+    "tiktokUrl": "https://www.tiktok.com/@dollybscarinderia"
   },
   {
     "id": "res-1787730739548",
@@ -15376,7 +15885,10 @@
         "address": "Sta Maria, Minalin, Philippines",
         "operatingHours": "08:00 AM - 01:00 PM & 5:00 PM - 12:00 AM",
         "lat": 14.99,
-        "lng": 120.741
+        "lng": 120.741,
+        "facebookUrl": "https://www.facebook.com/ebunebun/",
+        "instagramUrl": "https://www.instagram.com/ebunebun/",
+        "tiktokUrl": "https://www.tiktok.com/@ebunebun"
       }
     ],
     "username": "ebun_owner",
@@ -15721,7 +16233,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/ebunebun/",
+    "instagramUrl": "https://www.instagram.com/ebunebun/",
+    "tiktokUrl": "https://www.tiktok.com/@ebunebun"
   },
   {
     "id": "res-erwins-sisigan-ningnangan-arayat",
@@ -15753,7 +16268,10 @@
         "address": "Poblacion, Arayat, Pampanga",
         "operatingHours": "10:00 AM - 11:00 PM",
         "lat": 15.151,
-        "lng": 120.768
+        "lng": 120.768,
+        "facebookUrl": "https://www.facebook.com/erwinssisiganningnangan/",
+        "instagramUrl": "https://www.instagram.com/erwinssisiganningnangan/",
+        "tiktokUrl": "https://www.tiktok.com/@erwinssisiganningnangan"
       }
     ],
     "username": "erwins_owner",
@@ -16224,7 +16742,10 @@
           "fat": 0
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/erwinssisiganningnangan/",
+    "instagramUrl": "https://www.instagram.com/erwinssisiganningnangan/",
+    "tiktokUrl": "https://www.tiktok.com/@erwinssisiganningnangan"
   },
   {
     "id": "everybodys-cafe",
@@ -16271,7 +16792,10 @@
           20,
           10,
           5
-        ]
+        ],
+        "facebookUrl": "https://www.facebook.com/everybodyscafe/",
+        "instagramUrl": "https://www.instagram.com/everybodyscafe/",
+        "tiktokUrl": "https://www.tiktok.com/@everybodyscafe"
       },
       {
         "branchName": "Angeles Nepo Quad Branch",
@@ -16296,7 +16820,10 @@
           35,
           15,
           5
-        ]
+        ],
+        "facebookUrl": "https://www.facebook.com/everybodyscafe/",
+        "instagramUrl": "https://www.instagram.com/everybodyscafe/",
+        "tiktokUrl": "https://www.tiktok.com/@everybodyscafe"
       }
     ],
     "username": "everybody_s_cafe_owner",
@@ -16347,7 +16874,10 @@
           "fat": 12
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/everybodyscafe/",
+    "instagramUrl": "https://www.instagram.com/everybodyscafe/",
+    "tiktokUrl": "https://www.tiktok.com/@everybodyscafe"
   },
   {
     "id": "res-fhinas-panciteria-arayat",
@@ -16379,7 +16909,10 @@
         "address": "Poblacion, Arayat, Pampanga",
         "operatingHours": "07:30 AM - 08:00 PM",
         "lat": 15.1485,
-        "lng": 120.771
+        "lng": 120.771,
+        "facebookUrl": "https://www.facebook.com/fhinaspanciteria/",
+        "instagramUrl": "https://www.instagram.com/fhinaspanciteria/",
+        "tiktokUrl": "https://www.tiktok.com/@fhinaspanciteria"
       }
     ],
     "username": "fhinas_owner",
@@ -16696,7 +17229,10 @@
           "fat": 0
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/fhinaspanciteria/",
+    "instagramUrl": "https://www.instagram.com/fhinaspanciteria/",
+    "tiktokUrl": "https://www.tiktok.com/@fhinaspanciteria"
   },
   {
     "id": "floridablanca-sugar",
@@ -16726,7 +17262,10 @@
         "address": "Barangay San Agustin, Floridablanca, Pampanga",
         "operatingHours": "08:00 AM - 08:00 PM",
         "lat": 14.9752,
-        "lng": 120.5012
+        "lng": 120.5012,
+        "facebookUrl": "https://www.facebook.com/floridablancasugartrailresto/",
+        "instagramUrl": "https://www.instagram.com/floridablancasugartrailresto/",
+        "tiktokUrl": "https://www.tiktok.com/@floridablancasugartrailresto"
       }
     ],
     "username": "floridablanca_sugar_trail_resto_owner",
@@ -16763,7 +17302,10 @@
           "fat": 32
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/floridablancasugartrailresto/",
+    "instagramUrl": "https://www.instagram.com/floridablancasugartrailresto/",
+    "tiktokUrl": "https://www.tiktok.com/@floridablancasugartrailresto"
   },
   {
     "id": "candaba-funnside-ningnangan",
@@ -16795,7 +17337,10 @@
         "address": "Fil-Am Friendship Highway, Angeles City, Pampanga",
         "operatingHours": "10:00 AM - 11:00 PM",
         "lat": 15.1432,
-        "lng": 120.578
+        "lng": 120.578,
+        "facebookUrl": "https://www.facebook.com/funnsideningnangan/",
+        "instagramUrl": "https://www.instagram.com/funnsideningnangan/",
+        "tiktokUrl": "https://www.tiktok.com/@funnsideningnangan"
       },
       {
         "branchName": "Candaba Main Branch",
@@ -16803,7 +17348,10 @@
         "address": "Poblacion Highway, Candaba, Pampanga",
         "operatingHours": "10:00 AM - 11:00 PM",
         "lat": 15.092,
-        "lng": 120.825
+        "lng": 120.825,
+        "facebookUrl": "https://www.facebook.com/funnsideningnangan/",
+        "instagramUrl": "https://www.instagram.com/funnsideningnangan/",
+        "tiktokUrl": "https://www.tiktok.com/@funnsideningnangan"
       },
       {
         "branchName": "City of San Fernando Branch",
@@ -16811,7 +17359,10 @@
         "address": "Gapan-Olongapo Road, City of San Fernando, Pampanga",
         "operatingHours": "10:00 AM - 11:00 PM",
         "lat": 15.0345,
-        "lng": 120.687
+        "lng": 120.687,
+        "facebookUrl": "https://www.facebook.com/funnsideningnangan/",
+        "instagramUrl": "https://www.instagram.com/funnsideningnangan/",
+        "tiktokUrl": "https://www.tiktok.com/@funnsideningnangan"
       },
       {
         "branchName": "Mexico Branch",
@@ -16819,7 +17370,10 @@
         "address": "3P36+VQ5, Mexico, Pampanga",
         "operatingHours": "10:00 AM - 11:00 PM",
         "lat": 15.055,
-        "lng": 120.712
+        "lng": 120.712,
+        "facebookUrl": "https://www.facebook.com/funnsideningnangan/",
+        "instagramUrl": "https://www.instagram.com/funnsideningnangan/",
+        "tiktokUrl": "https://www.tiktok.com/@funnsideningnangan"
       },
       {
         "branchName": "Santo Tomas Branch",
@@ -16827,7 +17381,10 @@
         "address": "MacArthur Highway, Santo Tomas, Pampanga",
         "operatingHours": "10:00 AM - 10:30 PM",
         "lat": 15.011,
-        "lng": 120.7175
+        "lng": 120.7175,
+        "facebookUrl": "https://www.facebook.com/funnsideningnangan/",
+        "instagramUrl": "https://www.instagram.com/funnsideningnangan/",
+        "tiktokUrl": "https://www.tiktok.com/@funnsideningnangan"
       },
       {
         "branchName": "Lubao Branch",
@@ -16835,7 +17392,10 @@
         "address": "Jose Abad Santos Avenue, San Nicolas 2nd, Lubao, Pampanga",
         "operatingHours": "10:00 AM - 10:00 PM",
         "lat": 14.938,
-        "lng": 120.601
+        "lng": 120.601,
+        "facebookUrl": "https://www.facebook.com/funnsideningnangan/",
+        "instagramUrl": "https://www.instagram.com/funnsideningnangan/",
+        "tiktokUrl": "https://www.tiktok.com/@funnsideningnangan"
       },
       {
         "branchName": "Guagua Branch",
@@ -16843,7 +17403,10 @@
         "address": "Jose Abad Santos Avenue, Guagua, Pampanga",
         "operatingHours": "10:00 AM - 11:00 PM",
         "lat": 14.9701,
-        "lng": 120.63
+        "lng": 120.63,
+        "facebookUrl": "https://www.facebook.com/funnsideningnangan/",
+        "instagramUrl": "https://www.instagram.com/funnsideningnangan/",
+        "tiktokUrl": "https://www.tiktok.com/@funnsideningnangan"
       }
     ],
     "username": "ningnangan",
@@ -17790,7 +18353,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/funnsideningnangan/",
+    "instagramUrl": "https://www.instagram.com/funnsideningnangan/",
+    "tiktokUrl": "https://www.tiktok.com/@funnsideningnangan"
   },
   {
     "id": "res-1787676618511",
@@ -17819,7 +18385,10 @@
         "address": "Colgante, Apalit, Philippines, 2016",
         "operatingHours": "05:00 AM - 12:00 AM",
         "lat": 15.039198667939303,
-        "lng": 120.68270765145975
+        "lng": 120.68270765145975,
+        "facebookUrl": "https://www.facebook.com/gotoell/",
+        "instagramUrl": "https://www.instagram.com/gotoell/",
+        "tiktokUrl": "https://www.tiktok.com/@gotoell"
       },
       {
         "branchName": "GO TO ELL Macabebe",
@@ -17827,7 +18396,10 @@
         "address": "Sta. Rita, Macabebe, Pampanga",
         "operatingHours": "05:00 AM - 12:00 AM",
         "lat": 15.039198667939303,
-        "lng": 120.68270765145975
+        "lng": 120.68270765145975,
+        "facebookUrl": "https://www.facebook.com/gotoell/",
+        "instagramUrl": "https://www.instagram.com/gotoell/",
+        "tiktokUrl": "https://www.tiktok.com/@gotoell"
       }
     ],
     "username": "gotoell_owner",
@@ -19208,7 +19780,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/gotoell/",
+    "instagramUrl": "https://www.instagram.com/gotoell/",
+    "tiktokUrl": "https://www.tiktok.com/@gotoell"
   },
   {
     "id": "res-1787682623504",
@@ -19238,7 +19813,10 @@
         "address": "San Nicolas Sunset Blvd. Minalin Pampanga, 2019",
         "operatingHours": "06:00 AM - 11:30 PM",
         "lat": 14.972,
-        "lng": 120.686
+        "lng": 120.686,
+        "facebookUrl": "https://www.facebook.com/gotonipido/",
+        "instagramUrl": "https://www.instagram.com/gotonipido/",
+        "tiktokUrl": "https://www.tiktok.com/@gotonipido"
       }
     ],
     "username": "gotonipido_owner",
@@ -20549,7 +21127,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/gotonipido/",
+    "instagramUrl": "https://www.instagram.com/gotonipido/",
+    "tiktokUrl": "https://www.tiktok.com/@gotonipido"
   },
   {
     "id": "res-1787688037454",
@@ -20577,7 +21158,10 @@
         "address": "Barangay San Jose, City of San Fernando, Pampanga",
         "operatingHours": "09:00 AM - 09:00 PM",
         "lat": 15.026085453893845,
-        "lng": 120.68550462682781
+        "lng": 120.68550462682781,
+        "facebookUrl": "https://www.facebook.com/gracelandbuffetrestaurant/",
+        "instagramUrl": "https://www.instagram.com/gracelandbuffetrestaurant/",
+        "tiktokUrl": "https://www.tiktok.com/@gracelandbuffetrestaurant"
       }
     ],
     "username": "graceland_owner",
@@ -20614,7 +21198,10 @@
           "fat": 35
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/gracelandbuffetrestaurant/",
+    "instagramUrl": "https://www.instagram.com/gracelandbuffetrestaurant/",
+    "tiktokUrl": "https://www.tiktok.com/@gracelandbuffetrestaurant"
   },
   {
     "id": "guagua-matua",
@@ -20644,7 +21231,10 @@
         "address": "Barangay Del Pilar, Guagua, Pampanga",
         "operatingHours": "07:00 AM - 09:00 PM",
         "lat": 14.9982,
-        "lng": 120.6275
+        "lng": 120.6275,
+        "facebookUrl": "https://www.facebook.com/guaguakusinamatua/",
+        "instagramUrl": "https://www.instagram.com/guaguakusinamatua/",
+        "tiktokUrl": "https://www.tiktok.com/@guaguakusinamatua"
       }
     ],
     "username": "guagua_kusina_matua_owner",
@@ -20681,7 +21271,10 @@
           "fat": 12
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/guaguakusinamatua/",
+    "instagramUrl": "https://www.instagram.com/guaguakusinamatua/",
+    "tiktokUrl": "https://www.tiktok.com/@guaguakusinamatua"
   },
   {
     "id": "san-fernando-holidayland",
@@ -20712,7 +21305,10 @@
         "address": "Barangay Del Pilar, City of San Fernando, Pampanga",
         "operatingHours": "10:00 AM - 10:00 PM",
         "lat": 15.036,
-        "lng": 120.688
+        "lng": 120.688,
+        "facebookUrl": "https://www.facebook.com/holidaylandrestaurant/",
+        "instagramUrl": "https://www.instagram.com/holidaylandrestaurant/",
+        "tiktokUrl": "https://www.tiktok.com/@holidaylandrestaurant"
       }
     ],
     "username": "holidayland",
@@ -20763,7 +21359,10 @@
           "fat": 58
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/holidaylandrestaurant/",
+    "instagramUrl": "https://www.instagram.com/holidaylandrestaurant/",
+    "tiktokUrl": "https://www.tiktok.com/@holidaylandrestaurant"
   },
   {
     "id": "san-fernando-imang-nene",
@@ -20793,7 +21392,10 @@
         "address": "Barangay San Jose, City of San Fernando, Pampanga",
         "operatingHours": "08:00 AM - 09:00 PM",
         "lat": 15.037,
-        "lng": 120.6835
+        "lng": 120.6835,
+        "facebookUrl": "https://www.facebook.com/imangnenekapampangancuisine/",
+        "instagramUrl": "https://www.instagram.com/imangnenekapampangancuisine/",
+        "tiktokUrl": "https://www.tiktok.com/@imangnenekapampangancuisine"
       }
     ],
     "username": "imangnene",
@@ -20872,7 +21474,10 @@
           "fat": 34
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/imangnenekapampangancuisine/",
+    "instagramUrl": "https://www.instagram.com/imangnenekapampangancuisine/",
+    "tiktokUrl": "https://www.tiktok.com/@imangnenekapampangancuisine"
   },
   {
     "id": "res-1787729278736",
@@ -20899,7 +21504,10 @@
         "address": "XPPR+C8V, Sta. Maria, Minalin, Pampanga",
         "operatingHours": "06:00 AM - 06:00 PM",
         "lat": 14.986,
-        "lng": 120.74
+        "lng": 120.74,
+        "facebookUrl": "https://www.facebook.com/jdsgotohan/",
+        "instagramUrl": "https://www.instagram.com/jdsgotohan/",
+        "tiktokUrl": "https://www.tiktok.com/@jdsgotohan"
       }
     ],
     "username": "jdgotohan_owner",
@@ -20936,7 +21544,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/jdsgotohan/",
+    "instagramUrl": "https://www.instagram.com/jdsgotohan/",
+    "tiktokUrl": "https://www.tiktok.com/@jdsgotohan"
   },
   {
     "id": "res-jurados-5-arayat",
@@ -20968,7 +21579,10 @@
         "address": "Poblacion, Arayat, Pampanga",
         "operatingHours": "09:00 AM - 10:00 PM",
         "lat": 15.152,
-        "lng": 120.7675
+        "lng": 120.7675,
+        "facebookUrl": "https://www.facebook.com/jurados5/",
+        "instagramUrl": "https://www.instagram.com/jurados5/",
+        "tiktokUrl": "https://www.tiktok.com/@jurados5"
       }
     ],
     "username": "jurados5_owner",
@@ -21901,7 +22515,10 @@
           "fat": 20
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/jurados5/",
+    "instagramUrl": "https://www.instagram.com/jurados5/",
+    "tiktokUrl": "https://www.tiktok.com/@jurados5"
   },
   {
     "id": "res-kabigtings-halo-halo",
@@ -21932,7 +22549,10 @@
         "address": "Poblacion, Arayat, Pampanga",
         "operatingHours": "08:00 AM - 08:00 PM",
         "lat": 15.148,
-        "lng": 120.769
+        "lng": 120.769,
+        "facebookUrl": "https://www.facebook.com/kabigtingshalohalo/",
+        "instagramUrl": "https://www.instagram.com/kabigtingshalohalo/",
+        "tiktokUrl": "https://www.tiktok.com/@kabigtingshalohalo"
       },
       {
         "branchName": "Kabigting's Halo-Halo San Fernando Branch",
@@ -21940,7 +22560,10 @@
         "address": "MacArthur Highway, City of San Fernando, Pampanga",
         "operatingHours": "09:00 AM - 08:00 PM",
         "lat": 15.032,
-        "lng": 120.686
+        "lng": 120.686,
+        "facebookUrl": "https://www.facebook.com/kabigtingshalohalo/",
+        "instagramUrl": "https://www.instagram.com/kabigtingshalohalo/",
+        "tiktokUrl": "https://www.tiktok.com/@kabigtingshalohalo"
       },
       {
         "branchName": "Kabigting's Halo-Halo Floridablanca Branch",
@@ -21948,7 +22571,10 @@
         "address": "National Highway, Floridablanca, Pampanga",
         "operatingHours": "09:00 AM - 08:00 PM",
         "lat": 14.974,
-        "lng": 120.529
+        "lng": 120.529,
+        "facebookUrl": "https://www.facebook.com/kabigtingshalohalo/",
+        "instagramUrl": "https://www.instagram.com/kabigtingshalohalo/",
+        "tiktokUrl": "https://www.tiktok.com/@kabigtingshalohalo"
       }
     ],
     "username": "kabigtings_owner",
@@ -22601,7 +23227,10 @@
           "fat": 0
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/kabigtingshalohalo/",
+    "instagramUrl": "https://www.instagram.com/kabigtingshalohalo/",
+    "tiktokUrl": "https://www.tiktok.com/@kabigtingshalohalo"
   },
   {
     "id": "res-1787687123377",
@@ -22629,7 +23258,10 @@
         "address": "007 J. Luciano St. Marvea Subd. San Nicolas 2, Magalang, Philippines, 2011",
         "operatingHours": "09:00 AM - 08:30 PM (MON-TUE, TH&SAT), 09:00 AM - 10:00 PM (WED), 09:00 AM -  09:00 PM (FRI)",
         "lat": 15.215,
-        "lng": 120.664
+        "lng": 120.664,
+        "facebookUrl": "https://www.facebook.com/kainansahardin/",
+        "instagramUrl": "https://www.instagram.com/kainansahardin/",
+        "tiktokUrl": "https://www.tiktok.com/@kainansahardin"
       }
     ],
     "username": "kainansahardin_owner",
@@ -24080,7 +24712,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/kainansahardin/",
+    "instagramUrl": "https://www.instagram.com/kainansahardin/",
+    "tiktokUrl": "https://www.tiktok.com/@kainansahardin"
   },
   {
     "id": "res-1787653138004",
@@ -24108,7 +24743,10 @@
         "address": "56A Gen. Luna Street. Babo Sacan, Porac, Pampanga",
         "operatingHours": "10:00 AM - 11:00 PM",
         "lat": 15.108,
-        "lng": 120.564
+        "lng": 120.564,
+        "facebookUrl": "https://www.facebook.com/kikosderangan/",
+        "instagramUrl": "https://www.instagram.com/kikosderangan/",
+        "tiktokUrl": "https://www.tiktok.com/@kikosderangan"
       }
     ],
     "username": "kikoderangan_owner",
@@ -24775,7 +25413,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/kikosderangan/",
+    "instagramUrl": "https://www.instagram.com/kikosderangan/",
+    "tiktokUrl": "https://www.tiktok.com/@kikosderangan"
   },
   {
     "id": "arayat-kitchen",
@@ -24805,7 +25446,10 @@
         "address": "Barangay Santo Rosario, Arayat, Pampanga",
         "operatingHours": "08:00 AM - 10:00 PM",
         "lat": 15.1504,
-        "lng": 120.7698
+        "lng": 120.7698,
+        "facebookUrl": "https://www.facebook.com/kusinanangmtarayat/",
+        "instagramUrl": "https://www.instagram.com/kusinanangmtarayat/",
+        "tiktokUrl": "https://www.tiktok.com/@kusinanangmtarayat"
       }
     ],
     "username": "kusina_nang_mt__arayat_owner",
@@ -24856,7 +25500,10 @@
           "fat": 54
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/kusinanangmtarayat/",
+    "instagramUrl": "https://www.instagram.com/kusinanangmtarayat/",
+    "tiktokUrl": "https://www.tiktok.com/@kusinanangmtarayat"
   },
   {
     "id": "bacolor-tamales",
@@ -24886,7 +25533,10 @@
         "address": "Barangay San Jose, Bacolor, Pampanga",
         "operatingHours": "09:00 AM - 08:00 PM",
         "lat": 15.0003,
-        "lng": 120.6508
+        "lng": 120.6508,
+        "facebookUrl": "https://www.facebook.com/kusinasanguillermo/",
+        "instagramUrl": "https://www.instagram.com/kusinasanguillermo/",
+        "tiktokUrl": "https://www.tiktok.com/@kusinasanguillermo"
       }
     ],
     "username": "kusina_san_guillermo_owner",
@@ -24937,7 +25587,10 @@
           "fat": 10
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/kusinasanguillermo/",
+    "instagramUrl": "https://www.instagram.com/kusinasanguillermo/",
+    "tiktokUrl": "https://www.tiktok.com/@kusinasanguillermo"
   },
   {
     "id": "res-1787666413358",
@@ -24965,7 +25618,10 @@
         "address": "NONOS Commercial Building, JASA Road, Sto. Domingo, Mexico, Pampanga",
         "operatingHours": "11:00 AM - 09:00 PM",
         "lat": 15.73,
-        "lng": 120.746
+        "lng": 120.746,
+        "facebookUrl": "https://www.facebook.com/kuyasizzlersmexico/",
+        "instagramUrl": "https://www.instagram.com/kuyasizzlersmexico/",
+        "tiktokUrl": "https://www.tiktok.com/@kuyasizzlersmexico"
       }
     ],
     "username": "kuyasizzlers_owner",
@@ -25674,7 +26330,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/kuyasizzlersmexico/",
+    "instagramUrl": "https://www.instagram.com/kuyasizzlersmexico/",
+    "tiktokUrl": "https://www.tiktok.com/@kuyasizzlersmexico"
   },
   {
     "id": "res-1787663738680",
@@ -25702,7 +26361,10 @@
         "address": "Maningning Street 1st floor, NONO’s Commercial Building, Santo Domingo, Mexico, Philippines, 2021",
         "operatingHours": "10:00 AM - 08:00 PM",
         "lat": 15.073,
-        "lng": 120.746
+        "lng": 120.746,
+        "facebookUrl": "https://www.facebook.com/lafarinamexico/",
+        "instagramUrl": "https://www.instagram.com/lafarinamexico/",
+        "tiktokUrl": "https://www.tiktok.com/@lafarinamexico"
       }
     ],
     "username": "lafarina_owner",
@@ -26411,7 +27073,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/lafarinamexico/",
+    "instagramUrl": "https://www.instagram.com/lafarinamexico/",
+    "tiktokUrl": "https://www.tiktok.com/@lafarinamexico"
   },
   {
     "id": "res-1787649109666",
@@ -26439,7 +27104,10 @@
         "address": "Porac, Pampanga",
         "operatingHours": "10:00 AM - 08:00 PM (CLOSED EVERY MONDAYS)",
         "lat": 15.04,
-        "lng": 120.56
+        "lng": 120.56,
+        "facebookUrl": "https://www.facebook.com/leaffarmrestaurantandprivateresort/",
+        "instagramUrl": "https://www.instagram.com/leaffarmrestaurantandprivateresort/",
+        "tiktokUrl": "https://www.tiktok.com/@leaffarmrestaurantandprivateresort"
       }
     ],
     "username": "leaffarm_owner",
@@ -26966,7 +27634,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/leaffarmrestaurantandprivateresort/",
+    "instagramUrl": "https://www.instagram.com/leaffarmrestaurantandprivateresort/",
+    "tiktokUrl": "https://www.tiktok.com/@leaffarmrestaurantandprivateresort"
   },
   {
     "id": "san-fernando-lola-ima",
@@ -26996,7 +27667,10 @@
         "address": "Barangay Lourdes, City of San Fernando, Pampanga",
         "operatingHours": "10:30 AM - 09:00 PM",
         "lat": 15.038,
-        "lng": 120.6855
+        "lng": 120.6855,
+        "facebookUrl": "https://www.facebook.com/lolaimabuffetcatering/",
+        "instagramUrl": "https://www.instagram.com/lolaimabuffetcatering/",
+        "tiktokUrl": "https://www.tiktok.com/@lolaimabuffetcatering"
       }
     ],
     "username": "lolaima",
@@ -27047,7 +27721,10 @@
           "fat": 56
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/lolaimabuffetcatering/",
+    "instagramUrl": "https://www.instagram.com/lolaimabuffetcatering/",
+    "tiktokUrl": "https://www.tiktok.com/@lolaimabuffetcatering"
   },
   {
     "id": "res-1787658130139",
@@ -27075,7 +27752,10 @@
         "address": "LakeShore Petron Gas Station, Mexico, Pampanga",
         "operatingHours": "05:30 AM - 10:00 PM",
         "lat": 15.094,
-        "lng": 120.669
+        "lng": 120.669,
+        "facebookUrl": "https://www.facebook.com/lolaimapampangacuisine/",
+        "instagramUrl": "https://www.instagram.com/lolaimapampangacuisine/",
+        "tiktokUrl": "https://www.tiktok.com/@lolaimapampangacuisine"
       },
       {
         "branchName": "Lolaima Pampanga Cuisine - Bulaon",
@@ -27083,7 +27763,10 @@
         "address": "Covelandia-Del carmen Road, San Fernando, 2000 Pampanga",
         "operatingHours": "10:00 AM - 03:00 PM",
         "lat": 15.08,
-        "lng": 120.67
+        "lng": 120.67,
+        "facebookUrl": "https://www.facebook.com/lolaimapampangacuisine/",
+        "instagramUrl": "https://www.instagram.com/lolaimapampangacuisine/",
+        "tiktokUrl": "https://www.tiktok.com/@lolaimapampangacuisine"
       },
       {
         "branchName": "Lolaima Tierra Linda - JASA",
@@ -27091,7 +27774,10 @@
         "address": "Tierra Linda Pampanga Best Building, Jose Abad Santos Ave, San Fernando, Pampanga",
         "operatingHours": "06:00 AM - 09:00 PM",
         "lat": 15.045,
-        "lng": 120.69
+        "lng": 120.69,
+        "facebookUrl": "https://www.facebook.com/lolaimapampangacuisine/",
+        "instagramUrl": "https://www.instagram.com/lolaimapampangacuisine/",
+        "tiktokUrl": "https://www.tiktok.com/@lolaimapampangacuisine"
       }
     ],
     "username": "lolaima_owner",
@@ -27282,7 +27968,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/lolaimapampangacuisine/",
+    "instagramUrl": "https://www.instagram.com/lolaimapampangacuisine/",
+    "tiktokUrl": "https://www.tiktok.com/@lolaimapampangacuisine"
   },
   {
     "id": "mabalacat-bibingka",
@@ -27312,7 +28001,10 @@
         "address": "Barangay Sto. Niño, Mabalacat City, Pampanga",
         "operatingHours": "09:00 AM - 09:00 PM",
         "lat": 15.2212,
-        "lng": 120.5794
+        "lng": 120.5794,
+        "facebookUrl": "https://www.facebook.com/mabalacatnativetreatsclaypot/",
+        "instagramUrl": "https://www.instagram.com/mabalacatnativetreatsclaypot/",
+        "tiktokUrl": "https://www.tiktok.com/@mabalacatnativetreatsclaypot"
       }
     ],
     "username": "mabalacat_native_treats___claypot_owner",
@@ -27349,7 +28041,10 @@
           "fat": 16
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/mabalacatnativetreatsclaypot/",
+    "instagramUrl": "https://www.instagram.com/mabalacatnativetreatsclaypot/",
+    "tiktokUrl": "https://www.tiktok.com/@mabalacatnativetreatsclaypot"
   },
   {
     "id": "res-1787687504080",
@@ -27378,7 +28073,10 @@
         "address": "Santa Cruz (Pob.), Magalang, Pampanga",
         "operatingHours": "04:30 AM - 09:30 PM",
         "lat": 15.213,
-        "lng": 120.659
+        "lng": 120.659,
+        "facebookUrl": "https://www.facebook.com/mabukobarandrestogrill/",
+        "instagramUrl": "https://www.instagram.com/mabukobarandrestogrill/",
+        "tiktokUrl": "https://www.tiktok.com/@mabukobarandrestogrill"
       }
     ],
     "username": "mabuko_owner",
@@ -28493,7 +29191,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/mabukobarandrestogrill/",
+    "instagramUrl": "https://www.instagram.com/mabukobarandrestogrill/",
+    "tiktokUrl": "https://www.tiktok.com/@mabukobarandrestogrill"
   },
   {
     "id": "macabebe-seafood",
@@ -28523,7 +29224,10 @@
         "address": "Barangay San Nicolas, Macabebe, Pampanga",
         "operatingHours": "09:00 AM - 09:00 PM",
         "lat": 14.9082,
-        "lng": 120.7121
+        "lng": 120.7121,
+        "facebookUrl": "https://www.facebook.com/macabebedeltaseafoodgrill/",
+        "instagramUrl": "https://www.instagram.com/macabebedeltaseafoodgrill/",
+        "tiktokUrl": "https://www.tiktok.com/@macabebedeltaseafoodgrill"
       }
     ],
     "username": "macabebe_delta_seafood_grill_owner",
@@ -28560,7 +29264,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/macabebedeltaseafoodgrill/",
+    "instagramUrl": "https://www.instagram.com/macabebedeltaseafoodgrill/",
+    "tiktokUrl": "https://www.tiktok.com/@macabebedeltaseafoodgrill"
   },
   {
     "id": "res-1787677137442",
@@ -28589,7 +29296,10 @@
         "address": "Sta. Rita, Macabebe, Pampanga (Besides YAMAHA and In front of GO TO ELL)",
         "operatingHours": "ALWAYS OPEN",
         "lat": 15.03,
-        "lng": 120.68
+        "lng": 120.68,
+        "facebookUrl": "https://www.facebook.com/mamazontapsilogan/",
+        "instagramUrl": "https://www.instagram.com/mamazontapsilogan/",
+        "tiktokUrl": "https://www.tiktok.com/@mamazontapsilogan"
       }
     ],
     "username": "mamazon_owner",
@@ -29102,7 +29812,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/mamazontapsilogan/",
+    "instagramUrl": "https://www.instagram.com/mamazontapsilogan/",
+    "tiktokUrl": "https://www.tiktok.com/@mamazontapsilogan"
   },
   {
     "id": "res-1787650889954",
@@ -29130,7 +29843,10 @@
         "address": "Along Angeles - Porac National Road, Sampaguita Street, Señura, Porac, Pampanga (Manibaug - Señura), Porac, Philippines, 2008",
         "operatingHours": "ALWAYS OPEN",
         "lat": 15.117,
-        "lng": 120.568
+        "lng": 120.568,
+        "facebookUrl": "https://www.facebook.com/mamihonfoodhouse/",
+        "instagramUrl": "https://www.instagram.com/mamihonfoodhouse/",
+        "tiktokUrl": "https://www.tiktok.com/@mamihonfoodhouse"
       }
     ],
     "username": "mamihon_owner",
@@ -29741,7 +30457,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/mamihonfoodhouse/",
+    "instagramUrl": "https://www.instagram.com/mamihonfoodhouse/",
+    "tiktokUrl": "https://www.tiktok.com/@mamihonfoodhouse"
   },
   {
     "id": "masantol-crabs",
@@ -29771,7 +30490,10 @@
         "address": "Barangay San Jose, Masantol, Pampanga",
         "operatingHours": "10:00 AM - 10:00 PM",
         "lat": 14.8987,
-        "lng": 120.7042
+        "lng": 120.7042,
+        "facebookUrl": "https://www.facebook.com/masantolmangrovecrabhouse/",
+        "instagramUrl": "https://www.instagram.com/masantolmangrovecrabhouse/",
+        "tiktokUrl": "https://www.tiktok.com/@masantolmangrovecrabhouse"
       }
     ],
     "username": "masantol_mangrove_crab_house_owner",
@@ -29808,7 +30530,10 @@
           "fat": 34
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/masantolmangrovecrabhouse/",
+    "instagramUrl": "https://www.instagram.com/masantolmangrovecrabhouse/",
+    "tiktokUrl": "https://www.tiktok.com/@masantolmangrovecrabhouse"
   },
   {
     "id": "res-1787652683224",
@@ -29836,7 +30561,10 @@
         "address": "BLK LOT 13 Model Community PIO, Porac, Pampanga",
         "operatingHours": "05:00 AM - 02:00 PM",
         "lat": 15.046,
-        "lng": 120.527
+        "lng": 120.527,
+        "facebookUrl": "https://www.facebook.com/merenfastfood/",
+        "instagramUrl": "https://www.instagram.com/merenfastfood/",
+        "tiktokUrl": "https://www.tiktok.com/@merenfastfood"
       }
     ],
     "username": "merenfastfood_owner",
@@ -30041,7 +30769,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/merenfastfood/",
+    "instagramUrl": "https://www.instagram.com/merenfastfood/",
+    "tiktokUrl": "https://www.tiktok.com/@merenfastfood"
   },
   {
     "id": "res-1787686661966",
@@ -30069,7 +30800,10 @@
         "address": "Purok 1 Sto. Niño Magalang, Pampanga, Magalang, Philippines, 2011",
         "operatingHours": "11:00 AM - 05:00 PM (TUE-TH,SAT), 11:00 AM - 07:00 PM (FRI & SUN), CLOSED ON MONDAYS",
         "lat": 15.233,
-        "lng": 120.705
+        "lng": 120.705,
+        "facebookUrl": "https://www.facebook.com/miabekapampangancuisine/",
+        "instagramUrl": "https://www.instagram.com/miabekapampangancuisine/",
+        "tiktokUrl": "https://www.tiktok.com/@miabekapampangancuisine"
       }
     ],
     "username": "miabe_owner",
@@ -30624,7 +31358,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/miabekapampangancuisine/",
+    "instagramUrl": "https://www.instagram.com/miabekapampangancuisine/",
+    "tiktokUrl": "https://www.tiktok.com/@miabekapampangancuisine"
   },
   {
     "id": "res-1787684431316",
@@ -30653,7 +31390,10 @@
         "address": "0509 Washington st. Green Meadows, Mabiga, Mabalacat City, Pampanga",
         "operatingHours": "04:00 PM - 12:00 AM",
         "lat": 15.211,
-        "lng": 120.582
+        "lng": 120.582,
+        "facebookUrl": "https://www.facebook.com/milletsbarbequehouse/",
+        "instagramUrl": "https://www.instagram.com/milletsbarbequehouse/",
+        "tiktokUrl": "https://www.tiktok.com/@milletsbarbequehouse"
       }
     ],
     "username": "milletsbbq_owner",
@@ -30998,7 +31738,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/milletsbarbequehouse/",
+    "instagramUrl": "https://www.instagram.com/milletsbarbequehouse/",
+    "tiktokUrl": "https://www.tiktok.com/@milletsbarbequehouse"
   },
   {
     "id": "minalin-eggs",
@@ -31028,7 +31771,10 @@
         "address": "Barangay San Agustin, Minalin, Pampanga",
         "operatingHours": "07:00 AM - 08:00 PM",
         "lat": 14.9812,
-        "lng": 120.6903
+        "lng": 120.6903,
+        "facebookUrl": "https://www.facebook.com/minalineggfarmcafe/",
+        "instagramUrl": "https://www.instagram.com/minalineggfarmcafe/",
+        "tiktokUrl": "https://www.tiktok.com/@minalineggfarmcafe"
       }
     ],
     "username": "minalin_egg_farm_cafe_owner",
@@ -31065,7 +31811,10 @@
           "fat": 26
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/minalineggfarmcafe/",
+    "instagramUrl": "https://www.instagram.com/minalineggfarmcafe/",
+    "tiktokUrl": "https://www.tiktok.com/@minalineggfarmcafe"
   },
   {
     "id": "res-1787688549510",
@@ -31093,7 +31842,10 @@
         "address": "Magalang, Pampanga, 2011",
         "operatingHours": "07:00 AM - 10:00 PM",
         "lat": 15.202,
-        "lng": 120.668
+        "lng": 120.668,
+        "facebookUrl": "https://www.facebook.com/nanaytalingsfoodhouse/",
+        "instagramUrl": "https://www.instagram.com/nanaytalingsfoodhouse/",
+        "tiktokUrl": "https://www.tiktok.com/@nanaytalingsfoodhouse"
       }
     ],
     "username": "nanaytaling_owner",
@@ -32222,7 +32974,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/nanaytalingsfoodhouse/",
+    "instagramUrl": "https://www.instagram.com/nanaytalingsfoodhouse/",
+    "tiktokUrl": "https://www.tiktok.com/@nanaytalingsfoodhouse"
   },
   {
     "id": "res-1787647515236",
@@ -32250,7 +33005,10 @@
         "address": "08 Jalung Highway (Angeles - Porac - Floridablanca - Dinalupihan Road) Jalung Porac, Pampanga Beside ROADSIDE 9 Restobar , Porac, Philippines, 2008",
         "operatingHours": "11:00 AM - 09:00 PM",
         "lat": 15.03,
-        "lng": 120.68
+        "lng": 120.68,
+        "facebookUrl": "https://www.facebook.com/nasiyarestaurant/",
+        "instagramUrl": "https://www.instagram.com/nasiyarestaurant/",
+        "tiktokUrl": "https://www.tiktok.com/@nasiyarestaurant"
       }
     ],
     "username": "nasiya_owner",
@@ -33267,7 +34025,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/nasiyarestaurant/",
+    "instagramUrl": "https://www.instagram.com/nasiyarestaurant/",
+    "tiktokUrl": "https://www.tiktok.com/@nasiyarestaurant"
   },
   {
     "id": "res-1787834930597",
@@ -33296,7 +34057,10 @@
         "address": "241 IRAQ ST. BEBE ANAC MASANTOL PAMPANGA",
         "operatingHours": "11:00 AM - 09:30 PM",
         "lat": 14.881,
-        "lng": 120.707
+        "lng": 120.707,
+        "facebookUrl": "https://www.facebook.com/nobitsa/",
+        "instagramUrl": "https://www.instagram.com/nobitsa/",
+        "tiktokUrl": "https://www.tiktok.com/@nobitsa"
       }
     ],
     "username": "nobitsa_owner",
@@ -33669,7 +34433,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/nobitsa/",
+    "instagramUrl": "https://www.instagram.com/nobitsa/",
+    "tiktokUrl": "https://www.tiktok.com/@nobitsa"
   },
   {
     "id": "san-fernando-pipanganan",
@@ -33700,7 +34467,10 @@
         "address": "Barangay Sto. Niño, City of San Fernando, Pampanga",
         "operatingHours": "09:00 AM - 09:00 PM",
         "lat": 15.031,
-        "lng": 120.682
+        "lng": 120.682,
+        "facebookUrl": "https://www.facebook.com/pipanganancapampanganrestaurantcatering/",
+        "instagramUrl": "https://www.instagram.com/pipanganancapampanganrestaurantcatering/",
+        "tiktokUrl": "https://www.tiktok.com/@pipanganancapampanganrestaurantcatering"
       }
     ],
     "username": "pipanganan",
@@ -33765,7 +34535,10 @@
           "fat": 32
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/pipanganancapampanganrestaurantcatering/",
+    "instagramUrl": "https://www.instagram.com/pipanganancapampanganrestaurantcatering/",
+    "tiktokUrl": "https://www.tiktok.com/@pipanganancapampanganrestaurantcatering"
   },
   {
     "id": "porac-mountain",
@@ -33795,7 +34568,10 @@
         "address": "Barangay Del Pilar, Porac, Pampanga",
         "operatingHours": "08:00 AM - 06:00 PM",
         "lat": 15.0487,
-        "lng": 120.5281
+        "lng": 120.5281,
+        "facebookUrl": "https://www.facebook.com/poracmountaingrillindigenouskitchen/",
+        "instagramUrl": "https://www.instagram.com/poracmountaingrillindigenouskitchen/",
+        "tiktokUrl": "https://www.tiktok.com/@poracmountaingrillindigenouskitchen"
       }
     ],
     "username": "porac_mountain_grill___indigenous_kitchen_owner",
@@ -33832,7 +34608,10 @@
           "fat": 42
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/poracmountaingrillindigenouskitchen/",
+    "instagramUrl": "https://www.instagram.com/poracmountaingrillindigenouskitchen/",
+    "tiktokUrl": "https://www.tiktok.com/@poracmountaingrillindigenouskitchen"
   },
   {
     "id": "res-razons-halo-halo-arayat",
@@ -33864,7 +34643,10 @@
         "address": "Poblacion, Arayat, Pampanga",
         "operatingHours": "08:00 AM - 08:30 PM",
         "lat": 15.15,
-        "lng": 120.769
+        "lng": 120.769,
+        "facebookUrl": "https://www.facebook.com/razonshalohalo/",
+        "instagramUrl": "https://www.instagram.com/razonshalohalo/",
+        "tiktokUrl": "https://www.tiktok.com/@razonshalohalo"
       },
       {
         "branchName": "Razon's of Guagua (Guagua Heritage Branch)",
@@ -33872,7 +34654,10 @@
         "address": "Guagua, Pampanga",
         "operatingHours": "08:00 AM - 08:30 PM",
         "lat": 14.9701,
-        "lng": 120.63
+        "lng": 120.63,
+        "facebookUrl": "https://www.facebook.com/razonshalohalo/",
+        "instagramUrl": "https://www.instagram.com/razonshalohalo/",
+        "tiktokUrl": "https://www.tiktok.com/@razonshalohalo"
       }
     ],
     "username": "razons_owner",
@@ -34399,7 +35184,10 @@
           "fat": 0
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/razonshalohalo/",
+    "instagramUrl": "https://www.instagram.com/razonshalohalo/",
+    "tiktokUrl": "https://www.tiktok.com/@razonshalohalo"
   },
   {
     "id": "res-1787675541942",
@@ -34427,7 +35215,10 @@
         "address": "Macabebe, Pampanga",
         "operatingHours": "11:00 AM - 10:00 PM",
         "lat": 15.030483392969762,
-        "lng": 120.67107627972834
+        "lng": 120.67107627972834,
+        "facebookUrl": "https://www.facebook.com/salanghee/",
+        "instagramUrl": "https://www.instagram.com/salanghee/",
+        "tiktokUrl": "https://www.tiktok.com/@salanghee"
       }
     ],
     "username": "salanghee_owner",
@@ -35066,7 +35857,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/salanghee/",
+    "instagramUrl": "https://www.instagram.com/salanghee/",
+    "tiktokUrl": "https://www.tiktok.com/@salanghee"
   },
   {
     "id": "san-simon-bulalo",
@@ -35096,7 +35890,10 @@
         "address": "Barangay Sto. Niño, San Simon, Pampanga",
         "operatingHours": "24 Hours",
         "lat": 14.9991,
-        "lng": 120.7854
+        "lng": 120.7854,
+        "facebookUrl": "https://www.facebook.com/sansimonexpresswaydiner/",
+        "instagramUrl": "https://www.instagram.com/sansimonexpresswaydiner/",
+        "tiktokUrl": "https://www.tiktok.com/@sansimonexpresswaydiner"
       }
     ],
     "username": "san_simon_expressway_diner_owner",
@@ -35133,7 +35930,10 @@
           "fat": 68
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/sansimonexpresswaydiner/",
+    "instagramUrl": "https://www.instagram.com/sansimonexpresswaydiner/",
+    "tiktokUrl": "https://www.tiktok.com/@sansimonexpresswaydiner"
   },
   {
     "id": "santo-tomas-lechon",
@@ -35163,7 +35963,10 @@
         "address": "Barangay San Jose, Santo Tomas, Pampanga",
         "operatingHours": "10:00 AM - 09:00 PM",
         "lat": 15.0118,
-        "lng": 120.7182
+        "lng": 120.7182,
+        "facebookUrl": "https://www.facebook.com/santotomaspalayokkitchen/",
+        "instagramUrl": "https://www.instagram.com/santotomaspalayokkitchen/",
+        "tiktokUrl": "https://www.tiktok.com/@santotomaspalayokkitchen"
       }
     ],
     "username": "santo_tomas_palayok_kitchen_owner",
@@ -35200,7 +36003,10 @@
           "fat": 68
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/santotomaspalayokkitchen/",
+    "instagramUrl": "https://www.instagram.com/santotomaspalayokkitchen/",
+    "tiktokUrl": "https://www.tiktok.com/@santotomaspalayokkitchen"
   },
   {
     "id": "sasmuan-polvoron",
@@ -35230,7 +36036,10 @@
         "address": "Barangay Santa Lucia, Sasmuan, Pampanga",
         "operatingHours": "09:00 AM - 08:00 PM",
         "lat": 14.9381,
-        "lng": 120.6202
+        "lng": 120.6202,
+        "facebookUrl": "https://www.facebook.com/sasmuancoastalseafoodcafe/",
+        "instagramUrl": "https://www.instagram.com/sasmuancoastalseafoodcafe/",
+        "tiktokUrl": "https://www.tiktok.com/@sasmuancoastalseafoodcafe"
       }
     ],
     "username": "sasmuan_coastal_seafood___cafe_owner",
@@ -35267,7 +36076,10 @@
           "fat": 20
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/sasmuancoastalseafoodcafe/",
+    "instagramUrl": "https://www.instagram.com/sasmuancoastalseafoodcafe/",
+    "tiktokUrl": "https://www.tiktok.com/@sasmuancoastalseafoodcafe"
   },
   {
     "id": "res-1787683785457",
@@ -35295,7 +36107,10 @@
         "address": "MacArthur Hwy, Mabiga, Mabalacat City, 2010 Pampanga",
         "operatingHours": "10:00 AM - 02:00 AM",
         "lat": 15.201,
-        "lng": 120.581
+        "lng": 120.581,
+        "facebookUrl": "https://www.facebook.com/sidegrillerrestaurant/",
+        "instagramUrl": "https://www.instagram.com/sidegrillerrestaurant/",
+        "tiktokUrl": "https://www.tiktok.com/@sidegrillerrestaurant"
       }
     ],
     "username": "sidegriller_owner",
@@ -37250,7 +38065,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/sidegrillerrestaurant/",
+    "instagramUrl": "https://www.instagram.com/sidegrillerrestaurant/",
+    "tiktokUrl": "https://www.tiktok.com/@sidegrillerrestaurant"
   },
   {
     "id": "san-fernando-souq",
@@ -37281,7 +38099,10 @@
         "address": "Lazatin Blvd, Dolores, City of San Fernando, Pampanga",
         "operatingHours": "11:00 AM - 10:00 PM",
         "lat": 15.0355,
-        "lng": 120.6895
+        "lng": 120.6895,
+        "facebookUrl": "https://www.facebook.com/souqpampanga/",
+        "instagramUrl": "https://www.instagram.com/souqpampanga/",
+        "tiktokUrl": "https://www.tiktok.com/@souqpampanga"
       },
       {
         "branchName": "SOUQ Pampanga (Mexico Branch)",
@@ -37289,7 +38110,10 @@
         "address": "Jose Abad Santos Ave, Parian, Mexico, Pampanga",
         "operatingHours": "11:00 AM - 10:00 PM",
         "lat": 15.064,
-        "lng": 120.72
+        "lng": 120.72,
+        "facebookUrl": "https://www.facebook.com/souqpampanga/",
+        "instagramUrl": "https://www.instagram.com/souqpampanga/",
+        "tiktokUrl": "https://www.tiktok.com/@souqpampanga"
       },
       {
         "branchName": "SOUQ Pampanga (Guagua Branch)",
@@ -37297,7 +38121,10 @@
         "address": "Guagua, Pampanga",
         "operatingHours": "11:00 AM - 10:00 PM",
         "lat": 14.9701,
-        "lng": 120.63
+        "lng": 120.63,
+        "facebookUrl": "https://www.facebook.com/souqpampanga/",
+        "instagramUrl": "https://www.instagram.com/souqpampanga/",
+        "tiktokUrl": "https://www.tiktok.com/@souqpampanga"
       }
     ],
     "username": "souqpampanga",
@@ -38062,7 +38889,10 @@
           "fat": 0
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/souqpampanga/",
+    "instagramUrl": "https://www.instagram.com/souqpampanga/",
+    "tiktokUrl": "https://www.tiktok.com/@souqpampanga"
   },
   {
     "id": "res-1787654074057",
@@ -38090,7 +38920,10 @@
         "address": "(Boundary of Minalin and Sto. Tomas) Cul-cul San Bartholome Road, Santo Tomas, Pampanga",
         "operatingHours": "08:00 AM - 08:00 PM",
         "lat": 14.106,
-        "lng": 121.159
+        "lng": 121.159,
+        "facebookUrl": "https://www.facebook.com/supremesisigbyspineda/",
+        "instagramUrl": "https://www.instagram.com/supremesisigbyspineda/",
+        "tiktokUrl": "https://www.tiktok.com/@supremesisigbyspineda"
       }
     ],
     "username": "supremesisig_owner",
@@ -38841,7 +39674,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/supremesisigbyspineda/",
+    "instagramUrl": "https://www.instagram.com/supremesisigbyspineda/",
+    "tiktokUrl": "https://www.tiktok.com/@supremesisigbyspineda"
   },
   {
     "id": "san-fernando-susies-cuisine",
@@ -38867,11 +39703,17 @@
     "branches": [
       {
         "municipality": "Angeles City",
-        "address": "Nepo Mart, Angeles City, Pampanga"
+        "address": "Nepo Mart, Angeles City, Pampanga",
+        "facebookUrl": "https://www.facebook.com/susiescuisine/",
+        "instagramUrl": "https://www.instagram.com/susiescuisine/",
+        "tiktokUrl": "https://www.tiktok.com/@susiescuisine"
       },
       {
         "municipality": "Mabalacat City",
-        "address": "Dau Highway, Mabalacat, Pampanga"
+        "address": "Dau Highway, Mabalacat, Pampanga",
+        "facebookUrl": "https://www.facebook.com/susiescuisine/",
+        "instagramUrl": "https://www.instagram.com/susiescuisine/",
+        "tiktokUrl": "https://www.tiktok.com/@susiescuisine"
       }
     ],
     "username": "susiescuisine",
@@ -42688,7 +43530,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/susiescuisine/",
+    "instagramUrl": "https://www.instagram.com/susiescuisine/",
+    "tiktokUrl": "https://www.tiktok.com/@susiescuisine"
   },
   {
     "id": "candaba-swamp",
@@ -42718,7 +43563,10 @@
         "address": "Barangay Santa Lucia, Candaba, Pampanga",
         "operatingHours": "10:00 AM - 09:00 PM",
         "lat": 15.0901,
-        "lng": 120.8245
+        "lng": 120.8245,
+        "facebookUrl": "https://www.facebook.com/swampwildduckgrill/",
+        "instagramUrl": "https://www.instagram.com/swampwildduckgrill/",
+        "tiktokUrl": "https://www.tiktok.com/@swampwildduckgrill"
       }
     ],
     "username": "swamp_wild_duck_grill_owner",
@@ -42755,7 +43603,10 @@
           "fat": 42
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/swampwildduckgrill/",
+    "instagramUrl": "https://www.instagram.com/swampwildduckgrill/",
+    "tiktokUrl": "https://www.tiktok.com/@swampwildduckgrill"
   },
   {
     "id": "res-1787683330813",
@@ -42783,7 +43634,10 @@
         "address": "LIGTASAN STREET, POBLACION, MABALACAT CITY, PAMPANGA",
         "operatingHours": "02:00 PM - 11:00 PM (TUE - SUN ONLY)",
         "lat": 15.225,
-        "lng": 120.574
+        "lng": 120.574,
+        "facebookUrl": "https://www.facebook.com/teresitasgrill/",
+        "instagramUrl": "https://www.instagram.com/teresitasgrill/",
+        "tiktokUrl": "https://www.tiktok.com/@teresitasgrill"
       }
     ],
     "username": "teresitasgrill_owner",
@@ -44458,7 +45312,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/teresitasgrill/",
+    "instagramUrl": "https://www.instagram.com/teresitasgrill/",
+    "tiktokUrl": "https://www.tiktok.com/@teresitasgrill"
   },
   {
     "id": "res-1787684194819",
@@ -44487,7 +45344,10 @@
         "address": "The Modern Hapag Kainan, Mc Arthur Hi-way, Mabiga, Mabalacat Pampanga, Mabalacat, Philippines, 2010",
         "operatingHours": "05:00 PM - 02:00 AM",
         "lat": 15.21,
-        "lng": 120.578
+        "lng": 120.578,
+        "facebookUrl": "https://www.facebook.com/themodernhapagkainan/",
+        "instagramUrl": "https://www.instagram.com/themodernhapagkainan/",
+        "tiktokUrl": "https://www.tiktok.com/@themodernhapagkainan"
       }
     ],
     "username": "themodernhapagkainan_owner",
@@ -47142,7 +48002,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/themodernhapagkainan/",
+    "instagramUrl": "https://www.instagram.com/themodernhapagkainan/",
+    "tiktokUrl": "https://www.tiktok.com/@themodernhapagkainan"
   },
   {
     "id": "res-1787731727400",
@@ -47170,7 +48033,10 @@
         "address": "Purok 2 Santo Rosario Minalin, Pampanga (Infront of Santo Rosario Barangay Hall)",
         "operatingHours": "08:00 AM - 05:00 PM",
         "lat": 14.966,
-        "lng": 120.687
+        "lng": 120.687,
+        "facebookUrl": "https://www.facebook.com/titachits/",
+        "instagramUrl": "https://www.instagram.com/titachits/",
+        "tiktokUrl": "https://www.tiktok.com/@titachits"
       }
     ],
     "username": "titachits_owner",
@@ -47543,7 +48409,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/titachits/",
+    "instagramUrl": "https://www.instagram.com/titachits/",
+    "tiktokUrl": "https://www.tiktok.com/@titachits"
   },
   {
     "id": "res-tonos-restaurant-arayat",
@@ -47575,7 +48444,10 @@
         "address": "Poblacion, Arayat, Pampanga",
         "operatingHours": "08:00 AM - 09:00 PM",
         "lat": 15.1515,
-        "lng": 120.7685
+        "lng": 120.7685,
+        "facebookUrl": "https://www.facebook.com/tonosrestaurant/",
+        "instagramUrl": "https://www.instagram.com/tonosrestaurant/",
+        "tiktokUrl": "https://www.tiktok.com/@tonosrestaurant"
       }
     ],
     "username": "tonos_owner",
@@ -48354,7 +49226,10 @@
           "fat": 9
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/tonosrestaurant/",
+    "instagramUrl": "https://www.instagram.com/tonosrestaurant/",
+    "tiktokUrl": "https://www.tiktok.com/@tonosrestaurant"
   },
   {
     "id": "res-1787689221236",
@@ -48382,7 +49257,10 @@
         "address": "San Jose Barangca, Magalang, Pampanga",
         "operatingHours": "10:00 AM - 09:30 PM (MON-FRI), 10:00 AM - 10:00 PM (SAT-SUN)",
         "lat": 15.193,
-        "lng": 120.637
+        "lng": 120.637,
+        "facebookUrl": "https://www.facebook.com/urbanpointpampanga/",
+        "instagramUrl": "https://www.instagram.com/urbanpointpampanga/",
+        "tiktokUrl": "https://www.tiktok.com/@urbanpointpampanga"
       }
     ],
     "username": "urbanpoint_owner",
@@ -48419,7 +49297,10 @@
           "fat": 15
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/urbanpointpampanga/",
+    "instagramUrl": "https://www.instagram.com/urbanpointpampanga/",
+    "tiktokUrl": "https://www.tiktok.com/@urbanpointpampanga"
   },
   {
     "id": "candaba-ver-rea-steak",
@@ -48450,7 +49331,10 @@
         "address": "Barangay San Agustin, Candaba, Pampanga",
         "operatingHours": "10:00 AM - 10:00 PM",
         "lat": 15.0945,
-        "lng": 120.828
+        "lng": 120.828,
+        "facebookUrl": "https://www.facebook.com/verreasizzlingsteakhouse/",
+        "instagramUrl": "https://www.instagram.com/verreasizzlingsteakhouse/",
+        "tiktokUrl": "https://www.tiktok.com/@verreasizzlingsteakhouse"
       }
     ],
     "username": "ver___rea_sizzling_steak_house_owner",
@@ -48599,7 +49483,10 @@
           "fat": 10
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/verreasizzlingsteakhouse/",
+    "instagramUrl": "https://www.instagram.com/verreasizzlingsteakhouse/",
+    "tiktokUrl": "https://www.tiktok.com/@verreasizzlingsteakhouse"
   },
   {
     "id": "res-flori-apung-oting",
@@ -48628,7 +49515,10 @@
         "address": "Jose Abad Santos Ave, Poblacion, Floridablanca, Pampanga",
         "operatingHours": "09:00 AM - 09:00 PM",
         "lat": 14.974,
-        "lng": 120.529
+        "lng": 120.529,
+        "facebookUrl": "https://www.facebook.com/apungotingsrestaurant/",
+        "instagramUrl": "https://www.instagram.com/apungotingsrestaurant/",
+        "tiktokUrl": "https://www.tiktok.com/@apungotingsrestaurant"
       }
     ],
     "username": "apungoting_owner",
@@ -48735,7 +49625,10 @@
           "fat": 22
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/apungotingsrestaurant/",
+    "instagramUrl": "https://www.instagram.com/apungotingsrestaurant/",
+    "tiktokUrl": "https://www.tiktok.com/@apungotingsrestaurant"
   },
   {
     "id": "res-flori-bariotik",
@@ -48764,7 +49657,10 @@
         "address": "San Jose, Floridablanca, Pampanga",
         "operatingHours": "10:00 AM - 08:00 PM",
         "lat": 14.9685,
-        "lng": 120.5342
+        "lng": 120.5342,
+        "facebookUrl": "https://www.facebook.com/bariotikkitchenandgarden/",
+        "instagramUrl": "https://www.instagram.com/bariotikkitchenandgarden/",
+        "tiktokUrl": "https://www.tiktok.com/@bariotikkitchenandgarden"
       }
     ],
     "username": "bariotik_owner",
@@ -48829,7 +49725,10 @@
           "fat": 20
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/bariotikkitchenandgarden/",
+    "instagramUrl": "https://www.instagram.com/bariotikkitchenandgarden/",
+    "tiktokUrl": "https://www.tiktok.com/@bariotikkitchenandgarden"
   },
   {
     "id": "res-flori-danilos",
@@ -48858,7 +49757,10 @@
         "address": "Valdez, Floridablanca, Pampanga",
         "operatingHours": "08:00 AM - 09:00 PM",
         "lat": 14.9782,
-        "lng": 120.5218
+        "lng": 120.5218,
+        "facebookUrl": "https://www.facebook.com/danilosgardenrestaurant/",
+        "instagramUrl": "https://www.instagram.com/danilosgardenrestaurant/",
+        "tiktokUrl": "https://www.tiktok.com/@danilosgardenrestaurant"
       }
     ],
     "username": "danilos_owner",
@@ -48951,7 +49853,10 @@
           "fat": 26
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/danilosgardenrestaurant/",
+    "instagramUrl": "https://www.instagram.com/danilosgardenrestaurant/",
+    "tiktokUrl": "https://www.tiktok.com/@danilosgardenrestaurant"
   },
   {
     "id": "res-flori-jilm5",
@@ -48980,7 +49885,10 @@
         "address": "Poblacion, Floridablanca, Pampanga",
         "operatingHours": "09:00 AM - 08:30 PM",
         "lat": 14.9725,
-        "lng": 120.531
+        "lng": 120.531,
+        "facebookUrl": "https://www.facebook.com/jilm5jlm5foodtraysgrill/",
+        "instagramUrl": "https://www.instagram.com/jilm5jlm5foodtraysgrill/",
+        "tiktokUrl": "https://www.tiktok.com/@jilm5jlm5foodtraysgrill"
       }
     ],
     "username": "jilm5_owner",
@@ -49059,7 +49967,10 @@
           "fat": 32
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/jilm5jlm5foodtraysgrill/",
+    "instagramUrl": "https://www.instagram.com/jilm5jlm5foodtraysgrill/",
+    "tiktokUrl": "https://www.tiktok.com/@jilm5jlm5foodtraysgrill"
   },
   {
     "id": "res-flori-kabigtings",
@@ -49088,7 +49999,10 @@
         "address": "San Nicolas, Floridablanca, Pampanga",
         "operatingHours": "08:00 AM - 07:30 PM",
         "lat": 14.9755,
-        "lng": 120.528
+        "lng": 120.528,
+        "facebookUrl": "https://www.facebook.com/kabigtingshalohalofloridablanca/",
+        "instagramUrl": "https://www.instagram.com/kabigtingshalohalofloridablanca/",
+        "tiktokUrl": "https://www.tiktok.com/@kabigtingshalohalofloridablanca"
       }
     ],
     "username": "kabigtings_flori",
@@ -49181,7 +50095,10 @@
           "fat": 20
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/kabigtingshalohalofloridablanca/",
+    "instagramUrl": "https://www.instagram.com/kabigtingshalohalofloridablanca/",
+    "tiktokUrl": "https://www.tiktok.com/@kabigtingshalohalofloridablanca"
   },
   {
     "id": "res-flori-susies",
@@ -49210,7 +50127,10 @@
         "address": "Poblacion, Floridablanca, Pampanga",
         "operatingHours": "07:30 AM - 07:00 PM",
         "lat": 14.9738,
-        "lng": 120.5305
+        "lng": 120.5305,
+        "facebookUrl": "https://www.facebook.com/susiescuisinefloridablanca/",
+        "instagramUrl": "https://www.instagram.com/susiescuisinefloridablanca/",
+        "tiktokUrl": "https://www.tiktok.com/@susiescuisinefloridablanca"
       }
     ],
     "username": "susies_flori",
@@ -49317,7 +50237,10 @@
           "fat": 10
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/susiescuisinefloridablanca/",
+    "instagramUrl": "https://www.instagram.com/susiescuisinefloridablanca/",
+    "tiktokUrl": "https://www.tiktok.com/@susiescuisinefloridablanca"
   },
   {
     "id": "res-bale-lubao",
@@ -49349,7 +50272,10 @@
         "address": "Jose Abad Santos Ave., Brgy. Santa Cruz, Lubao, Pampanga (Beside All Well's Supermarket)",
         "operatingHours": "08:00 AM - 08:00 PM",
         "lat": 14.9117,
-        "lng": 120.5644
+        "lng": 120.5644,
+        "facebookUrl": "https://www.facebook.com/balelubao/",
+        "instagramUrl": "https://www.instagram.com/balelubao/",
+        "tiktokUrl": "https://www.tiktok.com/@balelubao"
       }
     ],
     "username": "balelubao_owner",
@@ -50128,7 +51054,10 @@
           "fat": 12
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/balelubao/",
+    "instagramUrl": "https://www.instagram.com/balelubao/",
+    "tiktokUrl": "https://www.tiktok.com/@balelubao"
   },
   {
     "id": "res-wow-lubao",
@@ -50160,7 +51089,10 @@
         "address": "Jose Abad Santos Avenue, San Agustin, Lubao, Pampanga",
         "operatingHours": "09:00 AM - 08:30 PM",
         "lat": 14.9281,
-        "lng": 120.576
+        "lng": 120.576,
+        "facebookUrl": "https://www.facebook.com/wowlubao/",
+        "instagramUrl": "https://www.instagram.com/wowlubao/",
+        "tiktokUrl": "https://www.tiktok.com/@wowlubao"
       }
     ],
     "username": "wowlubao_owner",
@@ -50323,7 +51255,10 @@
           "fat": 14
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/wowlubao/",
+    "instagramUrl": "https://www.instagram.com/wowlubao/",
+    "tiktokUrl": "https://www.tiktok.com/@wowlubao"
   },
   {
     "id": "res-boss-madam-santa-ana",
@@ -50354,7 +51289,10 @@
         "address": "802 Jose Abad Santos Avenue, Barangay San Juan, Santa Ana, Pampanga",
         "operatingHours": "09:00 AM - 12:00 AM",
         "lat": 15.094,
-        "lng": 120.7695
+        "lng": 120.7695,
+        "facebookUrl": "https://www.facebook.com/bossmadamchickeninasal/",
+        "instagramUrl": "https://www.instagram.com/bossmadamchickeninasal/",
+        "tiktokUrl": "https://www.tiktok.com/@bossmadamchickeninasal"
       }
     ],
     "username": "bossmadam_owner",
@@ -50657,7 +51595,10 @@
           "fat": 14
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/bossmadamchickeninasal/",
+    "instagramUrl": "https://www.instagram.com/bossmadamchickeninasal/",
+    "tiktokUrl": "https://www.tiktok.com/@bossmadamchickeninasal"
   },
   {
     "id": "res-ernestos-kitchen-bar-santa-ana",
@@ -50689,7 +51630,10 @@
         "address": "Santa Lucia, Santa Ana, Pampanga (In front of RCS Sta. Ana)",
         "operatingHours": "11:00 AM - 10:00 PM",
         "lat": 15.095,
-        "lng": 120.766
+        "lng": 120.766,
+        "facebookUrl": "https://www.facebook.com/ernestoskitchenbar/",
+        "instagramUrl": "https://www.instagram.com/ernestoskitchenbar/",
+        "tiktokUrl": "https://www.tiktok.com/@ernestoskitchenbar"
       }
     ],
     "username": "ernestos_owner",
@@ -51342,7 +52286,10 @@
           "fat": 28
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/ernestoskitchenbar/",
+    "instagramUrl": "https://www.instagram.com/ernestoskitchenbar/",
+    "tiktokUrl": "https://www.tiktok.com/@ernestoskitchenbar"
   },
   {
     "id": "res-lotus-st-isidore-santa-ana",
@@ -51373,7 +52320,10 @@
         "address": "434 Purok 5, Brgy. San Isidro, Santa Ana, Pampanga",
         "operatingHours": "08:00 AM - 09:00 PM",
         "lat": 15.085,
-        "lng": 120.772
+        "lng": 120.772,
+        "facebookUrl": "https://www.facebook.com/lotusrestaurantstisidorethefarmer/",
+        "instagramUrl": "https://www.instagram.com/lotusrestaurantstisidorethefarmer/",
+        "tiktokUrl": "https://www.tiktok.com/@lotusrestaurantstisidorethefarmer"
       }
     ],
     "username": "stisidore_lotus_owner",
@@ -51998,7 +52948,10 @@
           "fat": 20
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/lotusrestaurantstisidorethefarmer/",
+    "instagramUrl": "https://www.instagram.com/lotusrestaurantstisidorethefarmer/",
+    "tiktokUrl": "https://www.tiktok.com/@lotusrestaurantstisidorethefarmer"
   },
   {
     "id": "res-the-ville-mandelin-santa-ana",
@@ -52032,7 +52985,10 @@
         "address": "88 Santa Ana - Magalang Rd, Barangay Santiago, Santa Ana, Pampanga",
         "operatingHours": "07:00 AM - 10:00 PM",
         "lat": 15.105,
-        "lng": 120.762
+        "lng": 120.762,
+        "facebookUrl": "https://www.facebook.com/thevillemandelin/",
+        "instagramUrl": "https://www.instagram.com/thevillemandelin/",
+        "tiktokUrl": "https://www.tiktok.com/@thevillemandelin"
       }
     ],
     "username": "mandelin_theville_owner",
@@ -52825,7 +53781,10 @@
           "fat": 3
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/thevillemandelin/",
+    "instagramUrl": "https://www.instagram.com/thevillemandelin/",
+    "tiktokUrl": "https://www.tiktok.com/@thevillemandelin"
   },
   {
     "id": "res-farm-68-san-luis",
@@ -52858,7 +53817,10 @@
         "address": "Farm 68, San Luis-Baliwag Road, San Luis, Pampanga",
         "operatingHours": "08:00 AM - 06:00 PM",
         "lat": 15.0385,
-        "lng": 120.796
+        "lng": 120.796,
+        "facebookUrl": "https://www.facebook.com/manganpampangalutungpesusatfarm68/",
+        "instagramUrl": "https://www.instagram.com/manganpampangalutungpesusatfarm68/",
+        "tiktokUrl": "https://www.tiktok.com/@manganpampangalutungpesusatfarm68"
       }
     ],
     "username": "farm68_sanluis_owner",
@@ -53049,7 +54011,10 @@
           "fat": 45
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/manganpampangalutungpesusatfarm68/",
+    "instagramUrl": "https://www.instagram.com/manganpampangalutungpesusatfarm68/",
+    "tiktokUrl": "https://www.tiktok.com/@manganpampangalutungpesusatfarm68"
   },
   {
     "id": "res-alviz-farm-santa-rita",
@@ -53082,7 +54047,10 @@
         "address": "Barangay San Agustin, Santa Rita, Pampanga",
         "operatingHours": "10:00 AM - 08:00 PM (By Appointment)",
         "lat": 15.0035,
-        "lng": 120.6152
+        "lng": 120.6152,
+        "facebookUrl": "https://www.facebook.com/alvizfarm/",
+        "instagramUrl": "https://www.instagram.com/alvizfarm/",
+        "tiktokUrl": "https://www.tiktok.com/@alvizfarm"
       }
     ],
     "username": "alvizfarm_owner",
@@ -53259,7 +54227,10 @@
           "fat": 8
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/alvizfarm/",
+    "instagramUrl": "https://www.instagram.com/alvizfarm/",
+    "tiktokUrl": "https://www.tiktok.com/@alvizfarm"
   },
   {
     "id": "res-fat-grille-santa-rita",
@@ -53291,7 +54262,10 @@
         "address": "Santa Rita, Pampanga",
         "operatingHours": "10:00 AM - 10:00 PM",
         "lat": 15.0018,
-        "lng": 120.6185
+        "lng": 120.6185,
+        "facebookUrl": "https://www.facebook.com/fatgrillerestaurant/",
+        "instagramUrl": "https://www.instagram.com/fatgrillerestaurant/",
+        "tiktokUrl": "https://www.tiktok.com/@fatgrillerestaurant"
       }
     ],
     "username": "fatgrille_santarita_owner",
@@ -53524,7 +54498,10 @@
           "fat": 20
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/fatgrillerestaurant/",
+    "instagramUrl": "https://www.instagram.com/fatgrillerestaurant/",
+    "tiktokUrl": "https://www.tiktok.com/@fatgrillerestaurant"
   },
   {
     "id": "res-lex-shas-santa-rita",
@@ -53557,7 +54534,10 @@
         "address": "Santa Rita, Pampanga",
         "operatingHours": "09:00 AM - 10:00 PM",
         "lat": 14.9995,
-        "lng": 120.6148
+        "lng": 120.6148,
+        "facebookUrl": "https://www.facebook.com/lexshasrestaurant/",
+        "instagramUrl": "https://www.instagram.com/lexshasrestaurant/",
+        "tiktokUrl": "https://www.tiktok.com/@lexshasrestaurant"
       }
     ],
     "username": "lexshas_santarita_owner",
@@ -53748,7 +54728,10 @@
           "fat": 26
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/lexshasrestaurant/",
+    "instagramUrl": "https://www.instagram.com/lexshasrestaurant/",
+    "tiktokUrl": "https://www.tiktok.com/@lexshasrestaurant"
   },
   {
     "id": "res-bala-kayu-sasmuan",
@@ -53780,7 +54763,10 @@
         "address": "Sasmuan, Pampanga",
         "operatingHours": "07:00 AM - 09:00 PM",
         "lat": 14.938,
-        "lng": 120.6275
+        "lng": 120.6275,
+        "facebookUrl": "https://www.facebook.com/balakayusiloganatbp/",
+        "instagramUrl": "https://www.instagram.com/balakayusiloganatbp/",
+        "tiktokUrl": "https://www.tiktok.com/@balakayusiloganatbp"
       }
     ],
     "username": "balakayu_sasmuan_owner",
@@ -53943,7 +54929,10 @@
           "fat": 18
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/balakayusiloganatbp/",
+    "instagramUrl": "https://www.instagram.com/balakayusiloganatbp/",
+    "tiktokUrl": "https://www.tiktok.com/@balakayusiloganatbp"
   },
   {
     "id": "res-mabsi-soy-sasmuan",
@@ -53975,7 +54964,10 @@
         "address": "Sasmuan, Pampanga",
         "operatingHours": "07:00 AM - 09:00 PM",
         "lat": 14.9365,
-        "lng": 120.6288
+        "lng": 120.6288,
+        "facebookUrl": "https://www.facebook.com/mabsisoysilogan/",
+        "instagramUrl": "https://www.instagram.com/mabsisoysilogan/",
+        "tiktokUrl": "https://www.tiktok.com/@mabsisoysilogan"
       }
     ],
     "username": "mabsisoy_sasmuan_owner",
@@ -54166,7 +55158,10 @@
           "fat": 34
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/mabsisoysilogan/",
+    "instagramUrl": "https://www.instagram.com/mabsisoysilogan/",
+    "tiktokUrl": "https://www.tiktok.com/@mabsisoysilogan"
   },
   {
     "id": "res-lurings-bbq-house-guagua",
@@ -54197,7 +55192,10 @@
         "address": "San Roque, Guagua, Pampanga",
         "operatingHours": "09:00 AM - 08:00 PM",
         "lat": 14.9685,
-        "lng": 120.6275
+        "lng": 120.6275,
+        "facebookUrl": "https://www.facebook.com/luringsbbqhouse/",
+        "instagramUrl": "https://www.instagram.com/luringsbbqhouse/",
+        "tiktokUrl": "https://www.tiktok.com/@luringsbbqhouse"
       }
     ],
     "username": "lurings_guagua_owner",
@@ -54962,7 +55960,10 @@
           "fat": 6
         }
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/luringsbbqhouse/",
+    "instagramUrl": "https://www.instagram.com/luringsbbqhouse/",
+    "tiktokUrl": "https://www.tiktok.com/@luringsbbqhouse"
   },
   {
     "id": "res-conchings-restaurant-guagua",
@@ -55014,7 +56015,10 @@
           50,
           30,
           15
-        ]
+        ],
+        "facebookUrl": "https://www.facebook.com/conchingsrestaurantnativefoods/",
+        "instagramUrl": "https://www.instagram.com/conchingsrestaurantnativefoods/",
+        "tiktokUrl": "https://www.tiktok.com/@conchingsrestaurantnativefoods"
       }
     ],
     "username": "conchings_guagua_owner",
@@ -56177,7 +57181,10 @@
         },
         "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80"
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/conchingsrestaurantnativefoods/",
+    "instagramUrl": "https://www.instagram.com/conchingsrestaurantnativefoods/",
+    "tiktokUrl": "https://www.tiktok.com/@conchingsrestaurantnativefoods"
   },
   {
     "id": "res-cakes-and-creams-cafe-san-simon",
@@ -56237,7 +57244,10 @@
           0,
           5,
           10
-        ]
+        ],
+        "facebookUrl": "https://www.facebook.com/cakesandcreamscafe/",
+        "instagramUrl": "https://www.instagram.com/cakesandcreamscafe/",
+        "tiktokUrl": "https://www.tiktok.com/@cakesandcreamscafe"
       }
     ],
     "dishes": [
@@ -58489,6 +59499,9 @@
         },
         "image": "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=500&q=80"
       }
-    ]
+    ],
+    "facebookUrl": "https://www.facebook.com/cakesandcreamscafe/",
+    "instagramUrl": "https://www.instagram.com/cakesandcreamscafe/",
+    "tiktokUrl": "https://www.tiktok.com/@cakesandcreamscafe"
   }
 ]
