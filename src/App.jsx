@@ -1199,8 +1199,7 @@ function App() {
       strId.startsWith('rev-aling-lucing') ||
       strId.startsWith('rev-bale-dutung') ||
       strId.startsWith('rev-susies') ||
-      strId.startsWith('rev-lurings') ||
-      strId.startsWith('drev-');
+      strId.startsWith('rev-lurings');
   };
 
   const [restaurantReviews, setRestaurantReviews] = useState(() => {
@@ -1223,77 +1222,6 @@ function App() {
     } catch (e) { }
   }, [restaurantReviews]);
 
-  // Real-time Cloud Synchronization for Reviews across all browsers & devices
-  useEffect(() => {
-    // 1. Initial sync & merge between local storage and cloud database
-    fetchCloudReviews().then(cloudRevs => {
-      const deletedIds = getDeletedReviewIds();
-      setRestaurantReviews(prev => {
-        const localList = Array.isArray(prev) ? prev : [];
-        const cloudList = Array.isArray(cloudRevs) ? cloudRevs : [];
-        const reviewMap = new Map();
-
-        // Load cloud reviews
-        cloudList.forEach(r => {
-          if (r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r)) {
-            reviewMap.set(String(r.id), r);
-          }
-        });
-
-        // Load local reviews
-        let hasNewLocal = false;
-        localList.forEach(r => {
-          if (r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r)) {
-            if (!reviewMap.has(String(r.id))) {
-              hasNewLocal = true;
-            }
-            reviewMap.set(String(r.id), r);
-          }
-        });
-
-        const merged = Array.from(reviewMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-
-        // If local had reviews not on cloud yet, push merged set to cloud
-        if (hasNewLocal || (cloudList.length === 0 && merged.length > 0)) {
-          pushCloudReviews(merged);
-        }
-
-        return merged;
-      });
-    }).catch(() => { });
-
-    // 2. Real-time background sync loop (polls every 4s and on tab switch/focus)
-    const unsubscribe = startCloudReviewsSync((remoteReviews) => {
-      if (!Array.isArray(remoteReviews)) return;
-      const deletedIds = getDeletedReviewIds();
-      setRestaurantReviews(prev => {
-        const localList = Array.isArray(prev) ? prev : [];
-        const map = new Map();
-        localList.forEach(r => {
-          if (r && r.id && !deletedIds.has(String(r.id))) map.set(String(r.id), r);
-        });
-
-        let changed = false;
-        remoteReviews.forEach(r => {
-          if (r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r)) {
-            if (!map.has(String(r.id))) {
-              map.set(String(r.id), r);
-              changed = true;
-            }
-          }
-        });
-
-        if (changed) {
-          const merged = Array.from(map.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-          return merged;
-        }
-        return prev;
-      });
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   // Persistent Tourist Destination Reviews Database (Star Ratings & Comments)
   const [destinationReviews, setDestinationReviews] = useState(() => {
     const deletedIds = getDeletedReviewIds();
@@ -1314,6 +1242,128 @@ function App() {
       localStorage.setItem('kanyamanan_destination_reviews', JSON.stringify(destinationReviews));
     } catch (e) { }
   }, [destinationReviews]);
+
+  // Real-time Cloud Synchronization for Reviews across all browsers & devices
+  useEffect(() => {
+    const isDestReview = (r) => Boolean(r && (r.attractionId || r.attraction_id || r.itemType === 'attraction' || String(r.id).startsWith('drev-')));
+    const deletedIds = getDeletedReviewIds();
+
+    // 1. Initial sync & merge between local storage and cloud database
+    fetchCloudReviews().then(cloudRevs => {
+      if (!Array.isArray(cloudRevs)) return;
+      const cloudDestRevs = cloudRevs.filter(r => isDestReview(r) && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r));
+      const cloudRestRevs = cloudRevs.filter(r => !isDestReview(r) && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r));
+
+      if (cloudDestRevs.length > 0) {
+        setDestinationReviews(prev => {
+          const map = new Map();
+          (Array.isArray(prev) ? prev : []).forEach(r => {
+            if (r && r.id && !deletedIds.has(String(r.id))) map.set(String(r.id), r);
+          });
+          cloudDestRevs.forEach(r => map.set(String(r.id), r));
+          const merged = Array.from(map.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+          try {
+            localStorage.setItem('kanyamanan_destination_reviews', JSON.stringify(merged));
+          } catch (e) { }
+          return merged;
+        });
+      }
+
+      setRestaurantReviews(prev => {
+        const localList = Array.isArray(prev) ? prev : [];
+        const reviewMap = new Map();
+
+        // Load cloud reviews
+        cloudRestRevs.forEach(r => {
+          if (r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r)) {
+            reviewMap.set(String(r.id), r);
+          }
+        });
+
+        // Load local reviews
+        let hasNewLocal = false;
+        localList.forEach(r => {
+          if (r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r)) {
+            if (!reviewMap.has(String(r.id))) {
+              hasNewLocal = true;
+            }
+            reviewMap.set(String(r.id), r);
+          }
+        });
+
+        const merged = Array.from(reviewMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+        // If local had reviews not on cloud yet, push merged set to cloud
+        if (hasNewLocal || (cloudRevs.length === 0 && merged.length > 0)) {
+          let savedDests = [];
+          try {
+            const rawD = localStorage.getItem('kanyamanan_destination_reviews');
+            if (rawD) savedDests = JSON.parse(rawD) || [];
+          } catch (e) { }
+          pushCloudReviews([...merged, ...savedDests]);
+        }
+
+        return merged;
+      });
+    }).catch(() => { });
+
+    // 2. Real-time background sync loop
+    const unsubscribe = startCloudReviewsSync((remoteReviews) => {
+      if (!Array.isArray(remoteReviews)) return;
+      const remoteDestRevs = remoteReviews.filter(r => isDestReview(r) && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r));
+      const remoteRestRevs = remoteReviews.filter(r => !isDestReview(r) && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r));
+
+      if (remoteDestRevs.length > 0) {
+        setDestinationReviews(prev => {
+          const map = new Map();
+          (Array.isArray(prev) ? prev : []).forEach(r => {
+            if (r && r.id && !deletedIds.has(String(r.id))) map.set(String(r.id), r);
+          });
+          let changed = false;
+          remoteDestRevs.forEach(r => {
+            if (!map.has(String(r.id))) {
+              map.set(String(r.id), r);
+              changed = true;
+            }
+          });
+          if (changed) {
+            const merged = Array.from(map.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            try {
+              localStorage.setItem('kanyamanan_destination_reviews', JSON.stringify(merged));
+            } catch (e) { }
+            return merged;
+          }
+          return prev;
+        });
+      }
+
+      setRestaurantReviews(prev => {
+        const localList = Array.isArray(prev) ? prev : [];
+        const map = new Map();
+        localList.forEach(r => {
+          if (r && r.id && !deletedIds.has(String(r.id))) map.set(String(r.id), r);
+        });
+
+        let changed = false;
+        remoteRestRevs.forEach(r => {
+          if (r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r)) {
+            if (!map.has(String(r.id))) {
+              map.set(String(r.id), r);
+              changed = true;
+            }
+          }
+        });
+
+        if (changed) {
+          const merged = Array.from(map.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+          return merged;
+        }
+        return prev;
+      });
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Review Form States in Restaurant Drawer
   const [newReviewRating, setNewReviewRating] = useState(5);
@@ -1380,7 +1430,14 @@ function App() {
       createdAt: new Date().toISOString().replace('T', ' ').slice(0, 16)
     };
 
-    setDestinationReviews(prev => [newRev, ...prev]);
+    setDestinationReviews(prev => {
+      const next = [newRev, ...prev];
+      try {
+        localStorage.setItem('kanyamanan_destination_reviews', JSON.stringify(next));
+      } catch (e) { }
+      pushCloudReviews([...restaurantReviews, ...next]);
+      return next;
+    });
     // Consume 1 unrated visit credit and permanently register as rated
     consumeUnratedVisit(attractionId);
     setRatedStops(prev => {
@@ -1521,6 +1578,7 @@ function App() {
       try {
         localStorage.setItem('kanyamanan_destination_reviews', JSON.stringify(updated));
       } catch (e) { }
+      pushCloudReviews([...restaurantReviews, ...updated]);
       return updated;
     });
 
@@ -18347,6 +18405,7 @@ ${rawText}`;
                         <th className="px-4 py-3">Landmark Name</th>
                         <th className="px-4 py-3">Municipality / City</th>
                         <th className="px-4 py-3">Category</th>
+                        <th className="px-4 py-3">Rating</th>
                         <th className="px-4 py-3">Description</th>
                         <th className="px-4 py-3 text-right">Actions</th>
                       </tr>
@@ -18384,6 +18443,25 @@ ${rawText}`;
                                   )}
                                 </div>
                               )}
+                            </td>
+                            <td className="px-4 py-3 shrink-0">
+                              {(() => {
+                                const destRating = getDestinationAverageRating(attr.id);
+                                if (destRating.count === 0 || destRating.isUnrated) {
+                                  return (
+                                    <span className="text-[10px] font-bold text-charcoal-light bg-gray-100 px-2 py-0.5 rounded-md border border-[#E9E5DE]">
+                                      New (0 reviews)
+                                    </span>
+                                  );
+                                }
+                                return (
+                                  <div className="flex items-center gap-1 font-black text-amber-500">
+                                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                                    <span className="text-xs text-charcoal">{destRating.score}</span>
+                                    <span className="text-[10px] text-charcoal-light font-medium">({destRating.count})</span>
+                                  </div>
+                                );
+                              })()}
                             </td>
                             <td className="px-4 py-3 text-charcoal-light text-[11px] max-w-xs truncate">{attr.description}</td>
                             <td className="px-4 py-3 text-right space-x-1 shrink-0">
@@ -18549,28 +18627,58 @@ ${rawText}`;
 
                 {/* Unified Master Reviews Table */}
                 {(() => {
-                  const combined = [
-                    ...restaurantReviews.map(r => {
-                      const matchedTarget = (restaurants || []).find(res => res.id === r.restaurantId);
-                      return {
-                        ...r,
-                        itemType: 'restaurant',
-                        targetName: matchedTarget?.name || 'Kapampangan Restaurant',
-                        targetMunicipality: matchedTarget?.municipality || 'Pampanga',
-                        targetImage: matchedTarget?.image || (matchedTarget?.images && matchedTarget.images[0]) || ''
-                      };
-                    }),
-                    ...destinationReviews.map(r => {
-                      const matchedTarget = (attractions || []).find(attr => attr.id === r.attractionId);
+                  const isDestinationRev = (r) => Boolean(
+                    r && (
+                      r.itemType === 'attraction' ||
+                      r.attractionId ||
+                      r.attraction_id ||
+                      (r.id && String(r.id).startsWith('drev-')) ||
+                      (attractions || []).some(a => a.id === r.restaurantId || a.id === r.attractionId)
+                    )
+                  );
+
+                  // Extract all reviews from both sets, normalizing any miscategorized reviews
+                  const allRawReviews = [...restaurantReviews, ...destinationReviews];
+                  const seenIds = new Set();
+                  const uniqueRawReviews = allRawReviews.filter(r => {
+                    if (!r || !r.id) return false;
+                    const idStr = String(r.id);
+                    if (seenIds.has(idStr)) return false;
+                    seenIds.add(idStr);
+                    return true;
+                  });
+
+                  const combined = uniqueRawReviews.map(r => {
+                    const isAttraction = isDestinationRev(r);
+                    if (isAttraction) {
+                      const targetId = r.attractionId || r.attraction_id || r.restaurantId || r.id;
+                      const matchedTarget = (attractions || []).find(attr => 
+                        attr.id === targetId || 
+                        (attr.name && r.targetName && attr.name.toLowerCase() === r.targetName.toLowerCase()) ||
+                        (attr.name && r.comment && r.comment.toLowerCase().includes(attr.name.toLowerCase()))
+                      );
                       return {
                         ...r,
                         itemType: 'attraction',
-                        targetName: matchedTarget?.name || 'Heritage Destination',
-                        targetMunicipality: matchedTarget?.municipality || 'Pampanga',
-                        targetImage: matchedTarget?.image || (matchedTarget?.images && matchedTarget.images[0]) || ''
+                        targetName: matchedTarget?.name || r.targetName || 'Heritage Destination',
+                        targetMunicipality: matchedTarget?.municipality || r.targetMunicipality || 'Pampanga',
+                        targetImage: matchedTarget?.image || (matchedTarget?.images && matchedTarget.images[0]) || r.targetImage || '/attractions/real_landmark_bacolor_lahar.jpg'
                       };
-                    })
-                  ];
+                    } else {
+                      const targetId = r.restaurantId || r.restaurant_id || r.id;
+                      const matchedTarget = (restaurants || []).find(res => 
+                        res.id === targetId ||
+                        (res.name && r.targetName && res.name.toLowerCase() === r.targetName.toLowerCase())
+                      );
+                      return {
+                        ...r,
+                        itemType: 'restaurant',
+                        targetName: matchedTarget?.name || r.targetName || 'Kapampangan Restaurant',
+                        targetMunicipality: matchedTarget?.municipality || r.targetMunicipality || 'Pampanga',
+                        targetImage: matchedTarget?.image || (matchedTarget?.images && matchedTarget.images[0]) || r.targetImage || ''
+                      };
+                    }
+                  });
 
                   const filtered = combined.filter(rev => {
                     const matchesType = adminReviewTypeFilter === 'all' ||
@@ -18648,7 +18756,7 @@ ${rawText}`;
                                 <div>
                                   <span className="font-bold text-charcoal block">{rev.reviewerName || 'Anonymous Explorer'}</span>
                                   <span className="text-[9px] font-black uppercase text-bananaleaf bg-bananaleaf/10 px-1.5 py-0.2 rounded border border-bananaleaf/20 inline-block">
-                                    ✓ Verified Visit
+                                    {rev.itemType === 'attraction' ? '✓ Verified Visitor' : '✓ Verified Visit'}
                                   </span>
                                 </div>
                               </td>
