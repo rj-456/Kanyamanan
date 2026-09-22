@@ -209,3 +209,78 @@ export const saveUserProfileToCloud = async (userProfile) => {
     return false;
   }
 };
+
+/**
+ * Realtime listener for verified reviews in Firestore
+ * Guarantees ratings persist and synchronize across all devices & Vercel deployments
+ */
+export const subscribeToReviews = (onData, onError) => {
+  if (!db) return () => {};
+  try {
+    const q = collection(db, 'reviews');
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const list = [];
+      snapshot.forEach((docSnap) => {
+        list.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      onData(list);
+    }, (err) => {
+      console.warn("Firestore reviews listener warning:", err);
+      if (onError) onError(err);
+    });
+    return unsubscribe;
+  } catch (err) {
+    console.warn("Error subscribing to Firestore reviews:", err);
+    return () => {};
+  }
+};
+
+/**
+ * Fetch all reviews once from Firestore
+ */
+export const fetchReviewsFromCloud = async () => {
+  if (!db) return [];
+  try {
+    const q = collection(db, 'reviews');
+    const snapshot = await getDocs(q);
+    const list = [];
+    snapshot.forEach((docSnap) => {
+      list.push({ id: docSnap.id, ...docSnap.data() });
+    });
+    return list;
+  } catch (err) {
+    console.warn("Firestore fetch reviews warning:", err);
+    return [];
+  }
+};
+
+/**
+ * Save / Create a new review in Firestore permanently
+ */
+export const saveReviewToCloud = async (reviewObj) => {
+  if (!db || !reviewObj || !reviewObj.id) return false;
+  try {
+    const docRef = doc(db, 'reviews', String(reviewObj.id));
+    await setDoc(docRef, reviewObj, { merge: true });
+    return true;
+  } catch (err) {
+    console.error("Firestore save review error:", err);
+    return false;
+  }
+};
+
+/**
+ * Delete a review from Firestore (Moderation)
+ */
+export const deleteReviewFromCloud = async (reviewId) => {
+  if (!db || !reviewId) return false;
+  try {
+    const docRef = doc(db, 'reviews', String(reviewId));
+    await deleteDoc(docRef);
+    return true;
+  } catch (err) {
+    console.error("Firestore delete review error:", err);
+    return false;
+  }
+};
+

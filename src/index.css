@@ -91,6 +91,18 @@ html.dark ::-webkit-scrollbar-thumb {
 .glow-terracotta {
   box-shadow: 0 0 15px rgba(217, 93, 57, 0.15);
 }
+.glow-ube {
+  box-shadow: 0 0 15px rgba(115, 56, 120, 0.2);
+}
+.glow-calamansi {
+  box-shadow: 0 0 15px rgba(141, 170, 54, 0.2);
+}
+.glow-cacao {
+  box-shadow: 0 0 15px rgba(74, 46, 27, 0.2);
+}
+.glow-caramel {
+  box-shadow: 0 0 15px rgba(200, 125, 50, 0.2);
+}
 
 /* Dark mode utility overrides for high visual fidelity */
 html.dark {

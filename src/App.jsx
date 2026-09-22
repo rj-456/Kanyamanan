@@ -24,8 +24,10 @@ import {
   Heart,
   Coffee,
   Star,
+  ChevronLeft,
   ChevronRight,
   ChevronDown,
+  ChevronUp,
   Database,
   Briefcase,
   Layers,
@@ -52,6 +54,8 @@ import {
   Mail,
   ExternalLink,
   Lock,
+  Eye,
+  EyeOff,
   Award,
   Share2,
   Calendar
@@ -74,7 +78,11 @@ import {
   deleteRestaurantFromCloud,
   saveUserItinerariesToCloud,
   subscribeToUserItineraries,
-  saveUserProfileToCloud
+  saveUserProfileToCloud,
+  subscribeToReviews,
+  fetchReviewsFromCloud,
+  saveReviewToCloud,
+  deleteReviewFromCloud
 } from './firebase';
 import Tesseract from 'tesseract.js';
 import {
@@ -482,6 +490,32 @@ function App() {
     };
   }, []);
 
+  // Centralized Centered Pop-Up Modal (Replaces browser-native top alerts)
+  const [centeredPopup, setCenteredPopup] = useState(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const originalAlert = window.alert;
+    window.alert = (msg) => {
+      setCenteredPopup({
+        message: String(msg ?? ''),
+        title: null
+      });
+    };
+    return () => {
+      window.alert = originalAlert;
+    };
+  }, []);
+
+  // Enforce admin auto-logout whenever browser is refreshed or page is loaded
+  useEffect(() => {
+    try {
+      localStorage.removeItem('kanyamanan_admin_auth');
+      localStorage.removeItem('kanyamanan_admin_role');
+      localStorage.removeItem('kanyamanan_merchant_res_id');
+    } catch (_) { }
+  }, []);
+
   // Dark Mode / Light Mode state - Automatic Light Mode by default
   const [isDarkMode, setIsDarkMode] = useState(() => {
     try {
@@ -560,6 +594,21 @@ function App() {
 
   // Dashboard Sub-Modules: 'planner', 'health', 'assistant', 'history'
   const [dashboardTab, setDashboardTab] = useState('planner');
+  const dashboardTabsRef = useRef(null);
+  const [dashboardTabsOverflow, setDashboardTabsOverflow] = useState(false);
+
+  const checkDashboardTabsOverflow = useCallback(() => {
+    if (dashboardTabsRef.current) {
+      const el = dashboardTabsRef.current;
+      setDashboardTabsOverflow(el.scrollWidth > el.clientWidth + 4);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkDashboardTabsOverflow();
+    window.addEventListener('resize', checkDashboardTabsOverflow);
+    return () => window.removeEventListener('resize', checkDashboardTabsOverflow);
+  }, [checkDashboardTabsOverflow, activeView]);
 
   // Simulated dynamic toast/status state
   const [showToast, setShowToast] = useState(false);
@@ -1033,6 +1082,73 @@ function App() {
   const [selectedCorridor, setSelectedCorridor] = useState('All');
   const [selectedMunicipality, setSelectedMunicipality] = useState('All');
 
+  // Horizontal Municipalities Bar: Touch Swipe, Mouse Drag-to-Scroll & Auto-Scroll
+  const munScrollRef = useRef(null);
+  const [canScrollMunLeft, setCanScrollMunLeft] = useState(false);
+  const [canScrollMunRight, setCanScrollMunRight] = useState(true);
+  const isDraggingMunRef = useRef(false);
+  const startXMunRef = useRef(0);
+  const scrollLeftMunRef = useRef(0);
+  const hasDraggedMunRef = useRef(false);
+
+  const checkMunScroll = useCallback(() => {
+    const el = munScrollRef.current;
+    if (!el) return;
+    setCanScrollMunLeft(el.scrollLeft > 5);
+    setCanScrollMunRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 5);
+  }, []);
+
+  const handleMunScroll = (direction) => {
+    if (munScrollRef.current) {
+      munScrollRef.current.scrollBy({
+        left: direction === 'left' ? -260 : 260,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const handleMunMouseDown = (e) => {
+    const el = munScrollRef.current;
+    if (!el) return;
+    isDraggingMunRef.current = true;
+    hasDraggedMunRef.current = false;
+    startXMunRef.current = e.pageX - el.offsetLeft;
+    scrollLeftMunRef.current = el.scrollLeft;
+  };
+
+  const handleMunMouseMove = (e) => {
+    if (!isDraggingMunRef.current) return;
+    const el = munScrollRef.current;
+    if (!el) return;
+    e.preventDefault();
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startXMunRef.current) * 1.5;
+    if (Math.abs(walk) > 5) {
+      hasDraggedMunRef.current = true;
+    }
+    el.scrollLeft = scrollLeftMunRef.current - walk;
+    checkMunScroll();
+  };
+
+  const handleMunMouseUp = () => {
+    isDraggingMunRef.current = false;
+  };
+
+  const handleMunMouseLeave = () => {
+    isDraggingMunRef.current = false;
+  };
+
+  // Auto-scroll selected municipality into center of view
+  useEffect(() => {
+    if (munScrollRef.current) {
+      const activeBtn = munScrollRef.current.querySelector('[data-active="true"]');
+      if (activeBtn) {
+        activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+      checkMunScroll();
+    }
+  }, [selectedMunicipality, checkMunScroll]);
+
   // Restaurant Drawer State
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const [selectedDetailBranch, setSelectedDetailBranch] = useState(null);
@@ -1254,12 +1370,81 @@ function App() {
     } catch (e) { }
   }, [destinationReviews]);
 
-  // Real-time Cloud Synchronization for Reviews across all browsers & devices
+  // Real-time Cloud Synchronization for Reviews across all browsers & devices (Firestore + Fallback)
+  // Guarantees all user ratings and reviews are permanently saved even when rated from Vercel deployments
   useEffect(() => {
     const isDestReview = (r) => Boolean(r && (r.attractionId || r.attraction_id || r.itemType === 'attraction' || String(r.id).startsWith('drev-')));
     const deletedIds = getDeletedReviewIds();
 
-    // 1. Initial sync & merge between local storage and cloud database
+    // 1. Primary: Real-time Firebase Firestore Reviews Subscription
+    const unsubFirestore = subscribeToReviews((cloudRevs) => {
+      if (!Array.isArray(cloudRevs) || cloudRevs.length === 0) return;
+      const validCloudRevs = cloudRevs.filter(r => r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r));
+
+      const cloudDestRevs = validCloudRevs.filter(r => isDestReview(r));
+      const cloudRestRevs = validCloudRevs.filter(r => !isDestReview(r));
+
+      if (cloudDestRevs.length > 0) {
+        setDestinationReviews(prev => {
+          const map = new Map();
+          (Array.isArray(prev) ? prev : []).forEach(r => {
+            if (r && r.id && !deletedIds.has(String(r.id))) map.set(String(r.id), r);
+          });
+          let changed = false;
+          cloudDestRevs.forEach(r => {
+            if (!map.has(String(r.id))) {
+              map.set(String(r.id), r);
+              changed = true;
+            }
+          });
+          if (changed) {
+            const merged = Array.from(map.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            try {
+              localStorage.setItem('kanyamanan_destination_reviews', JSON.stringify(merged));
+            } catch (e) { }
+            return merged;
+          }
+          return prev;
+        });
+      }
+
+      if (cloudRestRevs.length > 0) {
+        setRestaurantReviews(prev => {
+          const map = new Map();
+          (Array.isArray(prev) ? prev : []).forEach(r => {
+            if (r && r.id && !deletedIds.has(String(r.id))) map.set(String(r.id), r);
+          });
+          let changed = false;
+          cloudRestRevs.forEach(r => {
+            if (!map.has(String(r.id))) {
+              map.set(String(r.id), r);
+              changed = true;
+            }
+          });
+          if (changed) {
+            const merged = Array.from(map.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            try {
+              localStorage.setItem('kanyamanan_restaurant_reviews', JSON.stringify(merged));
+            } catch (e) { }
+            return merged;
+          }
+          return prev;
+        });
+      }
+    });
+
+    // 2. Initial Migration: Ensure any locally stored reviews are backed up to Firestore
+    try {
+      const localRest = JSON.parse(localStorage.getItem('kanyamanan_restaurant_reviews') || '[]');
+      const localDest = JSON.parse(localStorage.getItem('kanyamanan_destination_reviews') || '[]');
+      [...localRest, ...localDest].forEach(r => {
+        if (r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r)) {
+          saveReviewToCloud(r);
+        }
+      });
+    } catch (_) { }
+
+    // 3. Fallback Cloud sync
     fetchCloudReviews().then(cloudRevs => {
       if (!Array.isArray(cloudRevs)) return;
       const cloudDestRevs = cloudRevs.filter(r => isDestReview(r) && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r));
@@ -1280,100 +1465,32 @@ function App() {
         });
       }
 
-      setRestaurantReviews(prev => {
-        const localList = Array.isArray(prev) ? prev : [];
-        const reviewMap = new Map();
-
-        // Load cloud reviews
-        cloudRestRevs.forEach(r => {
-          if (r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r)) {
-            reviewMap.set(String(r.id), r);
-          }
-        });
-
-        // Load local reviews
-        let hasNewLocal = false;
-        localList.forEach(r => {
-          if (r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r)) {
-            if (!reviewMap.has(String(r.id))) {
-              hasNewLocal = true;
+      if (cloudRestRevs.length > 0) {
+        setRestaurantReviews(prev => {
+          const localList = Array.isArray(prev) ? prev : [];
+          const reviewMap = new Map();
+          cloudRestRevs.forEach(r => {
+            if (r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r)) {
+              reviewMap.set(String(r.id), r);
             }
-            reviewMap.set(String(r.id), r);
-          }
-        });
-
-        const merged = Array.from(reviewMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-
-        // If local had reviews not on cloud yet, push merged set to cloud
-        if (hasNewLocal || (cloudRevs.length === 0 && merged.length > 0)) {
-          let savedDests = [];
+          });
+          localList.forEach(r => {
+            if (r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r)) {
+              reviewMap.set(String(r.id), r);
+            }
+          });
+          const merged = Array.from(reviewMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
           try {
-            const rawD = localStorage.getItem('kanyamanan_destination_reviews');
-            if (rawD) savedDests = JSON.parse(rawD) || [];
+            localStorage.setItem('kanyamanan_restaurant_reviews', JSON.stringify(merged));
           } catch (e) { }
-          pushCloudReviews([...merged, ...savedDests]);
-        }
-
-        return merged;
-      });
-    }).catch(() => { });
-
-    // 2. Real-time background sync loop
-    const unsubscribe = startCloudReviewsSync((remoteReviews) => {
-      if (!Array.isArray(remoteReviews)) return;
-      const remoteDestRevs = remoteReviews.filter(r => isDestReview(r) && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r));
-      const remoteRestRevs = remoteReviews.filter(r => !isDestReview(r) && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r));
-
-      if (remoteDestRevs.length > 0) {
-        setDestinationReviews(prev => {
-          const map = new Map();
-          (Array.isArray(prev) ? prev : []).forEach(r => {
-            if (r && r.id && !deletedIds.has(String(r.id))) map.set(String(r.id), r);
-          });
-          let changed = false;
-          remoteDestRevs.forEach(r => {
-            if (!map.has(String(r.id))) {
-              map.set(String(r.id), r);
-              changed = true;
-            }
-          });
-          if (changed) {
-            const merged = Array.from(map.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-            try {
-              localStorage.setItem('kanyamanan_destination_reviews', JSON.stringify(merged));
-            } catch (e) { }
-            return merged;
-          }
-          return prev;
+          return merged;
         });
       }
+    }).catch(() => { });
 
-      setRestaurantReviews(prev => {
-        const localList = Array.isArray(prev) ? prev : [];
-        const map = new Map();
-        localList.forEach(r => {
-          if (r && r.id && !deletedIds.has(String(r.id))) map.set(String(r.id), r);
-        });
-
-        let changed = false;
-        remoteRestRevs.forEach(r => {
-          if (r && r.id && !deletedIds.has(String(r.id)) && !isLegacyPreseededReview(r)) {
-            if (!map.has(String(r.id))) {
-              map.set(String(r.id), r);
-              changed = true;
-            }
-          }
-        });
-
-        if (changed) {
-          const merged = Array.from(map.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-          return merged;
-        }
-        return prev;
-      });
-    });
-
-    return () => unsubscribe();
+    return () => {
+      if (typeof unsubFirestore === 'function') unsubFirestore();
+    };
   }, []);
 
   // Review Form States in Restaurant Drawer
@@ -1449,6 +1566,8 @@ function App() {
       pushCloudReviews([...restaurantReviews, ...next]);
       return next;
     });
+    // Persist immediately to Firebase Firestore
+    saveReviewToCloud(newRev);
     // Consume 1 unrated visit credit and permanently register as rated
     consumeUnratedVisit(attractionId);
     setRatedStops(prev => {
@@ -1468,31 +1587,18 @@ function App() {
     return true;
   };
 
-  const [adminRole, setAdminRole] = useState(() => {
-    try {
-      return localStorage.getItem('kanyamanan_admin_role') || 'superadmin';
-    } catch (e) {
-      return 'superadmin';
-    }
-  }); // 'superadmin' or 'merchant'
+  // Admin & Merchant session is strictly in-memory: always logged out when browser is refreshed
+  const [adminRole, setAdminRole] = useState('superadmin'); // 'superadmin' or 'merchant'
   const [merchantResId, setMerchantResId] = useState(() => {
-    try {
-      const saved = localStorage.getItem('kanyamanan_merchant_res_id');
-      if (saved) return saved;
-    } catch (e) { }
     return (Array.isArray(PRESEEDED_RESTAURANTS) && PRESEEDED_RESTAURANTS[0] ? PRESEEDED_RESTAURANTS[0].id : 'res-1');
   });
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
-    try {
-      return localStorage.getItem('kanyamanan_admin_auth') === 'true';
-    } catch (e) {
-      return false;
-    }
-  });
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const isAdmin = Boolean(isAdminAuthenticated);
+  const [expandedMerchantReqs, setExpandedMerchantReqs] = useState({});
   const [adminLoginType, setAdminLoginType] = useState('superadmin'); // 'superadmin' or 'merchant'
   const [adminLoginUser, setAdminLoginUser] = useState('');
   const [adminLoginPass, setAdminLoginPass] = useState('');
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState('');
 
   // System Administrator Access Control & Privilege Verification
@@ -1559,7 +1665,10 @@ function App() {
       return modified ? updated : prev;
     });
 
-    // 4. Delete from Django REST API backend
+    // 4. Delete from Firebase Firestore cloud
+    deleteReviewFromCloud(strId);
+
+    // 5. Delete from Django REST API backend
     try {
       await deleteDjangoReview(reviewId);
     } catch (e) {
@@ -1593,7 +1702,10 @@ function App() {
       return updated;
     });
 
-    // 3. Purge embedded review copies from attractions dataset
+    // 3. Delete from Firebase Firestore cloud
+    deleteReviewFromCloud(strId);
+
+    // 4. Purge embedded review copies from attractions dataset
     setAttractions(prev => {
       let modified = false;
       const updated = prev.map(attr => {
@@ -1810,9 +1922,14 @@ function App() {
 
     setRestaurantReviews(prev => {
       const updated = [newRev, ...prev];
+      try {
+        localStorage.setItem('kanyamanan_restaurant_reviews', JSON.stringify(updated));
+      } catch (e) { }
       pushCloudReviews(updated);
       return updated;
     });
+    // Persist immediately to Firebase Firestore
+    saveReviewToCloud(newRev);
     // Consume 1 unrated visit credit and permanently register as rated
     consumeUnratedVisit(restaurantId);
     setRatedStops(prev => {
@@ -1918,6 +2035,7 @@ function App() {
       return '';
     }
   });
+  const [showAiKey, setShowAiKey] = useState(false);
 
   // Persistent localStorage synchronization effect for live frontend updates
   useEffect(() => {
@@ -3230,6 +3348,7 @@ function App() {
     calorieLimit: 2000,
     budgetLimit: 1500
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
   // ============================================================
@@ -13313,10 +13432,6 @@ Return ONLY a valid JSON object matching this schema:
       if (adminLoginUser.trim() === 'admin' && adminLoginPass === 'admin123') {
         setAdminRole('superadmin');
         setIsAdminAuthenticated(true);
-        try {
-          localStorage.setItem('kanyamanan_admin_auth', 'true');
-          localStorage.setItem('kanyamanan_admin_role', 'superadmin');
-        } catch (e) { }
         setAdminLoginUser('');
         setAdminLoginPass('');
       } else {
@@ -13333,11 +13448,6 @@ Return ONLY a valid JSON object matching this schema:
         setAdminRole('merchant');
         setMerchantResId(matchedRes.id);
         setIsAdminAuthenticated(true);
-        try {
-          localStorage.setItem('kanyamanan_admin_auth', 'true');
-          localStorage.setItem('kanyamanan_admin_role', 'merchant');
-          localStorage.setItem('kanyamanan_merchant_res_id', matchedRes.id);
-        } catch (e) { }
         setAdminLoginUser('');
         setAdminLoginPass('');
       } else {
@@ -15999,14 +16109,25 @@ ${rawText}`;
                     <label className="block text-[10px] font-bold text-gray-300 uppercase tracking-wider mb-1">
                       Password
                     </label>
-                    <input
-                      type="password"
-                      required
-                      placeholder="••••••••"
-                      value={adminLoginPass}
-                      onChange={(e) => setAdminLoginPass(e.target.value)}
-                      className="block w-full px-3.5 py-2.5 bg-charcoal border border-[#3E3E3E] rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-terracotta"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showAdminPassword ? "text" : "password"}
+                        required
+                        placeholder="••••••••"
+                        value={adminLoginPass}
+                        onChange={(e) => setAdminLoginPass(e.target.value)}
+                        className="block w-full px-3.5 py-2.5 pr-10 bg-charcoal border border-[#3E3E3E] rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-terracotta"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowAdminPassword(!showAdminPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer"
+                        title={showAdminPassword ? "Hide password" : "Show password"}
+                        aria-label={showAdminPassword ? "Hide password" : "Show password"}
+                      >
+                        {showAdminPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -16028,14 +16149,25 @@ ${rawText}`;
                     <label className="block text-[10px] font-bold text-gray-300 uppercase tracking-wider mb-1">
                       Account Password
                     </label>
-                    <input
-                      type="password"
-                      required
-                      placeholder="••••••••"
-                      value={adminLoginPass}
-                      onChange={(e) => setAdminLoginPass(e.target.value)}
-                      className="block w-full px-3.5 py-2.5 bg-charcoal border border-[#3E3E3E] rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-terracotta"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showAdminPassword ? "text" : "password"}
+                        required
+                        placeholder="••••••••"
+                        value={adminLoginPass}
+                        onChange={(e) => setAdminLoginPass(e.target.value)}
+                        className="block w-full px-3.5 py-2.5 pr-10 bg-charcoal border border-[#3E3E3E] rounded-xl text-xs text-white focus:outline-none focus:ring-1 focus:ring-terracotta"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowAdminPassword(!showAdminPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer"
+                        title={showAdminPassword ? "Hide password" : "Show password"}
+                        aria-label={showAdminPassword ? "Hide password" : "Show password"}
+                      >
+                        {showAdminPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -16144,15 +16276,19 @@ ${rawText}`;
                 }`}
             >
               <span className="text-sm">🏪</span>
-              <span className="tracking-wide uppercase truncate">Restaurants</span>
-              <span
-                className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${adminSectionTab === 'restaurants'
-                  ? 'bg-white/20 text-white'
-                  : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
-                  }`}
-              >
-                {restaurants.length}
+              <span className="tracking-wide uppercase truncate">
+                {adminRole === 'merchant' ? 'My Restaurant Profile' : 'Restaurants'}
               </span>
+              {adminRole === 'superadmin' && (
+                <span
+                  className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-colors ${adminSectionTab === 'restaurants'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-[#FAF8F5] text-charcoal border border-[#E9E5DE]'
+                    }`}
+                >
+                  {restaurants.length}
+                </span>
+              )}
             </button>
 
             {adminRole === 'superadmin' && (
@@ -16340,8 +16476,11 @@ ${rawText}`;
                           <div className="space-y-2.5">
                             {myRequests.map(req => {
                               const reqStatus = req.status || 'pending';
+                              const isExpanded = Boolean(expandedMerchantReqs[req.id]);
+                              const changeKeys = Object.keys(req.changes || {}).filter(k => k !== 'images' && k !== 'image');
+
                               return (
-                                <div key={req.id} className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-xs space-y-2">
+                                <div key={req.id} className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl text-xs space-y-2.5">
                                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E9E5DE] pb-2">
                                     <div className="flex items-center gap-2">
                                       <span className="font-bold text-charcoal text-xs">Submitted on: {req.submittedAt}</span>
@@ -16365,17 +16504,44 @@ ${rawText}`;
                                     </div>
                                   </div>
 
-                                  <div className="bg-white p-2.5 rounded-lg border border-[#E9E5DE] text-[11px] space-y-1.5">
-                                    <span className="font-bold text-charcoal block">Requested Profile Modifications:</span>
-                                    <div className="text-charcoal-light space-y-1">
-                                      {Object.keys(req.changes).filter(k => k !== 'images' && k !== 'image').map(k => (
-                                        <div key={k} className="flex flex-wrap gap-1 items-start">
-                                          <strong className="text-charcoal">{formatChangeKey(k)}:</strong>
-                                          <span className="text-bananaleaf font-bold">{typeof req.changes[k] === 'string' ? req.changes[k] : JSON.stringify(req.changes[k])}</span>
-                                        </div>
-                                      ))}
+                                  {/* Collapsible Dropdown Summary Bar */}
+                                  <div className="flex items-center justify-between gap-2 bg-white px-3 py-2 rounded-lg border border-[#E9E5DE]">
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                      <span className="text-[11px] font-extrabold text-charcoal shrink-0">
+                                        {changeKeys.length} {changeKeys.length === 1 ? 'Field Modified' : 'Fields Modified'}:
+                                      </span>
+                                      <span className="text-[11px] text-charcoal-light font-medium truncate">
+                                        {changeKeys.map(k => formatChangeKey(k)).join(', ')}
+                                      </span>
                                     </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => setExpandedMerchantReqs(prev => ({ ...prev, [req.id]: !prev[req.id] }))}
+                                      className="text-[11px] font-black text-terracotta hover:text-terracotta-dark flex items-center gap-1 shrink-0 px-2 py-1 rounded-md hover:bg-terracotta/5 transition-all cursor-pointer"
+                                    >
+                                      <span>{isExpanded ? 'Hide Details' : 'View Changes'}</span>
+                                      {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                                    </button>
                                   </div>
+
+                                  {/* Expanded Requested Profile Modifications */}
+                                  {isExpanded && (
+                                    <div className="bg-white p-3 rounded-lg border border-[#E9E5DE] text-[11px] space-y-2 animate-fade-in">
+                                      <span className="font-extrabold text-charcoal block border-b border-[#E9E5DE]/60 pb-1">
+                                        Requested Profile Modifications:
+                                      </span>
+                                      <div className="text-charcoal-light space-y-1.5">
+                                        {changeKeys.map(k => (
+                                          <div key={k} className="flex flex-col sm:flex-row sm:gap-1.5 items-start bg-[#FAF8F5] p-2 rounded-md border border-[#E9E5DE]/40">
+                                            <strong className="text-charcoal shrink-0 font-bold">{formatChangeKey(k)}:</strong>
+                                            <span className="text-bananaleaf font-bold break-all sm:break-normal">
+                                              {typeof req.changes[k] === 'string' ? req.changes[k] : JSON.stringify(req.changes[k], null, 2)}
+                                            </span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
 
                                   {req.reviewedAt && (
                                     <div className="text-[10px] text-charcoal-light flex items-center justify-between pt-1">
@@ -16426,8 +16592,8 @@ ${rawText}`;
                   {/* Provisioning Form */}
                   <form onSubmit={handleQuickProvisionMerchantAccount} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Restaurant Name */}
-                      <div className="md:col-span-2">
+                      {/* Row 1, Col 1: Restaurant Name */}
+                      <div>
                         <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
                           Restaurant Establishment Name <span className="text-rose-500">*</span>
                         </label>
@@ -16452,7 +16618,7 @@ ${rawText}`;
                         />
                       </div>
 
-                      {/* Municipality */}
+                      {/* Row 1, Col 2: Municipality */}
                       <div>
                         <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider mb-1">
                           Municipality / City <span className="text-rose-500">*</span>
@@ -16468,7 +16634,7 @@ ${rawText}`;
                         </select>
                       </div>
 
-                      {/* Owner Username */}
+                      {/* Row 2, Col 1: Owner Username */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
                           <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider">
@@ -16489,8 +16655,8 @@ ${rawText}`;
                         />
                       </div>
 
-                      {/* Account Password */}
-                      <div className="md:col-span-2">
+                      {/* Row 2, Col 2: Account Password */}
+                      <div>
                         <div className="flex items-center justify-between mb-1">
                           <label className="block text-[10px] font-bold text-charcoal uppercase tracking-wider">
                             🔑 Restaurant Owner Password <span className="text-rose-500">*</span>
@@ -16503,9 +16669,9 @@ ${rawText}`;
                               setQuickResPassword(`${base}${randNum}!`);
                               setQuickResPasswordEdited(true);
                             }}
-                            className="text-[10px] text-terracotta font-bold hover:underline cursor-pointer"
+                            className="text-[10px] text-terracotta font-bold hover:underline cursor-pointer flex items-center gap-1"
                           >
-                            🎲 Generate Random Password
+                            <span>🎲</span> Generate Random
                           </button>
                         </div>
                         <div className="relative">
@@ -16518,7 +16684,7 @@ ${rawText}`;
                               setQuickResPassword(e.target.value);
                               setQuickResPasswordEdited(true);
                             }}
-                            className="block w-full px-3.5 py-2.5 pr-20 text-xs border border-[#E9E5DE] rounded-xl bg-ivory font-mono font-bold focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white text-charcoal"
+                            className="block w-full px-3.5 py-2.5 pr-16 text-xs border border-[#E9E5DE] rounded-xl bg-ivory font-mono font-bold focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white text-charcoal"
                           />
                           <button
                             type="button"
@@ -16528,8 +16694,12 @@ ${rawText}`;
                             {quickShowPassword ? 'Hide' : 'Show'}
                           </button>
                         </div>
-                        <p className="text-[10px] text-charcoal-light mt-1">
-                          💡 A copyable credentials card with formatted invitation will pop up immediately after creation.
+                      </div>
+
+                      {/* Helper Note spanning full width */}
+                      <div className="md:col-span-2">
+                        <p className="text-[10.5px] text-charcoal-light m-0 flex items-center gap-1">
+                          <span>💡</span> A copyable credentials card with formatted invitation will pop up immediately after creation.
                         </p>
                       </div>
                     </div>
@@ -17442,52 +17612,60 @@ ${rawText}`;
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider m-0">
-                      Kapampangan Restaurants Database Listings
+                      {adminRole === 'merchant' ? 'My Restaurant Live Profile Details' : 'Kapampangan Restaurants Database Listings'}
                     </h3>
                     <span className="text-[10px] text-charcoal-light font-medium block mt-0.5">
-                      Alphabetically Sorted A-Z
+                      {adminRole === 'merchant' ? 'Current verified information live on the public directory' : 'Alphabetically Sorted A-Z'}
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 text-xs">
-                    {/* Admin Search Bar */}
-                    <div className="relative flex items-center min-w-[220px]">
-                      <Search className="absolute left-2.5 h-3.5 w-3.5 text-charcoal-light pointer-events-none" />
-                      <input
-                        type="text"
-                        placeholder="Search by restaurant, city, address..."
-                        value={adminSearchQuery}
-                        onChange={(e) => setAdminSearchQuery(e.target.value)}
-                        className="w-full pl-8 pr-7 py-1.5 rounded-lg bg-ivory border border-[#E9E5DE] text-xs focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white"
-                      />
-                      {adminSearchQuery && (
-                        <button
-                          type="button"
-                          onClick={() => setAdminSearchQuery('')}
-                          className="absolute right-2 text-charcoal-light hover:text-red-600 text-xs font-bold transition-colors cursor-pointer"
-                          title="Clear search"
-                          aria-label="Clear search"
-                        >
-                          ✕
-                        </button>
-                      )}
-                    </div>
+                  {adminRole === 'superadmin' ? (
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      {/* Admin Search Bar */}
+                      <div className="relative flex items-center min-w-[220px]">
+                        <Search className="absolute left-2.5 h-3.5 w-3.5 text-charcoal-light pointer-events-none" />
+                        <input
+                          type="text"
+                          placeholder="Search by restaurant, city, address..."
+                          value={adminSearchQuery}
+                          onChange={(e) => setAdminSearchQuery(e.target.value)}
+                          className="w-full pl-8 pr-7 py-1.5 rounded-lg bg-ivory border border-[#E9E5DE] text-xs focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white"
+                        />
+                        {adminSearchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setAdminSearchQuery('')}
+                            className="absolute right-2 text-charcoal-light hover:text-red-600 text-xs font-bold transition-colors cursor-pointer"
+                            title="Clear search"
+                            aria-label="Clear search"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
 
-                    {/* Location Filter */}
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold text-charcoal uppercase tracking-wider whitespace-nowrap">Filter Location:</span>
-                      <select
-                        value={adminSelectedMunicipality}
-                        onChange={(e) => setAdminSelectedMunicipality(e.target.value)}
-                        className="px-2.5 py-1.5 rounded-lg bg-ivory border border-[#E9E5DE] text-xs font-semibold focus:outline-none"
-                      >
-                        <option value="All">All Municipalities/Cities</option>
-                        {MUNICIPALITIES.map(mun => (
-                          <option key={mun} value={mun}>{mun}</option>
-                        ))}
-                      </select>
+                      {/* Location Filter */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-charcoal uppercase tracking-wider whitespace-nowrap">Filter Location:</span>
+                        <select
+                          value={adminSelectedMunicipality}
+                          onChange={(e) => setAdminSelectedMunicipality(e.target.value)}
+                          className="px-2.5 py-1.5 rounded-lg bg-ivory border border-[#E9E5DE] text-xs font-semibold focus:outline-none"
+                        >
+                          <option value="All">All Municipalities/Cities</option>
+                          {MUNICIPALITIES.map(mun => (
+                            <option key={mun} value={mun}>{mun}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full flex items-center gap-1">
+                        <CheckCircle className="h-3 w-3 text-emerald-600" /> Active on Public Directory
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="overflow-x-auto border border-[#E9E5DE] rounded-xl">
@@ -17501,7 +17679,7 @@ ${rawText}`;
                         <th className="px-4 py-3">Primary Address</th>
                         <th className="px-4 py-3">Hours</th>
                         <th className="px-4 py-3">Tier</th>
-                        <th className="px-4 py-3 text-right">Actions</th>
+                        <th className="px-4 py-3 text-right">{adminRole === 'merchant' ? 'Public View' : 'Actions'}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#E9E5DE] bg-white text-charcoal font-medium">
@@ -17555,23 +17733,34 @@ ${rawText}`;
                             <td className="px-4 py-3 text-charcoal-light">{res.operatingHours}</td>
                             <td className="px-4 py-3 text-bananaleaf font-bold">{res.priceTier}</td>
                             <td className="px-4 py-3 text-right space-x-1 shrink-0 whitespace-nowrap">
-                              <button
-                                type="button"
-                                onClick={() => startAdminEdit(res)}
-                                className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs hover:border-terracotta"
-                                title="Edit Listing & Credentials"
-                              >
-                                <Edit className="h-4 w-4 text-terracotta" />
-                              </button>
-                              {adminRole !== 'merchant' && (
+                              {adminRole === 'merchant' ? (
                                 <button
                                   type="button"
-                                  onClick={() => deleteRestaurant(res.id)}
-                                  className="p-1.5 text-charcoal-light hover:text-red-600 rounded-lg hover:bg-red-50 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs hover:border-red-300"
-                                  title="Remove Listing"
+                                  onClick={() => { setSelectedRestaurant(res); setActiveImgIdx(0); }}
+                                  className="px-3 py-1.5 text-xs font-bold text-terracotta hover:text-white bg-terracotta/10 hover:bg-terracotta rounded-lg border border-terracotta/20 transition-all cursor-pointer shadow-2xs inline-flex items-center gap-1.5 active:scale-95"
+                                  title="View your restaurant's live listing drawer"
                                 >
-                                  <Trash2 className="h-4 w-4 text-red-500" />
+                                  <Eye className="h-3.5 w-3.5" /> Preview Listing
                                 </button>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => startAdminEdit(res)}
+                                    className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs hover:border-terracotta"
+                                    title="Edit Listing & Credentials"
+                                  >
+                                    <Edit className="h-4 w-4 text-terracotta" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteRestaurant(res.id)}
+                                    className="p-1.5 text-charcoal-light hover:text-red-600 rounded-lg hover:bg-red-50 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs hover:border-red-300"
+                                    title="Remove Listing"
+                                  >
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                  </button>
+                                </>
                               )}
                             </td>
                           </tr>
@@ -18891,7 +19080,7 @@ ${rawText}`;
               className="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-xl shadow-md border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 bg-white dark:bg-[#1E1B18] p-0.5"
             />
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron m-0 flex items-center gap-1.5 leading-none truncate">
+              <h1 className="text-lg sm:text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-caramel to-saffron m-0 flex items-center gap-1.5 leading-none truncate">
                 Kanyamanan
               </h1>
               <p className="text-[9px] sm:text-[10px] text-charcoal-light dark:text-gray-400 font-medium tracking-wide mt-0.5 hidden xl:block truncate">
@@ -19207,9 +19396,9 @@ ${rawText}`;
           <div className="space-y-6">
 
             {/* Hero Section with Kapampangan Cultural & Food Imagery */}
-            <div className="bento-card relative overflow-hidden p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFEB] dark:from-[#1E1B18] dark:via-[#171513] dark:to-[#12100E] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl shadow-sm">
+            <div className="bento-card relative overflow-hidden p-4 sm:p-6 md:p-8 lg:p-8 xl:p-10 bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFEB] dark:from-[#1E1B18] dark:via-[#171513] dark:to-[#12100E] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl shadow-sm">
               {/* Background Parul Sampernandu (Giant Lantern) & Mount Arayat Outline Watermark */}
-              <div className="absolute right-0 bottom-0 w-72 h-72 sm:w-96 sm:h-96 text-terracotta/10 dark:text-terracotta/5 opacity-25 pointer-events-none z-0">
+              <div className="absolute right-0 bottom-0 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 text-terracotta/10 dark:text-terracotta/5 opacity-25 pointer-events-none z-0">
                 <svg viewBox="0 0 100 100" className="w-full h-full stroke-current fill-none" strokeWidth="0.8">
                   <polygon points="50,15 57,38 80,38 61,52 69,75 50,60 31,75 39,52 20,38 43,38" />
                   <circle cx="50" cy="50" r="30" />
@@ -19221,165 +19410,165 @@ ${rawText}`;
                 </svg>
               </div>
 
-              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-10 items-center">
                 {/* Left Column: Rich Editorial Typography, Feature Pills & Quick Actions */}
-                <div className="lg:col-span-6 space-y-4 sm:space-y-5 text-left">
+                <div className="lg:col-span-6 space-y-3.5 sm:space-y-4.5 text-left">
                   {/* Top Cultural Badge */}
                   <div className="inline-flex flex-wrap items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-gradient-to-r from-terracotta/15 via-[#FFF8F3]/5 to-saffron/15 dark:from-terracotta/25 dark:via-[#26211C] dark:to-saffron/25 border border-terracotta/30 dark:border-terracotta/40 shadow-xs backdrop-blur-xs max-w-full">
                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-terracotta to-[#D9531E] text-white text-[10px] shadow-xs shrink-0">
                       ✨
                     </span>
-                    <span className="text-[11px] sm:text-xs font-black tracking-wider uppercase text-charcoal dark:text-[#F7F5F0] whitespace-nowrap">
+                    <span className="text-[10.5px] sm:text-xs font-black tracking-wider uppercase text-charcoal dark:text-[#F7F5F0] whitespace-nowrap">
                       Manyaman a Kayamanan
                     </span>
-                    <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-terracotta/50 shrink-0"></span>
-                    <span className="hidden sm:inline text-[10px] sm:text-[11px] font-extrabold tracking-wide uppercase text-terracotta whitespace-nowrap">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-terracotta/50 shrink-0"></span>
+                    <span className="text-[9.5px] sm:text-[11px] font-extrabold tracking-wide uppercase text-terracotta whitespace-nowrap">
                       Culinary Heritage of Pampanga
                     </span>
                   </div>
 
                   {/* Main Headline */}
-                  <div className="space-y-1.5">
-                    <h2 className="text-3xl sm:text-4xl lg:text-[44px] xl:text-[48px] font-black text-[#1E1915] dark:text-white tracking-tight leading-[1.1] m-0 drop-shadow-xs">
+                  <div className="space-y-1">
+                    <h2 className="text-2xl xs:text-3xl sm:text-4xl lg:text-[40px] xl:text-[46px] font-black text-[#1E1915] dark:text-white tracking-tight leading-[1.12] m-0 drop-shadow-xs">
                       Mekeni, Mangan Tana!
                     </h2>
-                    <div className="text-base sm:text-xl lg:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#D9531E] to-saffron tracking-tight">
+                    <div className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-caramel to-saffron tracking-tight">
                       Explore Pampanga’s Culinary Map and more!
                     </div>
                   </div>
 
                   {/* Fast, Entertaining & Easy-to-Read Intro */}
-                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed font-medium m-0 max-w-xl">
+                  <p className="text-xs xs:text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed font-medium m-0 max-w-xl">
                     Discover <strong className="text-charcoal dark:text-white font-black bg-terracotta/10 dark:bg-terracotta/20 px-1.5 py-0.5 rounded-md text-terracotta inline-block">Pampanga's best heirloom flavors</strong>, legendary local kitchens across all <strong className="text-[#1E1915] dark:text-white font-bold">22 towns</strong>, and top tourist spots — powered by smart <strong className="text-[#1E1915] dark:text-white font-bold">AI food trails</strong> and instant <strong className="text-[#1E1915] dark:text-white font-bold">health insights</strong>! 🍲✨
                   </p>
 
                   {/* Fun, Fast-to-Scan Feature Cards */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 w-full max-w-lg lg:max-w-none">
-                    <div className="bg-gradient-to-b from-white to-[#FFF9F5] dark:from-[#1E1B18] dark:to-[#25201B] px-2.5 py-2 rounded-xl border border-terracotta/20 dark:border-terracotta/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
-                      <span className="text-sm">🍲</span>
-                      <span className="text-[10px] font-black text-charcoal dark:text-white mt-0.5">22 Towns</span>
-                      <span className="text-[8px] font-extrabold text-terracotta uppercase">Authentic Eats</span>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 pt-1 w-full max-w-2xl lg:max-w-none">
+                    <div className="bg-gradient-to-b from-white to-[#FFF9F5] dark:from-[#1E1B18] dark:to-[#25201B] p-2 sm:py-2.5 sm:px-3 rounded-xl sm:rounded-2xl border border-terracotta/20 dark:border-terracotta/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
+                      <span className="text-base sm:text-lg">🍲</span>
+                      <span className="text-[10.5px] sm:text-xs font-black text-charcoal dark:text-white mt-0.5">22 Towns</span>
+                      <span className="text-[8px] sm:text-[8.5px] font-extrabold text-terracotta uppercase tracking-wide">Authentic Eats</span>
                     </div>
-                    <div className="bg-gradient-to-b from-white to-[#F6FFF9] dark:from-[#1E1B18] dark:to-[#1B2520] px-2.5 py-2 rounded-xl border border-bananaleaf/20 dark:border-bananaleaf/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
-                      <span className="text-sm">🌿</span>
-                      <span className="text-[10px] font-black text-charcoal dark:text-white mt-0.5">Health Data</span>
-                      <span className="text-[8px] font-extrabold text-bananaleaf dark:text-[#52B788] uppercase">Allergens &amp; Diet</span>
+                    <div className="bg-gradient-to-b from-white to-calamansi-soft/50 dark:from-[#1E1B18] dark:to-calamansi-dark/20 p-2 sm:py-2.5 sm:px-3 rounded-xl sm:rounded-2xl border border-calamansi/25 dark:border-calamansi/35 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
+                      <span className="text-base sm:text-lg">🌿</span>
+                      <span className="text-[10.5px] sm:text-xs font-black text-charcoal dark:text-white mt-0.5">Health Data</span>
+                      <span className="text-[8px] sm:text-[8.5px] font-extrabold text-calamansi dark:text-calamansi-light uppercase tracking-wide">Allergens &amp; Diet</span>
                     </div>
-                    <div className="bg-gradient-to-b from-white to-[#FFFDF5] dark:from-[#1E1B18] dark:to-[#25231B] px-2.5 py-2 rounded-xl border border-saffron/25 dark:border-saffron/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
-                      <span className="text-sm">🤖</span>
-                      <span className="text-[10px] font-black text-charcoal dark:text-white mt-0.5">AI Trails</span>
-                      <span className="text-[8px] font-extrabold text-saffron-dark dark:text-saffron uppercase">Smart Trips</span>
+                    <div className="bg-gradient-to-b from-white to-[#FFFDF5] dark:from-[#1E1B18] dark:to-[#25231B] p-2 sm:py-2.5 sm:px-3 rounded-xl sm:rounded-2xl border border-saffron/25 dark:border-saffron/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
+                      <span className="text-base sm:text-lg">🤖</span>
+                      <span className="text-[10.5px] sm:text-xs font-black text-charcoal dark:text-white mt-0.5">AI Trails</span>
+                      <span className="text-[8px] sm:text-[8.5px] font-extrabold text-caramel dark:text-saffron uppercase tracking-wide">Smart Trips</span>
                     </div>
-                    <div className="bg-gradient-to-b from-white to-[#FAF5FF] dark:from-[#1E1B18] dark:to-[#221B25] px-2.5 py-2 rounded-xl border border-purple-500/20 dark:border-purple-500/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
-                      <span className="text-sm">⛰️</span>
-                      <span className="text-[10px] font-black text-charcoal dark:text-white mt-0.5">Top Sights</span>
-                      <span className="text-[8px] font-extrabold text-purple-700 dark:text-purple-400 uppercase">Must-Visit Spots</span>
+                    <div className="bg-gradient-to-b from-white to-ube-soft/50 dark:from-[#1E1B18] dark:to-ube-dark/20 p-2 sm:py-2.5 sm:px-3 rounded-xl sm:rounded-2xl border border-ube/25 dark:border-ube/35 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
+                      <span className="text-base sm:text-lg">⛰️</span>
+                      <span className="text-[10.5px] sm:text-xs font-black text-charcoal dark:text-white mt-0.5">Top Sights</span>
+                      <span className="text-[8px] sm:text-[8.5px] font-extrabold text-ube dark:text-ube-light uppercase tracking-wide">Must-Visit Spots</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Right Column: Kapampangan Food & Tourist Destination Showcase */}
                 <div className="lg:col-span-6 flex flex-col items-center lg:items-end w-full">
-                  {/* Top: Iconic Kapampangan Food Showcase */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 items-stretch w-full max-w-lg lg:max-w-none">
+                  {/* Top: Iconic Kapampangan Food Showcase (Symmetric Triptych that scales cleanly across all sizes) */}
+                  <div className="grid grid-cols-3 gap-2 sm:gap-2.5 lg:gap-3 items-stretch w-full max-w-2xl lg:max-w-none">
 
                     {/* Left Flank: Authentic Culinary Classics */}
-                    <div className="flex flex-row sm:flex-col gap-2.5 justify-between">
+                    <div className="flex flex-col gap-2 sm:gap-2.5 h-full justify-between">
                       {/* Card 1: Kare-Kare */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
-                        <div className="h-16 sm:h-18 rounded-xl overflow-hidden relative shadow-xs">
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
+                        <div className="h-16 xs:h-18 sm:h-22 md:h-24 lg:h-18 xl:h-22 rounded-xl overflow-hidden relative shadow-2xs w-full">
                           <img
                             src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80"
                             alt="Authentic Kapampangan Kare-Kare Stew"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80"; }}
                           />
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7px] xs:text-[7.5px] sm:text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                             🥜 Kare-Kare
                           </span>
                         </div>
                         <div className="pt-1 text-center">
-                          <span className="font-extrabold text-[11px] text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Kare-Kare</span>
-                          <span className="text-[8.5px] font-black text-amber-700 dark:text-amber-500 block mt-0.5 uppercase tracking-wide">Peanut Stew</span>
+                          <span className="font-extrabold text-[10px] xs:text-[11px] sm:text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Kare-Kare</span>
+                          <span className="text-[7.5px] xs:text-[8px] sm:text-[8.5px] font-black text-caramel dark:text-caramel-light block mt-0.5 uppercase tracking-wide truncate">Peanut Stew</span>
                         </div>
                       </div>
 
                       {/* Card 2: Bringhe */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
-                        <div className="h-16 sm:h-18 rounded-xl overflow-hidden relative shadow-xs">
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
+                        <div className="h-16 xs:h-18 sm:h-22 md:h-24 lg:h-18 xl:h-22 rounded-xl overflow-hidden relative shadow-2xs w-full">
                           <img
                             src="https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=400&q=80"
                             alt="Kapampangan Bringhe Fiesta Rice"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80"; }}
                           />
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7px] xs:text-[7.5px] sm:text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                             🥥 Bringhe
                           </span>
                         </div>
                         <div className="pt-1 text-center">
-                          <span className="font-extrabold text-[11px] text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Bringhe Rice</span>
-                          <span className="text-[8.5px] font-black text-bananaleaf block mt-0.5 uppercase tracking-wide">Fiesta Dish</span>
+                          <span className="font-extrabold text-[10px] xs:text-[11px] sm:text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Bringhe Rice</span>
+                          <span className="text-[7.5px] xs:text-[8px] sm:text-[8.5px] font-black text-bananaleaf block mt-0.5 uppercase tracking-wide truncate">Fiesta Dish</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Center Column: Prominent Large Sisig Focal Piece */}
-                    <div className="bg-white dark:bg-[#1E1B18] p-2 sm:p-2.5 rounded-2xl border-2 border-terracotta shadow-md ring-2 ring-terracotta/20 hover:shadow-lg transition-all text-center flex flex-col justify-between group">
-                      <div className="h-32 sm:h-36 rounded-xl overflow-hidden relative shadow-xs flex-1">
+                    <div className="h-full flex flex-col justify-between bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2.5 rounded-2xl border-2 border-terracotta shadow-md ring-2 ring-terracotta/20 hover:shadow-lg transition-all text-center group">
+                      <div className="w-full h-full min-h-[130px] xs:min-h-[145px] sm:min-h-[180px] md:min-h-[200px] lg:min-h-[160px] xl:min-h-[190px] flex-1 rounded-xl overflow-hidden relative shadow-2xs">
                         <img
                           src="/restaurants/authentic_sisig.jpg"
                           alt="Authentic Kapampangan Sizzling Sisig"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"; }}
                         />
-                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[9.5px] font-black px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap border border-white/30">
+                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[8px] xs:text-[8.5px] sm:text-[9.5px] font-black px-2 sm:px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap border border-white/30">
                           🔥 Sizzling Sisig
                         </span>
                       </div>
                       <div className="pt-1.5 text-center shrink-0">
-                        <span className="font-black text-xs sm:text-sm text-charcoal dark:text-[#F7F5F0] block leading-tight">Culinary Capital</span>
-                        <span className="text-[9px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Authentic Food</span>
+                        <span className="font-black text-[11px] xs:text-xs sm:text-sm text-charcoal dark:text-[#F7F5F0] block leading-tight">Culinary Capital</span>
+                        <span className="text-[7.5px] xs:text-[8.5px] sm:text-[9px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Authentic Food</span>
                       </div>
                     </div>
 
                     {/* Right Flank: Crispy Pata & Desserts */}
-                    <div className="flex flex-row sm:flex-col gap-2.5 justify-between">
+                    <div className="flex flex-col gap-2 sm:gap-2.5 h-full justify-between">
                       {/* Card 3: Crispy Pata */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
-                        <div className="h-16 sm:h-18 rounded-xl overflow-hidden relative shadow-xs">
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
+                        <div className="h-16 xs:h-18 sm:h-22 md:h-24 lg:h-18 xl:h-22 rounded-xl overflow-hidden relative shadow-2xs w-full">
                           <img
                             src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=400&q=80"
                             alt="Kapampangan Crispy Pata"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80"; }}
                           />
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7px] xs:text-[7.5px] sm:text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                             🍖 Crispy Pata
                           </span>
                         </div>
                         <div className="pt-1 text-center">
-                          <span className="font-extrabold text-[11px] text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Crispy Pata</span>
-                          <span className="text-[8.5px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Signature Meat</span>
+                          <span className="font-extrabold text-[10px] xs:text-[11px] sm:text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Crispy Pata</span>
+                          <span className="text-[7.5px] xs:text-[8px] sm:text-[8.5px] font-black text-terracotta block mt-0.5 uppercase tracking-wide truncate">Signature Meat</span>
                         </div>
                       </div>
 
                       {/* Card 4: Halo-Halo */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
-                        <div className="h-16 sm:h-18 rounded-xl overflow-hidden relative shadow-xs">
+                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
+                        <div className="h-16 xs:h-18 sm:h-22 md:h-24 lg:h-18 xl:h-22 rounded-xl overflow-hidden relative shadow-2xs w-full">
                           <img
                             src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=400&q=80"
                             alt="Special Kapampangan Halo-Halo"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=400&q=80"; }}
                           />
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7.5px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7px] xs:text-[7.5px] sm:text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                             🍧 Halo-Halo
                           </span>
                         </div>
                         <div className="pt-1 text-center">
-                          <span className="font-extrabold text-[11px] text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Halo-Halo</span>
-                          <span className="text-[8.5px] font-black text-saffron-dark dark:text-saffron block mt-0.5 uppercase tracking-wide">Sweet Dessert</span>
+                          <span className="font-extrabold text-[10px] xs:text-[11px] sm:text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Halo-Halo</span>
+                          <span className="text-[7.5px] xs:text-[8px] sm:text-[8.5px] font-black text-ube dark:text-ube-light block mt-0.5 uppercase tracking-wide truncate">Ube &amp; Sweet Treat</span>
                         </div>
                       </div>
                     </div>
@@ -19387,7 +19576,7 @@ ${rawText}`;
                   </div>
 
                   {/* Bottom: Smaller Tourist Destination Image Cards Row */}
-                  <div className="mt-4 pt-3 border-t border-[#E9E5DE]/80 dark:border-[#2E2A24]/80 w-full max-w-lg md:max-w-none">
+                  <div className="mt-4 pt-3 border-t border-[#E9E5DE]/80 dark:border-[#2E2A24]/80 w-full max-w-2xl lg:max-w-none">
                     <div className="flex items-center justify-between mb-1.5 px-0.5">
                       <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-charcoal-light dark:text-gray-400 flex items-center gap-1">
                         <span>🧭</span> Top Tourist Destinations to Visit
@@ -19504,48 +19693,101 @@ ${rawText}`;
             </div>
 
             {/* Bento Grid: 12-Column Layout */}
-            <div id="restaurants-section" className="grid grid-cols-1 md:grid-cols-12 gap-6 scroll-mt-24">
+            <div id="restaurants-section" className="grid grid-cols-1 lg:grid-cols-12 gap-6 scroll-mt-24">
 
-              {/* Sidebar: Municipalities List */}
-              <div className="md:col-span-4 lg:col-span-3 space-y-4">
+              {/* Sidebar / Horizontal Strip: Municipalities List */}
+              <div className="lg:col-span-3 space-y-4">
 
-                {/* Mobile/Tablet Horizontal Municipality Chips (< md) */}
-                <div className="md:hidden space-y-2">
+                {/* Mobile & Tablet Horizontal Municipality Strip (< lg) */}
+                <div className="lg:hidden space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-black uppercase tracking-wider text-charcoal dark:text-white flex items-center gap-1.5">
                       <MapPin className="h-3.5 w-3.5 text-terracotta" /> Municipalities ({MUNICIPALITIES.length})
                     </span>
-                    <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">Swipe to browse ➡️</span>
+
+                    {/* Controls: Swipe Notice & Interactive Scroll Buttons */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-semibold hidden sm:inline select-none">
+                        Swipe or drag to explore
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleMunScroll('left')}
+                          className="w-7 h-7 rounded-lg bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal dark:text-gray-200 flex items-center justify-center hover:bg-terracotta hover:text-white hover:border-terracotta transition-all shadow-2xs cursor-pointer active:scale-90"
+                          aria-label="Scroll municipalities left"
+                          title="Scroll left"
+                        >
+                          <ChevronLeft className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMunScroll('right')}
+                          className="w-7 h-7 rounded-lg bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal dark:text-gray-200 flex items-center justify-center hover:bg-terracotta hover:text-white hover:border-terracotta transition-all shadow-2xs cursor-pointer active:scale-90"
+                          aria-label="Scroll municipalities right"
+                          title="Scroll right"
+                        >
+                          <ChevronRight className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex overflow-x-auto gap-1.5 pb-1 no-scrollbar">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMunicipality('All')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${selectedMunicipality === 'All'
-                        ? 'bg-terracotta text-white shadow-xs font-black'
-                        : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24]'
-                        }`}
+
+                  {/* Horizontal Scrollable Row: Touch Pan & Mouse Drag to Scroll */}
+                  <div className="relative">
+                    <div
+                      ref={munScrollRef}
+                      onMouseDown={handleMunMouseDown}
+                      onMouseMove={handleMunMouseMove}
+                      onMouseUp={handleMunMouseUp}
+                      onMouseLeave={handleMunMouseLeave}
+                      onScroll={checkMunScroll}
+                      className="flex overflow-x-auto gap-1.5 pb-2 pt-0.5 no-scrollbar touch-pan-x overscroll-x-contain select-none cursor-grab active:cursor-grabbing scroll-smooth"
                     >
-                      All ({restaurants.length})
-                    </button>
-                    {MUNICIPALITIES.map(mun => (
                       <button
-                        key={mun}
                         type="button"
-                        onClick={() => setSelectedMunicipality(mun)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${selectedMunicipality === mun
-                          ? 'bg-terracotta text-white shadow-xs font-black'
-                          : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24]'
+                        data-active={selectedMunicipality === 'All'}
+                        onClick={(e) => {
+                          if (hasDraggedMunRef.current) {
+                            e.preventDefault();
+                            return;
+                          }
+                          setSelectedMunicipality('All');
+                        }}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer whitespace-nowrap select-none ${selectedMunicipality === 'All'
+                          ? 'bg-terracotta text-white shadow-xs font-black ring-2 ring-terracotta/20 scale-102'
+                          : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/40'
                           }`}
                       >
-                        {mun} ({municipalityCounts[mun] || 0})
+                        All ({restaurants.length})
                       </button>
-                    ))}
+
+                      {MUNICIPALITIES.map(mun => (
+                        <button
+                          key={mun}
+                          type="button"
+                          data-active={selectedMunicipality === mun}
+                          onClick={(e) => {
+                            if (hasDraggedMunRef.current) {
+                              e.preventDefault();
+                              return;
+                            }
+                            setSelectedMunicipality(mun);
+                          }}
+                          className={`px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer whitespace-nowrap select-none ${selectedMunicipality === mun
+                            ? 'bg-terracotta text-white shadow-xs font-black ring-2 ring-terracotta/20 scale-102'
+                            : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/40'
+                            }`}
+                        >
+                          {mun} ({municipalityCounts[mun] || 0})
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
-                {/* Desktop Sidebar: Vertical Municipality List (md:) */}
-                <div className="hidden md:block bento-card p-5 bg-white dark:bg-[#1E1B18] space-y-4 border-[#E9E5DE] dark:border-[#2E2A24]">
+                {/* Desktop Sidebar: Vertical Municipality List (lg:) */}
+                <div className="hidden lg:block bento-card p-5 bg-white dark:bg-[#1E1B18] space-y-4 border-[#E9E5DE] dark:border-[#2E2A24] sticky top-24">
                   <div className="flex items-center justify-between pb-2 border-b border-[#E9E5DE] dark:border-[#2E2A24]">
                     <h3 className="text-xs font-extrabold text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-terracotta" /> Municipality/City Selection
@@ -19555,10 +19797,11 @@ ${rawText}`;
                     </span>
                   </div>
 
-                  <div className="space-y-1.5 max-h-[460px] overflow-y-auto pr-1">
+                  <div className="space-y-1.5 max-h-[520px] overflow-y-auto pr-1">
                     <button
+                      type="button"
                       onClick={() => setSelectedMunicipality('All')}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${selectedMunicipality === 'All'
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${selectedMunicipality === 'All'
                         ? 'bg-terracotta text-white shadow-sm font-black'
                         : 'bg-[#FAF8F5] dark:bg-[#161412] hover:bg-white dark:hover:bg-[#25221E] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white border border-[#E9E5DE]/60 dark:border-[#2A2621]'
                         }`}
@@ -19572,8 +19815,9 @@ ${rawText}`;
                     {MUNICIPALITIES.map(mun => (
                       <button
                         key={mun}
+                        type="button"
                         onClick={() => setSelectedMunicipality(mun)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${selectedMunicipality === mun
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${selectedMunicipality === mun
                           ? 'bg-terracotta text-white shadow-sm font-black'
                           : 'bg-[#FAF8F5] dark:bg-[#161412] hover:bg-white dark:hover:bg-[#25221E] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white border border-[#E9E5DE]/60 dark:border-[#2A2621]'
                           }`}
@@ -19590,7 +19834,7 @@ ${rawText}`;
               </div>
 
               {/* Feed Grid Area */}
-              <div className="md:col-span-8 lg:col-span-9 space-y-6">
+              <div className="lg:col-span-9 space-y-6">
 
                 {/* Filter indicators */}
                 <div className="flex items-center justify-between bg-white dark:bg-[#1E1B18] px-4 py-3 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
@@ -19723,7 +19967,7 @@ ${rawText}`;
                               );
                             }
                             return (
-                              <div className="flex items-center gap-1 text-[11px] mt-1 text-amber-500 font-bold">
+                              <div className="flex items-center gap-1 text-[11px] mt-1 text-caramel dark:text-caramel-light font-bold">
                                 <span>★</span>
                                 <span className="text-charcoal dark:text-gray-200 font-extrabold">{stats.score}</span>
                                 <span className="text-charcoal-light dark:text-gray-400 font-medium text-[10px]">({stats.count} {stats.count === 1 ? 'review' : 'reviews'})</span>
@@ -19743,8 +19987,8 @@ ${rawText}`;
                             <span className="text-terracotta">{(res.occupancy?.[4] ?? res.branches?.[0]?.occupancy?.[4] ?? 85)}% Peak</span>
                           </div>
                           <div className="flex items-center justify-between font-semibold">
-                            <span className="flex items-center gap-1"><DollarSign className="h-3.5 w-3.5 text-bananaleaf shrink-0" /> Est. Cost:</span>
-                            <span className="text-bananaleaf">₱{res.menu[0]?.price || 200} base</span>
+                            <span className="flex items-center gap-1"><DollarSign className="h-3.5 w-3.5 text-calamansi shrink-0" /> Est. Cost:</span>
+                            <span className="text-calamansi font-bold">₱{res.menu[0]?.price || 200} base</span>
                           </div>
 
                           <div className="flex items-center justify-between text-[10px] pt-1 border-t border-[#FAF8F5] dark:border-[#2A2621]">
@@ -19894,14 +20138,25 @@ ${rawText}`;
                   <label className="block text-xs font-bold text-charcoal dark:text-gray-200 uppercase tracking-wider mb-1">
                     Password
                   </label>
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={regForm.password}
-                    onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
-                    className="block w-full px-3.5 py-2.5 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-sm bg-ivory dark:bg-[#161412] dark:text-white focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white dark:focus:bg-[#1A1715]"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      placeholder="••••••••"
+                      value={regForm.password}
+                      onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
+                      className="block w-full px-3.5 py-2.5 pr-10 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-sm bg-ivory dark:bg-[#161412] dark:text-white focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white dark:focus:bg-[#1A1715]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white transition-colors cursor-pointer"
+                      title={showPassword ? "Hide password" : "Show password"}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                   {formErrors.password ? (
                     <p className="text-xs text-terracotta mt-1 font-semibold">{formErrors.password}</p>
                   ) : isRegistering ? (
@@ -19927,19 +20182,25 @@ ${rawText}`;
         {activeView === 'dashboard' && (
           <div className="space-y-6 animate-slide-up">
 
-            {/* Mobile/Tablet Swipe Hint - visible on screens < lg where tab bar scrolls horizontally */}
-            <div className="flex lg:hidden items-center justify-between px-1 text-xs">
-              <span className="text-[10px] font-black uppercase tracking-wider text-charcoal-light dark:text-gray-400 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-terracotta animate-pulse"></span>
-                <span>5 Modules Available</span>
-              </span>
-              <span className="text-[10px] font-black text-terracotta dark:text-orange-400 bg-terracotta/10 dark:bg-terracotta/20 px-2.5 py-1 rounded-full border border-terracotta/25 flex items-center gap-1 shadow-2xs">
-                <span>👉 Swipe for more tabs ➡️</span>
-              </span>
-            </div>
+            {/* Mobile/Tablet Swipe Hint - ONLY visible when tabs actually overflow the screen */}
+            {dashboardTabsOverflow && (
+              <div className="flex lg:hidden items-center justify-between px-1 text-xs animate-fade-in">
+                <span className="text-[10px] font-black uppercase tracking-wider text-charcoal-light dark:text-gray-400 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-terracotta animate-pulse"></span>
+                  <span>5 Modules Available</span>
+                </span>
+                <span className="text-[10px] font-black text-terracotta dark:text-orange-400 bg-terracotta/10 dark:bg-terracotta/20 px-2.5 py-1 rounded-full border border-terracotta/25 flex items-center gap-1 shadow-2xs">
+                  <span>👉 Swipe for more tabs ➡️</span>
+                </span>
+              </div>
+            )}
 
             {/* Responsive Tabbed Menu/Navbar - Smooth scroll on mobile/tablet, full grid on desktop */}
-            <div className="bg-[#FAF8F5] dark:bg-[#141210] border border-[#E9E5DE] dark:border-[#2A2622] rounded-2xl p-1.5 shadow-sm flex lg:grid lg:grid-cols-5 gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none w-full transition-colors">
+            <div
+              ref={dashboardTabsRef}
+              onScroll={checkDashboardTabsOverflow}
+              className="bg-[#FAF8F5] dark:bg-[#141210] border border-[#E9E5DE] dark:border-[#2A2622] rounded-2xl p-1.5 shadow-sm flex lg:grid lg:grid-cols-5 gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none w-full transition-colors"
+            >
               <button
                 type="button"
                 onClick={() => setDashboardTab('planner')}
@@ -24625,13 +24886,24 @@ ${rawText}`;
                 <label className="block text-[10px] font-bold text-charcoal dark:text-white uppercase mb-1">
                   Google Gemini API Key
                 </label>
-                <input
-                  type="password"
-                  placeholder="Paste AIzaSy... key here"
-                  value={aiKeyInput}
-                  onChange={(e) => setAiKeyInput(e.target.value.trim())}
-                  className="w-full px-3 py-2 text-xs border border-[#E9E5DE] dark:border-white/20 rounded-xl bg-white dark:bg-charcoal-light dark:text-white font-mono"
-                />
+                <div className="relative">
+                  <input
+                    type={showAiKey ? "text" : "password"}
+                    placeholder="Paste AIzaSy... key here"
+                    value={aiKeyInput}
+                    onChange={(e) => setAiKeyInput(e.target.value.trim())}
+                    className="w-full px-3 py-2 pr-9 text-xs border border-[#E9E5DE] dark:border-white/20 rounded-xl bg-white dark:bg-charcoal-light dark:text-white font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAiKey(!showAiKey)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-charcoal dark:hover:text-white transition-colors cursor-pointer"
+                    title={showAiKey ? "Hide key" : "Show key"}
+                    aria-label={showAiKey ? "Hide key" : "Show key"}
+                  >
+                    {showAiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
 
               <div className="flex items-center justify-between text-[10px]">
@@ -24703,6 +24975,104 @@ ${rawText}`;
           </div>
         </div>
       )}
+
+      {/* Centered In-App Notification / Alert Modal (Replaces browser-native top alerts) */}
+      {centeredPopup && (
+        <div
+          className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in font-sans"
+          onClick={() => setCenteredPopup(null)}
+        >
+          <div
+            className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl p-6 sm:p-7 max-w-sm sm:max-w-md w-full shadow-2xl space-y-4 text-center animate-scale-in relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setCenteredPopup(null)}
+              className="absolute top-4 right-4 text-charcoal-light dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 w-7 h-7 rounded-full bg-ivory dark:bg-[#161412] flex items-center justify-center text-xs font-bold border border-[#E9E5DE] dark:border-[#2E2A24] cursor-pointer transition-colors"
+              aria-label="Close"
+              title="Close"
+            >
+              ✕
+            </button>
+
+            {/* Dynamic Culinary / Status Icon */}
+            {(() => {
+              const msg = centeredPopup.message || '';
+              const isRoute = msg.includes('Reached Stop') || msg.includes('Advancing to Stop') || msg.includes('Arrived at Stop');
+              const isParty = msg.startsWith('🎉');
+              const isSuccess = msg.startsWith('✓') || msg.startsWith('✅') || msg.toLowerCase().includes('success');
+              const isWarning = msg.startsWith('⚠️') || msg.toLowerCase().includes('error') || msg.toLowerCase().includes('please');
+
+              if (isRoute) {
+                return (
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-terracotta/15 text-terracotta flex items-center justify-center text-2xl shadow-inner ring-4 ring-terracotta/10">
+                    📍
+                  </div>
+                );
+              }
+              if (isParty) {
+                return (
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-saffron/20 text-saffron-dark dark:text-saffron flex items-center justify-center text-2xl shadow-inner ring-4 ring-saffron/10">
+                    🎉
+                  </div>
+                );
+              }
+              if (isSuccess) {
+                return (
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-bananaleaf/15 text-bananaleaf dark:text-[#52B788] flex items-center justify-center text-2xl shadow-inner ring-4 ring-bananaleaf/10">
+                    ✨
+                  </div>
+                );
+              }
+              if (isWarning) {
+                return (
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center text-2xl shadow-inner ring-4 ring-amber-500/10">
+                    ⚠️
+                  </div>
+                );
+              }
+              return (
+                <div className="w-14 h-14 mx-auto rounded-2xl bg-terracotta/15 text-terracotta flex items-center justify-center text-2xl shadow-inner ring-4 ring-terracotta/10">
+                  🍲
+                </div>
+              );
+            })()}
+
+            {/* Content Details */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-terracotta bg-terracotta/10 dark:bg-terracotta/20 px-2.5 py-0.5 rounded-full border border-terracotta/20 inline-block">
+                {centeredPopup.title || (
+                  (centeredPopup.message || '').includes('Reached Stop') || (centeredPopup.message || '').includes('Advancing to Stop')
+                    ? '📍 Route Navigation Update'
+                    : (centeredPopup.message || '').startsWith('✓') || (centeredPopup.message || '').startsWith('✅')
+                      ? '✓ Notification'
+                      : (centeredPopup.message || '').startsWith('⚠️')
+                        ? 'Notice'
+                        : 'Kanyamanan Food Trips'
+                )}
+              </span>
+
+              <div className="text-xs sm:text-sm text-charcoal dark:text-gray-200 leading-relaxed font-semibold max-h-60 overflow-y-auto px-1 whitespace-pre-line text-center">
+                {centeredPopup.message}
+              </div>
+            </div>
+
+            {/* Action Confirmation Button */}
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setCenteredPopup(null)}
+                className="w-full py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stop Added Confirmation Modal - Centered Popup with navigation actions */}
       {addedStopModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in font-sans">
