@@ -23522,12 +23522,12 @@ ${rawText}`;
                 className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] p-5 rounded-2xl shadow-xs space-y-4 text-left scroll-mt-6"
               >
                 {/* Section Header with Overall Rating Badge */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#FAF8F5] pb-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#FAF8F5] dark:border-[#2E2A24] pb-3">
                   <div>
-                    <h3 className="text-xs font-black text-charcoal uppercase tracking-wider flex items-center gap-1.5 m-0">
+                    <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-1.5 m-0">
                       <span>⭐</span> Customer Ratings &amp; Verified Reviews
                     </h3>
-                    <p className="text-[10px] text-charcoal-light font-medium mt-0.5 m-0">
+                    <p className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium mt-0.5 m-0">
                       Genuine feedback from travelers and culinary explorers who completed visits to this destination.
                     </p>
                   </div>
@@ -23552,17 +23552,17 @@ ${rawText}`;
                       );
                     }
                     return (
-                      <div className="flex items-center gap-2 bg-saffron/15 border border-saffron/30 px-3 py-1.5 rounded-xl">
-                        <span className="text-sm font-black text-charcoal">{stats.score}</span>
+                      <div className="flex items-center gap-2 bg-saffron/15 dark:bg-saffron/20 border border-saffron/30 dark:border-saffron/40 px-3 py-1.5 rounded-xl">
+                        <span className="text-sm font-black text-charcoal dark:text-white">{stats.score}</span>
                         <div className="flex items-center text-amber-500">
                           {[1, 2, 3, 4, 5].map(star => (
                             <Star
                               key={star}
-                              className={`w-3.5 h-3.5 ${star <= Math.round(Number(stats.score)) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`}
+                              className={`w-3.5 h-3.5 ${star <= Math.round(Number(stats.score)) ? 'fill-amber-400 text-amber-400' : 'text-gray-300 dark:text-gray-600'}`}
                             />
                           ))}
                         </div>
-                        <span className="text-[10px] font-bold text-charcoal-light">({stats.count} {stats.count === 1 ? 'Review' : 'Reviews'})</span>
+                        <span className="text-[10px] font-bold text-charcoal-light dark:text-gray-400">({stats.count} {stats.count === 1 ? 'Review' : 'Reviews'})</span>
                       </div>
                     );
                   })()}
@@ -23571,19 +23571,19 @@ ${rawText}`;
                 {/* Reviews List */}
                 <div className="space-y-3">
                   {getRestaurantReviews(selectedRestaurant.id).length === 0 ? (
-                    <div className="p-4 bg-[#FAF8F5] border border-dashed border-[#E9E5DE] rounded-xl text-center text-xs text-charcoal-light">
+                    <div className="p-4 bg-[#FAF8F5] dark:bg-[#161412] border border-dashed border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-center text-xs text-charcoal-light dark:text-gray-400">
                       No customer reviews yet. Be the first verified traveler to rate this heritage restaurant!
                     </div>
                   ) : (
                     <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
                       {getRestaurantReviews(selectedRestaurant.id).map(rev => (
-                        <div key={rev.id} className="p-3 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl space-y-1.5 text-xs">
+                        <div key={rev.id} className="p-3 bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl space-y-1.5 text-xs">
                           <div className="flex items-center justify-between gap-2 flex-wrap">
                             <div className="flex items-center gap-2">
-                              <span className="font-extrabold text-charcoal text-xs">{rev.reviewerName || rev.reviewer_name || 'Kapampangan Diner'}</span>
+                              <span className="font-extrabold text-charcoal dark:text-white text-xs">{rev.reviewerName || rev.reviewer_name || 'Kapampangan Diner'}</span>
                               {rev.isVerifiedDiner !== false && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full text-[9px] font-black">
-                                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> Verified Diner
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 rounded-full text-[9px] font-black">
+                                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" /> Verified Diner
                                 </span>
                               )}
                             </div>
@@ -23592,14 +23592,14 @@ ${rawText}`;
                                 {[1, 2, 3, 4, 5].map(star => (
                                   <Star
                                     key={star}
-                                    className={`w-3 h-3 ${star <= (rev.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'}`}
+                                    className={`w-3 h-3 ${star <= (rev.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-gray-300 dark:text-gray-600'}`}
                                   />
                                 ))}
                               </div>
-                              <span className="text-[10px] text-charcoal-light ml-1 font-mono">{rev.createdAt || rev.created_at || 'Recent visit'}</span>
+                              <span className="text-[10px] text-charcoal-light dark:text-gray-400 ml-1 font-mono">{rev.createdAt || rev.created_at || 'Recent visit'}</span>
                             </div>
                           </div>
-                          <p className="text-[11px] text-charcoal leading-relaxed m-0 font-medium">
+                          <p className="text-[11px] text-charcoal dark:text-gray-300 leading-relaxed m-0 font-medium">
                             "{rev.comment}"
                           </p>
                         </div>
@@ -23616,27 +23616,27 @@ ${rawText}`;
 
                   if (hasUnratedVisit) {
                     return (
-                      <div className="pt-3 border-t border-[#FAF8F5] space-y-3">
+                      <div className="pt-3 border-t border-[#FAF8F5] dark:border-[#2E2A24] space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] font-black text-bananaleaf uppercase tracking-wider flex items-center gap-1.5">
                             <Award className="w-3.5 h-3.5 text-bananaleaf" /> You Visited This Spot — Leave a Review &amp; Rating
                           </span>
-                          <span className="text-[9px] text-emerald-700 bg-emerald-100 font-bold px-2 py-0.5 rounded-full border border-emerald-300">
+                          <span className="text-[9px] text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 font-bold px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800">
                             ✓ Verified Diner Privileges Active
                           </span>
                         </div>
 
                         {reviewSubmitSuccess && (
-                          <div className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 animate-fade-in">
-                            <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 rounded-xl text-xs font-bold flex items-center gap-2 animate-fade-in">
+                            <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                             <span>Salamat! Your rating and comment have been permanently recorded and published.</span>
                           </div>
                         )}
 
-                        <div className="space-y-2.5 bg-[#FAF8F5] p-3.5 rounded-xl border border-[#E9E5DE]">
+                        <div className="space-y-2.5 bg-[#FAF8F5] dark:bg-[#161412] p-3.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
                           {/* Rating Selector */}
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-bold text-charcoal">Your Rating:</span>
+                            <span className="text-xs font-bold text-charcoal dark:text-white">Your Rating:</span>
                             <div className="flex items-center gap-1">
                               {[1, 2, 3, 4, 5].map(star => (
                                 <button
@@ -23647,12 +23647,12 @@ ${rawText}`;
                                   title={`${star} Star${star > 1 ? 's' : ''}`}
                                 >
                                   <Star
-                                    className={`w-5 h-5 ${star <= newReviewRating ? 'fill-amber-400 text-amber-400' : 'text-gray-300 hover:text-amber-300'}`}
+                                    className={`w-5 h-5 ${star <= newReviewRating ? 'fill-amber-400 text-amber-400' : 'text-gray-300 dark:text-gray-600 hover:text-amber-300'}`}
                                   />
                                 </button>
                               ))}
                             </div>
-                            <span className="text-xs font-extrabold text-amber-600 ml-1 font-mono">
+                            <span className="text-xs font-extrabold text-amber-600 dark:text-amber-400 ml-1 font-mono">
                               {newReviewRating} / 5 Stars
                             </span>
                           </div>
@@ -23664,7 +23664,7 @@ ${rawText}`;
                               placeholder={`Your Name (e.g. ${userProfile?.username && userProfile.username !== 'Guest' ? userProfile.username : 'Maria Santos / Guest Traveler'})`}
                               value={newReviewerName}
                               onChange={(e) => setNewReviewerName(e.target.value)}
-                              className="w-full px-3 py-1.5 text-xs bg-white border border-[#E9E5DE] rounded-lg text-charcoal placeholder-charcoal-light/60 focus:outline-none focus:border-terracotta font-medium"
+                              className="w-full px-3 py-1.5 text-xs bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg text-charcoal dark:text-white placeholder-charcoal-light/60 dark:placeholder-gray-400 focus:outline-none focus:border-terracotta font-medium"
                             />
                           </div>
 
@@ -23675,7 +23675,7 @@ ${rawText}`;
                               placeholder="Describe your dining experience, favorite heritage dishes, service, and atmosphere..."
                               value={newReviewComment}
                               onChange={(e) => setNewReviewComment(e.target.value)}
-                              className="w-full px-3 py-2 text-xs bg-white border border-[#E9E5DE] rounded-lg text-charcoal placeholder-charcoal-light/60 focus:outline-none focus:border-terracotta leading-relaxed"
+                              className="w-full px-3 py-2 text-xs bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg text-charcoal dark:text-white placeholder-charcoal-light/60 dark:placeholder-gray-400 focus:outline-none focus:border-terracotta leading-relaxed"
                             />
                           </div>
 
@@ -23697,17 +23697,17 @@ ${rawText}`;
 
                   if (hasCompletedVisit) {
                     return (
-                      <div className="pt-3 border-t border-[#FAF8F5]">
-                        <div className="p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-start gap-3 text-xs shadow-2xs">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                      <div className="pt-3 border-t border-[#FAF8F5] dark:border-[#2E2A24]">
+                        <div className="p-3.5 bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-start gap-3 text-xs shadow-2xs">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
                             <CheckCircle className="w-4 h-4" />
                           </div>
                           <div className="min-w-0 flex-1 space-y-1.5">
-                            <strong className="font-extrabold text-charcoal block text-xs">
+                            <strong className="font-extrabold text-charcoal dark:text-white block text-xs">
                               ✓ Rating Submitted for Previous Visit
                             </strong>
-                            <p className="text-[11px] text-charcoal-light leading-relaxed m-0">
-                              You have already submitted your review for your completed trip here. To submit another rating, add this restaurant to your next food trip route and complete the trip in the <span className="font-bold text-terracotta">Food Trip Planner</span>.
+                            <p className="text-[11px] text-charcoal-light dark:text-gray-300 leading-relaxed m-0">
+                              You have already submitted your review for your completed trip here. To submit another rating, add this restaurant to your next food trip route and complete the trip in the <span className="font-bold text-terracotta dark:text-orange-400">Food Trip Planner</span>.
                             </p>
                             <div className="pt-1 flex items-center gap-1.5">
                               <button
@@ -23730,17 +23730,17 @@ ${rawText}`;
 
                   // Non-verified visitors lock gate
                   return (
-                    <div className="pt-3 border-t border-[#FAF8F5]">
-                      <div className="p-3.5 bg-neutral-50 border border-neutral-200 rounded-xl flex items-start gap-3 text-xs shadow-2xs">
-                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 border border-amber-500/20">
+                    <div className="pt-3 border-t border-[#FAF8F5] dark:border-[#2E2A24]">
+                      <div className="p-3.5 bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl flex items-start gap-3 text-xs shadow-2xs">
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20">
                           <Lock className="w-4 h-4" />
                         </div>
                         <div className="min-w-0 flex-1 space-y-1.5">
-                          <strong className="font-extrabold text-charcoal block text-xs">
+                          <strong className="font-extrabold text-charcoal dark:text-white block text-xs">
                             🔒 Verified Diners Only
                           </strong>
-                          <p className="text-[11px] text-charcoal-light leading-relaxed m-0">
-                            To ensure 100% authentic reviews, ratings and comments are exclusive to travelers who added this restaurant to their food crawl and completed their trip in the <span className="font-bold text-terracotta">Food Trip Planner</span> (even as a guest!).
+                          <p className="text-[11px] text-charcoal-light dark:text-gray-300 leading-relaxed m-0">
+                            To ensure 100% authentic reviews, ratings and comments are exclusive to travelers who added this restaurant to their food crawl and completed their trip in the <span className="font-bold text-terracotta dark:text-orange-400">Food Trip Planner</span> (even as a guest!).
                           </p>
                           <div className="pt-1 flex items-center gap-1.5">
                             <button
