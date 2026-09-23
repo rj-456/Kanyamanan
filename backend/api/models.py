@@ -3,13 +3,14 @@ from django.contrib.auth.models import User
 
 class Municipality(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    objects = models.Manager()
 
     class Meta:
         verbose_name_plural = "Municipalities"
         ordering = ['name']
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 class Restaurant(models.Model):
     PRICE_TIER_CHOICES = [
@@ -47,6 +48,8 @@ class Restaurant(models.Model):
     # Occupancy Heatmap Data (hourly occupancy levels 0-100)
     occupancy = models.JSONField(default=list, blank=True)
 
+    objects = models.Manager()
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -73,6 +76,8 @@ class Branch(models.Model):
     email = models.EmailField(blank=True, default='')
     reservation_info = models.TextField(blank=True, default='')
 
+    objects = models.Manager()
+
     class Meta:
         ordering = ['branch_name']
 
@@ -87,6 +92,8 @@ class RestaurantReview(models.Model):
     is_verified_diner = models.BooleanField(default=True)
     trip_id = models.CharField(max_length=100, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
 
     class Meta:
         ordering = ['-created_at']
@@ -106,6 +113,8 @@ class MenuItem(models.Model):
     protein = models.IntegerField(default=0)
     carbs = models.IntegerField(default=0)
     fat = models.IntegerField(default=0)
+
+    objects = models.Manager()
 
     class Meta:
         ordering = ['name']
@@ -128,6 +137,8 @@ class ChangeRequest(models.Model):
     change_type = models.CharField(max_length=100, default='Menu / Info Update')
     details = models.JSONField(default=dict)
 
+    objects = models.Manager()
+
     class Meta:
         ordering = ['restaurant_name']
 
@@ -139,6 +150,8 @@ class TouristAccount(models.Model):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
 
     class Meta:
         ordering = ['username']
@@ -155,6 +168,8 @@ class TouristItinerary(models.Model):
     is_finished = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
 
     class Meta:
         verbose_name_plural = "Tourist Itineraries"

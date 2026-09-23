@@ -1,3 +1,4 @@
+from typing import Any
 from django.contrib import admin
 from django.db.models import Q
 from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary
@@ -19,21 +20,22 @@ class MultiBranchMunicipalityFilter(admin.SimpleListFilter):
         return [(m, m) for m in municipalities]
 
     def queryset(self, request, queryset):
-        if self.value():
-            val = self.value().strip()
+        val = self.value()
+        if val:
+            val_clean = str(val).strip()
             return queryset.filter(
-                Q(municipality__iexact=val) |
-                Q(branches__municipality__iexact=val)
+                Q(municipality__iexact=val_clean) |
+                Q(branches__municipality__iexact=val_clean)
             ).distinct()
         return queryset
 
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
-    list_display = ('name', 'display_municipalities', 'username', 'password', 'operating_hours', 'price_tier')
+    list_display: Any = ('name', 'display_municipalities', 'username', 'password', 'operating_hours', 'price_tier')
     search_fields = ('name', 'municipality', 'username', 'description', 'address', 'branches__municipality', 'branches__address')
     list_filter = (MultiBranchMunicipalityFilter, 'price_tier')
     ordering = ('name',)
-    inlines = [BranchInline, MenuItemInline]
+    inlines: Any = (BranchInline, MenuItemInline)
 
     @admin.display(description='Municipality / Cities', ordering='municipality')
     def display_municipalities(self, obj):
@@ -49,24 +51,24 @@ class RestaurantAdmin(admin.ModelAdmin):
 
 @admin.register(TouristAccount)
 class TouristAccountAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'created_at')
+    list_display: Any = ('username', 'email', 'created_at')
     search_fields = ('username', 'email')
     ordering = ('username',)
 
 @admin.register(TouristItinerary)
 class TouristItineraryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'user_account_key', 'is_finished', 'updated_at')
+    list_display: Any = ('name', 'user_account_key', 'is_finished', 'updated_at')
     search_fields = ('name', 'user_account_key')
     list_filter = ('is_finished', 'updated_at')
     ordering = ('user_account_key', 'name')
 
 @admin.register(Municipality)
 class MunicipalityAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display: Any = ('name',)
     ordering = ('name',)
 
 @admin.register(ChangeRequest)
 class ChangeRequestAdmin(admin.ModelAdmin):
-    list_display = ('request_id', 'restaurant_name', 'requested_by', 'status', 'date_submitted')
+    list_display: Any = ('request_id', 'restaurant_name', 'requested_by', 'status', 'date_submitted')
     list_filter = ('status', 'date_submitted')
     ordering = ('restaurant_name',)

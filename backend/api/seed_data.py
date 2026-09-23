@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import django
+import django.apps
 
 # Setup Django environment
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -60,11 +61,16 @@ def seed():
         with open(json_path, 'r', encoding='utf-8') as f:
             restaurants_data = json.load(f)
 
+        used_usernames = set()
         for res_idx, r in enumerate(restaurants_data):
             if not isinstance(r, dict):
                 continue
             res_id = r.get('id') or f"res-{res_idx}"
-            username = r.get('username') or f"owner_{res_idx+1}"
+            raw_username = (r.get('username') or f"owner_{res_idx+1}").strip()
+            username = raw_username
+            if username in used_usernames:
+                username = f"{raw_username}_{res_idx}"
+            used_usernames.add(username)
             password = r.get('password') or 'password123'
             
             restaurant_obj, _ = Restaurant.objects.update_or_create(

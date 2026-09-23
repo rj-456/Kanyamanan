@@ -683,4 +683,159 @@ export const catalogMenuWithAi = async ({ rawText = '', images = [], apiKey = ''
   };
 };
 
+/**
+ * Scan Plate AI Client Endpoint
+ * Sends image frame to /api/scan-plate for food gatekeeping and nutritional deconstruction.
+ */
+export const scanPlateWithAi = async (imageDataUrl, options = {}) => {
+  const { apiKey = '', signal = null } = options;
+  if (!imageDataUrl) {
+    return {
+      is_food: false,
+      rejection_reason: "No image provided for PlateScan AI."
+    };
+  }
+
+  // 1. Try endpoints in priority order
+  const endpointsToTry = [
+    '/api/scan-plate',
+    `${DJANGO_BASE_URL}/scan-plate/`,
+    `${DJANGO_BASE_URL}/scan-plate`
+  ];
+
+  for (const endpoint of endpointsToTry) {
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (apiKey) headers['x-goog-api-key'] = apiKey;
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        signal,
+        body: JSON.stringify({
+          image: imageDataUrl,
+          api_key: apiKey
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data.is_food === 'boolean') {
+          return data;
+        }
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') throw err;
+      // continue to next endpoint
+    }
+  }
+
+  // 2. Direct client-side Gemini fallback
+  const resolvedApiKey = apiKey || 
+    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) ||
+    (typeof localStorage !== 'undefined' && localStorage.getItem('kanyamanan_gemini_api_key')) ||
+    '';
+
+  if (resolvedApiKey) {
+    const candidateModels = [
+      (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_MODEL) || '',
+      'gemini-3.5-flash-lite',
+      'gemini-3.1-flash-lite',
+      'gemini-3.6-flash',
+      'gemini-3.5-flash',
+      'gemini-flash-latest'
+    ].filter(Boolean);
+    const modelsToTry = [...new Set(candidateModels)];
+
+    let mime = 'image/jpeg';
+    let b64 = imageDataUrl;
+    if (imageDataUrl.includes(',')) {
+      const [hdr, data] = imageDataUrl.split(',', 2);
+      if (hdr.includes('png')) mime = 'image/png';
+      else if (hdr.includes('webp')) mime = 'image/webp';
+      b64 = data;
+    }
+
+    const SCAN_PLATE_SYSTEM_PROMPT = `You are a specialized culinary AI nutritionist and visual food classifier with deep expertise in Philippine regional gastronomy (especially authentic Kapampangan cuisine such as Sisig, Bringhe, Burong Isda/Balo-balo, Tibok-tibok, Murcon, etc.) as well as standard global dishes.
+
+You must follow a strict two-phase inspection:
+1. Verification & Gatekeeping (Food vs. Non-Food):
+   - Inspect whether the image actually contains edible cooked food, prepared dishes, snacks, or beverages.
+   - If the image depicts non-food subjects (such as faces, pets, clothing, furniture, office desks, electronics, vehicles, documents, or an empty plate/table), you MUST set is_food: false.
+   - When is_food is false, do NOT calculate or hallucinate calories or nutrients. Provide a polite explanation in rejection_reason.
+2. Nutritional Deconstruction (Only if is_food is true):
+   - Accurately identify the dish name.
+   - Estimate the visual portion volume against standard dishware to compute serving weight in grams.
+   - Return realistic calories, macronutrients (protein, carbs, fat in grams), and sodium (in milligrams).`;
+
+    const SCAN_PLATE_SCHEMA = {
+      type: "OBJECT",
+      properties: {
+        is_food: { type: "BOOLEAN", description: "True ONLY if the frame contains edible food, dishes, or drinks. False for non-food objects, people, pets, or empty surfaces." },
+        rejection_reason: { type: "STRING", description: "User-friendly explanation if is_food is false explaining what was detected instead. Null if is_food is true." },
+        dish_name: { type: "STRING", description: "Accurate culinary name of the dish. Null if is_food is false." },
+        is_kapampangan: { type: "BOOLEAN", description: "True if authentic Kapampangan or Philippine regional dish." },
+        portion_estimate: { type: "STRING", description: "Estimated weight and serving, e.g., '160g (1 plate)'. Null if is_food is false." },
+        calories: { type: "INTEGER", description: "Estimated calories in kcal. Null if is_food is false." },
+        sodium_mg: { type: "INTEGER", description: "Estimated sodium in milligrams. Null if is_food is false." },
+        macros: {
+          type: "OBJECT",
+          properties: {
+            protein_g: { type: "NUMBER" },
+            carbs_g: { type: "NUMBER" },
+            fat_g: { type: "NUMBER" }
+          }
+        },
+        confidence_score: { type: "NUMBER" }
+      },
+      required: ["is_food"]
+    };
+
+    for (const model of modelsToTry) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(resolvedApiKey)}`;
+
+        const aiResp = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal,
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { inlineData: { mimeType: mime, data: b64 } },
+                { text: "Inspect this image. Determine if it contains edible food or a beverage. If is_food is true, you MUST provide dish_name, portion_estimate, calories (in kcal), sodium_mg, and macros (protein_g, carbs_g, fat_g)." }
+              ]
+            }],
+            systemInstruction: { parts: [{ text: SCAN_PLATE_SYSTEM_PROMPT }] },
+            generationConfig: {
+              temperature: 0.1,
+              responseMimeType: 'application/json',
+              responseSchema: SCAN_PLATE_SCHEMA
+            }
+          })
+        });
+
+        if (aiResp.ok) {
+          const aiData = await aiResp.json();
+          const text = aiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) {
+            return JSON.parse(text);
+          }
+        } else {
+          console.warn(`Direct client Gemini model ${model} returned ${aiResp.status}, trying fallback...`);
+        }
+      } catch (err) {
+        if (err.name === 'AbortError') throw err;
+        console.warn(`Direct client Gemini model ${model} failed:`, err);
+      }
+    }
+  }
+
+  return {
+    is_food: false,
+    rejection_reason: "PlateScan AI could not verify food in this frame. Please center your meal in good lighting."
+  };
+};
+
+
 

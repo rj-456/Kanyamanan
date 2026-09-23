@@ -4,7 +4,7 @@ from .views import (
     RestaurantViewSet, MunicipalityViewSet,
     ChangeRequestViewSet, TouristAccountViewSet, TouristItineraryViewSet,
     RestaurantReviewViewSet,
-    authenticate_user, register_tourist, catalog_menu
+    authenticate_user, register_tourist, catalog_menu, scan_plate
 )
 
 router = DefaultRouter()
@@ -18,7 +18,10 @@ router.register(r'itineraries', TouristItineraryViewSet, basename='itinerary')
 urlpatterns = [
     path('catalog-menu/', catalog_menu, name='api-catalog-menu'),
     path('catalog-menu', catalog_menu),
+    path('scan-plate/', scan_plate, name='api-scan-plate'),
+    path('scan-plate', scan_plate),
     path('auth/login/', authenticate_user, name='api-login'),
     path('auth/register-tourist/', register_tourist, name='api-register-tourist'),
     path('', include(router.urls)),
 ]
+

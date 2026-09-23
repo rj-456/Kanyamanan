@@ -1,9 +1,19 @@
+import os
+import re
+import json
+import base64
+import urllib.request
+import urllib.error
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from django.db.models import Q
-from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview
+from .models import (
+    Municipality, Restaurant, ChangeRequest,
+    TouristAccount, TouristItinerary, RestaurantReview
+)
 from .serializers import (
     MunicipalitySerializer, RestaurantSerializer,
     ChangeRequestSerializer, TouristAccountSerializer, TouristItinerarySerializer,
@@ -18,7 +28,7 @@ class RestaurantViewSet(viewsets.ModelViewSet):
         queryset = Restaurant.objects.all().distinct().order_by('name')
         municipality = self.request.query_params.get('municipality', None)
         if municipality:
-            mun_clean = municipality.strip()
+            mun_clean = str(municipality).strip()
             queryset = queryset.filter(
                 Q(municipality__iexact=mun_clean) |
                 Q(branches__municipality__iexact=mun_clean)
@@ -36,7 +46,8 @@ class RestaurantReviewViewSet(viewsets.ModelViewSet):
         return super().get_queryset()
 
     def perform_create(self, serializer):
-        restaurant_id = self.request.data.get('restaurantId') or self.request.data.get('restaurant')
+        data = getattr(self.request, 'data', {}) or {}
+        restaurant_id = data.get('restaurantId') or data.get('restaurant') if isinstance(data, dict) else None
         if restaurant_id:
             restaurant = Restaurant.objects.filter(restaurant_id=restaurant_id).first()
             if restaurant:
@@ -65,7 +76,7 @@ class TouristItineraryViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user_key = self.request.query_params.get('userAccountKey') or self.request.query_params.get('username')
         if user_key:
-            return TouristItinerary.objects.filter(user_account_key__iexact=user_key.strip()).order_by('name')
+            return TouristItinerary.objects.filter(user_account_key__iexact=str(user_key).strip()).order_by('name')
         return super().get_queryset()
 
 @api_view(['POST'])
@@ -222,7 +233,6 @@ CATALOG_MENU_SCHEMA = {
 
 def estimate_py_dish_calories(name, category=""):
     n = (name or "").lower()
-    import re
     if re.search(r'crispy pata|pata', n): return 920
     if re.search(r'lechon kawali|bagnet', n): return 780
     if re.search(r'bulalo|nilaga', n): return 720
@@ -322,7 +332,6 @@ OCR_WORD_REPLACEMENTS = [
 def clean_py_ocr_text(text):
     if not text:
         return ""
-    import re
     cleaned = text
     for pattern, repl in OCR_WORD_REPLACEMENTS:
         cleaned = re.sub(pattern, repl, cleaned, flags=re.IGNORECASE)
@@ -334,7 +343,7 @@ def clean_py_ocr_text(text):
 def clean_py_dish_or_package_name(name):
     if not name:
         return ""
-    import re
+    cleaned = str(name).strip()
     cleaned = re.sub(r'^([A-Z]\d+)(?:\s*[-–—:]+\s*|\s+)', r'\1 - ', cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r'(?:\s*[-–—:]+\s*){2,}', ' - ', cleaned)
     for pattern, repl in OCR_WORD_REPLACEMENTS:
@@ -343,7 +352,6 @@ def clean_py_dish_or_package_name(name):
     return cleaned
 
 def repair_py_pricings(price, context_name=""):
-    import re
     try:
         p = float(price)
     except:
@@ -360,7 +368,6 @@ def is_py_garbage_or_boilerplate(text):
     if not text or not isinstance(text, str): return True
     t = text.strip()
     if len(t) < 2: return True
-    import re
     if re.search(r'^\d{3,4}[-\s.]\d{4}$', t) or re.search(r'\b\d{3}[-\s.]\d{4}\b', t) or re.search(r'\b\d{4}[-\s.]\d{4}\b', t): return True
     if re.search(r'^(?:\+?63|0)9\d{9}$', t): return True
     if re.search(r'^[,.]\s*\d{1,2}$', t) or re.search(r'^[,.\s0-9]+$', t): return True
@@ -384,7 +391,6 @@ def is_py_garbage_or_boilerplate(text):
 def is_py_section_header(text):
     if not text or not isinstance(text, str): return False
     t = text.strip()
-    import re
     return bool(re.search(r'^(?:main\s+dish(?:es)?|mains?|ulam|special(?:s)?|special\s+order|house\s+special(?:s)?|best\s+seller(?:s)?|chef\'?s?\s+special(?:s)?|grilled|inihaw|barbecue|bbq|pancit|noodles?|pasta|drinks?|beverages?|in\s+can|desserts?|pangmayumu|sweets?|rice|nasi|funnmeals?|set\s+meals?|combos?|appetizers?|pulutan|starters?|side\s+dish(?:es)?|seafood|pork|poultry|chicken|beef|soups?|sabaw|a\s+la\s+carte|ala\s+carte|hot\s+specials?|all\s+day\s+breakfast)$', t, re.I))
 
 KNOWN_PY_CULINARY_DISHES = [
@@ -411,7 +417,6 @@ def is_py_valid_dish_name(name, has_price=False):
     if not name or not isinstance(name, str): return False
     n = name.strip()
     if len(n) < 3: return False
-    import re
     if re.match(r'^[\d\s.,:;()#*~_-]+$', n): return False
     if is_py_section_header(n): return False
     if is_py_garbage_or_boilerplate(n): return False
@@ -439,7 +444,6 @@ def is_py_likely_valid_menu(raw_text):
         'grilled', 'inihaw', 'bbq', 'barbecue', 'soup', 'sabaw', 'appetizer', 'pulutan', 'tokwa'
     ]
     food_matches = sum(1 for kw in food_keywords if kw in lower)
-    import re
     price_matches = re.findall(r'(?:[₱P\u20B1]\s*\d{2,5}|\b\d{2,4}(?:\.\d{2})?\s*(?:pesos|php)?\b)', text, re.I)
     if food_matches >= 2 and len(price_matches) >= 1: return True
     if food_matches >= 3: return True
@@ -451,7 +455,6 @@ def generate_py_dish_description_and_ingredients(dish_name, category="Mains"):
     name = (dish_name or "").strip()
     lower = name.lower()
     cat = (category or "").lower()
-    import re
 
     # 1. BEVERAGES & DRINKS (Strictly NO local seasoning, garlic, or onions)
     if cat == 'beverage' or bool(re.search(r'water|beverage|drink|coke|royal|sprite|pepsi|tea|juice|shake|soda|beer|coffee', lower)):
@@ -579,7 +582,6 @@ def generate_py_dish_description_and_ingredients(dish_name, category="Mains"):
 def is_py_package_or_combo(name):
     if not name or not isinstance(name, str): return False
     n = name.lower()
-    import re
     if re.search(r'^(?:f\d+|[1-9]s|set|combo|package|funnmeal)\b', n) and any(k in n for k in ['side', 'rice', 'drink', 'crisp', ',']):
         return True
     if any(k in n for k in ['side dish', 'side dies', 'side diss']) and any(k in n for k in ['rice', 'drink', 'crisp', 'alice', 'driske', 'ice']):
@@ -589,7 +591,6 @@ def is_py_package_or_combo(name):
     return False
 
 def split_py_combo_into_package(name, price=125):
-    import re
     cleaned = clean_py_dish_or_package_name(name)
     cleaned = re.sub(r'([a-z])\s+(Side\s+(?:Dish|Dies|Diss))\b', r'\1, \2', cleaned, flags=re.I)
     cleaned = re.sub(r'([a-z])\s+(Dirty\s+Rice|Steamed\s+Rice|Rice)\b', r'\1, \2', cleaned, flags=re.I)
@@ -666,7 +667,6 @@ def sanitize_py_menu_catalog(catalog, raw_input_text=""):
         if not is_py_valid_dish_name(c_name, bool(dish.get('price'))): continue
         
         # Categorize properly
-        import re
         cat = dish.get('category', 'Mains')
         if re.search(r'soup|sinigang|bulalo|nilaga|miso', c_name, re.I): cat = "Soup"
         elif re.search(r'noodle|bihon|canton|palabok|miki|pasta|spaghetti|guisado', c_name, re.I): cat = "Noodles"
@@ -715,15 +715,7 @@ def catalog_menu(request):
     """
     Multimodal Vision & Text Menu Processing Pipeline (/api/catalog-menu).
     Accepts multipart/form-data images/flyers/PDFs or JSON body raw_text,
-    and returns a structured catalog of individual dishes and buffet/event packages.
     """
-    import os
-    import json
-    import base64
-    import urllib.request
-    import urllib.error
-    import re
-
     raw_text = clean_py_ocr_text((request.data.get('raw_text') or request.data.get('text') or '').strip())
     
     # Collect images from files or JSON base64 payloads
@@ -793,10 +785,18 @@ def catalog_menu(request):
     else:
         parts.append({"text": "Please extract and catalog all dishes and packages across all columns from the provided menu image(s)."})
 
-    model_name = os.environ.get('GEMINI_MODEL', 'gemini-2.0-flash')
+    models_to_try = [
+        os.environ.get('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
+        'gemini-3.5-flash-lite',
+        'gemini-3.1-flash-lite',
+        'gemini-3.6-flash',
+        'gemini-3.5-flash',
+        'gemini-flash-latest'
+    ]
+    seen_models = set()
+    models = [m for m in models_to_try if not (m in seen_models or seen_models.add(m))]
     
     if api_key:
-        endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
         payload = {
             "contents": [{
                 "parts": parts
@@ -810,37 +810,29 @@ def catalog_menu(request):
                 "responseSchema": CATALOG_MENU_SCHEMA
             }
         }
-        try:
-            req_data = json.dumps(payload).encode('utf-8')
-            req = urllib.request.Request(
-                endpoint,
-                data=req_data,
-                headers={"Content-Type": "application/json"},
-                method="POST"
-            )
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                resp_json = json.loads(resp.read().decode('utf-8'))
-                candidate_text = resp_json.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
-                if candidate_text:
-                    parsed_result = json.loads(candidate_text)
-                    if parsed_result:
-                        if isinstance(parsed_result.get('dishes'), list):
-                            for d in parsed_result['dishes']:
-                                d['name'] = clean_py_dish_or_package_name(d.get('name', ''))
-                                d['price'] = repair_py_pricings(d.get('price', 0), d.get('name', ''))
-                                if not d.get('calories'):
-                                    d['calories'] = estimate_py_dish_calories(d.get('name'), d.get('category'))
-                        if isinstance(parsed_result.get('buffet_and_set_packages'), list):
-                            for p in parsed_result['buffet_and_set_packages']:
-                                p['package_name'] = clean_py_dish_or_package_name(p.get('package_name', ''))
-                                p['price'] = repair_py_pricings(p.get('price', 0), p.get('package_name', ''))
-                                if isinstance(p.get('included_dishes'), list):
-                                    p['included_dishes'] = [clean_py_dish_or_package_name(dish_item) for dish_item in p['included_dishes']]
-                                if isinstance(p.get('other_inclusions'), list):
-                                    p['other_inclusions'] = [clean_py_dish_or_package_name(inc) for inc in p['other_inclusions']]
-                        return Response(sanitize_py_menu_catalog(parsed_result), status=status.HTTP_200_OK)
-        except Exception as exc:
-            print("Gemini API call exception, attempting fallback:", exc)
+
+        for model_name in models:
+            endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+            try:
+                req_data = json.dumps(payload).encode('utf-8')
+                req = urllib.request.Request(
+                    endpoint,
+                    data=req_data,
+                    headers={"Content-Type": "application/json"},
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    resp_json = json.loads(resp.read().decode('utf-8'))
+                    candidate_text = resp_json.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+                    if candidate_text:
+                        parsed_result = json.loads(candidate_text)
+                        if isinstance(parsed_result, dict):
+                            dishes_list = parsed_result.get('dishes', [])
+                            packages_list = parsed_result.get('buffet_and_set_packages', [])
+                            if dishes_list or packages_list:
+                                return Response(sanitize_py_menu_catalog(parsed_result), status=status.HTTP_200_OK)
+            except Exception as exc:
+                print(f"Catalog Menu Gemini ({model_name}) error:", exc)
 
     # Early validation: If user provided text that does not match a food menu
     if raw_text and not is_py_likely_valid_menu(raw_text):
@@ -958,4 +950,178 @@ def catalog_menu(request):
         "buffet_and_set_packages": packages
     }
     return Response(sanitize_py_menu_catalog(fallback_data, raw_text), status=status.HTTP_200_OK)
+
+
+# =========================================================================
+# PLATESCAN AI™ - TWO-PHASE FOOD VERIFICATION & NUTRITION ENGINE
+# =========================================================================
+
+SCAN_PLATE_SYSTEM_PROMPT = """You are a specialized culinary AI nutritionist and visual food classifier with deep expertise in Philippine regional gastronomy (especially authentic Kapampangan cuisine such as Sisig, Bringhe, Burong Isda/Balo-balo, Tibok-tibok, Murcon, etc.) as well as standard global dishes.
+
+You must follow a strict two-phase inspection:
+1. Verification & Gatekeeping (Food vs. Non-Food):
+   - Inspect whether the image actually contains edible cooked food, prepared dishes, snacks, or beverages.
+   - If the image depicts non-food subjects (such as faces, pets, clothing, furniture, office desks, electronics, vehicles, documents, or an empty plate/table), you MUST set is_food: false.
+   - When is_food is false, do NOT calculate or hallucinate calories or nutrients. Provide a polite explanation in rejection_reason.
+2. Nutritional Deconstruction (Only if is_food is true):
+   - Accurately identify the dish name.
+   - Estimate the visual portion volume against standard dishware to compute serving weight in grams.
+   - Return realistic calories, macronutrients (protein, carbs, fat in grams), and sodium (in milligrams)."""
+
+SCAN_PLATE_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {
+        "is_food": {
+            "type": "BOOLEAN",
+            "description": "True ONLY if the frame contains edible food, dishes, or drinks. False for non-food objects, people, pets, or empty surfaces."
+        },
+        "rejection_reason": {
+            "type": "STRING",
+            "description": "User-friendly explanation if is_food is false explaining what was detected instead. Null if is_food is true."
+        },
+        "dish_name": {
+            "type": "STRING",
+            "description": "Accurate culinary name of the dish. Null if is_food is false."
+        },
+        "is_kapampangan": {
+            "type": "BOOLEAN",
+            "description": "True if authentic Kapampangan or Philippine regional dish."
+        },
+        "portion_estimate": {
+            "type": "STRING",
+            "description": "Estimated weight and serving, e.g., '160g (1 plate)'. Null if is_food is false."
+        },
+        "calories": {
+            "type": "INTEGER",
+            "description": "Estimated calories in kcal. Null if is_food is false."
+        },
+        "sodium_mg": {
+            "type": "INTEGER",
+            "description": "Estimated sodium in milligrams. Null if is_food is false."
+        },
+        "macros": {
+            "type": "OBJECT",
+            "properties": {
+                "protein_g": {"type": "NUMBER"},
+                "carbs_g": {"type": "NUMBER"},
+                "fat_g": {"type": "NUMBER"}
+            }
+        },
+        "confidence_score": {"type": "NUMBER"}
+    },
+    "required": ["is_food"]
+}
+
+@api_view(['POST'])
+def scan_plate(request):
+    """
+    PlateScan AI™ Endpoint (/api/scan-plate)
+    """
+    # Extract base64 image data or uploaded file
+    image_data_url = (
+        request.data.get('image') or
+        request.data.get('dataUrl') or
+        request.data.get('imageDataUrl') or
+        request.data.get('image_base64') or
+        ''
+    )
+
+    mime_type = "image/jpeg"
+    b64_content = ""
+
+    if image_data_url and isinstance(image_data_url, str):
+        if 'base64,' in image_data_url:
+            header, b64_content = image_data_url.split('base64,', 1)
+            if 'image/png' in header: mime_type = 'image/png'
+            elif 'image/webp' in header: mime_type = 'image/webp'
+        else:
+            b64_content = image_data_url
+    elif 'image' in request.FILES:
+        f = request.FILES['image']
+        mime_type = f.content_type or 'image/jpeg'
+        b64_content = base64.b64encode(f.read()).decode('utf-8')
+    elif 'file' in request.FILES:
+        f = request.FILES['file']
+        mime_type = f.content_type or 'image/jpeg'
+        b64_content = base64.b64encode(f.read()).decode('utf-8')
+
+    if not b64_content:
+        return Response({
+            "is_food": False,
+            "rejection_reason": "No image frame received. Please capture a camera frame or upload a photo."
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # Resolve API Key
+    api_key = (
+        os.environ.get('GEMINI_API_KEY') or
+        request.headers.get('x-goog-api-key') or
+        request.data.get('api_key') or
+        ''
+    ).strip()
+
+    models_to_try = [
+        os.environ.get('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
+        'gemini-3.5-flash-lite',
+        'gemini-3.1-flash-lite',
+        'gemini-3.6-flash',
+        'gemini-3.5-flash',
+        'gemini-flash-latest'
+    ]
+    seen = set()
+    models = [m for m in models_to_try if not (m in seen or seen.add(m))]
+
+    if api_key:
+        parts = [
+            {
+                "inlineData": {
+                    "mimeType": mime_type,
+                    "data": b64_content
+                }
+            },
+            {
+                "text": "Inspect this image. Determine if it contains edible food or a beverage. If is_food is true, you MUST provide dish_name, portion_estimate, calories (in kcal), sodium_mg, and macros (protein_g, carbs_g, fat_g)."
+            }
+        ]
+
+        payload = {
+            "contents": [{"parts": parts}],
+            "systemInstruction": {"parts": [{"text": SCAN_PLATE_SYSTEM_PROMPT}]},
+            "generationConfig": {
+                "temperature": 0.1,
+                "responseMimeType": "application/json",
+                "responseSchema": SCAN_PLATE_SCHEMA
+            }
+        }
+
+        for model_name in models:
+            endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+            try:
+                req_data = json.dumps(payload).encode('utf-8')
+                req = urllib.request.Request(
+                    endpoint,
+                    data=req_data,
+                    headers={"Content-Type": "application/json"},
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=20) as resp:
+                    resp_json = json.loads(resp.read().decode('utf-8'))
+                    candidate_text = resp_json.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+                    if candidate_text:
+                        parsed = json.loads(candidate_text)
+                        if isinstance(parsed, dict) and "is_food" in parsed:
+                            return Response(parsed, status=status.HTTP_200_OK)
+            except Exception as exc:
+                print(f"PlateScan Gemini ({model_name}) error:", exc)
+
+    # Fallback when API key is missing or calls failed
+    return Response({
+        "is_food": False,
+        "requires_api_key": not bool(api_key),
+        "rejection_reason": (
+            "PlateScan AI service could not analyze the frame. Please center the food in good lighting."
+            if api_key
+            else "Gemini API Key is required to run live visual food deconstruction. Enter your free API key or try Demo Mode."
+        )
+    }, status=status.HTTP_200_OK)
+
 

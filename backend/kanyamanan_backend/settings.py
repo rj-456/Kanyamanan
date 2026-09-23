@@ -1,6 +1,10 @@
 import os
 from pathlib import Path
-import dj_database_url
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -64,7 +68,7 @@ WSGI_APPLICATION = 'kanyamanan_backend.wsgi.application'
 IS_VERCEL = bool(os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
 
 # Database configuration (PostgreSQL for Vercel/production via DATABASE_URL, SQLite fallback in /tmp for serverless)
-if os.getenv('DATABASE_URL'):
+if os.getenv('DATABASE_URL') and dj_database_url:
     DATABASES = {
         'default': dj_database_url.config(
             conn_max_age=600,

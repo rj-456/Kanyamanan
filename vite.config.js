@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import {
   cleanMenuOcrSpelling,
@@ -86,6 +86,61 @@ const CATALOG_MENU_SCHEMA = {
   required: ["dishes", "buffet_and_set_packages"]
 };
 
+const SCAN_PLATE_SYSTEM_PROMPT = `You are a specialized culinary AI nutritionist and visual food classifier with deep expertise in Philippine regional gastronomy (especially authentic Kapampangan cuisine such as Sisig, Bringhe, Burong Isda/Balo-balo, Tibok-tibok, Murcon, etc.) as well as standard global dishes.
+
+You must follow a strict two-phase inspection:
+1. Verification & Gatekeeping (Food vs. Non-Food):
+   - Inspect whether the image actually contains edible cooked food, prepared dishes, snacks, or beverages.
+   - If the image depicts non-food subjects (such as faces, pets, clothing, furniture, office desks, electronics, vehicles, documents, or an empty plate/table), you MUST set is_food: false.
+   - When is_food is false, do NOT calculate or hallucinate calories or nutrients. Provide a polite explanation in rejection_reason.
+2. Nutritional Deconstruction (Only if is_food is true):
+   - Accurately identify the dish name.
+   - Estimate the visual portion volume against standard dishware to compute serving weight in grams.
+   - Return realistic calories, macronutrients (protein, carbs, fat in grams), and sodium (in milligrams).`;
+
+const SCAN_PLATE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    is_food: {
+      type: "BOOLEAN",
+      description: "True ONLY if the frame contains edible food, dishes, or drinks. False for non-food objects, people, pets, or empty surfaces."
+    },
+    rejection_reason: {
+      type: "STRING",
+      description: "User-friendly explanation if is_food is false explaining what was detected instead. Null if is_food is true."
+    },
+    dish_name: {
+      type: "STRING",
+      description: "Accurate culinary name of the dish. Null if is_food is false."
+    },
+    is_kapampangan: {
+      type: "BOOLEAN",
+      description: "True if authentic Kapampangan or Philippine regional dish."
+    },
+    portion_estimate: {
+      type: "STRING",
+      description: "Estimated weight and serving, e.g., '160g (1 plate)'. Null if is_food is false."
+    },
+    calories: {
+      type: "INTEGER",
+      description: "Estimated calories in kcal. Null if is_food is false."
+    },
+    sodium_mg: {
+      type: "INTEGER",
+      description: "Estimated sodium in milligrams. Null if is_food is false."
+    },
+    macros: {
+      type: "OBJECT",
+      properties: {
+        protein_g: { type: "NUMBER" },
+        carbs_g: { type: "NUMBER" },
+        fat_g: { type: "NUMBER" }
+      }
+    },
+    confidence_score: { type: "NUMBER" }
+  },
+  "required": ["is_food"]
+};
 
 function estimateDishCaloriesNode(name, category = '') {
   const n = (name || '').toLowerCase();
@@ -129,12 +184,121 @@ function estimateDishCaloriesNode(name, category = '') {
   return 450;
 }
 
-function catalogMenuApiPlugin() {
+function catalogMenuApiPlugin(loadedEnv = {}) {
   return {
     name: 'vite-plugin-catalog-menu-api',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const url = req.url ? req.url.split('?')[0] : '';
+
+        if ((url === '/api/scan-plate' || url === '/api/scan-plate/') && req.method === 'POST') {
+          let chunks = [];
+          req.on('data', c => chunks.push(c));
+          req.on('end', async () => {
+            try {
+              const buffer = Buffer.concat(chunks);
+              let payload = {};
+              try { payload = JSON.parse(buffer.toString('utf-8')); } catch { payload = {}; }
+
+              const rawImg = payload.image || payload.dataUrl || payload.imageDataUrl || payload.image_base64 || '';
+              if (!rawImg) {
+                res.statusCode = 400;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ is_food: false, rejection_reason: "No image frame received." }));
+                return;
+              }
+
+              const apiKey = (
+                payload.api_key ||
+                req.headers['x-goog-api-key'] ||
+                loadedEnv.VITE_GEMINI_API_KEY ||
+                loadedEnv.GEMINI_API_KEY ||
+                process.env.GEMINI_API_KEY ||
+                process.env.VITE_GEMINI_API_KEY ||
+                ''
+              ).trim();
+
+              let mime = 'image/jpeg';
+              let b64 = rawImg;
+              if (rawImg.includes(',')) {
+                const [hdr, data] = rawImg.split(',', 2);
+                if (hdr.includes('png')) mime = 'image/png';
+                else if (hdr.includes('webp')) mime = 'image/webp';
+                b64 = data;
+              }
+
+              if (apiKey) {
+                const candidateModels = [
+                  payload.model,
+                  process.env.VITE_GEMINI_MODEL,
+                  'gemini-3.5-flash-lite',
+                  'gemini-3.1-flash-lite',
+                  'gemini-3.6-flash',
+                  'gemini-3.5-flash',
+                  'gemini-flash-latest'
+                ].filter(Boolean);
+                const modelsToTry = [...new Set(candidateModels)];
+
+                for (const model of modelsToTry) {
+                  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+                  try {
+                    const aiResp = await fetch(endpoint, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        contents: [{
+                          parts: [
+                            { inlineData: { mimeType: mime, data: b64 } },
+                            { text: "Inspect this image. Determine if it contains edible food or a beverage. If is_food is true, you MUST provide dish_name, portion_estimate, calories (in kcal), sodium_mg, and macros (protein_g, carbs_g, fat_g)." }
+                          ]
+                        }],
+                        systemInstruction: { parts: [{ text: SCAN_PLATE_SYSTEM_PROMPT }] },
+                        generationConfig: {
+                          temperature: 0.1,
+                          responseMimeType: 'application/json',
+                          responseSchema: SCAN_PLATE_SCHEMA
+                        }
+                      })
+                    });
+
+                    if (aiResp.ok) {
+                      const aiData = await aiResp.json();
+                      const text = aiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+                      if (text) {
+                        const parsed = JSON.parse(text);
+                        res.statusCode = 200;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.end(JSON.stringify(parsed));
+                        return;
+                      }
+                    } else {
+                      console.warn(`Vite dev scan-plate model ${model} returned ${aiResp.status}, trying next fallback...`);
+                    }
+                  } catch (err) {
+                    console.warn(`Vite dev scan-plate model ${model} failed:`, err.message);
+                  }
+                }
+              }
+
+              res.statusCode = 200;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({
+                is_food: false,
+                requires_api_key: !apiKey,
+                rejection_reason: apiKey
+                  ? "PlateScan AI service could not analyze the frame. Please center the food in good lighting."
+                  : "Gemini API Key is required to run live visual food deconstruction. Enter your free API key or try Demo Mode."
+              }));
+            } catch (err) {
+              res.statusCode = 500;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
+          return;
+        }
+
         if ((url === '/api/catalog-menu' || url === '/api/catalog-menu/') && req.method === 'POST') {
           let chunks = [];
           req.on('data', c => chunks.push(c));
@@ -153,14 +317,24 @@ function catalogMenuApiPlugin() {
               const apiKey = (
                 payload.api_key ||
                 req.headers['x-goog-api-key'] ||
+                loadedEnv.VITE_GEMINI_API_KEY ||
+                loadedEnv.GEMINI_API_KEY ||
                 process.env.GEMINI_API_KEY ||
                 process.env.VITE_GEMINI_API_KEY ||
                 ''
               ).trim();
 
               if (apiKey) {
-                const model = process.env.VITE_GEMINI_MODEL || 'gemini-2.0-flash';
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                const candidateModels = [
+                  payload.model,
+                  process.env.VITE_GEMINI_MODEL,
+                  'gemini-3.5-flash-lite',
+                  'gemini-3.1-flash-lite',
+                  'gemini-3.6-flash',
+                  'gemini-3.5-flash',
+                  'gemini-flash-latest'
+                ].filter(Boolean);
+                const modelsToTry = [...new Set(candidateModels)];
 
                 const parts = [];
                 for (const img of images) {
@@ -185,52 +359,62 @@ function catalogMenuApiPlugin() {
                   parts.push({ text: "Catalog all dishes and buffet packages across all columns from the provided menu photos/flyers." });
                 }
 
-                try {
-                  const aiResp = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      contents: [{ parts }],
-                      systemInstruction: { parts: [{ text: SYSTEM_MENU_PROMPT }] },
-                      generationConfig: {
-                        temperature: 0.1,
-                        responseMimeType: 'application/json',
-                        responseSchema: CATALOG_MENU_SCHEMA
-                      }
-                    })
-                  });
+                for (const model of modelsToTry) {
+                  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-                  if (aiResp.ok) {
-                    const aiData = await aiResp.json();
-                    const text = aiData?.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (text) {
-                      const parsed = JSON.parse(text);
-                      if (parsed) {
-                        if (Array.isArray(parsed.dishes) && parsed.dishes.length > 0) {
-                          parsed.dishes = parsed.dishes.map(d => ({
-                            ...d,
-                            name: cleanDishOrPackageName(d.name),
-                            price: repairPricings(d.price, d.name),
-                            calories: d.calories || estimateDishCaloriesNode(d.name, d.category)
-                          }));
+                  try {
+                    const aiResp = await fetch(endpoint, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        contents: [{ parts }],
+                        systemInstruction: { parts: [{ text: SYSTEM_MENU_PROMPT }] },
+                        generationConfig: {
+                          temperature: 0.1,
+                          responseMimeType: 'application/json',
+                          responseSchema: CATALOG_MENU_SCHEMA
                         }
-                        if (Array.isArray(parsed.buffet_and_set_packages)) {
-                          parsed.buffet_and_set_packages = parsed.buffet_and_set_packages.map(pkg => ({
-                            ...pkg,
-                            package_name: cleanDishOrPackageName(pkg.package_name),
-                            price: repairPricings(pkg.price, pkg.package_name),
-                            included_dishes: Array.isArray(pkg.included_dishes) ? pkg.included_dishes.map(cleanDishOrPackageName) : []
-                          }));
+                      })
+                    });
+
+                    if (aiResp.ok) {
+                      const aiData = await aiResp.json();
+                      const text = aiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+                      if (text) {
+                        const parsed = JSON.parse(text);
+                        if (parsed) {
+                          if (Array.isArray(parsed.dishes) && parsed.dishes.length > 0) {
+                            parsed.dishes = parsed.dishes.map(d => ({
+                              ...d,
+                              name: cleanDishOrPackageName(d.name),
+                              price: repairPricings(d.price, d.name),
+                              category: categorizeDish(d.name, d.category),
+                              calories: d.calories || estimateDishCaloriesNode(d.name, d.category),
+                              description: (d.description || '').trim(),
+                              allergens: Array.isArray(d.allergens) ? d.allergens : []
+                            }));
+                          }
+                          if (Array.isArray(parsed.buffet_and_set_packages)) {
+                            parsed.buffet_and_set_packages = parsed.buffet_and_set_packages.map(p => ({
+                              ...p,
+                              package_name: cleanDishOrPackageName(p.package_name),
+                              price: repairPricings(p.price, p.package_name),
+                              pricing_model: p.pricing_model || 'per_head',
+                              description: (p.description || '').trim()
+                            }));
+                          }
+                          res.statusCode = 200;
+                          res.setHeader('Content-Type', 'application/json');
+                          res.end(JSON.stringify(parsed));
+                          return;
                         }
-                        res.statusCode = 200;
-                        res.setHeader('Content-Type', 'application/json');
-                        res.end(JSON.stringify(sanitizeMenuCatalog(parsed)));
-                        return;
                       }
+                    } else {
+                      console.warn(`Vite dev catalog-menu model ${model} returned ${aiResp.status}, trying fallback...`);
                     }
+                  } catch (err) {
+                    console.warn(`Vite dev catalog-menu model ${model} failed:`, err.message);
                   }
-                } catch (aiErr) {
-                  console.warn('[catalog-menu-api] Gemini call failed, returning fallback:', aiErr.message);
                 }
               }
 
@@ -385,6 +569,9 @@ function catalogMenuApiPlugin() {
 }
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react(), catalogMenuApiPlugin()],
-})
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  return {
+    plugins: [react(), catalogMenuApiPlugin(env)],
+  };
+});
