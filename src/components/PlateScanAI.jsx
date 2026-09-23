@@ -390,7 +390,7 @@ export default function PlateScanAI({
   };
 
   return (
-    <div className={`bg-[#12100E] border border-[#2E2A24] rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-5 shadow-2xl text-white ${className}`}>
+    <div className={`bg-white dark:bg-[#12100E] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-5 shadow-xl text-charcoal dark:text-white transition-colors duration-200 ${className}`}>
       {/* Hidden Off-Screen Canvas for Frame Downscaling */}
       <canvas ref={canvasRef} className="hidden" />
 
@@ -406,18 +406,18 @@ export default function PlateScanAI({
       {/* ============================================================
           1. HEADER & ACTION BUTTONS
           ============================================================ */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#2E2A24]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E9E5DE] dark:border-[#2E2A24]">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-base sm:text-lg font-black tracking-wider uppercase text-white m-0 flex items-center gap-2">
+            <h3 className="text-base sm:text-lg font-black tracking-wider uppercase text-charcoal dark:text-white m-0 flex items-center gap-2">
               <Camera className="h-5 w-5 text-terracotta" />
               <span>PLATESCAN AI™</span>
             </h3>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider bg-terracotta/20 text-orange-400 px-2.5 py-0.5 rounded-full border border-terracotta/30 flex items-center gap-1">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider bg-terracotta/10 dark:bg-terracotta/20 text-terracotta dark:text-orange-400 px-2.5 py-0.5 rounded-full border border-terracotta/20 dark:border-terracotta/30 flex items-center gap-1">
               <Sparkles className="h-3 w-3" /> Instant Plate &amp; Macro Scanner
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-1 m-0 leading-relaxed">
+          <p className="text-xs text-charcoal-light dark:text-gray-400 mt-1 m-0 leading-relaxed">
             Snap a photo or launch the live camera to deconstruct calories, macros, and nutrients in real time.
           </p>
         </div>
@@ -428,7 +428,7 @@ export default function PlateScanAI({
             <button
               type="button"
               onClick={handleReset}
-              className="px-3 py-1.5 bg-[#1E1B18] hover:bg-[#25221E] text-gray-300 hover:text-white border border-[#2E2A24] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+              className="px-3 py-1.5 bg-[#FAF8F5] hover:bg-[#F2ECE1] dark:bg-[#1E1B18] dark:hover:bg-[#25221E] text-charcoal dark:text-gray-300 hover:text-charcoal dark:hover:text-white border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs active:scale-95"
               title="Reset Viewfinder"
             >
               <X className="h-3.5 w-3.5 text-terracotta" />
@@ -441,7 +441,7 @@ export default function PlateScanAI({
       {/* ============================================================
           2. VIEWFINDER / VIEWPORT AREA
           ============================================================ */}
-      <div className="relative aspect-16/9 sm:aspect-16/9 min-h-[300px] sm:min-h-[320px] w-full bg-[#181614] rounded-2xl overflow-hidden border border-[#2E2A24] flex items-center justify-center group shadow-inner">
+      <div className="relative aspect-16/9 sm:aspect-16/9 min-h-[300px] sm:min-h-[320px] w-full bg-[#FAF8F5] dark:bg-[#181614] rounded-2xl overflow-hidden border border-[#E9E5DE] dark:border-[#2E2A24] flex items-center justify-center group shadow-inner transition-colors duration-200">
         {/* Animated Scanning Laser Overlay */}
         {isAnalyzing && (
           <div className="absolute inset-0 pointer-events-none z-30 overflow-hidden">
@@ -532,8 +532,8 @@ export default function PlateScanAI({
         ) : cameraError ? (
           /* State C: Camera Hardware Error */
           <div className="p-6 text-center space-y-3 z-10 max-w-md">
-            <AlertTriangle className="h-10 w-10 text-amber-400 mx-auto" />
-            <p className="text-xs text-gray-300 leading-relaxed font-medium">
+            <AlertTriangle className="h-10 w-10 text-amber-500 mx-auto" />
+            <p className="text-xs text-charcoal dark:text-gray-300 leading-relaxed font-medium">
               {cameraError}
             </p>
             <div className="flex items-center justify-center gap-2 pt-1">
@@ -547,7 +547,7 @@ export default function PlateScanAI({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-3 py-1.5 bg-[#25221E] hover:bg-[#302B25] text-gray-200 border border-[#2E2A24] rounded-xl text-xs font-bold cursor-pointer"
+                className="px-3 py-1.5 bg-white dark:bg-[#25221E] hover:bg-[#FAF8F5] dark:hover:bg-[#302B25] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-xs font-bold cursor-pointer"
               >
                 Upload Photo Instead
               </button>
@@ -560,10 +560,10 @@ export default function PlateScanAI({
               <Camera className="h-7 w-7 text-terracotta" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-sm sm:text-base font-extrabold text-white tracking-tight m-0">
+              <h4 className="text-sm sm:text-base font-extrabold text-charcoal dark:text-white tracking-tight m-0">
                 Snap a photo or launch PlateScan AI™ Live Camera
               </h4>
-              <p className="text-xs text-gray-400 font-medium m-0 leading-relaxed">
+              <p className="text-xs text-charcoal-light dark:text-gray-400 font-medium m-0 leading-relaxed">
                 Recognizes authentic Kapampangan dishes, portions, calories, macros, and sodium in real time.
               </p>
             </div>
@@ -579,7 +579,7 @@ export default function PlateScanAI({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-5 py-2.5 bg-[#221F1B] hover:bg-[#2C2722] text-gray-200 border border-[#3A342C] rounded-xl text-xs sm:text-[13px] font-semibold tracking-normal flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 hover:border-gray-500"
+                className="px-5 py-2.5 bg-white dark:bg-[#221F1B] hover:bg-[#FAF8F5] dark:hover:bg-[#2C2722] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#3A342C] rounded-xl text-xs sm:text-[13px] font-semibold tracking-normal flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 hover:border-terracotta/50 shadow-xs"
               >
                 <Upload className="h-4 w-4 text-terracotta shrink-0" />
                 <span className="leading-none">Upload Dish Photo</span>
@@ -596,35 +596,35 @@ export default function PlateScanAI({
         <div className="animate-fade-in">
           {/* CASE A: Food is Detected (is_food === true) */}
           {scanResult.is_food ? (
-            <div className="border border-emerald-500/40 bg-gradient-to-br from-[#1A2E20] via-[#1E1B18] to-[#251E17] rounded-2xl p-4 sm:p-5 space-y-4 shadow-lg">
+            <div className="border border-emerald-500/30 dark:border-emerald-500/40 bg-emerald-50/40 dark:bg-gradient-to-br dark:from-[#1A2E20] dark:via-[#1E1B18] dark:to-[#251E17] rounded-2xl p-4 sm:p-5 space-y-4 shadow-lg transition-colors duration-200">
               {/* Header: Dish Name & Regional Badge */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-[#2E2A24]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-emerald-900/10 dark:border-[#2E2A24]">
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3 text-emerald-400" /> Food Verified
+                    <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" /> Food Verified
                     </span>
                     {scanResult.is_kapampangan ? (
-                      <span className="text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                        <Award className="h-3 w-3 text-amber-400" /> Authentic Kapampangan Heritage
+                      <span className="text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                        <Award className="h-3 w-3 text-amber-600 dark:text-amber-400" /> Authentic Kapampangan Heritage
                       </span>
                     ) : (
-                      <span className="text-[10px] font-bold text-gray-400 bg-white/5 px-2 py-0.5 rounded-full border border-white/10">
+                      <span className="text-[10px] font-bold text-charcoal-light dark:text-gray-400 bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-full border border-black/10 dark:border-white/10">
                         Culinary Standard
                       </span>
                     )}
                   </div>
-                  <h4 className="text-lg sm:text-xl font-black text-white mt-1.5 tracking-tight m-0">
+                  <h4 className="text-lg sm:text-xl font-black text-charcoal dark:text-white mt-1.5 tracking-tight m-0">
                     {scanResult.dish_name || "Recognized Meal"}
                   </h4>
-                  <p className="text-xs text-gray-300 font-medium m-0 mt-0.5">
-                    Estimated Serving: <strong className="text-amber-300">{scanResult.portion_estimate || "1 plate (~250g)"}</strong>
+                  <p className="text-xs text-charcoal-light dark:text-gray-300 font-medium m-0 mt-0.5">
+                    Estimated Serving: <strong className="text-amber-800 dark:text-amber-300">{scanResult.portion_estimate || "1 plate (~250g)"}</strong>
                   </p>
                 </div>
 
                 {/* Portion Multiplier Adjuster */}
-                <div className="flex items-center gap-1 bg-[#12100E] p-1 rounded-xl border border-[#2E2A24] shrink-0">
-                  <span className="text-[10px] font-bold text-gray-400 px-2">Portion:</span>
+                <div className="flex items-center gap-1 bg-white dark:bg-[#12100E] p-1 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 shadow-2xs">
+                  <span className="text-[10px] font-bold text-charcoal-light dark:text-gray-400 px-2">Portion:</span>
                   {[0.5, 1, 1.5, 2].map((val) => (
                     <button
                       key={val}
@@ -633,7 +633,7 @@ export default function PlateScanAI({
                       className={`px-2 py-1 rounded-lg text-xs font-black transition-all cursor-pointer ${
                         portionMultiplier === val
                           ? 'bg-terracotta text-white shadow-xs'
-                          : 'text-gray-400 hover:text-white'
+                          : 'text-charcoal-light hover:text-charcoal dark:text-gray-400 dark:hover:text-white'
                       }`}
                     >
                       {val}x
@@ -645,42 +645,42 @@ export default function PlateScanAI({
               {/* Metrics Grid: Large Calories + Macro Pills + Sodium Alert */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                 {/* Calories (Large Metric) */}
-                <div className="col-span-2 sm:col-span-1 bg-[#12100E] p-3 rounded-xl border border-orange-500/30 flex flex-col justify-center items-center text-center">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-orange-400 flex items-center gap-1">
+                <div className="col-span-2 sm:col-span-1 bg-white dark:bg-[#12100E] p-3 rounded-xl border border-orange-300 dark:border-orange-500/30 flex flex-col justify-center items-center text-center shadow-xs">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-orange-600 dark:text-orange-400 flex items-center gap-1">
                     <Flame className="h-3 w-3" /> Calories
                   </span>
-                  <span className="text-2xl font-black text-white mt-0.5">
+                  <span className="text-2xl font-black text-charcoal dark:text-white mt-0.5">
                     {currentCalories}
                   </span>
-                  <span className="text-[9px] text-gray-400 font-semibold">kcal</span>
+                  <span className="text-[9px] text-charcoal-light dark:text-gray-400 font-semibold">kcal</span>
                 </div>
 
                 {/* Protein Pill */}
-                <div className="bg-[#12100E] p-3 rounded-xl border border-[#2E2A24] text-center flex flex-col justify-center">
-                  <span className="text-[10px] font-black uppercase text-emerald-400">Protein</span>
-                  <span className="text-lg font-black text-white mt-0.5">{currentProtein}g</span>
-                  <span className="text-[9px] text-gray-400">Muscle Build</span>
+                <div className="bg-white dark:bg-[#12100E] p-3 rounded-xl border border-emerald-200 dark:border-[#2E2A24] text-center flex flex-col justify-center shadow-xs">
+                  <span className="text-[10px] font-black uppercase text-emerald-700 dark:text-emerald-400">Protein</span>
+                  <span className="text-lg font-black text-charcoal dark:text-white mt-0.5">{currentProtein}g</span>
+                  <span className="text-[9px] text-charcoal-light dark:text-gray-400">Muscle Build</span>
                 </div>
 
                 {/* Carbs Pill */}
-                <div className="bg-[#12100E] p-3 rounded-xl border border-[#2E2A24] text-center flex flex-col justify-center">
-                  <span className="text-[10px] font-black uppercase text-amber-400">Carbs</span>
-                  <span className="text-lg font-black text-white mt-0.5">{currentCarbs}g</span>
-                  <span className="text-[9px] text-gray-400">Energy</span>
+                <div className="bg-white dark:bg-[#12100E] p-3 rounded-xl border border-amber-200 dark:border-[#2E2A24] text-center flex flex-col justify-center shadow-xs">
+                  <span className="text-[10px] font-black uppercase text-amber-700 dark:text-amber-400">Carbs</span>
+                  <span className="text-lg font-black text-charcoal dark:text-white mt-0.5">{currentCarbs}g</span>
+                  <span className="text-[9px] text-charcoal-light dark:text-gray-400">Energy</span>
                 </div>
 
                 {/* Fat Pill */}
-                <div className="bg-[#12100E] p-3 rounded-xl border border-[#2E2A24] text-center flex flex-col justify-center">
-                  <span className="text-[10px] font-black uppercase text-rose-400">Fat</span>
-                  <span className="text-lg font-black text-white mt-0.5">{currentFat}g</span>
-                  <span className="text-[9px] text-gray-400">Lipids</span>
+                <div className="bg-white dark:bg-[#12100E] p-3 rounded-xl border border-rose-200 dark:border-[#2E2A24] text-center flex flex-col justify-center shadow-xs">
+                  <span className="text-[10px] font-black uppercase text-rose-700 dark:text-rose-400">Fat</span>
+                  <span className="text-lg font-black text-charcoal dark:text-white mt-0.5">{currentFat}g</span>
+                  <span className="text-[9px] text-charcoal-light dark:text-gray-400">Lipids</span>
                 </div>
 
                 {/* Sodium Micronutrient Alert */}
-                <div className="col-span-2 sm:col-span-1 bg-[#12100E] p-3 rounded-xl border border-sky-500/30 text-center flex flex-col justify-center">
-                  <span className="text-[10px] font-black uppercase text-sky-400">Sodium</span>
-                  <span className="text-lg font-black text-white mt-0.5">{currentSodium}mg</span>
-                  <span className="text-[9px] text-gray-400">Electrolyte</span>
+                <div className="col-span-2 sm:col-span-1 bg-white dark:bg-[#12100E] p-3 rounded-xl border border-sky-300 dark:border-sky-500/30 text-center flex flex-col justify-center shadow-xs">
+                  <span className="text-[10px] font-black uppercase text-sky-700 dark:text-sky-400">Sodium</span>
+                  <span className="text-lg font-black text-charcoal dark:text-white mt-0.5">{currentSodium}mg</span>
+                  <span className="text-[9px] text-charcoal-light dark:text-gray-400">Electrolyte</span>
                 </div>
               </div>
 
@@ -714,16 +714,16 @@ export default function PlateScanAI({
             </div>
           ) : scanResult.requires_api_key ? (
             /* CASE B: API Key Required Setup Card */
-            <div className="border border-amber-500/50 bg-gradient-to-br from-[#221810] via-[#1E1B18] to-[#251A14] rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xl animate-scale-in">
+            <div className="border border-amber-500/40 bg-amber-50/60 dark:bg-gradient-to-br dark:from-[#221810] dark:via-[#1E1B18] dark:to-[#251A14] rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xl animate-scale-in">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xl shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-500 flex items-center justify-center text-xl shrink-0">
                   🔑
                 </div>
                 <div className="space-y-1 min-w-0 flex-1">
-                  <h4 className="text-sm font-black uppercase tracking-wider text-amber-300 m-0">
+                  <h4 className="text-sm font-black uppercase tracking-wider text-amber-900 dark:text-amber-300 m-0">
                     Gemini Vision API Key Required
                   </h4>
-                  <p className="text-xs text-gray-300 leading-relaxed font-medium m-0">
+                  <p className="text-xs text-charcoal dark:text-gray-300 leading-relaxed font-medium m-0">
                     PlateScan AI™ requires a Google Gemini API key to run multimodal computer vision on your plate. Enter your free key below to activate live food recognition:
                   </p>
                 </div>
@@ -738,12 +738,12 @@ export default function PlateScanAI({
                       placeholder="Paste your free AIzaSy... key here"
                       value={inlineKeyInput}
                       onChange={(e) => setInlineKeyInput(e.target.value.trim())}
-                      className="w-full px-3.5 py-2.5 pr-10 bg-[#12100E] border border-amber-500/40 rounded-xl text-xs font-mono text-white placeholder-gray-500 focus:outline-hidden focus:border-terracotta"
+                      className="w-full px-3.5 py-2.5 pr-10 bg-white dark:bg-[#12100E] border border-amber-300 dark:border-amber-500/40 rounded-xl text-xs font-mono text-charcoal dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:border-terracotta"
                     />
                     <button
                       type="button"
                       onClick={() => setShowKeyText(!showKeyText)}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 dark:hover:text-white cursor-pointer"
                       title={showKeyText ? "Hide key" : "Show key"}
                     >
                       {showKeyText ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -764,7 +764,7 @@ export default function PlateScanAI({
                   </button>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] pt-1 border-t border-white/10">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] pt-1 border-t border-[#E9E5DE] dark:border-white/10">
                   <a
                     href="https://aistudio.google.com/app/apikey"
                     target="_blank"
@@ -778,7 +778,7 @@ export default function PlateScanAI({
                   <button
                     type="button"
                     onClick={handleRunDemoSisig}
-                    className="text-amber-400 hover:text-amber-300 underline font-bold cursor-pointer text-left sm:text-right"
+                    className="text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 underline font-bold cursor-pointer text-left sm:text-right"
                   >
                     ⚡ Or Run Demo Simulation (Sizzling Sisig)
                   </button>
@@ -787,19 +787,19 @@ export default function PlateScanAI({
             </div>
           ) : (
             /* CASE C: Genuine Non-Food Detected (is_food === false) */
-            <div className="border border-amber-500/50 bg-gradient-to-br from-amber-950/30 via-[#1E1B18] to-red-950/20 rounded-2xl p-4 sm:p-5 space-y-3 shadow-md">
+            <div className="border border-amber-500/40 bg-amber-50/70 dark:bg-gradient-to-br dark:from-amber-950/30 dark:via-[#1E1B18] dark:to-red-950/20 rounded-2xl p-4 sm:p-5 space-y-3 shadow-md">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-xl shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center text-xl shrink-0">
                   ⚠️
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-sm font-black uppercase tracking-wider text-amber-300 m-0">
+                  <h4 className="text-sm font-black uppercase tracking-wider text-amber-900 dark:text-amber-300 m-0">
                     No Food Detected
                   </h4>
-                  <p className="text-xs text-gray-200 font-medium m-0 leading-relaxed">
+                  <p className="text-xs text-charcoal dark:text-gray-200 font-medium m-0 leading-relaxed">
                     {scanResult.rejection_reason || "The camera frame does not appear to contain edible food or a beverage."}
                   </p>
-                  <p className="text-[11px] text-gray-400 font-medium m-0 pt-1">
+                  <p className="text-[11px] text-charcoal-light dark:text-gray-400 font-medium m-0 pt-1">
                     👉 <em>Please center an edible meal, dish, or beverage inside the viewfinder.</em>
                   </p>
                 </div>
@@ -812,29 +812,29 @@ export default function PlateScanAI({
       {/* API Key Modal */}
       {isKeyModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-[#1E1B18] border border-[#2E2A24] rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl text-white relative">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl text-charcoal dark:text-white relative">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E9E5DE] dark:border-white/10">
               <div className="flex items-center gap-2">
                 <Key className="h-4 w-4 text-terracotta" />
-                <h4 className="text-sm font-black uppercase tracking-wider text-white m-0">
+                <h4 className="text-sm font-black uppercase tracking-wider text-charcoal dark:text-white m-0">
                   Configure Gemini API Key
                 </h4>
               </div>
               <button
                 type="button"
                 onClick={() => setIsKeyModalOpen(false)}
-                className="p-1 text-gray-400 hover:text-white rounded-lg transition-colors cursor-pointer"
+                className="p-1 text-gray-400 hover:text-charcoal dark:hover:text-white rounded-lg transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <p className="text-xs text-gray-300 leading-relaxed m-0 font-medium">
+            <p className="text-xs text-charcoal-light dark:text-gray-300 leading-relaxed m-0 font-medium">
               PlateScan AI uses Google Gemini Multimodal Vision for continuous camera recognition. Your key is stored locally in your browser.
             </p>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-wider text-gray-400 block">
+              <label className="text-[10px] font-black uppercase tracking-wider text-charcoal-light dark:text-gray-400 block">
                 Google Gemini API Key:
               </label>
               <div className="relative">
@@ -843,19 +843,20 @@ export default function PlateScanAI({
                   placeholder="Paste AIzaSy... key here"
                   value={inlineKeyInput}
                   onChange={(e) => setInlineKeyInput(e.target.value.trim())}
-                  className="w-full px-3.5 py-2.5 pr-10 bg-[#12100E] border border-[#2E2A24] rounded-xl text-xs font-mono text-white placeholder-gray-500 focus:outline-hidden focus:border-terracotta"
+                  className="w-full px-3.5 py-2.5 pr-10 bg-[#FAF8F5] dark:bg-[#12100E] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-xs font-mono text-charcoal dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:border-terracotta"
                 />
                 <button
                   type="button"
                   onClick={() => setShowKeyText(!showKeyText)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-charcoal dark:hover:text-white cursor-pointer"
+                  title={showKeyText ? "Hide key" : "Show key"}
                 >
                   {showKeyText ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
-            <div className="pt-2 flex items-center justify-between gap-2 border-t border-white/10">
+            <div className="pt-2 flex items-center justify-between gap-2 border-t border-[#E9E5DE] dark:border-white/10">
               <a
                 href="https://aistudio.google.com/app/apikey"
                 target="_blank"
@@ -876,7 +877,7 @@ export default function PlateScanAI({
                       try { localStorage.removeItem('kanyamanan_gemini_api_key'); } catch (_) { }
                       setIsKeyModalOpen(false);
                     }}
-                    className="px-3 py-1.5 rounded-xl text-xs text-red-400 hover:text-red-300 font-bold cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl text-xs text-red-500 hover:text-red-600 font-bold cursor-pointer"
                   >
                     Clear Key
                   </button>
