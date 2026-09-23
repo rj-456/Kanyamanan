@@ -107,7 +107,7 @@ import {
   fetchCloudReviews
 } from './cloudSync';
 import AiMenuCataloger from './components/AiMenuCataloger';
-import PlateScanAI from './components/PlateScanAI';
+import PlateScanAI, { PlateScanLogo } from './components/PlateScanAI';
 
 // Authentic Official Facebook Icon Component
 const FacebookIcon = ({ className = "w-4 h-4" }) => (
@@ -3606,6 +3606,7 @@ So, where do we start? 😊`,
         protein: 0,
         carbs: 0,
         fat: 0,
+        sodium: 0,
         cost: 0,
         dishesCount: 0,
         allergens: new Set()
@@ -3768,6 +3769,7 @@ So, where do we start? 😊`,
         const scanProt = Number(scan.nutrition.protein) || 0;
         const scanCarbs = Number(scan.nutrition.carbs) || 0;
         const scanFat = Number(scan.nutrition.fat) || 0;
+        const scanSodium = Number(scan.nutrition.sodium) || 0;
 
         tableCalories += scanCals;
         tableProtein += scanProt;
@@ -3790,6 +3792,7 @@ So, where do we start? 😊`,
                 memberMetrics[m.id].protein += scanProt / groupCount;
                 memberMetrics[m.id].carbs += scanCarbs / groupCount;
                 memberMetrics[m.id].fat += scanFat / groupCount;
+                memberMetrics[m.id].sodium = (memberMetrics[m.id].sodium || 0) + (scanSodium / groupCount);
                 memberMetrics[m.id].dishesCount += 1 / groupCount;
                 if (scan.allergens) {
                   scan.allergens.replace(/^⚠️\s*ALLERGENS:\s*/i, '').split(',').map(a => a.trim()).filter(Boolean).forEach(a => memberMetrics[m.id].allergens.add(a));
@@ -3801,6 +3804,7 @@ So, where do we start? 😊`,
             memberMetrics[scan.assignedTo].protein += scanProt;
             memberMetrics[scan.assignedTo].carbs += scanCarbs;
             memberMetrics[scan.assignedTo].fat += scanFat;
+            memberMetrics[scan.assignedTo].sodium = (memberMetrics[scan.assignedTo].sodium || 0) + scanSodium;
             memberMetrics[scan.assignedTo].dishesCount += 1;
             if (scan.allergens) {
               scan.allergens.replace(/^⚠️\s*ALLERGENS:\s*/i, '').split(',').map(a => a.trim()).filter(Boolean).forEach(a => memberMetrics[scan.assignedTo].allergens.add(a));
@@ -3841,6 +3845,7 @@ So, where do we start? 😊`,
         protein: Math.round(data.protein || 0),
         carbs: Math.round(data.carbs || 0),
         fat: Math.round(data.fat || 0),
+        sodium: Math.round(data.sodium || 0),
         cost: Math.round(data.cost || 0),
         dishesCount: Number((data.dishesCount || 0).toFixed(1)),
         allergens: Array.from(data.allergens || []),
@@ -21590,11 +21595,15 @@ ${rawText}`;
 
                       {/* Card 2: PlateScan AI™ — Real-Time Food Nutrition Scanner */}
                       <PlateScanAI
+                        groqApiKey={(typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GROQ_API_KEY) || (typeof localStorage !== 'undefined' && localStorage.getItem('kanyamanan_groq_api_key')) || ''}
                         geminiApiKey={geminiApiKey || (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) || (typeof localStorage !== 'undefined' && localStorage.getItem('kanyamanan_gemini_api_key')) || ''}
+                        diningMode={isSolo ? 'solo' : 'group'}
+                        groupMembers={activeTripMetrics?.memberMetricsList || []}
+                        activeMemberTab={activeMemberTab}
                         onAddMeal={(meal) => {
-                          const assignedTo = diningMode === 'group'
-                            ? (activeMemberTab === 'all' ? 'shared' : activeMemberTab)
-                            : 'solo';
+                          const assignedTo = meal.assignedTo || (isSolo
+                            ? 'solo'
+                            : (activeMemberTab === 'all' ? 'shared' : activeMemberTab));
 
                           const newScanned = {
                             id: meal.id || `scanned-${Date.now()}`,
@@ -21602,6 +21611,9 @@ ${rawText}`;
                             portion: meal.portion,
                             image: meal.image || null,
                             assignedTo: assignedTo,
+                            isShared: meal.isShared || assignedTo === 'shared',
+                            groupCount: meal.groupCount || (groupMembers?.length || 1),
+                            perPersonNutrition: meal.perPersonNutrition || null,
                             addedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                             nutrition: {
                               calories: meal.nutrition?.calories || 0,
@@ -21613,7 +21625,6 @@ ${rawText}`;
                           };
 
                           setScannedMealsLog(prev => [newScanned, ...prev]);
-                          setShowToast(`PlateScan AI™: "${meal.name}" (${meal.nutrition?.calories || 0} kcal) added to tracker!`);
                         }}
                       />
 
@@ -21621,8 +21632,8 @@ ${rawText}`;
                       {scannedMealsLog.length > 0 && (
                         <div className="bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] p-4 space-y-2.5 shadow-sm">
                           <div className="flex items-center justify-between pb-1 border-b border-[#E9E5DE]/70 dark:border-[#2E2A24]">
-                            <span className="text-[10px] font-black text-charcoal-light dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                              <span>📋</span> PlateScan Logged Meals ({scannedMealsLog.length})
+                            <span className="text-[10px] font-black text-charcoal dark:text-gray-200 uppercase tracking-wider flex items-center gap-1.5">
+                              <PlateScanLogo className="w-3.5 h-3.5 text-terracotta" /> PlateScan Logged Meals ({scannedMealsLog.length})
                             </span>
                             <button
                               type="button"
@@ -21635,12 +21646,21 @@ ${rawText}`;
 
                           <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                             {scannedMealsLog.map((meal) => {
-                              const assignedMember = diningMode === 'group' && meal.assignedTo !== 'solo' && meal.assignedTo !== 'shared'
+                              const isMealShared = diningMode === 'group' && (meal.assignedTo === 'shared' || !meal.assignedTo || meal.isShared);
+                              const gCount = Math.max(1, groupMembers.length);
+                              const assignedMember = diningMode === 'group' && !isMealShared && meal.assignedTo !== 'solo'
                                 ? groupMembers.find(m => m.id === meal.assignedTo)
                                 : null;
+
+                              const perPersonCals = isMealShared
+                                ? (meal.perPersonNutrition?.calories || Math.round((meal.nutrition?.calories || 0) / gCount))
+                                : (meal.nutrition?.calories || 0);
+
                               const assigneeLabel = diningMode === 'solo'
                                 ? 'Personal Log'
-                                : (meal.assignedTo === 'shared' || !meal.assignedTo ? '👥 Shared (Split)' : `👤 ${assignedMember?.name || 'Member'}`);
+                                : (isMealShared
+                                    ? `👥 Shared (Split 1/${gCount}: +${perPersonCals} kcal/diner)`
+                                    : `👤 ${assignedMember?.name || 'Member'}`);
 
                               return (
                                 <div
@@ -21654,16 +21674,23 @@ ${rawText}`;
                                       <span className="text-base shrink-0">🍲</span>
                                     )}
                                     <div className="min-w-0 flex-1">
-                                      <span className="font-bold text-charcoal dark:text-white block truncate text-[11px]">{meal.name}</span>
-                                      <span className="text-[9px] text-charcoal-light dark:text-gray-400 block truncate">
+                                      <span className="font-bold text-charcoal dark:text-white block break-words text-[11px] leading-tight">{meal.name}</span>
+                                      <span className="text-[9px] text-charcoal-light dark:text-gray-400 block break-words leading-tight mt-0.5">
                                         {assigneeLabel} {meal.addedAt ? `• ${meal.addedAt}` : ''}
                                       </span>
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-1.5 shrink-0">
-                                    <strong className="text-terracotta dark:text-orange-400 font-black text-xs">
-                                      +{meal.nutrition?.calories || 0} kcal
-                                    </strong>
+                                  <div className="flex items-center gap-1.5 shrink-0 text-right">
+                                    <div>
+                                      <strong className="text-terracotta dark:text-orange-400 font-black text-xs block">
+                                        +{perPersonCals} kcal{isMealShared ? ' / ea' : ''}
+                                      </strong>
+                                      {isMealShared && (
+                                        <span className="text-[8px] text-charcoal-light dark:text-gray-400 block font-medium">
+                                          {meal.nutrition?.calories || 0} kcal total
+                                        </span>
+                                      )}
+                                    </div>
                                     <button
                                       type="button"
                                       onClick={() => handleRemoveScannedMeal(meal.id)}
@@ -21676,9 +21703,9 @@ ${rawText}`;
                                 </div>
                               );
                             })}
-                            </div>
                           </div>
-                        )}
+                        </div>
+                      )}
 
                     </div>
 

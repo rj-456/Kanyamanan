@@ -104,6 +104,20 @@ html.dark ::-webkit-scrollbar-thumb {
   box-shadow: 0 0 15px rgba(200, 125, 50, 0.2);
 }
 
+/* PlateScan AI Laser Scanning Effect */
+@keyframes platescan-laser {
+  0% { top: 2%; opacity: 0.7; }
+  50% { top: 96%; opacity: 1; }
+  100% { top: 2%; opacity: 0.7; }
+}
+
+.animate-scan-laser {
+  position: absolute;
+  left: 0;
+  right: 0;
+  animation: platescan-laser 2.2s ease-in-out infinite;
+}
+
 /* Dark mode utility overrides for high visual fidelity */
 html.dark {
   color-scheme: dark;

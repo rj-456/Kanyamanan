@@ -1013,12 +1013,21 @@ SCAN_PLATE_SCHEMA = {
         },
         "confidence_score": {"type": "NUMBER"}
     },
-    "required": ["is_food", "dish_name", "portion_estimate", "calories", "sodium_mg", "macros"]
+    "required": ["is_food"]
 }
 
 def normalize_py_plate_nutrition(data):
     if not isinstance(data, dict) or not data.get('is_food'):
-        return data
+        return {
+            "is_food": False,
+            "rejection_reason": data.get('rejection_reason') if isinstance(data, dict) else "No food detected.",
+            "dish_name": None,
+            "is_kapampangan": False,
+            "portion_estimate": None,
+            "calories": None,
+            "sodium_mg": None,
+            "macros": None
+        }
 
     name = str(data.get('dish_name') or '').lower()
     try:
@@ -1135,7 +1144,9 @@ def scan_plate(request):
     ).strip()
 
     models_to_try = [
-        os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash'),
+        os.environ.get('GEMINI_MODEL', 'gemini-2.0-flash'),
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
         'gemini-2.5-flash',
         'gemini-3.5-flash-lite',
         'gemini-3.1-flash-lite',
@@ -1189,15 +1200,68 @@ def scan_plate(request):
             except Exception as exc:
                 print(f"PlateScan Gemini ({model_name}) error:", exc)
 
-    # Fallback when API key is missing or calls failed
+    # Primary Keyless Engine Fallback via Pollinations AI (No API Key Required)
+    try:
+        data_url = f"data:{mime_type};base64,{b64_content}" if not b64_content.startswith('data:') else b64_content
+        poll_payload = {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": (
+                                "You are an expert culinary nutritionist specializing in Philippine and authentic Kapampangan cuisine "
+                                "(Pinakbet, Sisig, Bringhe, Sinigang, Bulalo, Kare-Kare, Tibok-tibok, etc.).\n\n"
+                                "INSPECTION RULES:\n"
+                                "1. Check if the image contains edible food or beverage.\n"
+                                "2. If the image is NOT food (e.g. office desk, laptop, person, car, empty table, animal), return:\n"
+                                '   {"is_food": false, "rejection_reason": "Explanation of non-food object detected"}\n'
+                                '3. If it IS food, identify the dish accurately (e.g. "Pinakbet / Pakbet"), estimate serving weight in grams, total calories, macros (protein_g, carbs_g, fat_g), and sodium_mg.\n\n'
+                                "Return strictly a valid JSON object with NO markdown formatting, NO backticks, and NO extra text:\n"
+                                "{\n"
+                                '  "is_food": true,\n'
+                                '  "dish_name": "Dish Name",\n'
+                                '  "is_kapampangan": true,\n'
+                                '  "portion_estimate": "250g (1 serving)",\n'
+                                '  "calories": 240,\n'
+                                '  "sodium_mg": 580,\n'
+                                '  "macros": { "protein_g": 8, "carbs_g": 22, "fat_g": 14 },\n'
+                                '  "confidence_score": 0.95\n'
+                                "}"
+                            )
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": data_url
+                            }
+                        }
+                    ]
+                }
+            ],
+            "model": "openai",
+            "jsonMode": True
+        }
+        poll_req = urllib.request.Request(
+            "https://text.pollinations.ai/",
+            data=json.dumps(poll_payload).encode('utf-8'),
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        with urllib.request.urlopen(poll_req, timeout=20) as p_resp:
+            raw_text = p_resp.read().decode('utf-8')
+            clean = raw_text.replace('```json', '').replace('```', '').strip()
+            parsed = json.loads(clean)
+            if isinstance(parsed, dict) and "is_food" in parsed:
+                return Response(normalize_py_plate_nutrition(parsed), status=status.HTTP_200_OK)
+    except Exception as poll_exc:
+        print("Backend Pollinations fallback error:", poll_exc)
+
+    # Fallback when calls failed
     return Response({
         "is_food": False,
-        "requires_api_key": not bool(api_key),
-        "rejection_reason": (
-            "PlateScan AI service could not analyze the frame. Please center the food in good lighting."
-            if api_key
-            else "Gemini API Key is required to run live visual food deconstruction. Enter your free API key or try Demo Mode."
-        )
+        "rejection_reason": "PlateScan AI service could not verify food in this frame. Please center your meal in good lighting and try again."
     }, status=status.HTTP_200_OK)
 
 

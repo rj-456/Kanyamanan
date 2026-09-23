@@ -688,7 +688,18 @@ export const catalogMenuWithAi = async ({ rawText = '', images = [], apiKey = ''
  * Sends image frame to /api/scan-plate for food gatekeeping and nutritional deconstruction.
  */
 export function normalizePlateScanNutrition(data) {
-  if (!data || !data.is_food) return data;
+  if (!data || !data.is_food) {
+    return {
+      is_food: false,
+      rejection_reason: data?.rejection_reason || "The camera frame does not appear to contain edible food or a beverage.",
+      dish_name: null,
+      is_kapampangan: false,
+      portion_estimate: null,
+      calories: null,
+      sodium_mg: null,
+      macros: null
+    };
+  }
 
   const name = (data.dish_name || '').toLowerCase();
   let cal = Number(data.calories) || 0;
@@ -697,9 +708,15 @@ export function normalizePlateScanNutrition(data) {
   let f = Number(data.macros?.fat_g) || 0;
   let sod = Number(data.sodium_mg) || 0;
 
+  const isKap = Boolean(data.is_kapampangan) || /sisig|bringhe|tibok|buro|balo[- ]*balo|murcon|morcon|tocino|tamales|camaro|betute|pindang/i.test(name);
+
   if (cal <= 0 || (p === 0 && c === 0 && f === 0)) {
     if (/sisig/i.test(name)) {
       cal = 650; p = 38; c = 6; f = 52; sod = sod || 780;
+    } else if (/bringhe|paella/i.test(name)) {
+      cal = 550; p = 24; c = 68; f = 20; sod = sod || 650;
+    } else if (/tibok/i.test(name)) {
+      cal = 280; p = 6; c = 44; f = 9; sod = sod || 90;
     } else if (/crispy pata|pata/i.test(name)) {
       cal = 890; p = 58; c = 2; f = 72; sod = sod || 920;
     } else if (/lechon|bagnet|kawali/i.test(name)) {
@@ -737,168 +754,247 @@ export function normalizePlateScanNutrition(data) {
     }
   }
 
+  const safeFinite = (num, fallback = 0) => {
+    const n = Number(num);
+    return (!Number.isFinite(n) || Number.isNaN(n) || n < 0) ? fallback : Math.round(n);
+  };
+
   return {
     ...data,
-    calories: cal,
-    sodium_mg: sod || 600,
+    is_food: true,
+    is_kapampangan: isKap,
+    calories: safeFinite(cal, 450),
+    sodium_mg: safeFinite(sod, 600),
     macros: {
-      protein_g: p,
-      carbs_g: c,
-      fat_g: f
+      protein_g: safeFinite(p, 20),
+      carbs_g: safeFinite(c, 30),
+      fat_g: safeFinite(f, 15)
     }
   };
 }
 
-export const scanPlateWithAi = async (imageDataUrl, options = {}) => {
-  const { apiKey = '', signal = null } = options;
-  if (!imageDataUrl) {
-    return {
-      is_food: false,
-      rejection_reason: "No image provided for PlateScan AI."
-    };
+export const PLATE_SCAN_SYSTEM_PROMPT = `You are a master Philippine and Kapampangan culinary chef, nutritionist, and visual food recognition engine.
+
+VISUAL FOOD IDENTIFICATION GUIDE:
+- PINAKBET / PAKBET: Medley of orange squash (kalabasa) chunks, sliced bitter melon (ampalaya) rings/ribbons, green okra pods, eggplant (talong) slices, and string beans in a savory shrimp paste (bagoong) sauce with pork belly bits. Low to moderate carbs (~18g-22g), moderate calories (~210-250 kcal).
+- SIZZLING SISIG / KAPAMPANGAN SISIG: Finely chopped/minced crispy pork jowl/ears/face and chicken liver, tossed with diced onions, red/green chilies, calamansi, and often topped with an egg on an oval cast-iron sizzling platter or plate. HIGH PROTEIN (30g-40g), HIGH FAT (35g-50g), VERY LOW CARBS (4g-8g). NEVER classify Sisig as fried rice or Sinangag!
+- CHICKEN & PORK ADOBO: Stewed browned chicken cuts and pork belly chunks braised in dark soy sauce, vinegar, garlic, bay leaves (laurel), and black peppercorns. High protein, savory sauce.
+- KARE-KARE: Thick golden-orange peanut sauce stew with tender beef shank, tripe, or oxtail, alongside eggplant, banana blossom, string beans, and a side of pink shrimp paste (bagoong).
+- SINIGANG: Clear, sour tamarind-based broth loaded with pork, shrimp, or fish, green finger chili (siling haba), kangkong (water spinach), radish, and tomatoes.
+- BRINGHE: Kapampangan fiesta yellow sticky rice (glutinous rice) cooked in coconut milk and turmeric, topped with chicken cuts, boiled egg slices, bell pepper strips, and chorizo.
+- BULALO / NILAGA: Clear beef shank and bone marrow soup with sweet corn on the cob, pechay or cabbage, and peppercorns.
+- CRISPY PATA / LECHON KAWALI: Deep-fried whole pork knuckle or crispy pork belly slab with crackling golden blistered skin and succulent meat.
+- SILOG VARIETIES (Tapsilog, Tocilog, Longsilog, Bangsilog): Visible separate mound of garlic fried rice (sinangag) + sunny-side-up fried egg + meat viand (beef tapa, sweet reddish tocino, sausages, or fried milkfish).
+- PANCIT (Palabok, Bihon, Canton, Luglug): Stir-fried or sauced noodles garnished with crushed chicharon, tinapa flakes, boiled egg, shrimp, and calamansi.
+
+INSPECTION PROTOCOL:
+Step 1: Check if the image contains edible food or beverage. If non-food (laptop, monitor, desk, person, car, empty table, animal, room), return {"is_food": false, "rejection_reason": "Explanation of non-food object"}.
+Step 2: Inspect ingredients and visual presentation (e.g. squash + ampalaya rings = Pinakbet; cast iron + minced pork + egg = Sisig; dark braised meat with bay leaf = Adobo).
+Step 3: Return raw JSON matching the schema below with NO markdown code fences.
+
+Return strictly raw JSON matching this schema:
+{
+  "is_food": true,
+  "dish_name": "Authentic Kapampangan Sizzling Sisig",
+  "is_kapampangan": true,
+  "portion_estimate": "250g (1 sizzling plate)",
+  "calories": 620,
+  "sodium_mg": 780,
+  "macros": {
+    "protein_g": 38,
+    "carbs_g": 6,
+    "fat_g": 48
+  },
+  "confidence_score": 0.98
+}
+If non-food:
+{
+  "is_food": false,
+  "rejection_reason": "Explanation of non-food object"
+}`;
+
+/**
+ * Keyless Public AI Vision Engine using Pollinations AI (No API Key Required)
+ */
+export async function scanPlateWithPollinations(imageDataUrl, signal = null) {
+  const imageBase64 = imageDataUrl.startsWith('data:')
+    ? imageDataUrl
+    : `data:image/jpeg;base64,${imageDataUrl}`;
+
+  const payload = {
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: `${PLATE_SCAN_SYSTEM_PROMPT}\nReturn strictly raw JSON.`
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url: imageBase64
+            }
+          }
+        ]
+      }
+    ],
+    model: "openai",
+    temperature: 0.1,
+    jsonMode: true
+  };
+
+  const res = await fetch("https://text.pollinations.ai/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    signal,
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    throw new Error(`Pollinations API HTTP error: ${res.status}`);
   }
 
-  // 1. Try endpoints in priority order
-  const endpointsToTry = [
-    '/api/scan-plate',
-    `${DJANGO_BASE_URL}/scan-plate/`,
-    `${DJANGO_BASE_URL}/scan-plate`
-  ];
+  const rawText = await res.text();
+  const clean = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
+  const parsed = JSON.parse(clean);
+  return normalizePlateScanNutrition(parsed);
+}
 
-  for (const endpoint of endpointsToTry) {
+export const scanPlateWithAi = async (imageBase64) => {
+  if (!imageBase64 || typeof imageBase64 !== 'string' || imageBase64.length < 50) {
+    return { is_food: false, rejection_reason: "No image provided to analyze." };
+  }
+
+  // 1. Try local dev-server route
+  try {
+    const res = await fetch('/api/scan-plate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: imageBase64 })
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.is_food === true) {
+        return normalizePlateScanNutrition(data);
+      }
+      return data;
+    }
+  } catch (err) {
+    console.warn("Backend /api/scan-plate unreachable, calling Groq directly:", err);
+  }
+
+  const cleanBase64 = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+  const formattedDataUrl = `data:image/jpeg;base64,${cleanBase64}`;
+
+  // 2. PRIMARY CLIENT-SIDE ENGINE: Groq Vision (qwen/qwen3.8-27b)
+  const groqKey = (
+    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GROQ_API_KEY) ||
+    (typeof localStorage !== 'undefined' && localStorage.getItem('kanyamanan_groq_api_key')) ||
+    ''
+  ).trim();
+
+  if (groqKey) {
     try {
-      const headers = { 'Content-Type': 'application/json' };
-      if (apiKey) headers['x-goog-api-key'] = apiKey;
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        signal,
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${groqKey}`,
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
-          image: imageDataUrl,
-          api_key: apiKey
+          model: "qwen/qwen3.8-27b",
+          messages: [{
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: PLATE_SCAN_SYSTEM_PROMPT
+              },
+              {
+                type: "image_url",
+                image_url: { url: formattedDataUrl }
+              }
+            ]
+          }],
+          temperature: 0.1,
+          response_format: { type: "json_object" },
+          max_tokens: 400
         })
       });
 
       if (res.ok) {
         const data = await res.json();
-        if (data && typeof data.is_food === 'boolean') {
-          return normalizePlateScanNutrition(data);
+        const content = data?.choices?.[0]?.message?.content || '{}';
+        const parsed = JSON.parse(content.replace(/```json/g, '').replace(/```/g, '').trim());
+        if (parsed && parsed.is_food === true) {
+          return normalizePlateScanNutrition(parsed);
         }
+        return parsed;
       }
-    } catch (err) {
-      if (err.name === 'AbortError') throw err;
-      // continue to next endpoint
+    } catch (gErr) {
+      console.warn("Groq client-side error, attempting Gemini failover:", gErr);
     }
   }
 
-  // 2. Direct client-side Gemini fallback
-  const resolvedApiKey = apiKey || 
+  // 3. SECONDARY CLIENT-SIDE ENGINE: Gemini 2.5 / 2.0 / 3.6 Flash Failover
+  const geminiKey = (
     (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) ||
     (typeof localStorage !== 'undefined' && localStorage.getItem('kanyamanan_gemini_api_key')) ||
-    '';
+    ''
+  ).trim();
 
-  if (resolvedApiKey) {
-    const candidateModels = [
-      (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_MODEL) || '',
-      'gemini-2.5-flash',
-      'gemini-3.5-flash-lite',
-      'gemini-3.1-flash-lite',
-      'gemini-3.6-flash',
-      'gemini-3.5-flash',
-      'gemini-flash-latest'
-    ].filter(Boolean);
-    const modelsToTry = [...new Set(candidateModels)];
-
-    let mime = 'image/jpeg';
-    let b64 = imageDataUrl;
-    if (imageDataUrl.includes(',')) {
-      const [hdr, data] = imageDataUrl.split(',', 2);
-      if (hdr.includes('png')) mime = 'image/png';
-      else if (hdr.includes('webp')) mime = 'image/webp';
-      b64 = data;
-    }
-
-    const SCAN_PLATE_SYSTEM_PROMPT = `You are a specialized culinary AI nutritionist and visual food classifier with deep expertise in Philippine regional gastronomy (especially authentic Kapampangan cuisine such as Sisig, Bringhe, Burong Isda/Balo-balo, Tibok-tibok, Murcon, etc.) as well as standard global dishes.
-
-You must follow a strict two-phase inspection:
-1. Verification & Gatekeeping (Food vs. Non-Food):
-   - Inspect whether the image actually contains edible cooked food, prepared dishes, snacks, or beverages.
-   - If the image depicts non-food subjects (such as faces, pets, clothing, furniture, office desks, electronics, vehicles, documents, or an empty plate/table), you MUST set is_food: false.
-   - When is_food is false, do NOT calculate or hallucinate calories or nutrients. Provide a polite explanation in rejection_reason.
-2. Nutritional Deconstruction (Only if is_food is true):
-   - Accurately identify the dish name.
-   - Estimate the visual portion volume against standard dishware to compute serving weight in grams.
-   - Return realistic calories, macronutrients (protein, carbs, fat in grams), and sodium (in milligrams).`;
-
-    const SCAN_PLATE_SCHEMA = {
-      type: "OBJECT",
-      properties: {
-        is_food: { type: "BOOLEAN", description: "True ONLY if the frame contains edible food, dishes, or drinks. False for non-food objects, people, pets, or empty surfaces." },
-        rejection_reason: { type: "STRING", description: "User-friendly explanation if is_food is false explaining what was detected instead. Null if is_food is true." },
-        dish_name: { type: "STRING", description: "Accurate culinary name of the dish. Null if is_food is false." },
-        is_kapampangan: { type: "BOOLEAN", description: "True if authentic Kapampangan or Philippine regional dish." },
-        portion_estimate: { type: "STRING", description: "Estimated weight and serving, e.g., '160g (1 plate)'. Null if is_food is false." },
-        calories: { type: "INTEGER", description: "Estimated calories in kcal. Positive integer." },
-        sodium_mg: { type: "INTEGER", description: "Estimated sodium in milligrams. Positive integer." },
-        macros: {
-          type: "OBJECT",
-          description: "Estimated macronutrients in grams.",
-          properties: {
-            protein_g: { type: "NUMBER", description: "Estimated protein in grams" },
-            carbs_g: { type: "NUMBER", description: "Estimated carbohydrates in grams" },
-            fat_g: { type: "NUMBER", description: "Estimated fat in grams" }
-          },
-          required: ["protein_g", "carbs_g", "fat_g"]
-        },
-        confidence_score: { type: "NUMBER" }
-      },
-      required: ["is_food", "dish_name", "portion_estimate", "calories", "sodium_mg", "macros"]
-    };
-
-    for (const model of modelsToTry) {
+  if (geminiKey) {
+    const candidateGemini = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.6-flash'];
+    for (const gModel of candidateGemini) {
       try {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(resolvedApiKey)}`;
-
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${gModel}:generateContent?key=${geminiKey}`;
         const aiResp = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          signal,
           body: JSON.stringify({
             contents: [{
               parts: [
-                { inlineData: { mimeType: mime, data: b64 } },
-                { text: "Inspect this image. Determine if it contains edible food or a beverage. If is_food is true, you MUST provide dish_name, portion_estimate, calories (in kcal), sodium_mg, and macros (protein_g, carbs_g, fat_g)." }
+                { inlineData: { mimeType: 'image/jpeg', data: cleanBase64 } },
+                { text: `${PLATE_SCAN_SYSTEM_PROMPT}\nReturn strictly raw JSON.` }
               ]
             }],
-            systemInstruction: { parts: [{ text: SCAN_PLATE_SYSTEM_PROMPT }] },
             generationConfig: {
               temperature: 0.1,
-              responseMimeType: 'application/json',
-              responseSchema: SCAN_PLATE_SCHEMA
+              responseMimeType: 'application/json'
             }
           })
         });
 
         if (aiResp.ok) {
-          const aiData = await aiResp.json();
-          const text = aiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+          const data = await aiResp.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (text) {
-            return normalizePlateScanNutrition(JSON.parse(text));
+            const parsed = JSON.parse(text);
+            if (parsed && parsed.is_food === true) {
+              return normalizePlateScanNutrition(parsed);
+            }
+            return parsed;
           }
-        } else {
-          console.warn(`Direct client Gemini model ${model} returned ${aiResp.status}, trying fallback...`);
         }
-      } catch (err) {
-        if (err.name === 'AbortError') throw err;
-        console.warn(`Direct client Gemini model ${model} failed:`, err);
+      } catch (gemErr) {
+        console.warn(`Gemini ${gModel} client-side fallback warning:`, gemErr);
       }
     }
   }
 
+  // 4. TERTIARY CLIENT-SIDE GATEWAY: Pollinations AI
+  try {
+    const fallbackResult = await scanPlateWithPollinations(formattedDataUrl);
+    if (fallbackResult) return fallbackResult;
+  } catch (err) {
+    console.warn("Vision gateway fallback warning:", err);
+  }
+
   return {
     is_food: false,
-    rejection_reason: "PlateScan AI could not verify food in this frame. Please center your meal in good lighting."
+    rejection_reason: "Vision services unavailable. Verify VITE_GROQ_API_KEY in .env."
   };
 };
 
