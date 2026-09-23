@@ -772,6 +772,7 @@ def catalog_menu(request):
     # Resolve Gemini API Key
     api_key = (
         os.environ.get('GEMINI_API_KEY') or
+        os.environ.get('VITE_GEMINI_API_KEY') or
         request.headers.get('x-goog-api-key') or
         request.data.get('api_key') or
         ''
@@ -786,7 +787,8 @@ def catalog_menu(request):
         parts.append({"text": "Please extract and catalog all dishes and packages across all columns from the provided menu image(s)."})
 
     models_to_try = [
-        os.environ.get('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
+        os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash'),
+        'gemini-2.5-flash',
         'gemini-3.5-flash-lite',
         'gemini-3.1-flash-lite',
         'gemini-3.6-flash',
@@ -993,24 +995,96 @@ SCAN_PLATE_SCHEMA = {
         },
         "calories": {
             "type": "INTEGER",
-            "description": "Estimated calories in kcal. Null if is_food is false."
+            "description": "Estimated calories in kcal. Positive integer."
         },
         "sodium_mg": {
             "type": "INTEGER",
-            "description": "Estimated sodium in milligrams. Null if is_food is false."
+            "description": "Estimated sodium in milligrams. Positive integer."
         },
         "macros": {
             "type": "OBJECT",
+            "description": "Estimated macronutrients in grams.",
             "properties": {
-                "protein_g": {"type": "NUMBER"},
-                "carbs_g": {"type": "NUMBER"},
-                "fat_g": {"type": "NUMBER"}
-            }
+                "protein_g": {"type": "NUMBER", "description": "Protein in grams"},
+                "carbs_g": {"type": "NUMBER", "description": "Carbs in grams"},
+                "fat_g": {"type": "NUMBER", "description": "Fat in grams"}
+            },
+            "required": ["protein_g", "carbs_g", "fat_g"]
         },
         "confidence_score": {"type": "NUMBER"}
     },
-    "required": ["is_food"]
+    "required": ["is_food", "dish_name", "portion_estimate", "calories", "sodium_mg", "macros"]
 }
+
+def normalize_py_plate_nutrition(data):
+    if not isinstance(data, dict) or not data.get('is_food'):
+        return data
+
+    name = str(data.get('dish_name') or '').lower()
+    try:
+        cal = int(data.get('calories') or 0)
+    except (ValueError, TypeError):
+        cal = 0
+
+    macros = data.get('macros') or {}
+    try:
+        p = float(macros.get('protein_g') or 0)
+        c = float(macros.get('carbs_g') or 0)
+        f = float(macros.get('fat_g') or 0)
+    except (ValueError, TypeError):
+        p, c, f = 0, 0, 0
+
+    try:
+        sod = int(data.get('sodium_mg') or 0)
+    except (ValueError, TypeError):
+        sod = 0
+
+    if cal <= 0 or (p == 0 and c == 0 and f == 0):
+        if 'sisig' in name:
+            cal, p, c, f, sod = 650, 38, 6, 52, sod or 780
+        elif any(k in name for k in ['crispy pata', 'pata']):
+            cal, p, c, f, sod = 890, 58, 2, 72, sod or 920
+        elif any(k in name for k in ['lechon', 'bagnet', 'kawali']):
+            cal, p, c, f, sod = 740, 34, 3, 64, sod or 850
+        elif any(k in name for k in ['bulalo', 'nilaga']):
+            cal, p, c, f, sod = 650, 42, 10, 48, sod or 780
+        elif any(k in name for k in ['liempo', 'pork belly', 'bbq']):
+            cal, p, c, f, sod = 680, 32, 8, 56, sod or 820
+        elif 'kare' in name:
+            cal, p, c, f, sod = 620, 36, 14, 46, sod or 750
+        elif any(k in name for k in ['kaldereta', 'caldereta', 'menudo', 'afritada', 'mechado']):
+            cal, p, c, f, sod = 540, 34, 18, 36, sod or 800
+        elif 'adobo' in name:
+            cal, p, c, f, sod = 520, 38, 8, 36, sod or 890
+        elif any(k in name for k in ['palabok', 'luglug']):
+            cal, p, c, f, sod = 480, 18, 62, 16, sod or 760
+        elif any(k in name for k in ['pancit', 'bihon', 'canton', 'miki']):
+            cal, p, c, f, sod = 420, 22, 54, 12, sod or 710
+        elif any(k in name for k in ['chicken inasal', 'fried chicken', 'wings']):
+            cal, p, c, f, sod = 450, 36, 12, 28, sod or 690
+        elif 'sinigang' in name:
+            cal, p, c, f, sod = 320, 26, 10, 16, sod or 820
+        elif any(k in name for k in ['bangus', 'tilapia', 'hito', 'fish']):
+            cal, p, c, f, sod = 280, 30, 4, 15, sod or 620
+        elif any(k in name for k in ['pinakbet', 'pakbit', 'chopsuey']):
+            cal, p, c, f, sod = 240, 10, 24, 11, sod or 580
+        elif 'halo' in name:
+            cal, p, c, f, sod = 420, 8, 78, 9, sod or 120
+        elif 'flan' in name:
+            cal, p, c, f, sod = 320, 7, 42, 14, sod or 110
+        elif any(k in name for k in ['rice', 'sinangag']):
+            cal, p, c, f, sod = 220, 4, 46, 2, sod or 150
+        else:
+            cal, p, c, f, sod = 450, 25, 30, 22, sod or 650
+
+    data['calories'] = cal
+    data['sodium_mg'] = sod or 600
+    data['macros'] = {
+        'protein_g': p,
+        'carbs_g': c,
+        'fat_g': f
+    }
+    return data
 
 @api_view(['POST'])
 def scan_plate(request):
@@ -1054,13 +1128,15 @@ def scan_plate(request):
     # Resolve API Key
     api_key = (
         os.environ.get('GEMINI_API_KEY') or
+        os.environ.get('VITE_GEMINI_API_KEY') or
         request.headers.get('x-goog-api-key') or
         request.data.get('api_key') or
         ''
     ).strip()
 
     models_to_try = [
-        os.environ.get('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
+        os.environ.get('GEMINI_MODEL', 'gemini-2.5-flash'),
+        'gemini-2.5-flash',
         'gemini-3.5-flash-lite',
         'gemini-3.1-flash-lite',
         'gemini-3.6-flash',
@@ -1109,7 +1185,7 @@ def scan_plate(request):
                     if candidate_text:
                         parsed = json.loads(candidate_text)
                         if isinstance(parsed, dict) and "is_food" in parsed:
-                            return Response(parsed, status=status.HTTP_200_OK)
+                            return Response(normalize_py_plate_nutrition(parsed), status=status.HTTP_200_OK)
             except Exception as exc:
                 print(f"PlateScan Gemini ({model_name}) error:", exc)
 

@@ -16,7 +16,7 @@ import {
   EyeOff,
   ExternalLink
 } from 'lucide-react';
-import { scanPlateWithAi } from '../djangoApi';
+import { scanPlateWithAi, normalizePlateScanNutrition } from '../djangoApi';
 
 /**
  * PlateScan AI™
@@ -144,18 +144,9 @@ export default function PlateScanAI({
   const performFrameAnalysis = useCallback(async (imageDataUrl, isLiveStream = false, keyOverride = null) => {
     if (!imageDataUrl) return;
 
-    const effectiveKey = keyOverride !== null ? keyOverride : (apiKey || (typeof localStorage !== 'undefined' && localStorage.getItem('kanyamanan_gemini_api_key')) || '');
-
-    // If no key is set anywhere, alert user with the setup card
-    if (!effectiveKey) {
-      setScanResult({
-        is_food: false,
-        requires_api_key: true,
-        rejection_reason: "A Gemini API Key is required for live visual food deconstruction. Enter your free Google AI Studio key below or try Demo Mode."
-      });
-      setIsAnalyzing(false);
-      return;
-    }
+    const effectiveKey = keyOverride !== null
+      ? keyOverride
+      : (apiKey || (typeof localStorage !== 'undefined' && localStorage.getItem('kanyamanan_gemini_api_key')) || (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) || '');
 
     // Abort previous in-flight request to avoid network queue lag
     if (abortControllerRef.current) {
@@ -178,7 +169,8 @@ export default function PlateScanAI({
       });
 
       if (data && typeof data.is_food === 'boolean') {
-        setScanResult(data);
+        const normalized = typeof normalizePlateScanNutrition === 'function' ? normalizePlateScanNutrition(data) : data;
+        setScanResult(normalized);
         setPortionMultiplier(1);
         setAddedToLogSuccess(false);
       }
@@ -365,11 +357,11 @@ export default function PlateScanAI({
 
   // Calculate adjusted values based on portionMultiplier
   const mult = portionMultiplier || 1;
-  const currentCalories = scanResult?.calories ? Math.round(scanResult.calories * mult) : 0;
-  const currentProtein = scanResult?.macros?.protein_g ? Math.round(scanResult.macros.protein_g * mult) : 0;
-  const currentCarbs = scanResult?.macros?.carbs_g ? Math.round(scanResult.macros.carbs_g * mult) : 0;
-  const currentFat = scanResult?.macros?.fat_g ? Math.round(scanResult.macros.fat_g * mult) : 0;
-  const currentSodium = scanResult?.sodium_mg ? Math.round(scanResult.sodium_mg * mult) : 0;
+  const currentCalories = Math.round((Number(scanResult?.calories) || 0) * mult);
+  const currentProtein = Math.round((Number(scanResult?.macros?.protein_g) || 0) * mult);
+  const currentCarbs = Math.round((Number(scanResult?.macros?.carbs_g) || 0) * mult);
+  const currentFat = Math.round((Number(scanResult?.macros?.fat_g) || 0) * mult);
+  const currentSodium = Math.round((Number(scanResult?.sodium_mg) || 0) * mult);
 
   // Add analyzed dish to meal log / itinerary
   const handleAddToMealLog = () => {
@@ -430,59 +422,26 @@ export default function PlateScanAI({
           </p>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-2 shrink-0 flex-wrap">
-
-          <button
-            type="button"
-            onClick={() => {
-              if (isCameraActive) {
-                stopCameraStream();
-              } else {
-                startCamera('environment');
-              }
-            }}
-            className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all shadow-md cursor-pointer active:scale-95 ${
-              isCameraActive
-                ? 'bg-red-600 hover:bg-red-700 text-white'
-                : 'bg-gradient-to-r from-terracotta to-[#E25C38] hover:opacity-95 text-white'
-            }`}
-            title={isCameraActive ? "Stop live camera" : "Launch live camera"}
-          >
-            <Camera className="h-4 w-4" />
-            <span>{isCameraActive ? "Stop Camera" : "Live Camera"}</span>
-            {isCameraActive && (
-              <span className="w-2 h-2 rounded-full bg-white animate-ping" />
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="px-3.5 py-2 bg-[#1E1B18] hover:bg-[#25221E] text-gray-200 border border-[#2E2A24] rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer hover:border-gray-600 active:scale-95"
-            title="Upload photo from device"
-          >
-            <Upload className="h-4 w-4 text-terracotta" />
-            <span>Upload Photo</span>
-          </button>
-
-          {(isCameraActive || previewImage || scanResult) && (
+        {/* Action Controls: Shows Reset when active */}
+        {(isCameraActive || previewImage || scanResult) && (
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={handleReset}
-              className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all cursor-pointer"
+              className="px-3 py-1.5 bg-[#1E1B18] hover:bg-[#25221E] text-gray-300 hover:text-white border border-[#2E2A24] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
               title="Reset Viewfinder"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5 text-terracotta" />
+              <span>Reset</span>
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* ============================================================
           2. VIEWFINDER / VIEWPORT AREA
           ============================================================ */}
-      <div className="relative aspect-16/9 sm:aspect-16/9 w-full bg-[#181614] rounded-2xl overflow-hidden border border-[#2E2A24] flex items-center justify-center group shadow-inner">
+      <div className="relative aspect-16/9 sm:aspect-16/9 min-h-[300px] sm:min-h-[320px] w-full bg-[#181614] rounded-2xl overflow-hidden border border-[#2E2A24] flex items-center justify-center group shadow-inner">
         {/* Animated Scanning Laser Overlay */}
         {isAnalyzing && (
           <div className="absolute inset-0 pointer-events-none z-30 overflow-hidden">
@@ -494,15 +453,15 @@ export default function PlateScanAI({
           </div>
         )}
 
-        {/* Dashed Bounding Guides Overlay */}
-        <div className="absolute inset-4 sm:inset-6 pointer-events-none z-20 flex flex-col justify-between">
+        {/* Dashed Bounding Guides Overlay - Framed flush to outer corners */}
+        <div className="absolute inset-2.5 sm:inset-3 pointer-events-none z-20 flex flex-col justify-between">
           <div className="flex justify-between">
-            <div className="w-6 h-6 border-t-2 border-l-2 border-dashed border-terracotta/80 rounded-tl-lg" />
-            <div className="w-6 h-6 border-t-2 border-r-2 border-dashed border-terracotta/80 rounded-tr-lg" />
+            <div className="w-5 h-5 border-t-2 border-l-2 border-dashed border-terracotta/70 rounded-tl-md" />
+            <div className="w-5 h-5 border-t-2 border-r-2 border-dashed border-terracotta/70 rounded-tr-md" />
           </div>
           <div className="flex justify-between">
-            <div className="w-6 h-6 border-b-2 border-l-2 border-dashed border-terracotta/80 rounded-bl-lg" />
-            <div className="w-6 h-6 border-b-2 border-r-2 border-dashed border-terracotta/80 rounded-br-lg" />
+            <div className="w-5 h-5 border-b-2 border-l-2 border-dashed border-terracotta/70 rounded-bl-md" />
+            <div className="w-5 h-5 border-b-2 border-r-2 border-dashed border-terracotta/70 rounded-br-md" />
           </div>
         </div>
 
@@ -518,15 +477,27 @@ export default function PlateScanAI({
             />
             {/* Camera Floating HUD Controls */}
             <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between gap-2 pointer-events-auto">
-              <button
-                type="button"
-                onClick={toggleCameraFacing}
-                className="px-2.5 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/20 text-gray-300 hover:text-white text-[11px] font-bold flex items-center gap-1.5 cursor-pointer shadow-md"
-                title="Flip Camera (Front/Rear)"
-              >
-                <RefreshCw className="h-3.5 w-3.5" />
-                <span>Flip ({cameraFacingMode === 'environment' ? 'Rear' : 'Front'})</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={toggleCameraFacing}
+                  className="px-2.5 py-1.5 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-md border border-white/20 text-gray-300 hover:text-white text-[11px] font-bold flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
+                  title="Flip Camera (Front/Rear)"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  <span>Flip ({cameraFacingMode === 'environment' ? 'Rear' : 'Front'})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={stopCameraStream}
+                  className="px-2.5 py-1.5 rounded-xl bg-red-600/80 hover:bg-red-700 backdrop-blur-md border border-red-400/30 text-white text-[11px] font-bold flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
+                  title="Close live camera"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  <span>Stop</span>
+                </button>
+              </div>
 
               <button
                 type="button"
@@ -596,22 +567,22 @@ export default function PlateScanAI({
                 Recognizes authentic Kapampangan dishes, portions, calories, macros, and sodium in real time.
               </p>
             </div>
-            <div className="pt-2 flex items-center justify-center gap-2.5">
+            <div className="pt-3 flex flex-wrap items-center justify-center gap-3">
               <button
                 type="button"
                 onClick={() => startCamera('environment')}
-                className="px-4 py-2 bg-gradient-to-r from-terracotta to-[#E25C38] hover:opacity-95 text-white rounded-xl text-xs font-black flex items-center gap-1.5 shadow-md cursor-pointer active:scale-95"
+                className="px-5 py-2.5 bg-gradient-to-r from-terracotta to-[#E25C38] hover:opacity-95 text-white rounded-xl text-xs sm:text-[13px] font-semibold tracking-normal flex items-center justify-center gap-2 shadow-md cursor-pointer active:scale-95 transition-all"
               >
-                <Camera className="h-3.5 w-3.5" />
-                <span>Start Live Camera</span>
+                <Camera className="h-4 w-4 shrink-0" />
+                <span className="leading-none">Start Live Camera</span>
               </button>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 bg-[#25221E] hover:bg-[#302B25] text-gray-200 border border-[#2E2A24] rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
+                className="px-5 py-2.5 bg-[#221F1B] hover:bg-[#2C2722] text-gray-200 border border-[#3A342C] rounded-xl text-xs sm:text-[13px] font-semibold tracking-normal flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 hover:border-gray-500"
               >
-                <Upload className="h-3.5 w-3.5 text-terracotta" />
-                <span>Browse Photo</span>
+                <Upload className="h-4 w-4 text-terracotta shrink-0" />
+                <span className="leading-none">Upload Dish Photo</span>
               </button>
             </div>
           </div>
@@ -720,7 +691,7 @@ export default function PlateScanAI({
                     type="button"
                     onClick={handleAddToMealLog}
                     disabled={addedToLogSuccess}
-                    className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer active:scale-95 ${
+                    className={`w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs sm:text-[13px] font-semibold tracking-normal flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer active:scale-95 ${
                       addedToLogSuccess
                         ? 'bg-emerald-600 text-white'
                         : 'bg-gradient-to-r from-terracotta to-[#E25C38] hover:opacity-95 text-white'

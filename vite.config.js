@@ -123,24 +123,88 @@ const SCAN_PLATE_SCHEMA = {
     },
     calories: {
       type: "INTEGER",
-      description: "Estimated calories in kcal. Null if is_food is false."
+      description: "Estimated calories in kcal. Positive integer."
     },
     sodium_mg: {
       type: "INTEGER",
-      description: "Estimated sodium in milligrams. Null if is_food is false."
+      description: "Estimated sodium in milligrams. Positive integer."
     },
     macros: {
       type: "OBJECT",
+      description: "Estimated macronutrients in grams.",
       properties: {
-        protein_g: { type: "NUMBER" },
-        carbs_g: { type: "NUMBER" },
-        fat_g: { type: "NUMBER" }
-      }
+        protein_g: { type: "NUMBER", description: "Estimated protein in grams" },
+        carbs_g: { type: "NUMBER", description: "Estimated carbohydrates in grams" },
+        fat_g: { type: "NUMBER", description: "Estimated fat in grams" }
+      },
+      required: ["protein_g", "carbs_g", "fat_g"]
     },
     confidence_score: { type: "NUMBER" }
   },
-  "required": ["is_food"]
+  required: ["is_food", "dish_name", "portion_estimate", "calories", "sodium_mg", "macros"]
 };
+
+function normalizePlateScanNutritionNode(data) {
+  if (!data || !data.is_food) return data;
+
+  const name = (data.dish_name || '').toLowerCase();
+  let cal = Number(data.calories) || 0;
+  let p = Number(data.macros?.protein_g) || 0;
+  let c = Number(data.macros?.carbs_g) || 0;
+  let f = Number(data.macros?.fat_g) || 0;
+  let sod = Number(data.sodium_mg) || 0;
+
+  if (cal <= 0 || (p === 0 && c === 0 && f === 0)) {
+    if (/sisig/i.test(name)) {
+      cal = 650; p = 38; c = 6; f = 52; sod = sod || 780;
+    } else if (/crispy pata|pata/i.test(name)) {
+      cal = 890; p = 58; c = 2; f = 72; sod = sod || 920;
+    } else if (/lechon|bagnet|kawali/i.test(name)) {
+      cal = 740; p = 34; c = 3; f = 64; sod = sod || 850;
+    } else if (/bulalo|nilaga/i.test(name)) {
+      cal = 650; p = 42; c = 10; f = 48; sod = sod || 780;
+    } else if (/liempo|pork belly|bbq/i.test(name)) {
+      cal = 680; p = 32; c = 8; f = 56; sod = sod || 820;
+    } else if (/kare[- ]*kare/i.test(name)) {
+      cal = 620; p = 36; c = 14; f = 46; sod = sod || 750;
+    } else if (/kaldereta|caldereta|menudo|afritada|mechado/i.test(name)) {
+      cal = 540; p = 34; c = 18; f = 36; sod = sod || 800;
+    } else if (/adobo/i.test(name)) {
+      cal = 520; p = 38; c = 8; f = 36; sod = sod || 890;
+    } else if (/palabok|luglug/i.test(name)) {
+      cal = 480; p = 18; c = 62; f = 16; sod = sod || 760;
+    } else if (/pancit|bihon|canton|miki/i.test(name)) {
+      cal = 420; p = 22; c = 54; f = 12; sod = sod || 710;
+    } else if (/chicken inasal|fried chicken|wings/i.test(name)) {
+      cal = 450; p = 36; c = 12; f = 28; sod = sod || 690;
+    } else if (/sinigang/i.test(name)) {
+      cal = 320; p = 26; c = 10; f = 16; sod = sod || 820;
+    } else if (/bangus|tilapia|hito|fish/i.test(name)) {
+      cal = 280; p = 30; c = 4; f = 15; sod = sod || 620;
+    } else if (/pinakbet|pakbit|chopsuey/i.test(name)) {
+      cal = 240; p = 10; c = 24; f = 11; sod = sod || 580;
+    } else if (/halo[- ]*halo/i.test(name)) {
+      cal = 420; p = 8; c = 78; f = 9; sod = sod || 120;
+    } else if (/flan/i.test(name)) {
+      cal = 320; p = 7; c = 42; f = 14; sod = sod || 110;
+    } else if (/rice|sinangag/i.test(name)) {
+      cal = 220; p = 4; c = 46; f = 2; sod = sod || 150;
+    } else {
+      cal = 450; p = 25; c = 30; f = 22; sod = sod || 650;
+    }
+  }
+
+  return {
+    ...data,
+    calories: cal,
+    sodium_mg: sod || 600,
+    macros: {
+      protein_g: p,
+      carbs_g: c,
+      fat_g: f
+    }
+  };
+}
 
 function estimateDishCaloriesNode(name, category = '') {
   const n = (name || '').toLowerCase();
@@ -231,6 +295,7 @@ function catalogMenuApiPlugin(loadedEnv = {}) {
                 const candidateModels = [
                   payload.model,
                   process.env.VITE_GEMINI_MODEL,
+                  'gemini-2.5-flash',
                   'gemini-3.5-flash-lite',
                   'gemini-3.1-flash-lite',
                   'gemini-3.6-flash',
@@ -269,7 +334,7 @@ function catalogMenuApiPlugin(loadedEnv = {}) {
                         const parsed = JSON.parse(text);
                         res.statusCode = 200;
                         res.setHeader('Content-Type', 'application/json');
-                        res.end(JSON.stringify(parsed));
+                        res.end(JSON.stringify(normalizePlateScanNutritionNode(parsed)));
                         return;
                       }
                     } else {
@@ -328,6 +393,7 @@ function catalogMenuApiPlugin(loadedEnv = {}) {
                 const candidateModels = [
                   payload.model,
                   process.env.VITE_GEMINI_MODEL,
+                  'gemini-2.5-flash',
                   'gemini-3.5-flash-lite',
                   'gemini-3.1-flash-lite',
                   'gemini-3.6-flash',

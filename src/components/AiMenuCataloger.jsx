@@ -136,7 +136,7 @@ export default function AiMenuCataloger({
       const result = await catalogMenuWithAi({
         rawText: textToProcess,
         images: images,
-        apiKey: geminiApiKey
+        apiKey: geminiApiKey || (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) || ''
       });
 
       if (result) {
