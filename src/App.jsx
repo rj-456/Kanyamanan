@@ -21226,7 +21226,7 @@ ${rawText}`;
                             🩺 Clinical Health Informatics
                           </span>
                           <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-400/20 text-amber-200 text-[10px] font-black uppercase tracking-wider border border-amber-300/30">
-                            {isSolo ? '👤 Individual Dinnig' : `👥 Group Dining (${groupMembers.length} Members)`}
+                            {isSolo ? '👤 Individual Dining' : `👥 Group Dining (${groupMembers.length} Members)`}
                           </span>
                         </div>
 
