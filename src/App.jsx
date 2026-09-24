@@ -19484,10 +19484,10 @@ ${rawText}`;
                       <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
                         <div className="h-16 xs:h-18 sm:h-22 md:h-24 lg:h-18 xl:h-22 rounded-xl overflow-hidden relative shadow-2xs w-full">
                           <img
-                            src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80"
+                            src="/dishes/kare_kare.jpg"
                             alt="Authentic Kapampangan Kare-Kare Stew"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80"; }}
+                            onError={(e) => { e.target.src = "/restaurants/candaba/dishes/crispy_karekare.jpg"; }}
                           />
                           <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7px] xs:text-[7.5px] sm:text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                             🥜 Kare-Kare
@@ -19503,10 +19503,10 @@ ${rawText}`;
                       <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
                         <div className="h-16 xs:h-18 sm:h-22 md:h-24 lg:h-18 xl:h-22 rounded-xl overflow-hidden relative shadow-2xs w-full">
                           <img
-                            src="https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=400&q=80"
+                            src="/dishes/bringhe.jpg"
                             alt="Kapampangan Bringhe Fiesta Rice"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80"; }}
+                            onError={(e) => { e.target.src = "/restaurants/candaba/dishes/paco_enselada.jpg"; }}
                           />
                           <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7px] xs:text-[7.5px] sm:text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                             🥥 Bringhe
@@ -19526,7 +19526,7 @@ ${rawText}`;
                           src="/restaurants/authentic_sisig.jpg"
                           alt="Authentic Kapampangan Sizzling Sisig"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=500&q=80"; }}
+                          onError={(e) => { e.target.src = "/restaurants/candaba/dishes/sizzling_sisig.jpg"; }}
                         />
                         <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[8px] xs:text-[8.5px] sm:text-[9.5px] font-black px-2 sm:px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap border border-white/30">
                           🔥 Sizzling Sisig
@@ -19544,10 +19544,10 @@ ${rawText}`;
                       <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
                         <div className="h-16 xs:h-18 sm:h-22 md:h-24 lg:h-18 xl:h-22 rounded-xl overflow-hidden relative shadow-2xs w-full">
                           <img
-                            src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=400&q=80"
+                            src="/dishes/crispy_pata.jpg"
                             alt="Kapampangan Crispy Pata"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80"; }}
+                            onError={(e) => { e.target.src = "/restaurants/candaba/dishes/lechon_kawali.jpg"; }}
                           />
                           <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7px] xs:text-[7.5px] sm:text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                             🍖 Crispy Pata
@@ -19563,10 +19563,10 @@ ${rawText}`;
                       <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
                         <div className="h-16 xs:h-18 sm:h-22 md:h-24 lg:h-18 xl:h-22 rounded-xl overflow-hidden relative shadow-2xs w-full">
                           <img
-                            src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=400&q=80"
+                            src="/dishes/halo_halo.jpg"
                             alt="Special Kapampangan Halo-Halo"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&w=400&q=80"; }}
+                            onError={(e) => { e.target.src = "/restaurants/candaba/dishes/buko_halo_halo.jpg"; }}
                           />
                           <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7px] xs:text-[7.5px] sm:text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                             🍧 Halo-Halo
