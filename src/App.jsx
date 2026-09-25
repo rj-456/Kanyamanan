@@ -6702,6 +6702,33 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         !dietaryRefinementWithContext &&
         /\b(?:which one|which restaurant|that one|this one|the first|first one|the second|second one|the third|third one|cheaper|cheapest|closest|nearest|best one|among those|among them|of those|of them|yan|iyan|iyon|pangalawa|pangatlo|pinakamura|pinakamalapit)\b/i.test(userMsg);
 
+      // Recommendation diversity: remember restaurants already shown recently in
+      // this conversation, but only within the same active location/food scope.
+      // Fresh recommendation requests should rotate toward valid restaurants that
+      // were not already shown instead of returning the same top 3 every time.
+      const recentlyShownRestaurantIds = new Set(
+        recentReferenceFrames
+          .flatMap(frame => safeArray(frame?.restaurants))
+          .filter(r => {
+            const locationMatches =
+              !localConstraints.location ||
+              getRestaurantMunicipalities(r).some(m =>
+                normalize(m) === normalize(localConstraints.location)
+              );
+            if (!locationMatches) return false;
+
+            if (!recommendationFoodTokens.length) return true;
+
+            return safeArray(r?.menu).some(dish =>
+              recommendationFoodTokens.some(token =>
+                getDishText(r, dish).includes(normalize(token))
+              )
+            );
+          })
+          .map(r => r?.id || normalize(r?.name))
+          .filter(Boolean)
+      );
+
       const getBudgetDishQuality = (dish, budgetLimit = null) => {
         const name = normalize(dish?.name || '');
         const price = toNumber(dish?.price, null);
@@ -7575,6 +7602,26 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         recentAttractionOrder.length > 0 &&
         !attractionIntroducesNewScope;
 
+      // Attraction recommendation diversity: rotate toward valid attractions that
+      // have not appeared in recent attraction answers for the same active scope.
+      const recentlyShownAttractionIds = new Set(
+        recentReferenceFrames
+          .flatMap(frame => safeArray(frame?.attractions))
+          .filter(a => {
+            const locationMatches =
+              !localConstraints.location ||
+              normalize(a?.municipality) === normalize(localConstraints.location);
+
+            if (!locationMatches) return false;
+
+            if (!requestedAttractionCategories.length) return true;
+
+            return requestedAttractionCategories.some(spec => spec.matches(a));
+          })
+          .map(a => a?.id || normalize(a?.name))
+          .filter(Boolean)
+      );
+
       const attractionOrdinalIndex = (() => {
         if (followUpOrdinalIndex === -1 && recentAttractionOrder.length) {
           return recentAttractionOrder.length - 1;
@@ -7835,6 +7882,19 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           return p.score > -50;
         })
         .sort((a, b) => {
+          // For a fresh broad recommendation, prefer valid restaurants that
+          // have not appeared in recent recommendation answers. Follow-up
+          // questions remain anchored to the previous result set.
+          if (!restaurantRecommendationFollowUp && recentlyShownRestaurantIds.size > 0) {
+            const aSeen = recentlyShownRestaurantIds.has(
+              a.restaurant?.id || normalize(a.restaurant?.name)
+            );
+            const bSeen = recentlyShownRestaurantIds.has(
+              b.restaurant?.id || normalize(b.restaurant?.name)
+            );
+            if (aSeen !== bSeen) return aSeen ? 1 : -1;
+          }
+
           // For "near me", geography is the primary ordering.
           if (localConstraints.asksCurrentLocation) {
             const ad = Number.isFinite(a.distanceKm) ? a.distanceKm : Infinity;
@@ -7910,6 +7970,18 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           return profile.score > -50;
         })
         .sort((a, b) => {
+          // Fresh attraction searches rotate away from attractions already shown
+          // in recent recommendation answers. Explicit follow-ups stay anchored.
+          if (!attractionRecommendationFollowUp && recentlyShownAttractionIds.size > 0) {
+            const aSeen = recentlyShownAttractionIds.has(
+              a.attraction?.id || normalize(a.attraction?.name)
+            );
+            const bSeen = recentlyShownAttractionIds.has(
+              b.attraction?.id || normalize(b.attraction?.name)
+            );
+            if (aSeen !== bSeen) return aSeen ? 1 : -1;
+          }
+
           if (localConstraints.asksAttractionNearby ||
             localConstraints.asksCurrentLocation ||
             /\b(?:closest|nearest)\b/i.test(userMsg)) {
