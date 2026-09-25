@@ -5453,6 +5453,14 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
       const localConstraints = detectConstraintsLocally(userMsg);
 
+      // A request to DISPLAY the user's existing itinerary is not a request to
+      // generate a new food plan. Keep this intent separate from generic
+      // "itinerary/route" planning language so "Show me my current itinerary"
+      // always reads the real activeTrip state.
+      const asksItineraryContentsRequest =
+        /\b(?:show(?: me)?|list|display|view|what(?:'s| is) in|what are|which are|what stops|which stops|what places|which places)\b.*\b(?:my|our|current|active)\s+(?:(?:current|active)\s+)?(?:itinerary|trip|route)\b/i.test(userMsg) ||
+        /\b(?:my|our|current|active)\s+(?:(?:current|active)\s+)?(?:itinerary|trip|route)\b.*\b(?:contents?|contain|contains|stops?|places|destinations?)\b/i.test(userMsg);
+
       // ============================================================
       // DIETARY RAW-INTENT GUARDS (Batch 6)
       // ============================================================
@@ -8384,7 +8392,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         needsClarification: false,
         clarificationQuestion: '',
         primaryIntent:
-          localConstraints.asksCurrentTrip
+          (localConstraints.asksCurrentTrip || asksItineraryContentsRequest)
             ? 'current_trip'
             : localConstraints.asksRoute
               ? 'planning'
@@ -8492,7 +8500,9 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         plan.primaryIntent = 'current_trip';
       }
       if ((localConstraints.asksRoute || /food trail|food crawl|food tour|day trip|one day|1 day/i.test(userMsg)) &&
-        !localConstraints.asksAction) {
+        !localConstraints.asksAction &&
+        !localConstraints.asksCurrentTrip &&
+        !asksItineraryContentsRequest) {
         plan.primaryIntent = 'planning';
         plan.answerMode = 'itinerary';
       }
@@ -8599,8 +8609,23 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           .reverse();
 
         for (const message of botMessages) {
-          const messageText = normalize(message?.text || '');
+          const rawMessageText = String(message?.text || '');
+          const messageText = normalize(rawMessageText);
           if (!messageText) continue;
+
+          // Itinerary status/action confirmations are not recommendation frames.
+          // Skip them so an ordinal follow-up such as "add the second restaurant too"
+          // still resolves against the last actual recommendation list rather than
+          // the one or two stops currently shown in the itinerary.
+          const itineraryStatusMessage =
+            /\bcurrent active itinerary\b/i.test(messageText) ||
+            /\byour current itinerary\b/i.test(messageText) ||
+            (
+              /\bactive itinerary\b/i.test(messageText) &&
+              /\b(?:added|removed|cleared|replaced|swapped|moved|saved|loaded|skipped)\b/i.test(messageText)
+            );
+
+          if (itineraryStatusMessage) continue;
 
           const found = allTripCatalogEntities
             .map(item => {
@@ -11782,12 +11807,8 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             `I’ll use this as context for your next restaurant, dish, or food-plan request.`;
         }
 
-        if (plan.primaryIntent === 'current_trip' || localConstraints.asksCurrentTrip) {
-          const asksForItineraryContents =
-            /\b(?:what(?:'s| is) in|show(?: me)?|list|what are|which are|what stops|which stops|what places|which places)\b.*\b(?:my|our|current|active)?\s*(?:itinerary|trip|route)\b/i.test(userMsg) ||
-            /\b(?:my|our|current|active)\s*(?:itinerary|trip|route)\b.*\b(?:contents?|contain|contains|stops?|places|destinations?)\b/i.test(userMsg);
-
-          if (asksForItineraryContents) {
+        if (plan.primaryIntent === 'current_trip' || localConstraints.asksCurrentTrip || asksItineraryContentsRequest) {
+          if (asksItineraryContentsRequest) {
             const itineraryStops = safeArray(activeTrip);
 
             if (!itineraryStops.length) {
