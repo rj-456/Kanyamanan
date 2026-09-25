@@ -6113,12 +6113,20 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       // Natural restaurant-refresh follow-up:
       // "Show me different options." after a restaurant result should continue
       // returning restaurants, not be reclassified as a generic dish/options query.
+      // Keep this matcher reusable so chained refresh prompts can be skipped when
+      // recovering the original restaurant search scope (for example San Fernando).
+      const isRestaurantRefreshFollowUpText = (value) => {
+        const text = String(value || '');
+        return (
+          /\b(?:show|give|recommend|suggest)\s+(?:me\s+)?(?:some\s+)?(?:different|other|new|another|more)\s+options?\b/i.test(text) ||
+          /\b(?:different|other|new|another|more)\s+restaurants?\b/i.test(text) ||
+          /\b(?:show|give|recommend|suggest)\s+(?:me\s+)?(?:something|somewhere)\s+(?:different|else)\b/i.test(text)
+        );
+      };
+
       const differentRestaurantOptionsFollowUp =
         referenceFrameForFollowUp?.primaryKind === 'restaurant' &&
-        (
-          /\b(?:show|give|recommend|suggest)\s+(?:me\s+)?(?:some\s+)?(?:different|other|new|another|more)\s+options?\b/i.test(userMsg) ||
-          /\b(?:different|other|new|another|more)\s+restaurants?\b/i.test(userMsg)
-        );
+        isRestaurantRefreshFollowUpText(userMsg);
 
       const hasExplicitRecentSetReference =
         followUpOrdinalIndex !== null ||
@@ -6474,6 +6482,39 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           )
         ) || null;
 
+      // Chained "different options" prompts are themselves restaurant requests,
+      // but they usually contain no city. Looking only at the immediately previous
+      // request therefore loses a scope such as "San Fernando" after one or more
+      // refreshes. Walk past those refresh prompts and recover the nearest genuine
+      // restaurant search that established the active scope.
+      //
+      // Important: a newer genuine restaurant search with no municipality (for
+      // example "Recommend restaurants in Pampanga") intentionally stops the scan,
+      // so an older city such as San Fernando is never resurrected by mistake.
+      const recentRestaurantScopeRequest = (() => {
+        for (const priorMessage of priorUserMessages) {
+          const previousText = String(priorMessage?.text || '');
+
+          if (isRestaurantRefreshFollowUpText(previousText)) {
+            continue;
+          }
+
+          const constraints = detectConstraintsLocally(previousText);
+          const isRestaurantSearch =
+            constraints.asksRestaurantRecommendation ||
+            (
+              constraints.asksRestaurantList &&
+              /\b(?:recommend|suggest|where|saan|eat|dine|kumain|restaurant|restaurants|kainan)\b/i.test(previousText)
+            );
+
+          if (isRestaurantSearch) {
+            return { text: previousText, constraints };
+          }
+        }
+
+        return null;
+      })();
+
       // Keep the previous restaurant search scope for "different options"
       // when the user does not repeat the municipality/city in the follow-up.
       if (differentRestaurantOptionsFollowUp) {
@@ -6482,8 +6523,8 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         localConstraints.asksDishList = false;
         localConstraints.asksRecommendation = true;
 
-        if (!localConstraints.location && recentRestaurantRequest?.constraints?.location) {
-          localConstraints.location = recentRestaurantRequest.constraints.location;
+        if (!localConstraints.location && recentRestaurantScopeRequest?.constraints?.location) {
+          localConstraints.location = recentRestaurantScopeRequest.constraints.location;
         }
       }
 
