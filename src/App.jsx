@@ -3349,6 +3349,16 @@ function App() {
 
 Need help deciding where to eat, what to try, where to go, or how to plan your Pampanga trip? I can help you check restaurants and dishes, explore attractions, compare options, manage your itinerary, watch your budget and dietary needs, and find places near you.
 
+**Try these prompts:**
+• Recommend restaurants in Pampanga.
+• What tourist attractions can we visit in Pampanga?
+• What restaurants are near me?
+• Recommend restaurants under ₱300.
+• I am vegetarian. Recommend restaurants in Pampanga.
+• Add the first restaurant to my itinerary.
+
+It is highly recommended to check the **Travel Kasaup Guide** quick-chat button before exploring. It shows the different Travel Kasaup features, helpful guides, and more sample prompts you can try.
+
 So, where do we start? 😊`,
     }
   ]);
@@ -4600,42 +4610,85 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       if (isBotTyping) return;
 
       const guideMessage = [
-        '**Travel Kasaup Guide**',
+        '**✨ Travel Kasaup Guide**',
         '',
-        'Travel Kasaup helps you explore Pampanga, find food and attractions, manage your trip, and ask follow-up questions in natural language.',
+        'Your Travel Kasaup guide is here! Explore the 8 features below and try the sample prompts to see how Kasaup can help you plan, discover, compare, and manage your Pampanga trip.',
         '',
-        '**1. Follow-up Understanding**',
-        'Keeps the context of your previous Kasaup answer so you can ask things like: “What about the cheaper ones?”',
+        '**🍴 1. Restaurant Recommendations**',
+        'Finds registered restaurants that match your location, request, preferences, and other constraints.',
+        '**Try these 5 prompts:**',
+        '1. “Recommend restaurants in Pampanga.”',
+        '2. “Recommend restaurants in San Fernando.”',
+        '3. “Recommend restaurants in Porac.”',
+        '4. “Recommend restaurants with local Kapampangan dishes.”',
+        '5. “Show me different restaurant options in Pampanga.”',
         '',
-        '**2. Restaurant Recommendations**',
-        'Finds registered restaurants that match your request, location, preferences, and other constraints.',
-        'Sample prompt: “Recommend restaurants in Pampanga.”',
+        '**🍽️ 2. Follow-up Understanding**',
+        'Kasaup remembers the context of your recent answer so you can continue the conversation naturally.',
+        '**Try these 5 prompts:**',
+        '1. “What about the cheaper ones?”',
+        '2. “Which one is closest?”',
+        '3. “What dishes does the first one have?”',
+        '4. “Tell me more about the second one.”',
+        '5. “What about other options?”',
         '',
-        '**3. Tourist Attraction Questions**',
-        'Helps you discover and ask questions about tourist attractions and destinations.',
-        'Sample prompt: “What tourist attractions can we visit in Pampanga?”',
+        '**🏛️ 3. Tourist Attraction Questions**',
+        'Helps you discover registered tourist attractions and ask questions about destinations.',
+        '**Try these 5 prompts:**',
+        '1. “What tourist attractions can we visit in Pampanga?”',
+        '2. “What tourist spots can we visit in San Fernando?”',
+        '3. “Recommend tourist attractions in Pampanga.”',
+        '4. “Tell me more about the first tourist spot.”',
+        '5. “Which tourist attraction is closest?”',
         '',
-        '**4. Itinerary Actions**',
+        '**🗺️ 4. Itinerary Actions**',
         'Lets you add, remove, check, replace, or clear stops in your current itinerary.',
-        'Sample prompt: “Add this restaurant to my itinerary.”',
+        '**Try these 5 prompts:**',
+        '1. “Add this restaurant to my itinerary.”',
+        '2. “Show me my current itinerary.”',
+        '3. “Remove the restaurant I just added.”',
+        '4. “Replace the second stop with the third restaurant.”',
+        '5. “Clear my itinerary.”',
         '',
-        '**5. Budget Handling**',
-        'Uses your stated budget when recommending restaurants, dishes, or trip options.',
-        'Sample prompt: “Recommend restaurants under ₱300.”',
+        '**💰 5. Budget Handling**',
+        'Uses your stated budget when recommending restaurants, dishes, or trip options, including group and per-person budgets.',
+        '**Try these 5 prompts:**',
+        '1. “Recommend restaurants under ₱300.”',
+        '2. “We are 4 people with a ₱1,500 total budget. Recommend restaurants.”',
+        '3. “My budget is ₱500 per person. Recommend restaurants.”',
+        '4. “Recommend dishes that fit my budget.”',
+        '5. “What if our group budget is ₱2,000?”',
         '',
-        '**6. Dietary Constraints**',
-        'Considers dietary preferences and food constraints when answering restaurant and dish questions.',
-        'Sample prompt: “I am vegetarian. Recommend restaurants for me.”',
+        '**🥗 6. Dietary Constraints**',
+        'Considers dietary preferences, allergies, and food restrictions when answering restaurant and dish questions.',
+        '**Try these 5 prompts:**',
+        '1. “I am vegetarian. Recommend restaurants for me.”',
+        '2. “I am allergic to shellfish. Recommend dishes.”',
+        '3. “Recommend dishes without bagoong.”',
+        '4. “I have a peanut allergy. Recommend dishes.”',
+        '5. “I have no dietary restrictions. Recommend restaurants in Pampanga.”',
         '',
-        '**7. Near-Me Behavior**',
-        'Uses your available location context to help find nearby restaurants or attractions.',
-        'Sample prompt: “What restaurants are near me?”',
+        '**📍 7. Near-Me Behavior**',
+        'Uses your available location context to help find nearby restaurants and attractions.',
+        '**Try these 5 prompts:**',
+        '1. “What restaurants are near me?”',
+        '2. “What tourist attractions are near me?”',
+        '3. “Which restaurant is closest to me?”',
+        '4. “What restaurants are near me under ₱300?”',
+        '5. “What places near me can I visit?”',
         '',
-        '**8. Comparison Questions**',
-        'Compares restaurants, dishes, prices, or other available travel options when you ask.',
-        'Sample prompt: “Compare these two restaurants. Which is cheaper?”',
+        '**⚖️ 8. Comparison Questions**',
+        'Compares restaurants, dishes, prices, or other available travel options from the results and context in your conversation.',
+        '**Try these 5 prompts:**',
+        '1. “Compare the first and second restaurants.”',
+        '2. “Which one is cheaper?”',
+        '3. “Which restaurant has lower-calorie options?”',
+        '4. “What are the differences between these two restaurants?”',
+        '5. “Compare the first three restaurants.”',
         '',
-        'You can also combine features in one conversation—for example, ask for restaurant recommendations, compare the results, then add your choice to the itinerary.'
+        '**💡 Tip:** You can combine features in one conversation—for example, ask for restaurant recommendations, compare the results, choose one, and then add it to your itinerary.',
+        '',
+        '**📖 Want more help?** Press the **Travel Kasaup Guide** quick-chat button anytime to open this guide again and explore the suggested prompts.'
       ].join('\n');
 
       setChatMessages(prev => [
