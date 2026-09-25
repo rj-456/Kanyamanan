@@ -12906,9 +12906,11 @@ Return ONLY a valid JSON object matching this schema:
   };
 
   const handleAddToItinerary = (res) => {
-    if (!res) return;
+    if (!res) return false;
 
-    // Festival season validation: Guard against adding inactive festivals
+    // Festival season validation: Guard against adding inactive festivals.
+    // Returning false is important because callers may show the "Added to Active Itinerary"
+    // confirmation only when the stop was actually added.
     const isFest = Boolean(
       res.isFestival ||
       (res.type && res.type.toLowerCase().includes('festival')) ||
@@ -12916,11 +12918,12 @@ Return ONLY a valid JSON object matching this schema:
     );
     if (isFest && !isFestivalActiveOnDate(res, plannedTripDate)) {
       alert(`⚠️ Festival Not Happening on Selected Date:\n\n"${res.name}" only takes place in ${res.eventMonth || 'its festival season'} (${res.eventDate || 'Scheduled Dates'}).\n\nYour planned trip date is currently set to ${plannedTripDate || 'today'}.\n\nTo add this festival to your itinerary, please adjust your Trip Date in the Food Trip Planner to ${res.eventMonth || 'its season'}.`);
-      return;
+      return false;
     }
 
-    if (activeTrip.some(item => item.id === res.id)) return;
+    if (activeTrip.some(item => item.id === res.id)) return false;
     setActiveTrip([...activeTrip, res]);
+    return true;
   };
 
 
@@ -21156,8 +21159,9 @@ ${rawText}`;
                                 type="button"
                                 disabled={isAdded}
                                 onClick={() => {
-                                  handleAddToItinerary(attr);
-                                  setAddedStopModal(attr);
+                                  if (handleAddToItinerary(attr)) {
+                                    setAddedStopModal(attr);
+                                  }
                                 }}
                                 className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${isAdded
                                   ? 'bg-bananaleaf/10 text-bananaleaf dark:text-emerald-400 border border-bananaleaf/25 font-bold cursor-default'
@@ -22592,8 +22596,9 @@ ${rawText}`;
                     if (muns.length > 1) {
                       setBranchSelectTarget(targetRes);
                     } else {
-                      handleAddToItinerary(targetRes);
-                      setAddedStopModal(targetRes);
+                      if (handleAddToItinerary(targetRes)) {
+                        setAddedStopModal(targetRes);
+                      }
                     }
                   }}
                   className="px-3.5 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-bold rounded-xl shadow-xs hover:shadow transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
@@ -23333,8 +23338,9 @@ ${rawText}`;
                               <button
                                 type="button"
                                 onClick={() => {
-                                  handleAddToItinerary(selectedRestaurant);
-                                  setAddedStopModal(selectedRestaurant);
+                                  if (handleAddToItinerary(selectedRestaurant)) {
+                                    setAddedStopModal(selectedRestaurant);
+                                  }
                                 }}
                                 className="px-3 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-[10px] font-black transition-all shadow-2xs cursor-pointer inline-flex items-center gap-1 active:scale-95"
                               >
@@ -23859,9 +23865,10 @@ ${rawText}`;
                               type="button"
                               onClick={() => {
                                 const targetAttr = selectedAttraction;
-                                handleAddToItinerary(targetAttr);
-                                setSelectedAttraction(null);
-                                setAddedStopModal(targetAttr);
+                                if (handleAddToItinerary(targetAttr)) {
+                                  setSelectedAttraction(null);
+                                  setAddedStopModal(targetAttr);
+                                }
                               }}
                               className="px-3.5 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-[10px] font-black transition-all shadow-2xs cursor-pointer inline-flex items-center gap-1 active:scale-95"
                             >
@@ -23894,9 +23901,10 @@ ${rawText}`;
                             type="button"
                             onClick={() => {
                               const targetAttr = selectedAttraction;
-                              handleAddToItinerary(targetAttr);
-                              setSelectedAttraction(null);
-                              setAddedStopModal(targetAttr);
+                              if (handleAddToItinerary(targetAttr)) {
+                                setSelectedAttraction(null);
+                                setAddedStopModal(targetAttr);
+                              }
                             }}
                             className="px-3.5 py-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-lg text-[10px] font-black transition-all shadow-2xs cursor-pointer inline-flex items-center gap-1 active:scale-95"
                           >
@@ -23925,9 +23933,10 @@ ${rawText}`;
                   type="button"
                   onClick={() => {
                     const targetAttr = selectedAttraction;
-                    handleAddToItinerary(targetAttr);
-                    setSelectedAttraction(null);
-                    setAddedStopModal(targetAttr);
+                    if (handleAddToItinerary(targetAttr)) {
+                      setSelectedAttraction(null);
+                      setAddedStopModal(targetAttr);
+                    }
                   }}
                   className="px-5 py-2 bg-[#2C5E3B] text-white rounded-xl text-xs font-bold hover:bg-[#20452B] shadow cursor-pointer active:scale-95"
                 >
@@ -23983,9 +23992,10 @@ ${rawText}`;
                         lng: lng,
                         selectedBranchName: mun
                       };
-                      handleAddToItinerary(branchItem);
-                      setBranchSelectTarget(null);
-                      setAddedStopModal(branchItem);
+                      if (handleAddToItinerary(branchItem)) {
+                        setBranchSelectTarget(null);
+                        setAddedStopModal(branchItem);
+                      }
                     }}
                     className="w-full text-left p-3.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] bg-ivory/50 dark:bg-[#161412] hover:bg-terracotta/5 dark:hover:bg-terracotta/15 hover:border-terracotta dark:hover:border-terracotta transition-all cursor-pointer group flex items-start gap-3"
                   >
