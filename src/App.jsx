@@ -4901,10 +4901,10 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         const raw = String(value || '');
 
         const moneyPatterns = [
-          /(?:under|below|less than|at most|max(?:imum)?|no more than|not more than|up to|within|around|about)\s*(?:php|₱|peso(?:s)?)?\s*(\d[\d,]*(?:\.\d+)?\s*k?)\b(?!\s*(?:kcal|calories?|km|kilometers?|minutes?|hours?|people|persons|pax|travelers?|travellers?|diners?|guests?|stops?|restaurants?|attractions?))/i,
-          /(?:budget|spend|spending|allowance|price|cost)\s*(?:of|is|=|:|around|about|under|below|up to|within|na|ng)?\s*(?:php|₱|peso(?:s)?)?\s*(\d[\d,]*(?:\.\d+)?\s*k?)\b/i,
-          /(?:php|₱)\s*(\d[\d,]*(?:\.\d+)?\s*k?)\b/i,
-          /\b(\d[\d,]*(?:\.\d+)?\s*k?)\s*(?:php|peso|pesos)\b/i,
+          /(?:under|below|less than|at most|max(?:imum)?|no more than|not more than|up to|within|around|about)\s*(?:php|₱|p(?=\s*\d)|peso(?:s)?)?\s*(\d[\d,]*(?:\.\d+)?\s*k?)\b(?!\s*(?:kcal|calories?|km|kilometers?|minutes?|hours?|people|persons|pax|travelers?|travellers?|diners?|guests?|stops?|restaurants?|attractions?))/i,
+          /(?:budget|spend|spending|allowance|price|cost)\s*(?:of|is|=|:|around|about|under|below|up to|within|na|ng)?\s*(?:php|₱|p(?=\s*\d)|peso(?:s)?)?\s*(\d[\d,]*(?:\.\d+)?\s*k?)\b/i,
+          /(?:php|₱|p(?=\s*\d))\s*(\d[\d,]*(?:\.\d+)?\s*k?)\b/i,
+          /\b(\d[\d,]*(?:\.\d+)?\s*k?)\s*(?:php|peso|pesos|p)\b/i,
           /\b(\d[\d,]*(?:\.\d+)?\s*k?)\s+(?:total\s+)?budget\b/i
         ];
 
@@ -4931,7 +4931,8 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       };
 
       const extractGroupSizeFromText = (value) => extractFirstNumber(value, [
-        /\b(?:for|party of|group of|we are|we re|there are|with)\s+(\d+)\s*(?:people|persons|pax|travelers|travellers|diners|guests|of us)?\b/i,
+        /\b(?:party of|group of|we are|we(?:'|’)re|there are)\s+(\d+)\s*(?:people|persons|pax|travelers|travellers|diners|guests|of us)?\b/i,
+        /\b(?:for|with)\s+(\d+)\s*(?:people|persons|pax|travelers|travellers|diners|guests|of us)\b/i,
         /\b(\d+)\s*(?:people|persons|pax|travelers|travellers|diners|guests|of us)\b/i,
         /\b(?:kami|tayo)\s+(?:ay\s+)?(\d+)\b/i
       ]);
@@ -5266,7 +5267,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         const asksLunch = /\b(?:lunch|lunchtime|noon)\b/i.test(raw);
         const asksDinner = /\b(?:dinner|dinnertime|tonight|evening)\b/i.test(raw);
         const asksBreakfast = /\b(?:breakfast|morning meal)\b/i.test(raw);
-        const asksFamilyOrGroup = /\b(?:family|group|couple|friends|for\s+\d+|party of\s+\d+|we are\s+\d+|there are\s+\d+)\b/i.test(raw);
+        const asksFamilyOrGroup = /\b(?:family|group|couple|friends|for\s+\d+\s*(?:people|persons|pax)?|party of\s+\d+|we are\s+\d+|we(?:'|’)re\s+\d+|there are\s+\d+)\b/i.test(raw);
         const groupSize = extractGroupSizeFromText(raw);
 
         const budgetItemCeiling =
@@ -5363,7 +5364,9 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           asksPurineAvoidList: /\b(?:avoid|which.*avoid|high[- ]purine|higher[- ]purine|purine risk|foods? to avoid|dishes? to avoid)\b/i.test(raw),
           asksAllergen: safeArray(dietaryInfo.allergyTerms).length > 0 || /allergen|allergy|allergies|intoleran|food sensitivity|food restriction|bawal na sangkap/i.test(q),
           asksCalories: /calorie|kcal|diet|lighter|light meal|low calorie|healthy meal/i.test(q),
-          asksBudget: /budget|cheap|cheapest|affordable|price|cost|spend|peso|php|inexpensive|expensive|afford|allowance|magkano|mura/i.test(q),
+          asksBudget:
+            explicitBudgetInfo.amount !== null ||
+            /budget|cheap|cheapest|affordable|price|cost|spend|peso|php|inexpensive|expensive|afford|allowance|magkano|mura/i.test(q),
           asksRoute:
             /\b(?:plan|route|itinerary|trail|food crawl|food tour|tour|schedule|stops?|day trip|day tour|one day|1 day|half day|morning|afternoon|evening)\b/i.test(q) ||
             (asksRecommendation && asksGeneralTravel && !asksAttraction && !asksActivities),
@@ -5492,18 +5495,18 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         /\b(?:what(?:'s| is) my budget|what(?:'s| is) our budget|show (?:me )?(?:my|our) budget|current budget|budget ko|budget namin)\b/i.test(userMsg);
 
       const rawBudgetTaskLanguage =
-        /\b(?:recommend|suggest|show|list|find|give|where|saan|what should|which|restaurant|restaurants|kainan|eat|dine|kumain|dish|dishes|meal|meals|food|menu|plan|route|itinerary|trip|tour|attraction|attractions|tourist|visit|see|afford|budget left|remaining budget)\b/i.test(userMsg);
+        /\b(?:recommend|suggest|show|list|find|give|where|saan|what should|which|option|options|restaurant|restaurants|kainan|eat|dine|kumain|dish|dishes|meal|meals|food|menu|plan|route|itinerary|trip|tour|attraction|attractions|tourist|visit|see|afford|budget left|remaining budget)\b/i.test(userMsg);
 
       const budgetStatementOnly =
         rawBudgetInfo.amount !== null &&
         !rawBudgetProfileQuery &&
         !rawBudgetTaskLanguage &&
-        !/\b(?:what if|how about|instead|same budget|change|make it)\b/i.test(userMsg) &&
+        !/\b(?:what if|what about|how about|instead|same budget|change|make it|option|options)\b/i.test(userMsg) &&
         !localConstraints.asksAction;
 
       const budgetConstraintRefinement =
         !rawBudgetProfileQuery &&
-        /\b(?:what if|how about|instead|same budget|change|make it)\b/i.test(userMsg) &&
+        /\b(?:what if|what about|how about|instead|same budget|change|make it)\b/i.test(userMsg) &&
         (
           rawBudgetInfo.amount !== null ||
           extractGroupSizeFromText(userMsg) !== null ||
@@ -6545,19 +6548,33 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         .find(frame => frame.constraints.asksDishList) || null;
 
       const budgetContinuationLanguage =
-        /\b(?:what if|how about|instead|same budget|budget|spend|afford|allowance|per person|per pax|each|total|for all|we are|we re|there are|people|persons|pax|of us|kami|tayo)\b/i.test(userMsg);
+        rawBudgetInfo.amount !== null ||
+        extractGroupSizeFromText(userMsg) !== null ||
+        /\b(?:same budget|budget|spend|spending|afford|allowance|per person|per pax|per head|each person|each of us|total budget|group budget|shared budget|for all|for everyone|people|persons|pax|of us|kami|tayo)\b/i.test(userMsg);
+
+      // Previous budget state is food-specific conversation context. Do not
+      // silently carry it into a fresh attraction/tourist request just because
+      // that request also contains a generic word such as "recommend".
+      const currentBudgetEligibleFoodRequest =
+        localConstraints.asksRestaurantRecommendation ||
+        localConstraints.asksRestaurantList ||
+        localConstraints.asksDishList ||
+        (
+          localConstraints.asksRoute &&
+          !localConstraints.asksAttraction &&
+          !localConstraints.asksActivities
+        ) ||
+        (
+          localConstraints.asksRecommendation &&
+          !localConstraints.asksAttraction &&
+          !localConstraints.asksActivities
+        );
 
       const currentRequestCanUsePreviousBudget =
         !rawBudgetProfileQuery &&
         localConstraints.budgetLimit === null &&
         previousUserWasBudgetSetup &&
-        (
-          localConstraints.asksRestaurantRecommendation ||
-          localConstraints.asksRestaurantList ||
-          localConstraints.asksDishList ||
-          localConstraints.asksRoute ||
-          localConstraints.asksRecommendation
-        );
+        currentBudgetEligibleFoodRequest;
 
       if (
         currentRequestCanUsePreviousBudget &&
@@ -6586,6 +6603,11 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         localConstraints.budgetItemCeiling = false;
         localConstraints.budgetExplicitlyTotal = Boolean(recentExplicitBudgetInfo.explicitlyTotal);
         localConstraints.asksBudget = true;
+
+        if (!localConstraints.groupSize && recentExplicitGroupSize) {
+          localConstraints.groupSize = recentExplicitGroupSize;
+          localConstraints.asksFamilyOrGroup = true;
+        }
       } else if (
         !rawBudgetProfileQuery &&
         budgetContinuationLanguage &&
@@ -6600,31 +6622,30 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         localConstraints.asksBudget = true;
       }
 
+      const currentMessageHasNewBudgetAmount = rawBudgetInfo.amount !== null;
+
       const effectiveBudgetGroupSize = Math.max(
         1,
         Math.min(
           100,
           toNumber(localConstraints.groupSize, null) ||
           (
-            (budgetContinuationLanguage && !rawBudgetProfileQuery)
+            (
+              !currentMessageHasNewBudgetAmount &&
+              budgetContinuationLanguage &&
+              !rawBudgetProfileQuery
+            )
               ? toNumber(recentExplicitGroupSize, null)
               : null
           ) ||
-          toNumber(numPersons, 1) ||
+          (
+            currentMessageHasNewBudgetAmount
+              ? 1
+              : toNumber(numPersons, 1)
+          ) ||
           1
         )
       );
-
-      if (budgetConstraintRefinement && referenceFrameForFollowUp?.primaryKind === 'restaurant') {
-        localConstraints.asksRestaurantRecommendation = true;
-        localConstraints.asksRestaurantList = true;
-        localConstraints.asksDishList = false;
-        localConstraints.asksRecommendation = true;
-
-        if (!localConstraints.location && recentRestaurantRequest?.constraints?.location) {
-          localConstraints.location = recentRestaurantRequest.constraints.location;
-        }
-      }
 
       if (budgetConstraintRefinement && referenceFrameForFollowUp?.primaryKind === 'dish') {
         localConstraints.asksDishList = true;
@@ -6632,6 +6653,21 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
         if (!localConstraints.location && recentDishRequest?.constraints?.location) {
           localConstraints.location = recentDishRequest.constraints.location;
+        }
+      } else if (
+        budgetConstraintRefinement &&
+        (
+          referenceFrameForFollowUp?.primaryKind === 'restaurant' ||
+          Boolean(recentRestaurantRequest)
+        )
+      ) {
+        localConstraints.asksRestaurantRecommendation = true;
+        localConstraints.asksRestaurantList = true;
+        localConstraints.asksDishList = false;
+        localConstraints.asksRecommendation = true;
+
+        if (!localConstraints.location && recentRestaurantScopeRequest?.constraints?.location) {
+          localConstraints.location = recentRestaurantScopeRequest.constraints.location;
         }
       }
 
@@ -6700,11 +6736,13 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
             ? `${formatPeso(budgetContext.perPersonLimit)} per-dish ceiling; about ${formatPeso(budgetContext.totalLimit)} if ${budgetContext.groupSize} people order one each`
             : `${formatPeso(budgetContext.perPersonLimit)} per-dish ceiling`;
         }
+        if (budgetContext.perPersonExplicit) {
+          return budgetContext.groupSize > 1
+            ? `${formatPeso(budgetContext.perPersonLimit)}/person × ${budgetContext.groupSize} = ${formatPeso(budgetContext.totalLimit)} group allowance`
+            : `${formatPeso(budgetContext.perPersonLimit)}/person`;
+        }
         if (budgetContext.groupSize <= 1) {
           return `${formatPeso(budgetContext.totalLimit)} budget`;
-        }
-        if (budgetContext.perPersonExplicit) {
-          return `${formatPeso(budgetContext.perPersonLimit)}/person × ${budgetContext.groupSize} = ${formatPeso(budgetContext.totalLimit)} group allowance`;
         }
         return `${formatPeso(budgetContext.totalLimit)} total ÷ ${budgetContext.groupSize} = about ${formatPeso(budgetContext.perPersonLimit)}/person`;
       })();
@@ -6864,6 +6902,17 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           .filter(Boolean)
       );
 
+      const isObviousNonMealBudgetRow = (dish) => {
+        const name = normalize(dish?.name || '');
+
+        return (
+          /\b(?:reservation\s+package|package\s+details?|reservation\s+details?|booking\s+details?|service\s+charge|corkage)\b/i.test(name) ||
+          /^(?:(?:plain|extra|steamed|garlic|java|fried)\s+)?rice(?:\s*\([^)]*\))?$/i.test(name) ||
+          /^(?:(?:garlic|toasted|toast|buttered|plain)(?:\s*\/\s*(?:garlic|toasted|toast|buttered|plain))?\s+)?bread(?:\s*\([^)]*\))?$/i.test(name) ||
+          /^(?:extra\s+)?(?:gravy|sauce|dip|dressing)$/i.test(name)
+        );
+      };
+
       const getBudgetDishQuality = (dish, budgetLimit = null) => {
         const name = normalize(dish?.name || '');
         const price = toNumber(dish?.price, null);
@@ -6872,8 +6921,11 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
         let score = 0;
 
-        // Deprioritize obvious sides, add-ons, drinks, and generic one-word rows.
-        if (/^(?:plain\s+)?rice$|^extra\s+rice$|^steamed\s+rice$|^water$|^bottled\s+water$|^soft\s*drinks?$|^coke$|^iced\s+tea$|^hotdog$|^pork$|^beef$|^chicken$/i.test(name)) {
+        // Broad restaurant affordability must be based on a meaningful food item,
+        // not booking/package metadata or a very small side/add-on.
+        if (isObviousNonMealBudgetRow(dish)) {
+          score -= 90;
+        } else if (/^(?:plain\s+)?rice$|^extra\s+rice$|^steamed\s+rice$|^water$|^bottled\s+water$|^soft\s*drinks?$|^coke$|^iced\s+tea$|^hotdog$|^pork$|^beef$|^chicken$/i.test(name)) {
           score -= 45;
         } else if (/\b(?:extra rice|add[\s-]?on|additional rice|soft drink|bottled water)\b/i.test(name)) {
           score -= 25;
@@ -6921,6 +6973,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       };
 
       const isMealLikeBudgetDish = (dish) =>
+        !isObviousNonMealBudgetRow(dish) &&
         getBudgetDishQuality(dish, recommendationPerPersonBudget) > 0;
 
       const getDietaryDishText = (dish) => normalize([
