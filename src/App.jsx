@@ -3349,6 +3349,9 @@ function App() {
 
 Need help deciding where to eat, what to try, where to go, or how to plan your Pampanga trip? I can help you check restaurants and dishes, explore attractions, compare options, manage your itinerary, watch your budget and dietary needs, and find places near you.
 
+**⭐ Highly Recommended: Check the Travel Kasaup Guide**
+Before trying the prompts below, tap the **Travel Kasaup Guide** quick-chat button. It explains the different Travel Kasaup features, gives helpful guidance, and provides more sample prompts so you can make the most of Kasaup.
+
 **Try these prompts:**
 • Recommend restaurants in Pampanga.
 • What tourist attractions can we visit in Pampanga?
@@ -3357,7 +3360,8 @@ Need help deciding where to eat, what to try, where to go, or how to plan your P
 • I am vegetarian. Recommend restaurants in Pampanga.
 • Add the first restaurant to my itinerary.
 
-It is highly recommended to check the **Travel Kasaup Guide** quick-chat button before exploring. It shows the different Travel Kasaup features, helpful guides, and more sample prompts you can try.
+**📍 Restaurant Near Me Setup Note:**
+Before asking Kasaup for restaurants near you, first go to the **Food Trip Planner** and press **Locate Me** so your current location is available. Then return to Travel Kasaup and use a restaurant near-me prompt.
 
 So, where do we start? 😊`,
     }
@@ -4670,6 +4674,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         '',
         '**📍 7. Near-Me Behavior**',
         'Uses your available location context to help find nearby restaurants and attractions.',
+        '**Important for Restaurant Near Me:** Before using restaurant near-me prompts, first go to the **Food Trip Planner** and press **Locate Me** so Kasaup has your current location. Then return to Travel Kasaup and ask for restaurants near you.',
         '**Try these 5 prompts:**',
         '1. “What restaurants are near me?”',
         '2. “What tourist attractions are near me?”',
