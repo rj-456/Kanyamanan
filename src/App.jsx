@@ -11898,7 +11898,9 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           return `📍 **I need your current location for “near me” results${radiusText}.**\n\n` +
             `${kasaupLocationIssue || 'I could not access a detected browser location.'} ` +
             `I won't treat the default San Fernando start point as your real position.\n\n` +
-            `Enable browser location access and try again, or name a city/municipality such as “restaurants in San Fernando.”`;
+            `**Near-Me Setup:** Go to the **Food Trip Planner** and press **Locate Me** first. ` +
+            `Allow browser location access, then return to **Travel Kasaup** and try your near-me prompt again.\n\n` +
+            `If you prefer not to share location, name a city/municipality instead, such as “restaurants in San Fernando.”`;
         }
 
         // A normal displayed menu already has a dedicated single-dish follow-up
