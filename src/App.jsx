@@ -6017,7 +6017,25 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         Boolean(latestReferenceFrame) &&
         (followUpReferenceLanguage || shortFollowUpRefinement);
 
+      // "What about cheaper ones?" is a restaurant-search refinement, not a
+      // request to compare only the restaurants already shown. Keep that meaning
+      // distinct from singular criterion questions such as "Which one is cheaper?"
+      // or "Which one is the cheapest?", which should compare the current set.
+      const isCheaperRestaurantAlternativesFollowUpText = (value) => {
+        const text = String(value || '');
+        return (
+          /\b(?:what|how)\s+about\s+(?:the\s+)?(?:cheaper|more affordable|less expensive)\s+(?:one|ones|options?|restaurants?)\b/i.test(text) ||
+          /\b(?:show|give|recommend|suggest)\s+(?:me\s+)?(?:some\s+)?(?:cheaper|more affordable|less expensive)\s+(?:one|ones|options?|restaurants?)\b/i.test(text) ||
+          /\bany\s+(?:other\s+)?(?:cheaper|more affordable|less expensive)\s+(?:one|ones|options?|restaurants?)\b/i.test(text)
+        );
+      };
+
+      const cheaperRestaurantAlternativesFollowUp =
+        latestReferenceFrame?.primaryKind === 'restaurant' &&
+        isCheaperRestaurantAlternativesFollowUpText(userMsg);
+
       const followUpComparisonLanguage =
+        !cheaperRestaurantAlternativesFollowUp &&
         /\b(?:which one|which is|which has|which fits|which stays|which opens|which closes|which of|cheaper|cheapest|closer|closest|nearest|nearer|lowest|highest|best of|most affordable|least expensive|lowest calorie|lower calorie|fewer calories|fewest calories|lightest|opens earlier|open earlier|closes later|stays open later|open later|more vegetarian options|more vegan options|more dietary options|more menu options|more dishes|fits? my budget|fits? our budget|fits? my diet|fits? our diet|pinakamura|pinakamalapit)\b/i.test(userMsg);
 
       // Dedicated comparison signal for the final Kasaup comparison batch.
@@ -6025,10 +6043,13 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       // queries such as "Which restaurant is closest in Porac?" when no
       // comparison set/named pair actually exists.
       const comparisonSignal =
-        Boolean(localConstraints.asksComparison) ||
-        /\b(?:which|what)\b.{0,90}\b(?:cheaper|cheapest|closer|closest|nearest|nearer|fewer calories|fewest calories|lower calorie|lowest calorie|lighter|opens earlier|open earlier|closes later|stays open later|open later)\b/i.test(userMsg) ||
-        /\b(?:which|what)\b.{0,90}\b(?:more|fewer|fewest)\b.{0,70}\b(?:options|dishes|menu items|calories)\b/i.test(userMsg) ||
-        /\bwhich\b.{0,70}\bfits?\b.{0,70}\b(?:budget|diet|dietary|restriction|allergy|allergies)\b/i.test(userMsg);
+        !cheaperRestaurantAlternativesFollowUp &&
+        (
+          Boolean(localConstraints.asksComparison) ||
+          /\b(?:which|what)\b.{0,90}\b(?:cheaper|cheapest|closer|closest|nearest|nearer|fewer calories|fewest calories|lower calorie|lowest calorie|lighter|opens earlier|open earlier|closes later|stays open later|open later)\b/i.test(userMsg) ||
+          /\b(?:which|what)\b.{0,90}\b(?:more|fewer|fewest)\b.{0,70}\b(?:options|dishes|menu items|calories)\b/i.test(userMsg) ||
+          /\bwhich\b.{0,70}\bfits?\b.{0,70}\b(?:budget|diet|dietary|restriction|allergy|allergies)\b/i.test(userMsg)
+        );
 
       const referenceFrameForFollowUp = (() => {
         if (!recentReferenceFrames.length) return null;
@@ -6177,6 +6198,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       // A location change is always a new geographic scope.
       const freshRestaurantSearch =
         differentRestaurantOptionsFollowUp ||
+        cheaperRestaurantAlternativesFollowUp ||
         (
           explicitRestaurantResultRequest &&
           (
@@ -6536,7 +6558,10 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         for (const priorMessage of priorUserMessages) {
           const previousText = String(priorMessage?.text || '');
 
-          if (isRestaurantRefreshFollowUpText(previousText)) {
+          if (
+            isRestaurantRefreshFollowUpText(previousText) ||
+            isCheaperRestaurantAlternativesFollowUpText(previousText)
+          ) {
             continue;
           }
 
@@ -6556,9 +6581,9 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         return null;
       })();
 
-      // Keep the previous restaurant search scope for "different options"
-      // when the user does not repeat the municipality/city in the follow-up.
-      if (differentRestaurantOptionsFollowUp) {
+      // Keep the previous restaurant search scope for restaurant-refinement
+      // follow-ups when the user does not repeat the municipality/city.
+      if (differentRestaurantOptionsFollowUp || cheaperRestaurantAlternativesFollowUp) {
         localConstraints.asksRestaurantRecommendation = true;
         localConstraints.asksRestaurantList = true;
         localConstraints.asksDishList = false;
@@ -6901,6 +6926,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       const restaurantRecommendationFollowUp =
         recentMentionedRestaurantIds.size > 0 &&
         isFollowUpQuery &&
+        !cheaperRestaurantAlternativesFollowUp &&
         !budgetConstraintRefinement &&
         !dietaryRefinementWithContext &&
         /\b(?:which one|which restaurant|that one|this one|the first|first one|the second|second one|the third|third one|cheaper|cheapest|closest|nearest|best one|among those|among them|of those|of them|yan|iyan|iyon|pangalawa|pangatlo|pinakamura|pinakamalapit)\b/i.test(userMsg);
@@ -8083,6 +8109,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       const shouldRotateRestaurantRecommendations =
         freshRestaurantSearch &&
         !restaurantRecommendationFollowUp &&
+        !cheaperRestaurantAlternativesFollowUp &&
         !localConstraints.asksCurrentLocation &&
         !localConstraints.asksNearestOnly &&
         !/\b(?:cheapest|lowest price|most affordable|least expensive|closest|nearest|best restaurant|best place|pick one|choose one)\b/i.test(userMsg);
@@ -8125,6 +8152,13 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           // For follow-up ranking, stay inside the restaurants just discussed when
           // we can identify them from the preceding Kasaup response.
           if (restaurantRecommendationFollowUp && !p.mentionedRecently) {
+            return false;
+          }
+
+          // "What about cheaper ones?" asks for alternative restaurants, so do
+          // not simply repeat the exact restaurants from the previous result set.
+          // The remaining candidates are then ordered by meaningful affordability.
+          if (cheaperRestaurantAlternativesFollowUp && p.mentionedRecently) {
             return false;
           }
 
@@ -12454,9 +12488,11 @@ ${JSON.stringify(updatedMessages.slice(-8))}
           };
 
           const scopeNote =
-            restaurantRecommendationFollowUp
-              ? `\n\n_I ranked the restaurants from the previous Kasaup recommendation._`
-              : '';
+            cheaperRestaurantAlternativesFollowUp
+              ? `\n\n_I looked for alternative restaurants using lower meaningful registered menu starting prices while keeping the active restaurant search scope._`
+              : restaurantRecommendationFollowUp
+                ? `\n\n_I ranked the restaurants from the previous Kasaup recommendation._`
+                : '';
 
           const rankingNote = shouldRotateRestaurantRecommendations
             ? `\n\n_Recommendations are randomized among qualifying Kanyamanan matches after applying the registered location, menu, price, and constraint filters—not alphabetically ordered or based on invented ratings._`
