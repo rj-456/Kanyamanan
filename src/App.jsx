@@ -6736,7 +6736,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         ) &&
         Boolean(referenceFrameForFollowUp?.primaryKind);
 
-      if (dietaryRefinementWithContext && referenceFrameForFollowUp?.primaryKind === 'restaurant') {
+      if (dietaryRefinementWithContext && referenceFrameForFollowUp?.primaryKind === 'restaurant' && !explicitDishResultRequest) {
         localConstraints.asksRestaurantRecommendation = true;
         localConstraints.asksRestaurantList = true;
         localConstraints.asksDishList = false;
@@ -6747,7 +6747,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         }
       }
 
-      if (dietaryRefinementWithContext && referenceFrameForFollowUp?.primaryKind === 'dish') {
+      if (dietaryRefinementWithContext && referenceFrameForFollowUp?.primaryKind === 'dish' && !explicitRestaurantResultRequest) {
         localConstraints.asksDishList = true;
         localConstraints.asksRestaurantRecommendation = false;
 
@@ -6890,6 +6890,18 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         'serve', 'serves', 'serving', 'restaurant', 'restaurants'
       ]);
 
+      // A dietary-reset sentence is conversational metadata, not a food request.
+      // Without this guard, words such as "have", "dietary", "restrictions",
+      // or "now" can accidentally overlap registered menu text and collapse a
+      // normal plural restaurant recommendation to a single menu-matched result.
+      // Keep real food words (for example "sisig") eligible even when the user
+      // also clears dietary restrictions in the same request.
+      const dietaryResetMetaTokens = new Set([
+        'have', 'has', 'had', 'diet', 'dietary', 'restriction', 'restrictions',
+        'restricted', 'now', 'none', 'anything', 'fine', 'clear', 'cleared',
+        'ignore', 'ignoring', 'previous', 'prior', 'old'
+      ]);
+
       const recommendationFoodTokens = unique(
         normalize(userMsg)
           .split(/\s+/)
@@ -6899,6 +6911,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
             !genericRestaurantConstraintTokens.has(token) &&
             !municipalityTokens.has(token) &&
             !dietaryExcludedFoodTokens.has(token) &&
+            !(rawDietaryInfo.reset && dietaryResetMetaTokens.has(token)) &&
             !/^\d+(?:\.\d+)?$/.test(token) &&
             registeredMenuVocabulary.has(token)
           )
@@ -7135,6 +7148,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       };
 
       const hasActiveDietaryConstraint = () =>
+        !rawDietaryInfo.reset &&
         Boolean(
           safeArray(localConstraints.exclusionTerms).length ||
           safeArray(localConstraints.allergyTerms).length ||
@@ -11244,12 +11258,33 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
         // A menu follow-up should create a new DISH COLLECTION context.
         // This prevents "What dishes does it have?" from collapsing to one dish.
+        // IMPORTANT: if the conversation is carrying a dietary constraint
+        // (for example vegetarian), apply it here too. This branch runs before
+        // the later selectedFollowUpItem menu branch, so skipping the screen
+        // here would silently bypass dietary continuity.
         if (followUpMenuQuestion && explicitDishRestaurant) {
+          const activeDietaryMenuFilter = hasActiveDietaryConstraint();
+
           const menu = safeArray(explicitDishRestaurant?.menu)
+            .filter(dish =>
+              !activeDietaryMenuFilter ||
+              evaluateDishDietaryFit(explicitDishRestaurant, dish).passes
+            )
             .slice()
             .sort((a, b) => toNumber(a?.price, Infinity) - toNumber(b?.price, Infinity));
 
           if (!menu.length) {
+            if (activeDietaryMenuFilter) {
+              return `🍽️ **Registered dishes at ${explicitDishRestaurant?.name || 'Registered restaurant'}**\n\n` +
+                `No registered dishes at this restaurant pass the active dietary screen.` +
+                (dietaryConstraintLabel
+                  ? `\n\n_🥗 Applied dietary filter: ${dietaryConstraintLabel}._`
+                  : '') +
+                (dietaryCautionNote
+                  ? `\n\n${dietaryCautionNote}`
+                  : '');
+            }
+
             return `🍽️ **${explicitDishRestaurant?.name || 'Registered restaurant'} menu**\n\n` +
               `No menu items are currently registered for this restaurant.`;
           }
@@ -11263,8 +11298,15 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
             ).join('\n') +
             (remaining
               ? `\n\n_+${remaining} more registered menu item${remaining === 1 ? '' : 's'} not shown._`
+              : '') +
+            (activeDietaryMenuFilter && dietaryConstraintLabel
+              ? `\n\n_🥗 Applied dietary filter: ${dietaryConstraintLabel}._`
+              : '') +
+            (activeDietaryMenuFilter && dietaryCautionNote
+              ? `\n\n${dietaryCautionNote}`
               : '');
         }
+
 
         // Compare only the items Kasaup just discussed.
         if (isCheapestFollowUp && items.length > 1) {
@@ -11391,18 +11433,38 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
             const r = selectedFollowUpItem;
 
             if (followUpMenuQuestion) {
+              // Preserve the active dietary context when an ordinal restaurant
+              // follow-up asks what the user can eat there. Previously this path
+              // listed the restaurant's full menu and bypassed the dietary screen.
               const menu = safeArray(r?.menu)
+                .filter(dish =>
+                  !hasActiveDietaryConstraint() ||
+                  evaluateDishDietaryFit(r, dish).passes
+                )
                 .slice()
                 .sort((a, b) => toNumber(a?.price, Infinity) - toNumber(b?.price, Infinity));
 
               if (!menu.length) {
+                if (hasActiveDietaryConstraint()) {
+                  return `🍽️ **Registered dishes at ${r?.name || 'Registered restaurant'}**\n\n` +
+                    `No registered dishes at this restaurant pass the active dietary screen.` +
+                    (dietaryConstraintLabel ? `\n\n_🥗 Applied dietary filter: ${dietaryConstraintLabel}._` : '') +
+                    (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '');
+                }
+
                 return `🍽️ **${r?.name || 'Registered restaurant'} menu**\n\nNo menu items are currently registered for this restaurant.`;
               }
 
               return `🍽️ **Registered dishes at ${r.name}**\n\n` +
                 menu.slice(0, 15).map((dish, index) =>
                   formatDirectDishLine({ restaurant: r, dish }, index)
-                ).join('\n');
+                ).join('\n') +
+                (hasActiveDietaryConstraint() && dietaryConstraintLabel
+                  ? `\n\n_🥗 Applied dietary filter: ${dietaryConstraintLabel}._`
+                  : '') +
+                (hasActiveDietaryConstraint() && dietaryCautionNote
+                  ? `\n\n${dietaryCautionNote}`
+                  : '');
             }
 
             return formatRestaurantFollowUpDetail(r);
@@ -12512,6 +12574,11 @@ ${JSON.stringify(updatedMessages.slice(-8))}
               (dietaryCautionNote ? `\n\n${dietaryCautionNote}` : '')
               : '';
 
+          const dietaryResetNote =
+            rawDietaryInfo.reset
+              ? `\n\n_🥗 Dietary filter reset: previous dietary restrictions are not being applied to this recommendation._`
+              : '';
+
           const nearbyNote =
             localConstraints.asksCurrentLocation
               ? nearMeDistanceNote
@@ -12521,6 +12588,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             profiles.map(formatRecommendation).join('\n\n') +
             budgetNote +
             dietaryNote +
+            dietaryResetNote +
             nearbyNote +
             scopeNote +
             rankingNote;
