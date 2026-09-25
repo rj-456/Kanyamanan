@@ -4498,7 +4498,7 @@ So, where do we start? 😊`,
     }
 
     // Comparison / explanation / information-seeking
-    if (has(/\b(compare|comparison|versus|vs\.?|difference|better than|which is better|cheaper than)\b/i)) {
+    if (has(/\b(compare|comparison|versus|vs\.?|differences?|better than|which is better|cheaper than)\b/i)) {
       addIntent('comparison', 0.9);
     }
     if (has(/\b(why|how does|what does|what is|tell me about|explain|meaning|history|story)\b/i)) {
@@ -4718,7 +4718,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
     const openEnded =
 
-      /\b(plan|itinerary|build|create|design|organize|explain|why|compare|comparison|versus|vs\.?|difference|recommend|recommendation|suggest|best|worth|strategy|how should|make me)\b/i.test(userMsg);
+      /\b(plan|itinerary|build|create|design|organize|explain|why|compare|comparison|versus|vs\.?|differences?|recommend|recommendation|suggest|best|worth|strategy|how should|make me)\b/i.test(userMsg);
 
     const concrete =
 
@@ -4734,7 +4734,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
       kasaupWords.length > 4 &&
 
-      (!concrete || /\b(plan|itinerary|build|create|design|explain|why|compare|comparison|versus|vs\.?|difference)\b/i.test(userMsg));
+      (!concrete || /\b(plan|itinerary|build|create|design|explain|why|compare|comparison|versus|vs\.?|differences?)\b/i.test(userMsg));
 
     const kasaupLocalFirst = !useGeminiForKasaup;
 
@@ -4746,7 +4746,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
     const fastWords = fastNormalized.split(' ').filter(Boolean);
     const fastIsGreeting = /^(hi|hello|hey|kumusta|mabuhay|mekeni)\b/i.test(userMsg);
     const fastIsFollowUp = /\b(it|that|this|those|these|there|second|third|first|next|same|them|what about|how about|which one|what else|add it|remove it|the cheaper one|the first one|the second one)\b/i.test(userMsg);
-    const fastNeedsReasoning = /\b(plan|itinerary|route|compare|comparison|versus|vs\.?|difference|why|explain|directions?|navigate|how far|how long|recommend|suggest|best|worth|things to do|activities|tourist|day trip|what should|where should|which should)\b/i.test(userMsg);
+    const fastNeedsReasoning = /\b(plan|itinerary|route|compare|comparison|versus|vs\.?|differences?|why|explain|directions?|navigate|how far|how long|recommend|suggest|best|worth|things to do|activities|tourist|day trip|what should|where should|which should)\b/i.test(userMsg);
     const fastHasLocalConstraint = /\b(calorie|calories|kcal|purine|uric acid|gout|bagoong|allerg(y|ies)|allergic|budget|cheap|cheapest|price|cost|php|peso|pesos|₱)\b/i.test(userMsg);
     const fastLocalOnly =
       fastIsGreeting ||
@@ -5289,7 +5289,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           (asksCurrentLocation && /\b(?:restaurant|restaurants|place to eat|places to eat|kainan)\b/i.test(raw)) ||
           /\b(?:pinakamalapit)(?:\s+na)?\s+(?:restaurant|restaurants|kainan)\b/i.test(raw) ||
           /\b(?:which one|which restaurant|the cheaper one|the cheapest one|cheapest one)\b/i.test(raw);
-        const asksComparison = /\b(?:compare|comparison|versus|vs\.?|difference|better|best between|which is better)\b/i.test(raw);
+        const asksComparison = /\b(?:compare|comparison|versus|vs\.?|differences?|better|best between|which is better)\b/i.test(raw);
         const asksDirections = /\b(?:how do i get|how to get|directions?|navigate|navigation|drive to|go to|route to|way to)\b/i.test(raw);
         const asksTravelTime = /\b(?:how long|travel time|drive time|eta|minutes away|far is|distance)\b/i.test(raw);
         const asksActivities = /\b(?:things to do|what can i do|activities|activity|visit|see|sightseeing|places to visit|tourist spots|tourist destinations)\b/i.test(raw);
@@ -5617,10 +5617,19 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       const orderedExactBoldCatalogMentions = (messageText, catalog, getName, getKey) => {
         const sourceText = String(messageText || '');
         const boldFragments = [...sourceText.matchAll(/\*\*([^*\n]+)\*\*/g)]
-          .map(match => ({
-            normalized: normalize(match?.[1] || ''),
-            position: Number.isFinite(match?.index) ? match.index : 0
-          }))
+          .map(match => {
+            // Formal restaurant comparisons render rows like **1. Restaurant Name**.
+            // Strip only that display ordinal so the full compared set is still
+            // captured even when a later **Result:** line bolds just the winner.
+            const normalized = normalize(match?.[1] || '')
+              .replace(/^\d{1,2}[.)]\s+/, '')
+              .trim();
+
+            return {
+              normalized,
+              position: Number.isFinite(match?.index) ? match.index : 0
+            };
+          })
           .filter(x => x.normalized);
 
         if (!boldFragments.length) return [];
@@ -5872,6 +5881,25 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
               primaryKind === 'dish' ? dishesInOrder :
                 [];
 
+        // Keep the full compared set separately from the singular "winner" subject.
+        // Criterion comparison responses intentionally collapse primaryItems to the
+        // winning entity for pronoun/detail follow-ups such as "How much is it?".
+        // However, comparison follow-ups such as "Which one has lower calories?"
+        // and "What are the main differences between them?" must stay anchored to
+        // the complete pair/set that was compared.
+        const isFormalComparisonFrame =
+          /\b(?:dish comparison|restaurant comparison|attraction comparison)\b/i.test(leadLine);
+
+        const comparisonItems =
+          isFormalComparisonFrame
+            ? (
+              primaryKind === 'restaurant' ? restaurantsInOrder :
+                primaryKind === 'attraction' ? attractionsInOrder :
+                  primaryKind === 'dish' ? dishesInOrder :
+                    []
+            )
+            : [];
+
         // Criterion comparisons emit an explicit "**Result:** **Entity**" line.
         // Make that winning entity the next singular follow-up subject while
         // retaining every compared entity in restaurants/attractions/dishes.
@@ -5939,6 +5967,8 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           text: messageText,
           primaryKind,
           primaryItems,
+          isFormalComparisonFrame,
+          comparisonItems,
           restaurants: restaurantsInOrder,
           attractions: attractionsInOrder,
           dishes: dishesInOrder
@@ -9777,10 +9807,81 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         a => a?.id || normalize(a?.name || '')
       );
 
+      // If the immediately previous Kasaup answer was a formal comparison,
+      // comparison-style follow-ups should continue using that same compared set
+      // even when the previous answer named one criterion winner. Keep explicit
+      // multi-position commands (for example "compare first and third") tied to
+      // the normal list-reference resolver so they can intentionally choose a new
+      // pair from the displayed recommendation list.
+      const normalizedComparisonPrompt = normalize(userMsg);
+
+      const currentComparisonOrdinalMentions =
+        normalizedComparisonPrompt.match(
+          /\b(?:first|1st|number 1|#1|second|2nd|number 2|#2|third|3rd|number 3|#3|fourth|4th|number 4|#4|fifth|5th|number 5|#5|sixth|6th|number 6|#6|seventh|7th|number 7|#7|eighth|8th|number 8|#8|ninth|9th|number 9|#9|tenth|10th|number 10|#10)\b/g
+        ) || [];
+
+      const requestedComparisonCount = (() => {
+        const match = normalizedComparisonPrompt.match(
+          /\b(?:first|top)\s+(two|three|four|2|3|4)\b/
+        );
+        if (!match) return null;
+        const token = match[1];
+        if (token === 'two' || token === '2') return 2;
+        if (token === 'three' || token === '3') return 3;
+        if (token === 'four' || token === '4') return 4;
+        return null;
+      })();
+
+      const comparisonPreferredKind =
+        explicitRestaurantTopic ? 'restaurant' :
+          explicitDishTopic ? 'dish' :
+            explicitAttractionTopic ? 'attraction' :
+              latestReferenceFrame?.primaryKind || null;
+
+      // Explicit ordinal/count commands intentionally select from the most recent
+      // actual result list, not from a smaller comparison response produced later.
+      // This preserves flows such as:
+      // recommendation list -> compare first/second -> ... -> compare first three.
+      const explicitComparisonListFrame =
+        (
+          requestedComparisonCount !== null ||
+          currentComparisonOrdinalMentions.length >= 2
+        )
+          ? recentReferenceFrames.find(frame =>
+            !frame?.isFormalComparisonFrame &&
+            frame?.primaryKind === comparisonPreferredKind &&
+            safeArray(frame?.primaryItems).length > 1
+          ) || null
+          : null;
+
+      const shouldContinueLatestComparison =
+        comparisonSignal &&
+        requestedComparisonCount === null &&
+        currentComparisonOrdinalMentions.length < 2 &&
+        Boolean(latestReferenceFrame?.isFormalComparisonFrame) &&
+        safeArray(latestReferenceFrame?.comparisonItems).length > 1;
+
       const comparisonReferenceFrame =
-        referenceFrameForFollowUp?.primaryKind
-          ? referenceFrameForFollowUp
-          : latestReferenceFrame;
+        explicitComparisonListFrame
+          ? {
+            ...explicitComparisonListFrame,
+            primaryItems:
+              requestedComparisonCount !== null
+                ? safeArray(explicitComparisonListFrame.primaryItems).slice(0, requestedComparisonCount)
+                : explicitComparisonListFrame.primaryItems
+          }
+          : (
+            shouldContinueLatestComparison
+              ? {
+                ...latestReferenceFrame,
+                primaryItems: latestReferenceFrame.comparisonItems
+              }
+              : (
+                referenceFrameForFollowUp?.primaryKind
+                  ? referenceFrameForFollowUp
+                  : latestReferenceFrame
+              )
+          );
 
       const collectComparisonOrdinalIndices = (frameLength = 0) => {
         const q = normalize(userMsg);
@@ -9996,7 +10097,7 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         /\b(?:which is better|which one is better|better one|best between|which should i choose|which should we choose)\b/i.test(userMsg);
 
       const comparisonHasExplicitCommand =
-        /\b(?:compare|comparison|versus|vs\.?|difference|better|best between)\b/i.test(userMsg);
+        /\b(?:compare|comparison|versus|vs\.?|differences?|better|best between)\b/i.test(userMsg);
 
       const getComparisonTargetScope = () => {
         if (!comparisonSignal) return null;
@@ -12732,7 +12833,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       const localDraft = localAnswer();
       const localDraftIsGeneric = /^I can help with that\b/i.test(String(localDraft || ''));
       const explicitAIDepth =
-        /\b(why|explain|compare|comparison|versus|vs\.?|difference|history|meaning|story)\b/i.test(userMsg);
+        /\b(why|explain|compare|comparison|versus|vs\.?|differences?|history|meaning|story)\b/i.test(userMsg);
 
       // Local answers cover restaurants, dishes, budgets, health screening,
       // attractions, trip status and itinerary planning immediately. Gemini is
