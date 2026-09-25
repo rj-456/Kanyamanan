@@ -8784,6 +8784,43 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         return [];
       })();
 
+      // Test 13: preserve the winner of the latest restaurant PRICE comparison
+      // for an immediate itinerary command such as "add the cheaper one".
+      // This is intentionally scoped to price-comparison language so other
+      // recommendation, comparison, and itinerary-reference behavior is unchanged.
+      const recentPriceComparisonWinner = (() => {
+        const botMessages = safeArray(updatedMessages)
+          .slice(0, -1)
+          .filter(m => m?.sender === 'bot')
+          .slice(-6)
+          .reverse();
+
+        for (const message of botMessages) {
+          const rawMessageText = String(message?.text || '');
+          const messageText = normalize(rawMessageText);
+
+          if (!/\brestaurant comparison\b/i.test(messageText)) continue;
+          if (!/meaningful registered starting price/i.test(rawMessageText)) continue;
+
+          const resultLine = rawMessageText
+            .split(/\r?\n/)
+            .map(line => String(line || '').trim())
+            .find(line => /(?:\*\*)?result\s*:(?:\*\*)?/i.test(line));
+
+          if (!resultLine) continue;
+
+          const normalizedResultLine = normalize(resultLine);
+          const winnerMatches = allRestaurants.filter(restaurant => {
+            const name = normalize(restaurant?.name || '');
+            return name && normalizedResultLine.includes(name);
+          });
+
+          if (winnerMatches.length === 1) return winnerMatches[0];
+        }
+
+        return null;
+      })();
+
       const findCatalogMentions = (rawText) => {
         const q = normalize(rawText);
         if (!q) return [];
@@ -9348,6 +9385,15 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
           if (anchorIndex !== null) {
             insertionIndex = relation === 'before' ? anchorIndex : anchorIndex + 1;
+          }
+        }
+
+        if (!addTargets.length) {
+          const asksForCheaperComparisonWinner =
+            /\b(?:the\s+)?(?:cheaper|cheapest|less expensive|least expensive|more affordable|most affordable|lower[- ]priced)\s+(?:one|restaurant|option)\b/i.test(userMsg);
+
+          if (asksForCheaperComparisonWinner && recentPriceComparisonWinner) {
+            addTargets = [recentPriceComparisonWinner];
           }
         }
 
