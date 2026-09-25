@@ -4589,6 +4589,64 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
 
     const userMsg = String(promptOverride ?? chatInput).trim();
 
+    // Travel Kasaup Guide is a deterministic local response. It must not enter
+    // the adaptive/Gemini pipeline because this is a fixed in-app help request.
+    const normalizedGuideRequest = userMsg.toLowerCase().replace(/\s+/g, ' ').trim();
+    if (
+      normalizedGuideRequest === 'travel kasaup guide' ||
+      normalizedGuideRequest.includes('travel kasaup guide:')
+    ) {
+      if (e?.preventDefault) e.preventDefault();
+      if (isBotTyping) return;
+
+      const guideMessage = [
+        '**Travel Kasaup Guide**',
+        '',
+        'Travel Kasaup helps you explore Pampanga, find food and attractions, manage your trip, and ask follow-up questions in natural language.',
+        '',
+        '**1. Follow-up Understanding**',
+        'Keeps the context of your previous Kasaup answer so you can ask things like: “What about the cheaper ones?”',
+        '',
+        '**2. Restaurant Recommendations**',
+        'Finds registered restaurants that match your request, location, preferences, and other constraints.',
+        'Sample prompt: “Recommend restaurants in Pampanga.”',
+        '',
+        '**3. Tourist Attraction Questions**',
+        'Helps you discover and ask questions about tourist attractions and destinations.',
+        'Sample prompt: “What tourist attractions can we visit in Pampanga?”',
+        '',
+        '**4. Itinerary Actions**',
+        'Lets you add, remove, check, replace, or clear stops in your current itinerary.',
+        'Sample prompt: “Add this restaurant to my itinerary.”',
+        '',
+        '**5. Budget Handling**',
+        'Uses your stated budget when recommending restaurants, dishes, or trip options.',
+        'Sample prompt: “Recommend restaurants under ₱300.”',
+        '',
+        '**6. Dietary Constraints**',
+        'Considers dietary preferences and food constraints when answering restaurant and dish questions.',
+        'Sample prompt: “I am vegetarian. Recommend restaurants for me.”',
+        '',
+        '**7. Near-Me Behavior**',
+        'Uses your available location context to help find nearby restaurants or attractions.',
+        'Sample prompt: “What restaurants are near me?”',
+        '',
+        '**8. Comparison Questions**',
+        'Compares restaurants, dishes, prices, or other available travel options when you ask.',
+        'Sample prompt: “Compare these two restaurants. Which is cheaper?”',
+        '',
+        'You can also combine features in one conversation—for example, ask for restaurant recommendations, compare the results, then add your choice to the itinerary.'
+      ].join('\n');
+
+      setChatMessages(prev => [
+        ...prev,
+        { sender: 'user', text: userMsg },
+        { sender: 'bot', text: guideMessage }
+      ]);
+      setChatInput('');
+      return;
+    }
+
 
     // INSTANT KASAUP: local-first routing. Concrete Kanyamanan questions
 
@@ -22139,18 +22197,18 @@ ${rawText}`;
                 {/* Quick prompts: tap one on mobile instead of typing a long query. */}
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
                   {[
-                    '🗺️ Plan a 1-day San Fernando heritage food trail',
-                    '⚠️ Check dishes with high purines / uric acid',
-                    '🦐 List dishes containing bagoong / shrimp paste',
-                    '📊 Am I exceeding my daily calorie limit with my current trip?'
-                  ].map(prompt => (
+                    ['📖 Travel Kasaup Guide', 'Travel Kasaup Guide: Show me the 8 Travel Kasaup features, what each feature does, and a sample prompt I can use for each one.'],
+                    ['🍽️ Recommend restaurants in Pampanga', 'Recommend restaurants in Pampanga'],
+                    ['🏛️ What tourist attractions can we visit in Pampanga?', 'What tourist attractions can we visit in Pampanga?'],
+                    ['📍 What restaurants are near me?', 'What restaurants are near me?']
+                  ].map(([label, fullPrompt]) => (
                     <button
-                      key={prompt}
+                      key={label}
                       type="button"
-                      onClick={() => handleSendChatMessage(null, prompt)}
+                      onClick={() => handleSendChatMessage(null, fullPrompt)}
                       className="shrink-0 px-3 py-2 bg-ivory hover:bg-terracotta/10 border border-[#E9E5DE] hover:border-terracotta/40 rounded-xl text-[10px] font-bold text-charcoal transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {prompt}
+                      {label}
                     </button>
                   ))}
                 </div>
@@ -22396,28 +22454,20 @@ ${rawText}`;
             {/* Quick prompts in the floating/mobile drawer. */}
             <div className="bg-white border-b border-[#E9E5DE] px-3 py-2 flex gap-1.5 overflow-x-auto">
               {[
-                '🗺️ 1-day San Fernando trail',
-                '⚠️ High purine / uric acid',
-                '🦐 Bagoong / shrimp paste',
-                '📊 Check my calorie limit'
-              ].map((prompt, idx) => {
-                const fullPrompt = [
-                  'Plan a 1-day San Fernando heritage food trail',
-                  'Check dishes with high purines / uric acid',
-                  'List dishes containing bagoong / shrimp paste',
-                  'Am I exceeding my daily calorie limit with my current trip?'
-                ][idx];
-                return (
-                  <button
-                    key={fullPrompt}
-                    type="button"
-                    onClick={() => handleSendChatMessage(null, fullPrompt)}
-                    className="shrink-0 px-2.5 py-1.5 bg-ivory hover:bg-terracotta/10 border border-[#E9E5DE] rounded-lg text-[9px] font-bold text-charcoal disabled:opacity-50"
-                  >
-                    {prompt}
-                  </button>
-                );
-              })}
+                ['📖 Travel Kasaup Guide', 'Travel Kasaup Guide: Show me the 8 Travel Kasaup features, what each feature does, and a sample prompt I can use for each one.'],
+                ['🍽️ Restaurants in Pampanga', 'Recommend restaurants in Pampanga'],
+                ['🏛️ Tourist attractions in Pampanga', 'What tourist attractions can we visit in Pampanga?'],
+                ['📍 Restaurants near me', 'What restaurants are near me?']
+              ].map(([label, fullPrompt]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => handleSendChatMessage(null, fullPrompt)}
+                  className="shrink-0 px-2.5 py-1.5 bg-ivory hover:bg-terracotta/10 border border-[#E9E5DE] rounded-lg text-[9px] font-bold text-charcoal disabled:opacity-50"
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
             <div className="flex-1 overflow-y-auto bg-[#FAF8F5] p-4 space-y-3">
