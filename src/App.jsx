@@ -332,50 +332,35 @@ const getUserAccountKey = (profile) => {
   return String(raw).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_');
 };
 
-// Resilient Multi-Key Recovery Helper for Saved User Plans with Strict Account Isolation
+// Per-account saved itinerary loader.
+// IMPORTANT: a brand-new account must start with an empty Travel History.
+// Never fall back to shared/demo/master itinerary keys for a registered user.
 const getSavedItinerariesForUser = (profile) => {
-  const userKey = getUserAccountKey(profile);
-  const isDefaultUser = !profile || userKey === 'default_explorer' || userKey.includes('rancis');
+  if (!profile || isDemoUserObj(profile)) return [];
 
-  // Account-specific keys for strict privacy & isolation
+  const userKey = getUserAccountKey(profile);
   const accountSpecificKeys = [
     `kanyamanan_itineraries_${userKey}`,
-    profile?.email ? `kanyamanan_itineraries_${String(profile.email).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}` : null,
-    profile?.username ? `kanyamanan_itineraries_${String(profile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}` : null
+    profile?.email
+      ? `kanyamanan_itineraries_${String(profile.email).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`
+      : null,
+    profile?.username
+      ? `kanyamanan_itineraries_${String(profile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`
+      : null
   ].filter(Boolean);
-
-  // If default / rancis account, include legacy fallback keys
-  if (isDefaultUser) {
-    accountSpecificKeys.push('kanyamanan_master_itineraries', 'kanyamanan_itineraries_rancis_pampanga_gov_ph', 'kanyamanan_itineraries_rancis', 'kanyamanan_itineraries_default_explorer');
-  }
 
   for (const key of accountSpecificKeys) {
     try {
       const saved = localStorage.getItem(key);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch (e) { }
   }
 
-  // Initial starter templates for new accounts
-  return [
-    {
-      id: 'trail-1',
-      name: 'San Fernando Heritage Trail',
-      stops: ["Everybody's Cafe", "Santo Tomas Palayok Kitchen"],
-      isFinished: false,
-      updatedAt: Date.now()
-    },
-    {
-      id: 'trail-2',
-      name: 'Angeles City Sisig Hop',
-      stops: ["Aling Lucing's Sisig", "Atching Lillian's Ancestral Kitchen"],
-      isFinished: false,
-      updatedAt: Date.now()
-    }
-  ];
+  // New account = no saved travel history yet.
+  return [];
 };
 
 const getRestaurantMunicipalities = (r) => {
@@ -2302,25 +2287,9 @@ function App() {
     try {
       const activeUser = localStorage.getItem('kanyamanan_active_user');
       const parsed = activeUser ? JSON.parse(activeUser) : null;
-      const profile = (!parsed || isDemoUserObj(parsed)) ? { username: 'Guest', email: '' } : parsed;
-      return getSavedItinerariesForUser(profile);
+      return getSavedItinerariesForUser(parsed);
     } catch (e) {
-      return [
-        {
-          id: 'trail-1',
-          name: 'San Fernando Heritage Trail',
-          stops: ["Everybody's Cafe", "Santo Tomas Palayok Kitchen"],
-          isFinished: false,
-          updatedAt: Date.now()
-        },
-        {
-          id: 'trail-2',
-          name: 'Angeles City Sisig Hop',
-          stops: ["Aling Lucing's Sisig", "Atching Lillian's Ancestral Kitchen"],
-          isFinished: false,
-          updatedAt: Date.now()
-        }
-      ];
+      return [];
     }
   });
 
@@ -2330,24 +2299,35 @@ function App() {
   const [editingItinId, setEditingItinId] = useState(null);
   const [editingItinName, setEditingItinName] = useState('');
 
-  // Dual-Layer Persistence helper for Saved Itineraries
+  // Persist Travel History strictly per authenticated account.
+  // Guests and newly-created accounts must never inherit another account's history.
   const persistSavedItineraries = (updatedList) => {
-    setSavedItineraries(updatedList);
+    if (!isAuthenticated || isGuest || !userProfile || isDemoUserObj(userProfile)) {
+      setSavedItineraries([]);
+      return;
+    }
+
+    setSavedItineraries(Array.isArray(updatedList) ? updatedList : []);
     const userKey = getUserAccountKey(userProfile);
+
     try {
       localStorage.setItem(`kanyamanan_itineraries_${userKey}`, JSON.stringify(updatedList));
-      localStorage.setItem('kanyamanan_master_itineraries', JSON.stringify(updatedList));
       if (userProfile?.username) {
-        localStorage.setItem(`kanyamanan_itineraries_${String(userProfile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`, JSON.stringify(updatedList));
+        localStorage.setItem(
+          `kanyamanan_itineraries_${String(userProfile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`,
+          JSON.stringify(updatedList)
+        );
       }
       if (userProfile?.email) {
-        localStorage.setItem(`kanyamanan_itineraries_${String(userProfile.email).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`, JSON.stringify(updatedList));
+        localStorage.setItem(
+          `kanyamanan_itineraries_${String(userProfile.email).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`,
+          JSON.stringify(updatedList)
+        );
       }
     } catch (e) { }
+
     saveUserItinerariesToCloud(userKey, updatedList);
-    if (userProfile?.username) {
-      saveUserItinerariesToCloud(String(userProfile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_'), updatedList);
-    }
+
     // Sync itineraries to Django REST API
     if (Array.isArray(updatedList)) {
       updatedList.forEach(itin => {
@@ -2356,37 +2336,43 @@ function App() {
     }
   };
 
-  // Sync Saved Itineraries per account from LocalStorage and Realtime Firestore (Non-Destructive)
+  // Reload Travel History whenever the authenticated account changes.
+  // An empty account must explicitly load [] so a previous user's state cannot remain in React state.
   useEffect(() => {
-    const userKey = getUserAccountKey(userProfile);
-
-    // 1. Instant pull from localStorage or auto-recovery
-    const localRecovered = getSavedItinerariesForUser(userProfile);
-    if (Array.isArray(localRecovered) && localRecovered.length > 0) {
-      setSavedItineraries(localRecovered);
+    if (!isAuthenticated || isGuest || !userProfile || isDemoUserObj(userProfile)) {
+      setSavedItineraries([]);
+      return;
     }
 
-    // 2. Realtime listener from Firestore for multi-device sync
+    const userKey = getUserAccountKey(userProfile);
+    const localRecovered = getSavedItinerariesForUser(userProfile);
+    setSavedItineraries(Array.isArray(localRecovered) ? localRecovered : []);
+
     const unsubscribe = subscribeToUserItineraries(userKey, (cloudItins) => {
-      if (Array.isArray(cloudItins) && cloudItins.length > 0) {
+      if (Array.isArray(cloudItins)) {
         setSavedItineraries(cloudItins);
         try {
           localStorage.setItem(`kanyamanan_itineraries_${userKey}`, JSON.stringify(cloudItins));
-          localStorage.setItem('kanyamanan_master_itineraries', JSON.stringify(cloudItins));
+          if (userProfile?.username) {
+            localStorage.setItem(
+              `kanyamanan_itineraries_${String(userProfile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`,
+              JSON.stringify(cloudItins)
+            );
+          }
+          if (userProfile?.email) {
+            localStorage.setItem(
+              `kanyamanan_itineraries_${String(userProfile.email).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`,
+              JSON.stringify(cloudItins)
+            );
+          }
         } catch (e) { }
-      } else {
-        // If cloud document is new/empty, safely upload local custom itineraries to cloud
-        const currentLocal = getSavedItinerariesForUser(userProfile);
-        if (Array.isArray(currentLocal) && currentLocal.length > 0) {
-          saveUserItinerariesToCloud(userKey, currentLocal);
-        }
       }
     });
 
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, [userProfile?.email, userProfile?.username]);
+  }, [isAuthenticated, isGuest, userProfile?.email, userProfile?.username]);
 
   const [numPersons, setNumPersons] = useState(1);
   const [activeImgIdx, setActiveImgIdx] = useState(0);
