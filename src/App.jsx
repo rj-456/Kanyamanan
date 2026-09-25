@@ -6105,6 +6105,16 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       const explicitDishResultRequest =
         requestedFoodResultKind === 'dish';
 
+      // Natural restaurant-refresh follow-up:
+      // "Show me different options." after a restaurant result should continue
+      // returning restaurants, not be reclassified as a generic dish/options query.
+      const differentRestaurantOptionsFollowUp =
+        referenceFrameForFollowUp?.primaryKind === 'restaurant' &&
+        (
+          /\b(?:show|give|recommend|suggest)\s+(?:me\s+)?(?:some\s+)?(?:different|other|new|another|more)\s+options?\b/i.test(userMsg) ||
+          /\b(?:different|other|new|another|more)\s+restaurants?\b/i.test(userMsg)
+        );
+
       const hasExplicitRecentSetReference =
         followUpOrdinalIndex !== null ||
         /\b(?:which one|which of|among those|among them|of those|of them|those|these|them|previous|above|former|latter|that one|this one|same one|other one|another one)\b/i.test(userMsg);
@@ -6112,12 +6122,15 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
       // A fresh restaurant search must outrank old conversation frames.
       // A location change is always a new geographic scope.
       const freshRestaurantSearch =
-        explicitRestaurantResultRequest &&
+        differentRestaurantOptionsFollowUp ||
         (
-          Boolean(localConstraints.location) ||
+          explicitRestaurantResultRequest &&
           (
-            /\b(?:recommend|suggest|show|list|find|give|pick|choose)\b/i.test(userMsg) &&
-            !hasExplicitRecentSetReference
+            Boolean(localConstraints.location) ||
+            (
+              /\b(?:recommend|suggest|show|list|find|give|pick|choose)\b/i.test(userMsg) &&
+              !hasExplicitRecentSetReference
+            )
           )
         );
 
@@ -6145,8 +6158,10 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           if (followUpMenuQuestion && !explicitRestaurantResultRequest) {
             localConstraints.asksDishList = true;
             localConstraints.asksRestaurantRecommendation = false;
-          } else if (!explicitDishTopic || explicitRestaurantResultRequest) {
+          } else if (!explicitDishTopic || explicitRestaurantResultRequest || differentRestaurantOptionsFollowUp) {
             localConstraints.asksRestaurantRecommendation = true;
+            localConstraints.asksRestaurantList = true;
+            localConstraints.asksDishList = false;
             localConstraints.asksRecommendation = true;
           }
         }
@@ -6453,6 +6468,19 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
             /\b(?:recommend|suggest|where|saan|eat|dine|kumain|restaurant|restaurants|kainan)\b/i.test(frame.text)
           )
         ) || null;
+
+      // Keep the previous restaurant search scope for "different options"
+      // when the user does not repeat the municipality/city in the follow-up.
+      if (differentRestaurantOptionsFollowUp) {
+        localConstraints.asksRestaurantRecommendation = true;
+        localConstraints.asksRestaurantList = true;
+        localConstraints.asksDishList = false;
+        localConstraints.asksRecommendation = true;
+
+        if (!localConstraints.location && recentRestaurantRequest?.constraints?.location) {
+          localConstraints.location = recentRestaurantRequest.constraints.location;
+        }
+      }
 
       const recentDishRequest = priorUserMessages
         .map(m => {
@@ -7868,6 +7896,82 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         .filter(r => restaurantScore(r) > 0)
         .slice(0, 16);
 
+      // Browser-refresh recommendation diversity.
+      // Persist ONLY the immediately previous restaurant result set per scope.
+      // This block intentionally lives here, after all helper declarations, so
+      // it cannot trigger temporal-dead-zone runtime errors.
+      const restaurantRotationStorageKey = 'kanyamanan_kasaup_restaurant_rotation_v4';
+
+      const restaurantRotationScopeKey = [
+        localConstraints.asksCurrentLocation
+          ? 'near-me'
+          : normalize(
+              localConstraints.location ||
+              (/\bpampanga\b/i.test(userMsg) ? 'pampanga' : 'all')
+            ),
+        recommendationFoodTokens.slice().map(normalize).sort().join('|') || 'any-food',
+        recommendationPerPersonBudget !== null
+          ? `budget-${recommendationPerPersonBudget}`
+          : 'no-budget',
+        localConstraints.dietaryPattern
+          ? `diet-${normalize(localConstraints.dietaryPattern)}`
+          : 'no-pattern',
+        safeArray(localConstraints.exclusionTerms)
+          .map(normalize)
+          .sort()
+          .join('|') || 'no-exclusions',
+        safeArray(localConstraints.allergyTerms)
+          .map(normalize)
+          .sort()
+          .join('|') || 'no-allergies'
+      ].join('::');
+
+      let restaurantRotationState = {};
+      try {
+        const rawRotationState = localStorage.getItem(restaurantRotationStorageKey);
+        const parsedRotationState = rawRotationState ? JSON.parse(rawRotationState) : {};
+        if (parsedRotationState && typeof parsedRotationState === 'object') {
+          restaurantRotationState = parsedRotationState;
+        }
+      } catch (_) {
+        restaurantRotationState = {};
+      }
+
+      const persistedLastRestaurantIds = new Set(
+        safeArray(restaurantRotationState?.[restaurantRotationScopeKey]?.lastResultIds)
+          .map(value => String(value || '').trim())
+          .filter(Boolean)
+      );
+
+      const shouldRotateRestaurantRecommendations =
+        freshRestaurantSearch &&
+        !restaurantRecommendationFollowUp &&
+        !localConstraints.asksCurrentLocation &&
+        !localConstraints.asksNearestOnly &&
+        !/\b(?:cheapest|lowest price|most affordable|least expensive|closest|nearest|best restaurant|best place|pick one|choose one)\b/i.test(userMsg);
+
+      const restaurantRotationSeenIds = new Set([
+        ...recentlyShownRestaurantIds,
+        ...(shouldRotateRestaurantRecommendations
+          ? [...persistedLastRestaurantIds]
+          : [])
+      ]);
+
+      const getRestaurantRotationId = (restaurant) =>
+        String(restaurant?.id || normalize(restaurant?.name) || '').trim();
+
+      // Fisher-Yates shuffle for broad recommendation variety. This is applied
+      // only AFTER hard constraints have filtered the eligible restaurants, so
+      // location/budget/diet/menu requirements remain authoritative.
+      const shuffleRestaurantProfiles = (profiles) => {
+        const shuffled = safeArray(profiles).slice();
+        for (let i = shuffled.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      };
+
       const recommendationCandidateProfiles = restaurantProfiles
         .filter(p => {
           // Explicit city/location should not leak recommendations from elsewhere.
@@ -7938,12 +8042,12 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
           // For a fresh broad recommendation, prefer valid restaurants that
           // have not appeared in recent recommendation answers. Follow-up
           // questions remain anchored to the previous result set.
-          if (!restaurantRecommendationFollowUp && recentlyShownRestaurantIds.size > 0) {
-            const aSeen = recentlyShownRestaurantIds.has(
-              a.restaurant?.id || normalize(a.restaurant?.name)
+          if (!restaurantRecommendationFollowUp && restaurantRotationSeenIds.size > 0) {
+            const aSeen = restaurantRotationSeenIds.has(
+              getRestaurantRotationId(a.restaurant)
             );
-            const bSeen = recentlyShownRestaurantIds.has(
-              b.restaurant?.id || normalize(b.restaurant?.name)
+            const bSeen = restaurantRotationSeenIds.has(
+              getRestaurantRotationId(b.restaurant)
             );
             if (aSeen !== bSeen) return aSeen ? 1 : -1;
           }
@@ -7989,9 +8093,86 @@ Return a concise, friendly answer suitable for the Kasaup chat UI.
         )
       );
 
-      const recommendedRestaurants = recommendationCandidateProfiles
-        .slice(0, recommendationResultLimit)
+      // Broad restaurant recommendations are intentionally randomized from the
+      // eligible candidate pool instead of inheriting the app database's A-Z
+      // ordering. Previously shown restaurants are pushed behind unseen matches.
+      // If another eligible restaurant exists, the exact previous browser result
+      // set is actively avoided rather than relying on chance alone.
+      let selectedRecommendationProfiles = recommendationCandidateProfiles
+        .slice(0, recommendationResultLimit);
+
+      if (shouldRotateRestaurantRecommendations && recommendationCandidateProfiles.length) {
+        const unseenProfiles = recommendationCandidateProfiles.filter(profile =>
+          !restaurantRotationSeenIds.has(getRestaurantRotationId(profile.restaurant))
+        );
+        const previouslySeenProfiles = recommendationCandidateProfiles.filter(profile =>
+          restaurantRotationSeenIds.has(getRestaurantRotationId(profile.restaurant))
+        );
+
+        const randomizedPool = [
+          ...shuffleRestaurantProfiles(unseenProfiles),
+          ...shuffleRestaurantProfiles(previouslySeenProfiles)
+        ];
+
+        selectedRecommendationProfiles = randomizedPool.slice(0, recommendationResultLimit);
+
+        // Guarantee a different SET from the immediately previous browser result
+        // whenever the eligible pool contains at least one alternative restaurant.
+        if (
+          persistedLastRestaurantIds.size > 0 &&
+          recommendationCandidateProfiles.length > recommendationResultLimit &&
+          selectedRecommendationProfiles.length === recommendationResultLimit
+        ) {
+          const selectedIds = selectedRecommendationProfiles
+            .map(profile => getRestaurantRotationId(profile.restaurant));
+          const sameSetAsLast =
+            selectedIds.length === persistedLastRestaurantIds.size &&
+            selectedIds.every(id => persistedLastRestaurantIds.has(id));
+
+          if (sameSetAsLast) {
+            const alternative = shuffleRestaurantProfiles(
+              recommendationCandidateProfiles.filter(profile =>
+                !persistedLastRestaurantIds.has(getRestaurantRotationId(profile.restaurant))
+              )
+            )[0];
+
+            if (alternative) {
+              selectedRecommendationProfiles = [
+                ...selectedRecommendationProfiles.slice(0, -1),
+                alternative
+              ];
+            }
+          }
+        }
+
+        // Randomize the visible order as well so the recommendations do not look
+        // alphabetically arranged even when the underlying database is A-Z sorted.
+        selectedRecommendationProfiles = shuffleRestaurantProfiles(selectedRecommendationProfiles);
+      }
+
+      const recommendedRestaurants = selectedRecommendationProfiles
         .map(p => p.restaurant);
+
+      // Save the actual displayed recommendation set. On the next browser
+      // visit/refresh, this exact set is avoided when alternatives are available.
+      if (shouldRotateRestaurantRecommendations && recommendedRestaurants.length) {
+        try {
+          localStorage.setItem(
+            restaurantRotationStorageKey,
+            JSON.stringify({
+              ...restaurantRotationState,
+              [restaurantRotationScopeKey]: {
+                lastResultIds: recommendedRestaurants
+                  .map(getRestaurantRotationId)
+                  .filter(Boolean),
+                updatedAt: Date.now()
+              }
+            })
+          );
+        } catch (_) {
+          // Storage failure must never break Kasaup recommendation replies.
+        }
+      }
 
       const relevantDishes = rankedDishes
         .filter(item => dishScore(item) > 0)
@@ -11904,7 +12085,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
             )
           )
         ) {
-          const profiles = recommendationCandidateProfiles.slice(0, recommendationResultLimit);
+          const profiles = selectedRecommendationProfiles;
 
           if (!profiles.length) {
             const locationText = localConstraints.location
@@ -12056,8 +12237,9 @@ ${JSON.stringify(updatedMessages.slice(-8))}
               ? `\n\n_I ranked the restaurants from the previous Kasaup recommendation._`
               : '';
 
-          const rankingNote =
-            `\n\n_Ranking is based on Kanyamanan's registered location, menu, price, and constraint fit—not invented ratings or live popularity._`;
+          const rankingNote = shouldRotateRestaurantRecommendations
+            ? `\n\n_Recommendations are randomized among qualifying Kanyamanan matches after applying the registered location, menu, price, and constraint filters—not alphabetically ordered or based on invented ratings._`
+            : `\n\n_Ranking is based on Kanyamanan's registered location, menu, price, and constraint fit—not invented ratings or live popularity._`;
 
           const heading = profiles.length === 1
             ? `🍴 **Kasaup's top restaurant match**`
