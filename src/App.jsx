@@ -20085,7 +20085,7 @@ ${rawText}`;
 
         {/* Mobile Search input - Hidden when viewing Auth/Login */}
         {activeView !== 'auth' && (
-          <div className="md:hidden w-full mb-5 relative z-20">
+          <div className="xl:hidden w-full mb-5 relative z-20">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-4 w-4 text-charcoal-light dark:text-gray-400" />
             </div>
