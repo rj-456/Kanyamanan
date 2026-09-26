@@ -4,7 +4,8 @@ import { Camera, Upload, RotateCw, Square, Sparkles, AlertTriangle, Flame, Refre
 // Custom Dedicated Vector Logo Symbol for PlateScan AI™
 // Visually connects: Dining Plate + Optical Reticle Scan Brackets + AI Intelligence Sparkle
 export function PlateScanLogo({ className = "w-6 h-6", animated = false }) {
-  const uniqueId = React.useId ? React.useId().replace(/[^a-zA-Z0-9]/g, '') : 'ps';
+  const rawId = React.useId();
+  const uniqueId = rawId ? rawId.replace(/[^a-zA-Z0-9]/g, '') : 'ps';
   const gradAccent = `ps-accent-${uniqueId}`;
   const gradDish = `ps-dish-${uniqueId}`;
   const gradBeam = `ps-beam-${uniqueId}`;
@@ -259,83 +260,106 @@ export default function PlateScanAI({
       defaultGemini
     ).trim();
 
-    const CULINARY_SYSTEM_PROMPT = `You are an expert Philippine & Kapampangan culinary nutritionist and visual food classifier. Inspect this image.
+    const CULINARY_SYSTEM_PROMPT = `You are an expert culinary nutritionist and visual food classifier capable of identifying ANY food, plated dish, snack, beverage, or dessert worldwide, with specialized expertise in Philippine and Kapampangan heritage cuisine.
 
 INSPECTION RULES:
 1. FOOD vs. NON-FOOD:
-   - Check if the image depicts edible food or drinks.
-   - If non-food (laptop, monitor, keyboard, desk, person, car, empty plate, room), return strictly:
-     {"is_food": false, "rejection_reason": "No edible food detected in this frame."}
-2. REGIONAL DISH IDENTIFICATION:
-   - Medley of squash (kalabasa), bitter melon (ampalaya) rings, okra pods, and eggplant in savory shrimp paste sauce = "Authentic Pinakbet (Pakbet)" (~210 kcal, ~19g carbs).
-   - Minced/chopped crispy pork with onions, chilies, egg, and calamansi on cast iron = "Authentic Kapampangan Sizzling Sisig" (High protein, high fat, VERY LOW carbs ~6g. NEVER classify Sisig as fried rice or Sinangag!).
-   - Stewed chicken cuts or pork belly braised in dark soy sauce, vinegar, garlic, and bay leaf = "Chicken and Pork Adobo".
-   - Rice combos with fried egg and meat viand = "Tapsilog", "Tocilog", or "Bangsilog".
-3. RETURN FORMAT:
-   Return ONLY a valid raw JSON object without markdown fences or backticks:
+   - Check if the image depicts edible food, beverages, snacks, or plated meals.
+   - If non-food (laptop, monitor, keyboard, desk, person, car, empty plate, room, pets), return strictly:
+     {"is_food": false, "rejection_reason": "No edible food or drink detected in this frame."}
+
+2. UNIVERSAL DISH CLASSIFICATION:
+   - You can identify ANY food from any cuisine:
+     * Philippine & Regional Specialties: Sisig, Sinigang, Kare-Kare, Dinuguan/Tid-tad, Pancit Palabok/Luglug, Bulalo, Bringhe, Lechon Kawali, Inasal na Manuk, Kaldereta, Menudo, Mechado, Bopis, Lumpia, Halo-Halo, Tibok-Tibok, Turon, Bibingka, Taho, Tapsilog/Tocilog/Bangsilog, etc.
+     * International & Daily Meals: Pizza, Pasta, Burgers, Sandwiches, Ramen, Sushi, Steak, Grilled Chicken Breast, Fish & Chips, Caesar Salad, Fried Rice, Soups, Pastries, Coffee, Smoothies, etc.
+   - For ANY food detected:
+     * "dish_name": Specific, appetizing dish title (e.g. "Authentic Kapampangan Sizzling Sisig", "Classic Sinigang na Baboy", "Artisanal Pepperoni Pizza").
+     * "meat_type": Primary protein cut if applicable ("Chicken", "Pork", "Beef", "Fish", "Seafood", "Vegetable", "Chicken & Pork", "Tofu", "Dairy/Egg", or "None").
+     * "is_kapampangan": Set to true ONLY if the dish originates from or is a celebrated heritage specialty of Pampanga (e.g., Sizzling Sisig, Kare-Kare, Bringhe, Tibok-Tibok, Betute, Camaru, Tid-tad, Kapampangan White Adobo, Kapampangan Tamales, Murcon). Otherwise false.
+     * "portion_estimate": Realistic visual serving estimate (e.g. "1 bowl (~300g)", "1 slice (~110g)", "1 plate (~350g)").
+     * "calories", "sodium_mg", "macros": Calculate realistic values for that portion.
+     * "culinary_notes": 1-2 sentence culinary summary of the ingredients, cooking technique, and nutrition.
+
+3. SPECIAL CALIBRATION FOR TRICKY REGIONAL DISHES:
+   - Pinakbet: Squash, bitter melon rings, okra, string beans, eggplant in shrimp paste = "Authentic Pinakbet (Pakbet)" (~210 kcal).
+   - Sisig: Crispy minced pork with onions, calamansi, chicken liver, and egg = "Authentic Kapampangan Sizzling Sisig" (High protein/fat, low carbs ~6g).
+   - Adobo Differentiation:
+     * Bone-in chicken pieces (drumsticks, wings, thighs) with poultry skin = "Classic Chicken Adobo (Adobung Manuk)" (meat_type: "Chicken", ~270 kcal, ~30g protein, ~12g fat).
+     * Cubed pork belly/shoulder with visible fat layers and rendered lard = "Classic Pork Adobo (Adobung Baboy)" (meat_type: "Pork", ~420 kcal, ~23g protein, ~28g fat).
+     * Platter with BOTH chicken parts and pork belly cubes = "Chicken and Pork Adobo (Adobung Manuk at Baboy)" (meat_type: "Chicken & Pork", ~350 kcal).
+     * Pale golden vinegar-garlic braise without soy sauce = "Authentic Adobong Puti (White Adobo)".
+
+4. RETURN FORMAT:
+   Return ONLY a valid raw JSON object without markdown fences:
    {
      "is_food": true,
-     "dish_name": "Authentic Pinakbet (Pakbet)",
+     "dish_name": "Authentic Kapampangan Sizzling Sisig",
+     "meat_type": "Pork",
      "is_kapampangan": true,
-     "portion_estimate": "250g (1 serving)",
-     "calories": 210,
-     "sodium_mg": 520,
-     "macros": { "protein_g": 8.5, "carbs_g": 19.0, "fat_g": 11.2 }
+     "portion_estimate": "1 sizzling plate (~200g)",
+     "calories": 380,
+     "sodium_mg": 740,
+     "macros": { "protein_g": 24.0, "carbs_g": 5.0, "fat_g": 29.0 },
+     "culinary_notes": "Iconic Kapampangan dish of boiled, grilled, and seasoned minced pork mask served sizzling with calamansi."
    }`;
 
     let lastError = null;
 
     // =======================================================
-    // 1. PRIMARY ENGINE: Groq Vision (qwen/qwen3.8-27b)
+    // 1. PRIMARY ENGINE: Groq Vision (llama-3.2-11b-vision-preview / llama-3.2-90b-vision-preview)
     // =======================================================
     if (groqKey) {
-      try {
-        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${groqKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: "qwen/qwen3.8-27b",
-            messages: [
-              {
-                role: "user",
-                content: [
-                  { type: "text", text: CULINARY_SYSTEM_PROMPT },
-                  { type: "image_url", image_url: { url: dataUrl } }
-                ]
-              }
-            ],
-            response_format: { type: "json_object" },
-            temperature: 0.1,
-            max_tokens: 400
-          })
-        });
+      const GROQ_MODELS = ["llama-3.2-11b-vision-preview", "llama-3.2-90b-vision-preview"];
+      for (const groqModel of GROQ_MODELS) {
+        try {
+          const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${groqKey}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              model: groqModel,
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    { type: "text", text: CULINARY_SYSTEM_PROMPT },
+                    { type: "image_url", image_url: { url: dataUrl } }
+                  ]
+                }
+              ],
+              response_format: { type: "json_object" },
+              temperature: 0.1,
+              max_tokens: 450
+            })
+          });
 
-        if (res.ok) {
-          const data = await res.json();
-          const content = data?.choices?.[0]?.message?.content;
-          if (content) {
-            console.log("[PlateScan] Successfully analyzed via Groq (qwen/qwen3.8-27b)");
-            return JSON.parse(content.replace(/```json/g, '').replace(/```/g, '').trim());
+          if (res.ok) {
+            const data = await res.json();
+            const content = data?.choices?.[0]?.message?.content;
+            if (content) {
+              console.log(`[PlateScan] Successfully analyzed via Groq (${groqModel})`);
+              return JSON.parse(content.replace(/```json/gi, '').replace(/```/g, '').trim());
+            }
+          } else {
+            const errJson = await res.json().catch(() => ({}));
+            lastError = `Groq ${groqModel}: ${errJson.error?.message || res.statusText}`;
+            console.warn(`[PlateScan] Groq error (${lastError}), trying next model...`);
           }
-        } else {
-          const errJson = await res.json().catch(() => ({}));
-          lastError = `Groq: ${errJson.error?.message || res.statusText}`;
-          console.warn(`[PlateScan] Groq error (${lastError}), failing over to Gemini...`);
+        } catch (gErr) {
+          lastError = `Groq Network: ${gErr.message}`;
+          console.warn(`[PlateScan] Groq ${groqModel} exception:`, gErr.message);
         }
-      } catch (gErr) {
-        lastError = `Groq Network: ${gErr.message}`;
-        console.warn("[PlateScan] Groq network exception, failing over to Gemini:", gErr.message);
       }
     }
 
     // =======================================================
-    // 2. SECONDARY FAILOVER: Google Gemini (Active 2.5 / 2.0 / 3.6 Flash)
+    // 2. SECONDARY FAILOVER: Google Gemini (Active 3.7 / flash-latest / 3.8 / 3.5)
     // =======================================================
     if (geminiKey) {
-      const ACTIVE_GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.6-flash'];
+      // Prioritize high-throughput verified models (gemini-flash-lite-latest & gemini-3.1-flash-lite return 200 OK without 503 load spikes)
+      const ACTIVE_GEMINI_MODELS = ['gemini-flash-lite-latest', 'gemini-3.1-flash-lite', 'gemini-3.7-flash', 'gemini-3.8-flash'];
 
       for (const model of ACTIVE_GEMINI_MODELS) {
         try {
@@ -368,7 +392,7 @@ INSPECTION RULES:
           } else {
             const errData = await res.json().catch(() => ({}));
             lastError = `Gemini ${model}: ${errData?.error?.message || res.statusText}`;
-            console.warn(`[PlateScan] Gemini ${model} failover failed:`, lastError);
+            console.warn(`[PlateScan] Gemini ${model} failover failed (${lastError}), trying next model...`);
           }
         } catch (err) {
           lastError = `Gemini Network: ${err.message}`;
@@ -781,7 +805,7 @@ INSPECTION RULES:
 
       {/* System Error Display */}
       {systemError && (
-        <div className="p-3.5 bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800/80 rounded-2xl text-red-800 dark:text-red-200 text-xs space-y-2 animate-fade-in shadow-sm">
+        <div className="p-4 bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800/80 rounded-2xl text-red-800 dark:text-red-200 text-xs space-y-3 animate-fade-in shadow-sm">
           <div className="flex items-start gap-2.5">
             <AlertTriangle className="h-4 w-4 text-red-500 dark:text-red-400 shrink-0 mt-0.5"/>
             <div>
@@ -789,13 +813,121 @@ INSPECTION RULES:
               <p className="m-0 font-mono text-[11px] text-red-700 dark:text-red-300/90 break-words">{systemError}</p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleReset}
-            className="w-full py-2 bg-red-600 hover:bg-red-700 dark:bg-red-900/60 dark:hover:bg-red-800/80 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs"
-          >
-            Reset Scanner
-          </button>
+
+          <div className="flex gap-2">
+            {capturedImage && (
+              <button
+                type="button"
+                onClick={() => processAndScan(capturedImage)}
+                disabled={isAnalyzing}
+                className="flex-1 py-2 px-3 bg-terracotta hover:bg-terracotta/90 text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${isAnalyzing ? 'animate-spin' : ''}`} />
+                <span>Retry Scan</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleReset}
+              className="flex-1 py-2 px-3 bg-stone-200 hover:bg-stone-300 dark:bg-red-900/60 dark:hover:bg-red-800/80 text-charcoal dark:text-white rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs"
+            >
+              Reset Scanner
+            </button>
+          </div>
+
+          {/* Instant Quick-Select Fallback in case of cloud API saturation */}
+          <div className="pt-2 border-t border-red-200/70 dark:border-red-800/50 space-y-1.5">
+            <span className="text-[10px] uppercase font-bold text-red-900/70 dark:text-red-300/70 tracking-wider block">
+              Or identify dish manually:
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                {
+                  label: "🥗 Authentic Pinakbet",
+                  dish: {
+                    is_food: true,
+                    dish_name: "Authentic Pinakbet (Pakbet)",
+                    meat_type: "Vegetables & Pork Bits",
+                    is_kapampangan: true,
+                    portion_estimate: "1 bowl (~280g)",
+                    calories: 210,
+                    sodium_mg: 620,
+                    macros: { protein_g: 8.5, carbs_g: 19.0, fat_g: 11.2 },
+                    culinary_notes: "Simmered native squash, bitter melon rings, okra, and eggplant braised in savory fermented bagoong."
+                  }
+                },
+                {
+                  label: "🍗 Classic Chicken Adobo",
+                  dish: {
+                    is_food: true,
+                    dish_name: "Classic Chicken Adobo (Adobung Manuk)",
+                    meat_type: "Chicken",
+                    is_kapampangan: true,
+                    portion_estimate: "250g (1 serving)",
+                    calories: 270,
+                    sodium_mg: 680,
+                    macros: { protein_g: 30.0, carbs_g: 4.0, fat_g: 12.0 },
+                    culinary_notes: "Lean poultry cut stewed in traditional garlic, vinegar, and soy reduction. High lean protein with lower saturated fat."
+                  }
+                },
+                {
+                  label: "🥓 Classic Pork Adobo",
+                  dish: {
+                    is_food: true,
+                    dish_name: "Classic Pork Adobo (Adobung Baboy)",
+                    meat_type: "Pork",
+                    is_kapampangan: true,
+                    portion_estimate: "250g (1 serving)",
+                    calories: 420,
+                    sodium_mg: 720,
+                    macros: { protein_g: 23.0, carbs_g: 4.0, fat_g: 28.0 },
+                    culinary_notes: "Rich pork belly braise with rendered lard, higher in saturated fat and purines."
+                  }
+                },
+                {
+                  label: "🍗🥓 Chicken & Pork Adobo",
+                  dish: {
+                    is_food: true,
+                    dish_name: "Chicken and Pork Adobo (Adobung Manuk at Baboy)",
+                    meat_type: "Chicken & Pork",
+                    is_kapampangan: true,
+                    portion_estimate: "250g (1 serving)",
+                    calories: 350,
+                    sodium_mg: 700,
+                    macros: { protein_g: 27.0, carbs_g: 4.0, fat_g: 19.0 },
+                    culinary_notes: "Classic Philippine combination adobo featuring both tender poultry and braised pork belly."
+                  }
+                },
+                {
+                  label: "🍳 Kapampangan Sisig",
+                  dish: {
+                    is_food: true,
+                    dish_name: "Authentic Kapampangan Sizzling Sisig",
+                    meat_type: "Pork",
+                    is_kapampangan: true,
+                    portion_estimate: "1 sizzling plate (~200g)",
+                    calories: 380,
+                    sodium_mg: 740,
+                    macros: { protein_g: 24.0, carbs_g: 5.0, fat_g: 29.0 },
+                    culinary_notes: "Authentic boiled, grilled, and minced pork mask seasoned with calamansi and chicken liver."
+                  }
+                }
+              ].map(({ label, dish }) => (
+                <button
+                  key={dish.dish_name}
+                  type="button"
+                  onClick={() => {
+                    setSystemError(null);
+                    setScanResult(dish);
+                    setShowAddPrompt(true);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-white/80 dark:bg-stone-900/80 hover:bg-white dark:hover:bg-stone-900 border border-red-200 dark:border-red-900/50 text-red-900 dark:text-red-200 text-[11px] font-bold transition-all cursor-pointer shadow-2xs active:scale-95"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
@@ -825,41 +957,46 @@ INSPECTION RULES:
           ) : (
             /* Verified Food Nutritional HUD */
             <div className="bg-white/95 dark:bg-gradient-to-b dark:from-stone-900/95 dark:to-stone-900/80 border border-[#E8E1D7] dark:border-stone-800 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xl text-charcoal dark:text-white">
-              {/* Dish Title & Hero Calorie Counter */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-start justify-between gap-3 border-b border-[#E8E1D7] dark:border-stone-800/90 pb-3.5">
+              {/* Dish Title & Hero Calorie Counter Row */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-[#E8E1D7] dark:border-stone-800 pb-3.5">
                 <div className="min-w-0 flex-1 space-y-1">
-                  {scanResult.is_kapampangan && (
-                    <span className="text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 dark:bg-gradient-to-r dark:from-amber-500/20 dark:to-orange-500/20 dark:text-amber-300 dark:border-amber-500/40 px-2 py-0.5 rounded-full inline-flex items-center gap-1 shadow-2xs max-w-full break-words">
-                      ★ Authentic Kapampangan Heritage Recipe
-                    </span>
-                  )}
-                  <h4 className="text-base sm:text-lg font-black text-charcoal dark:text-white m-0 leading-snug break-words">
+                  <h4 className="text-lg sm:text-xl font-black text-charcoal dark:text-stone-50 m-0 leading-snug break-words">
                     {scanResult.dish_name}
                   </h4>
-                  <div className="text-xs text-charcoal-light dark:text-stone-400 font-semibold flex items-center gap-1.5 pt-0.5 break-words">
+                  <div className="text-xs text-charcoal-light dark:text-stone-300 font-semibold flex items-center gap-1.5 pt-0.5 break-words">
                     <span className="text-sm shrink-0">🍽️</span>
                     <span className="break-words">{scanResult.portion_estimate || '1 standard serving'}</span>
                   </div>
                 </div>
 
-                <div className="text-right shrink-0 bg-[#FAF7F2] dark:bg-stone-800/60 border border-[#E8E1D7] dark:border-stone-700/60 rounded-2xl p-2.5 sm:p-3 shadow-inner self-start sm:self-auto min-w-[125px]">
+                <div className="text-right shrink-0 bg-[#FAF7F2] dark:bg-stone-800/90 border border-[#E8E1D7] dark:border-stone-700 rounded-2xl p-2.5 sm:p-3 shadow-inner self-start sm:self-auto min-w-[135px]">
                   <div className="flex items-center gap-1.5 text-terracotta dark:text-amber-400 justify-end">
                     <Flame className="h-5 w-5 fill-terracotta dark:fill-amber-500 text-terracotta dark:text-amber-400 shrink-0" />
                     <span className="text-2xl font-black text-charcoal dark:text-white leading-none">{currentCalories}</span>
-                    <span className="text-xs text-charcoal-light dark:text-stone-400 font-bold">kcal</span>
+                    <span className="text-xs text-charcoal-light dark:text-stone-300 font-bold">kcal</span>
                   </div>
-                  <span className="text-[9px] text-charcoal-light dark:text-stone-400 uppercase font-black tracking-wider block mt-1">Total Calories</span>
+                  <span className="text-[10px] text-charcoal-light dark:text-stone-300 uppercase font-black tracking-wider block mt-1">Total Calories</span>
                   {isGroupMode && (
-                    <span className="text-[10px] text-terracotta dark:text-amber-300 font-extrabold block mt-1 pt-1 border-t border-[#E8E1D7] dark:border-stone-700/50 leading-tight">
+                    <span className="text-[11px] text-terracotta dark:text-amber-300 font-extrabold block mt-1 pt-1 border-t border-[#E8E1D7] dark:border-stone-700 leading-tight">
                       ➗ {sharedCalories} kcal / diner ({groupCount})
                     </span>
                   )}
                 </div>
               </div>
 
+              {/* Full-width Culinary Notes Banner */}
+              {scanResult.culinary_notes && (
+                <div className="bg-[#FAF7F2] dark:bg-stone-800/70 p-3 rounded-xl border border-[#E8E1D7] dark:border-stone-700/80 text-xs text-charcoal dark:text-stone-200 leading-relaxed flex items-start gap-2.5 shadow-2xs">
+                  <span className="shrink-0 text-sm mt-0.5">💡</span>
+                  <p className="m-0 italic leading-relaxed text-charcoal dark:text-stone-200 flex-1">
+                    {scanResult.culinary_notes}
+                  </p>
+                </div>
+              )}
+
               {/* Portion Multiplier Segmented Selector */}
-              <div className="flex flex-wrap items-center justify-between gap-2 bg-[#F4EFE6] dark:bg-stone-800/40 p-2 sm:p-2.5 rounded-xl border border-[#E6DDD0] dark:border-stone-800">
-                <span className="text-xs font-bold text-charcoal dark:text-stone-300 flex items-center gap-1.5 shrink-0">
+              <div className="flex flex-wrap items-center justify-between gap-2 bg-[#F4EFE6] dark:bg-stone-800/80 p-2 sm:p-2.5 rounded-xl border border-[#E6DDD0] dark:border-stone-700">
+                <span className="text-xs font-bold text-charcoal dark:text-stone-100 flex items-center gap-1.5 shrink-0">
                   <span>⚖️</span> Portion Multiplier:
                 </span>
                 <div className="flex gap-1 shrink-0">
@@ -876,7 +1013,7 @@ INSPECTION RULES:
                       className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         portionMultiplier === m
                           ? 'bg-terracotta text-white shadow-[0_2px_8px_rgba(217,93,57,0.4)]'
-                          : 'bg-white dark:bg-stone-800 text-charcoal-light dark:text-stone-400 hover:text-charcoal dark:hover:text-stone-200 border border-[#E6DDD0] dark:border-transparent'
+                          : 'bg-white dark:bg-stone-900 text-charcoal dark:text-stone-200 hover:text-terracotta dark:hover:text-white border border-[#E6DDD0] dark:border-stone-700'
                       }`}
                     >
                       {label}
@@ -888,52 +1025,52 @@ INSPECTION RULES:
               {/* Bento Macronutrient Breakdown */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {/* Protein */}
-                <div className="bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-800/40 p-2 sm:p-2.5 rounded-xl text-center flex flex-col justify-between min-h-[66px]">
-                  <span className="text-[9px] font-black text-blue-700 dark:text-blue-300 uppercase tracking-wider block">🥩 Protein</span>
-                  <strong className="text-sm font-black text-blue-950 dark:text-white block mt-0.5 leading-none">{currentProtein}g</strong>
+                <div className="bg-blue-50 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-700/70 p-2.5 rounded-xl text-center flex flex-col justify-between min-h-[72px] shadow-2xs">
+                  <span className="text-[10px] font-black text-blue-900 dark:text-blue-300 uppercase tracking-wider block">🥩 Protein</span>
+                  <strong className="text-base font-black text-blue-950 dark:text-white block mt-0.5 leading-none">{currentProtein}g</strong>
                   {isGroupMode && (
-                    <span className="text-[8px] text-blue-600 dark:text-blue-300/80 font-semibold block mt-0.5 leading-tight">({sharedProtein}g / diner)</span>
+                    <span className="text-[10px] text-blue-800 dark:text-blue-200 font-bold block mt-1 leading-tight">({sharedProtein}g / diner)</span>
                   )}
                 </div>
 
                 {/* Carbs */}
-                <div className="bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/40 p-2 sm:p-2.5 rounded-xl text-center flex flex-col justify-between min-h-[66px]">
-                  <span className="text-[9px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-wider block">🌾 Carbs</span>
-                  <strong className="text-sm font-black text-amber-950 dark:text-white block mt-0.5 leading-none">{currentCarbs}g</strong>
+                <div className="bg-amber-50 dark:bg-amber-950/70 border border-amber-200 dark:border-amber-700/70 p-2.5 rounded-xl text-center flex flex-col justify-between min-h-[72px] shadow-2xs">
+                  <span className="text-[10px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider block">🌾 Carbs</span>
+                  <strong className="text-base font-black text-amber-950 dark:text-white block mt-0.5 leading-none">{currentCarbs}g</strong>
                   {isGroupMode && (
-                    <span className="text-[8px] text-amber-600 dark:text-amber-300/80 font-semibold block mt-0.5 leading-tight">({sharedCarbs}g / diner)</span>
+                    <span className="text-[10px] text-amber-800 dark:text-amber-200 font-bold block mt-1 leading-tight">({sharedCarbs}g / diner)</span>
                   )}
                 </div>
 
                 {/* Fat */}
-                <div className="bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-800/40 p-2 sm:p-2.5 rounded-xl text-center flex flex-col justify-between min-h-[66px]">
-                  <span className="text-[9px] font-black text-rose-700 dark:text-rose-300 uppercase tracking-wider block">🥑 Fat</span>
-                  <strong className="text-sm font-black text-rose-950 dark:text-white block mt-0.5 leading-none">{currentFat}g</strong>
+                <div className="bg-rose-50 dark:bg-rose-950/70 border border-rose-200 dark:border-rose-700/70 p-2.5 rounded-xl text-center flex flex-col justify-between min-h-[72px] shadow-2xs">
+                  <span className="text-[10px] font-black text-rose-900 dark:text-rose-300 uppercase tracking-wider block">🥑 Fat</span>
+                  <strong className="text-base font-black text-rose-950 dark:text-white block mt-0.5 leading-none">{currentFat}g</strong>
                   {isGroupMode && (
-                    <span className="text-[8px] text-rose-600 dark:text-rose-300/80 font-semibold block mt-0.5 leading-tight">({sharedFat}g / diner)</span>
+                    <span className="text-[10px] text-rose-800 dark:text-rose-200 font-bold block mt-1 leading-tight">({sharedFat}g / diner)</span>
                   )}
                 </div>
 
                 {/* Sodium */}
-                <div className="bg-orange-50/80 dark:bg-orange-950/30 border border-orange-200/80 dark:border-orange-800/40 p-2 sm:p-2.5 rounded-xl text-center flex flex-col justify-between min-h-[66px]">
-                  <span className="text-[9px] font-black text-orange-700 dark:text-orange-300 uppercase tracking-wider block">🧂 Sodium</span>
-                  <strong className="text-sm font-black text-orange-950 dark:text-orange-200 block mt-0.5 leading-none">{currentSodium}mg</strong>
+                <div className="bg-orange-50 dark:bg-orange-950/70 border border-orange-200 dark:border-orange-700/70 p-2.5 rounded-xl text-center flex flex-col justify-between min-h-[72px] shadow-2xs">
+                  <span className="text-[10px] font-black text-orange-900 dark:text-orange-300 uppercase tracking-wider block">🧂 Sodium</span>
+                  <strong className="text-base font-black text-orange-950 dark:text-orange-100 block mt-0.5 leading-none">{currentSodium}mg</strong>
                   {isGroupMode && (
-                    <span className="text-[8px] text-orange-600 dark:text-orange-300/80 font-semibold block mt-0.5 leading-tight">({sharedSodium}mg / diner)</span>
+                    <span className="text-[10px] text-orange-800 dark:text-orange-200 font-bold block mt-1 leading-tight">({sharedSodium}mg / diner)</span>
                   )}
                 </div>
               </div>
 
               {/* Success Badge after adding */}
               {addedToLogSuccess && (
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800/80 rounded-xl text-emerald-900 dark:text-emerald-200 text-xs flex items-center justify-between gap-2 animate-fade-in shadow-xs">
+                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-700 rounded-xl text-emerald-950 dark:text-emerald-100 text-xs flex items-center justify-between gap-2 animate-fade-in shadow-xs">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span className="break-words">
-                      Logged to <strong>{addedAssigneeLabel}</strong>!
+                      Logged to <strong className="text-emerald-950 dark:text-white">{addedAssigneeLabel}</strong>!
                     </span>
                   </div>
-                  <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-100 dark:bg-emerald-900/60 px-2 py-0.5 rounded-md shrink-0">
+                  <span className="text-[10px] text-emerald-800 dark:text-emerald-200 font-black bg-emerald-100 dark:bg-emerald-900/80 px-2 py-0.5 rounded-md shrink-0 border border-emerald-200 dark:border-emerald-700">
                     Saved
                   </span>
                 </div>
@@ -941,19 +1078,19 @@ INSPECTION RULES:
 
               {/* Interactive Add to Foods Section */}
               {showAddPrompt && (
-                <div className="bg-[#FAF7F2] dark:bg-stone-800/80 border border-[#E8E1D7] dark:border-stone-700/80 rounded-2xl p-3.5 space-y-3 animate-fade-in shadow-lg">
+                <div className="bg-[#FAF7F2] dark:bg-stone-800/90 border border-[#E8E1D7] dark:border-stone-700 rounded-2xl p-3.5 space-y-3 animate-fade-in shadow-lg">
                   <div>
-                    <h5 className="text-xs font-black uppercase tracking-wider text-charcoal dark:text-white m-0 flex items-center gap-1.5">
+                    <h5 className="text-xs font-black uppercase tracking-wider text-charcoal dark:text-stone-100 m-0 flex items-center gap-1.5">
                       <span>🍽️</span> Add to Foods We'll Eat?
                     </h5>
-                    <p className="text-[11px] text-charcoal-light dark:text-stone-300 m-0 mt-1 leading-relaxed break-words">
+                    <p className="text-xs text-charcoal-light dark:text-stone-300 m-0 mt-1 leading-relaxed break-words">
                       {isShared ? (
                         <>
-                          Log <strong>{scanResult.dish_name}</strong> into today's meal plan (<strong>{sharedCalories} kcal</strong> &amp; <strong>{sharedProtein}g protein</strong> per person — divided equally across {groupCount} diners; {currentCalories} kcal total).
+                          Log <strong className="text-charcoal dark:text-white">{scanResult.dish_name}</strong> into today's meal plan (<strong className="text-terracotta dark:text-amber-300 font-bold">{sharedCalories} kcal</strong> &amp; <strong className="text-terracotta dark:text-amber-300 font-bold">{sharedProtein}g protein</strong> per person — divided equally across {groupCount} diners; {currentCalories} kcal total).
                         </>
                       ) : (
                         <>
-                          Log <strong>{scanResult.dish_name}</strong> ({currentCalories} kcal, {currentProtein}g protein) into today's meal plan.
+                          Log <strong className="text-charcoal dark:text-white">{scanResult.dish_name}</strong> (<strong className="text-terracotta dark:text-amber-300 font-bold">{currentCalories} kcal</strong>, {currentProtein}g protein) into today's meal plan.
                         </>
                       )}
                     </p>
@@ -962,30 +1099,30 @@ INSPECTION RULES:
                   {/* Group Mode Person Selector */}
                   {isGroupMode && (
                     <div className="space-y-1.5 pt-1">
-                      <label className="text-[10px] font-black uppercase tracking-wider text-charcoal-light dark:text-stone-400 flex items-center gap-1">
-                        <Users className="h-3 w-3 text-terracotta" /> Which person will eat this dish?
+                      <label className="text-[11px] font-black uppercase tracking-wider text-charcoal dark:text-stone-300 flex items-center gap-1">
+                        <Users className="h-3.5 w-3.5 text-terracotta dark:text-amber-400" /> Which person will eat this dish?
                       </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-44 overflow-y-auto pr-1">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
                         {/* Option 1: Shared Entire Table */}
                         <button
                           type="button"
                           onClick={() => setSelectedAssignee('shared')}
                           className={`p-2.5 rounded-xl text-left text-xs font-bold border transition-all cursor-pointer flex items-center justify-between gap-2 ${
                             selectedAssignee === 'shared'
-                              ? 'bg-terracotta/10 dark:bg-terracotta/20 border-terracotta text-charcoal dark:text-white shadow-2xs'
-                              : 'bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 border-[#E6DFD5] dark:border-stone-800 text-charcoal dark:text-stone-300'
+                              ? 'bg-terracotta/10 dark:bg-terracotta/25 border-terracotta text-charcoal dark:text-white shadow-xs'
+                              : 'bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 border-[#E6DFD5] dark:border-stone-700 text-charcoal dark:text-stone-200'
                           }`}
                         >
                           <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <span className="text-sm shrink-0">👥</span>
+                            <span className="text-base shrink-0">👥</span>
                             <div className="min-w-0 flex-1">
-                              <span className="block font-black break-words leading-tight">Entire Group (Shared)</span>
-                              <span className="text-[10px] text-terracotta dark:text-amber-300 font-semibold block break-words mt-0.5 leading-tight">
+                              <span className="block font-black break-words leading-tight text-charcoal dark:text-white">Entire Group (Shared)</span>
+                              <span className="text-[11px] text-terracotta dark:text-amber-300 font-bold block break-words mt-0.5 leading-tight">
                                 ➗ Equal Split: {sharedCalories} kcal / person
                               </span>
                             </div>
                           </div>
-                          {selectedAssignee === 'shared' && <CheckCircle2 className="h-4 w-4 text-terracotta shrink-0" />}
+                          {selectedAssignee === 'shared' && <CheckCircle2 className="h-4 w-4 text-terracotta dark:text-amber-400 shrink-0" />}
                         </button>
 
                         {/* Option 2..N: Individual Diners */}
@@ -996,20 +1133,20 @@ INSPECTION RULES:
                             onClick={() => setSelectedAssignee(member.id)}
                             className={`p-2.5 rounded-xl text-left text-xs font-bold border transition-all cursor-pointer flex items-center justify-between gap-2 ${
                               selectedAssignee === member.id
-                                ? 'bg-terracotta/10 dark:bg-terracotta/20 border-terracotta text-charcoal dark:text-white shadow-2xs'
-                                : 'bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 border-[#E6DFD5] dark:border-stone-800 text-charcoal dark:text-stone-300'
+                                ? 'bg-terracotta/10 dark:bg-terracotta/25 border-terracotta text-charcoal dark:text-white shadow-xs'
+                                : 'bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 border-[#E6DFD5] dark:border-stone-700 text-charcoal dark:text-stone-200'
                             }`}
                           >
                             <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <span className="text-sm shrink-0">👤</span>
+                              <span className="text-base shrink-0">👤</span>
                               <div className="min-w-0 flex-1">
-                                <span className="block font-black break-words leading-tight">{member.name || `Diner ${idx + 1}`}</span>
-                                <span className="text-[10px] text-charcoal-light dark:text-stone-400 font-normal block break-words mt-0.5 leading-tight">
+                                <span className="block font-black break-words leading-tight text-charcoal dark:text-white">{member.name || `Diner ${idx + 1}`}</span>
+                                <span className="text-[11px] text-charcoal-light dark:text-stone-300 font-semibold block break-words mt-0.5 leading-tight">
                                   Full {currentCalories} kcal portion
                                 </span>
                               </div>
                             </div>
-                            {selectedAssignee === member.id && <CheckCircle2 className="h-4 w-4 text-terracotta shrink-0" />}
+                            {selectedAssignee === member.id && <CheckCircle2 className="h-4 w-4 text-terracotta dark:text-amber-400 shrink-0" />}
                           </button>
                         ))}
                       </div>
@@ -1018,40 +1155,40 @@ INSPECTION RULES:
 
                   {/* Equal Shared Breakdown Card when Shared is selected */}
                   {isShared && (
-                    <div className="bg-white dark:bg-stone-900/90 border border-amber-300 dark:border-amber-600/40 rounded-xl p-2.5 space-y-1.5 animate-fade-in shadow-2xs">
+                    <div className="bg-white dark:bg-stone-900 border border-amber-300 dark:border-amber-600/60 rounded-xl p-2.5 space-y-2 animate-fade-in shadow-xs">
                       <div className="flex flex-wrap items-center justify-between gap-1 text-[11px]">
-                        <span className="font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1">
+                        <span className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1">
                           <span>➗</span> Divided Equally Across {groupCount} Diners
                         </span>
-                        <span className="text-[10px] text-charcoal-light dark:text-stone-400 font-semibold">
+                        <span className="text-[10px] text-charcoal-light dark:text-stone-300 font-bold">
                           Total Dish: {currentCalories} kcal
                         </span>
                       </div>
                       <div className="grid grid-cols-4 gap-1.5 text-center">
-                        <div className="bg-[#FAF7F2] dark:bg-stone-800/80 p-1.5 rounded-lg border border-[#E8E1D7] dark:border-stone-700/60 min-h-[52px] flex flex-col justify-center">
-                          <span className="text-[8px] font-bold text-terracotta dark:text-amber-400 uppercase block">Calories</span>
-                          <strong className="text-xs font-black text-charcoal dark:text-amber-300 leading-none mt-0.5">{sharedCalories}</strong>
-                          <span className="text-[8px] text-charcoal-light dark:text-stone-400 block mt-0.5 leading-none">kcal/diner</span>
+                        <div className="bg-[#FAF7F2] dark:bg-stone-800 p-1.5 rounded-lg border border-[#E8E1D7] dark:border-stone-700 min-h-[54px] flex flex-col justify-center">
+                          <span className="text-[9px] font-black text-terracotta dark:text-amber-400 uppercase block">Calories</span>
+                          <strong className="text-xs font-black text-charcoal dark:text-amber-200 leading-none mt-0.5">{sharedCalories}</strong>
+                          <span className="text-[9px] text-charcoal-light dark:text-stone-300 block mt-0.5 leading-none">kcal/diner</span>
                         </div>
-                        <div className="bg-[#FAF7F2] dark:bg-stone-800/80 p-1.5 rounded-lg border border-[#E8E1D7] dark:border-stone-700/60 min-h-[52px] flex flex-col justify-center">
-                          <span className="text-[8px] font-bold text-blue-700 dark:text-stone-400 uppercase block">Protein</span>
+                        <div className="bg-[#FAF7F2] dark:bg-stone-800 p-1.5 rounded-lg border border-[#E8E1D7] dark:border-stone-700 min-h-[54px] flex flex-col justify-center">
+                          <span className="text-[9px] font-black text-blue-900 dark:text-blue-300 uppercase block">Protein</span>
                           <strong className="text-xs font-black text-charcoal dark:text-white leading-none mt-0.5">{sharedProtein}g</strong>
-                          <span className="text-[8px] text-charcoal-light dark:text-stone-400 block mt-0.5 leading-none">/diner</span>
+                          <span className="text-[9px] text-charcoal-light dark:text-stone-300 block mt-0.5 leading-none">/diner</span>
                         </div>
-                        <div className="bg-[#FAF7F2] dark:bg-stone-800/80 p-1.5 rounded-lg border border-[#E8E1D7] dark:border-stone-700/60 min-h-[52px] flex flex-col justify-center">
-                          <span className="text-[8px] font-bold text-amber-700 dark:text-stone-400 uppercase block">Carbs</span>
+                        <div className="bg-[#FAF7F2] dark:bg-stone-800 p-1.5 rounded-lg border border-[#E8E1D7] dark:border-stone-700 min-h-[54px] flex flex-col justify-center">
+                          <span className="text-[9px] font-black text-amber-900 dark:text-amber-300 uppercase block">Carbs</span>
                           <strong className="text-xs font-black text-charcoal dark:text-white leading-none mt-0.5">{sharedCarbs}g</strong>
-                          <span className="text-[8px] text-charcoal-light dark:text-stone-400 block mt-0.5 leading-none">/diner</span>
+                          <span className="text-[9px] text-charcoal-light dark:text-stone-300 block mt-0.5 leading-none">/diner</span>
                         </div>
-                        <div className="bg-[#FAF7F2] dark:bg-stone-800/80 p-1.5 rounded-lg border border-[#E8E1D7] dark:border-stone-700/60 min-h-[52px] flex flex-col justify-center">
-                          <span className="text-[8px] font-bold text-rose-700 dark:text-stone-400 uppercase block">Fat</span>
+                        <div className="bg-[#FAF7F2] dark:bg-stone-800 p-1.5 rounded-lg border border-[#E8E1D7] dark:border-stone-700 min-h-[54px] flex flex-col justify-center">
+                          <span className="text-[9px] font-black text-rose-900 dark:text-rose-300 uppercase block">Fat</span>
                           <strong className="text-xs font-black text-charcoal dark:text-white leading-none mt-0.5">{sharedFat}g</strong>
-                          <span className="text-[8px] text-charcoal-light dark:text-stone-400 block mt-0.5 leading-none">/diner</span>
+                          <span className="text-[9px] text-charcoal-light dark:text-stone-300 block mt-0.5 leading-none">/diner</span>
                         </div>
                       </div>
-                      <div className="text-[10px] text-charcoal-light dark:text-stone-400 flex items-center justify-between px-1 pt-0.5">
+                      <div className="text-[11px] text-charcoal-light dark:text-stone-300 flex items-center justify-between px-1 pt-0.5">
                         <span>Sodium per diner:</span>
-                        <strong className="text-orange-700 dark:text-rose-300 font-bold">{sharedSodium}mg</strong>
+                        <strong className="text-orange-950 dark:text-orange-200 font-bold">{sharedSodium}mg</strong>
                       </div>
                     </div>
                   )}

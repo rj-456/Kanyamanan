@@ -2191,6 +2191,50 @@ function App() {
     }
   });
   const [showFestivalsCalendar, setShowFestivalsCalendar] = useState(false);
+  const [authPromptModal, setAuthPromptModal] = useState({ isOpen: false, title: '', message: '', feature: '', targetItem: null });
+  const [festivalDateChangeModal, setFestivalDateChangeModal] = useState(null);
+
+  // Formatted human-readable date helper
+  const formatReadableDate = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr + 'T00:00:00');
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
+  const getTodayDateStr = () => {
+    try {
+      return new Date().toISOString().split('T')[0];
+    } catch (e) {
+      return '';
+    }
+  };
+
+  const getTomorrowDateStr = () => {
+    try {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      return d.toISOString().split('T')[0];
+    } catch (e) {
+      return '';
+    }
+  };
+
+  const getUpcomingSaturdayDateStr = () => {
+    try {
+      const d = new Date();
+      const day = d.getDay();
+      const diff = (6 - day + 7) % 7 || 7;
+      d.setDate(d.getDate() + diff);
+      return d.toISOString().split('T')[0];
+    } catch (e) {
+      return '';
+    }
+  };
 
   // Current month derived from the itinerary's planned trip date
   const plannedMonthName = useMemo(() => {
@@ -2203,6 +2247,20 @@ function App() {
       return '';
     }
   }, [plannedTripDate]);
+
+  // Enforce today's date for guests and forbid trips to previous days for all users
+  useEffect(() => {
+    const today = getTodayDateStr();
+    if (!isAuthenticated || isGuest) {
+      if (plannedTripDate && plannedTripDate !== today) {
+        setPlannedTripDate(today);
+      }
+    } else {
+      if (plannedTripDate && plannedTripDate < today) {
+        setPlannedTripDate(today);
+      }
+    }
+  }, [isAuthenticated, isGuest, plannedTripDate]);
 
   // Helper to convert month name into two-digit month string
   const getMonthNumber = (monthName) => {
@@ -2223,56 +2281,292 @@ function App() {
     return '12';
   };
 
-  // Helper to test if a festival is authentically happening on a given trip date
+  // Authentic calendar rules for Pampanga festivals with strict specific calendar date restrictions
+  const FESTIVAL_CALENDAR_RULES = useMemo(() => ({
+    'festival-apalit-libad': [
+      { month: 6, startDay: 28, endDay: 30 } // June 28 - 30
+    ],
+    'festival-batalla': [
+      { month: 5, startDay: 8, endDay: 8 } // May 8 (Feast of Saint Michael)
+    ],
+    'festival-caragan': [
+      { month: 2, startDay: 18, endDay: 25 } // February 18 - 25
+    ],
+    'festival-dukit': [
+      { month: 12, startDay: 27, endDay: 30 } // December 27 - 30
+    ],
+    'festival-duman': [
+      { month: 12, startDay: 1, endDay: 7 } // December 1 - 7
+    ],
+    'festival-fiestang-kuliat': [
+      { month: 10, startDay: 15, endDay: 28 } // October 15 - 28
+    ],
+    'festival-giant-lantern': [
+      { month: 12, startDay: 14, endDay: 31 }, // December 14 - 31
+      { month: 1, startDay: 1, endDay: 2 }     // January 1 - 2
+    ],
+    'festival-ibun-ebun': [
+      { month: 2, startDay: 1, endDay: 3 } // February 1 - 3
+    ],
+    'festival-kamaru': [
+      { month: 8, startDay: 20, endDay: 24 } // August 20 - 24
+    ],
+    'festival-lubao-balloon': [
+      { month: 3, startDay: 27, endDay: 31 }, // Late March / Early April
+      { month: 4, startDay: 1, endDay: 5 }
+    ],
+    'festival-majigangga': [
+      { month: 12, startDay: 22, endDay: 30 } // December 22 - 30
+    ],
+    'festival-makatapak': [
+      { month: 11, startDay: 15, endDay: 21 } // November 15 - 21
+    ],
+    'festival-pyestang-tugak': [
+      { month: 10, startDay: 1, endDay: 6 } // October 1 - 6
+    ],
+    'festival-sabuaga': [
+      { month: 3, startDay: 25, endDay: 31 }, // Easter / Holy Week
+      { month: 4, startDay: 1, endDay: 15 }
+    ],
+    'festival-maleldo-cutud': [
+      { month: 3, startDay: 25, endDay: 31 }, // Good Friday / Holy Week
+      { month: 4, startDay: 1, endDay: 15 }
+    ],
+    'festival-sasmuan-kuraldal': [
+      { month: 1, startDay: 6, endDay: 10 } // January 6 - 10
+    ],
+    'festival-sinukwan': [
+      { month: 11, startDay: 28, endDay: 30 }, // November 28 - 30
+      { month: 12, startDay: 1, endDay: 6 }    // December 1 - 6
+    ],
+    'festival-tigtigan-terakan': [
+      { month: 10, startDay: 24, endDay: 26 } // October 24 - 26
+    ]
+  }), []);
+
+  // Helper to parse specific festival dates from eventDate strings for dynamic/admin festivals
+  const parseFestivalDateRules = useCallback((eventDateStr) => {
+    const rules = [];
+    if (!eventDateStr) return rules;
+    const str = String(eventDateStr).trim();
+
+    // Cross-month: "Month1 Day1 - Month2 Day2"
+    const crossMatch = str.match(/([A-Za-z]+)\s+(\d{1,2})\s*[-–—to]+\s*([A-Za-z]+)\s+(\d{1,2})/i);
+    if (crossMatch) {
+      const m1 = parseInt(getMonthNumber(crossMatch[1]), 10);
+      const d1 = parseInt(crossMatch[2], 10);
+      const m2 = parseInt(getMonthNumber(crossMatch[3]), 10);
+      const d2 = parseInt(crossMatch[4], 10);
+      if (m1 && d1 && m2 && d2) {
+        rules.push({ month: m1, startDay: d1, endDay: 31 });
+        rules.push({ month: m2, startDay: 1, endDay: d2 });
+        return rules;
+      }
+    }
+
+    // Single-month range: "Month Day1 - Day2"
+    const rangeMatch = str.match(/([A-Za-z]+)\s+(\d{1,2})\s*[-–—to]+\s*(\d{1,2})/i);
+    if (rangeMatch) {
+      const m = parseInt(getMonthNumber(rangeMatch[1]), 10);
+      const d1 = parseInt(rangeMatch[2], 10);
+      const d2 = parseInt(rangeMatch[3], 10);
+      if (m && d1 && d2) {
+        rules.push({ month: m, startDay: Math.min(d1, d2), endDay: Math.max(d1, d2) });
+        return rules;
+      }
+    }
+
+    // Single day: "Month Day"
+    const singleMatch = str.match(/([A-Za-z]+)\s+(\d{1,2})/i);
+    if (singleMatch) {
+      const m = parseInt(getMonthNumber(singleMatch[1]), 10);
+      const d = parseInt(singleMatch[2], 10);
+      if (m && d) {
+        rules.push({ month: m, startDay: d, endDay: d });
+        return rules;
+      }
+    }
+
+    return rules;
+  }, []);
+
+  // Helper to obtain the recommended exact calendar date for a festival.
+  // If the festival has already passed this year relative to the present day, next year is recommended.
+  const getFestivalRecommendedDate = useCallback((attr) => {
+    if (!attr) return getTodayDateStr();
+    const todayStr = getTodayDateStr();
+    const currentYear = new Date().getFullYear();
+    const preMatch = (PRESEEDED_ATTRACTIONS || []).find(p => p && (p.id === attr.id || p.name === attr.name));
+    const attrId = attr.id || (preMatch && preMatch.id);
+
+    // 1. Check fixed calendar rules by attraction ID
+    let rules = (attrId && FESTIVAL_CALENDAR_RULES[attrId]) ? FESTIVAL_CALENDAR_RULES[attrId] : null;
+
+    // Match by name if ID was dynamically generated
+    if (!rules) {
+      const nameLower = (attr.name || '').toLowerCase();
+      if (nameLower.includes('apalit') && nameLower.includes('libad')) rules = FESTIVAL_CALENDAR_RULES['festival-apalit-libad'];
+      else if (nameLower.includes('batalla')) rules = FESTIVAL_CALENDAR_RULES['festival-batalla'];
+      else if (nameLower.includes('caragan')) rules = FESTIVAL_CALENDAR_RULES['festival-caragan'];
+      else if (nameLower.includes('dukit')) rules = FESTIVAL_CALENDAR_RULES['festival-dukit'];
+      else if (nameLower.includes('duman')) rules = FESTIVAL_CALENDAR_RULES['festival-duman'];
+      else if (nameLower.includes('kuliat') || nameLower.includes('sisig festival')) rules = FESTIVAL_CALENDAR_RULES['festival-fiestang-kuliat'];
+      else if (nameLower.includes('giant lantern') || nameLower.includes('ligligan parul')) rules = FESTIVAL_CALENDAR_RULES['festival-giant-lantern'];
+      else if (nameLower.includes('ibun-ebun') || nameLower.includes('birds and eggs')) rules = FESTIVAL_CALENDAR_RULES['festival-ibun-ebun'];
+      else if (nameLower.includes('kamaru')) rules = FESTIVAL_CALENDAR_RULES['festival-kamaru'];
+      else if (nameLower.includes('balloon') || nameLower.includes('lubao')) rules = FESTIVAL_CALENDAR_RULES['festival-lubao-balloon'];
+      else if (nameLower.includes('majigangga')) rules = FESTIVAL_CALENDAR_RULES['festival-majigangga'];
+      else if (nameLower.includes('makatapak')) rules = FESTIVAL_CALENDAR_RULES['festival-makatapak'];
+      else if (nameLower.includes('tugak') || nameLower.includes('frog')) rules = FESTIVAL_CALENDAR_RULES['festival-pyestang-tugak'];
+      else if (nameLower.includes('sabuaga')) rules = FESTIVAL_CALENDAR_RULES['festival-sabuaga'];
+      else if (nameLower.includes('cutud') || nameLower.includes('maleldo')) rules = FESTIVAL_CALENDAR_RULES['festival-maleldo-cutud'];
+      else if (nameLower.includes('kuraldal') || nameLower.includes('sasmuan')) rules = FESTIVAL_CALENDAR_RULES['festival-sasmuan-kuraldal'];
+      else if (nameLower.includes('sinukwan')) rules = FESTIVAL_CALENDAR_RULES['festival-sinukwan'];
+      else if (nameLower.includes('tigtigan terakan')) rules = FESTIVAL_CALENDAR_RULES['festival-tigtigan-terakan'];
+    }
+
+    let monthNum = null;
+    let startDay = 15;
+    let endDay = 15;
+
+    if (rules && rules.length > 0) {
+      monthNum = rules[0].month;
+      startDay = rules[0].startDay;
+      endDay = rules[0].endDay || rules[0].startDay;
+    } else {
+      const rawSample = attr.sampleActiveDate || (preMatch && preMatch.sampleActiveDate);
+      if (rawSample && /^\d{4}-\d{2}-\d{2}$/.test(rawSample)) {
+        const parts = rawSample.split('-');
+        monthNum = parseInt(parts[1], 10);
+        startDay = parseInt(parts[2], 10);
+        endDay = startDay;
+      } else {
+        const parsed = parseFestivalDateRules(attr.eventDate || (preMatch && preMatch.eventDate) || '');
+        if (parsed && parsed.length > 0) {
+          monthNum = parsed[0].month;
+          startDay = parsed[0].startDay;
+          endDay = parsed[0].endDay || parsed[0].startDay;
+        } else {
+          monthNum = parseInt(getMonthNumber(attr.eventMonth || (preMatch && preMatch.eventMonth)), 10) || 12;
+          startDay = 15;
+          endDay = 15;
+        }
+      }
+    }
+
+    const mStr = String(monthNum).padStart(2, '0');
+    const startDStr = String(startDay).padStart(2, '0');
+    const endDStr = String(endDay).padStart(2, '0');
+
+    // Determine the base year: respect future trip years if an account holder has planned ahead
+    let baseYear = currentYear;
+    if (plannedTripDate && plannedTripDate >= todayStr) {
+      const pYear = parseInt(plannedTripDate.split('-')[0], 10);
+      if (pYear && pYear >= currentYear) {
+        baseYear = pYear;
+      }
+    }
+
+    // If the festival dates have already passed this year relative to today, recommend next year
+    const festivalEndDateThisYear = `${baseYear}-${mStr}-${endDStr}`;
+    let targetYear = baseYear;
+    if (festivalEndDateThisYear < todayStr) {
+      targetYear = baseYear + 1;
+    }
+
+    return `${targetYear}-${mStr}-${startDStr}`;
+  }, [plannedTripDate, FESTIVAL_CALENDAR_RULES, parseFestivalDateRules]);
+
+  // Helper to test if a festival is authentically happening on a given trip date.
+  // FESTIVALS CAN STRICTLY ONLY BE ADDED ON THEIR SPECIFIC SCHEDULED CALENDAR DATES.
   const isFestivalActiveOnDate = useCallback((attr, targetDateStr) => {
     if (!attr) return true;
+    const preMatch = (PRESEEDED_ATTRACTIONS || []).find(p => p && (p.id === attr.id || p.name === attr.name));
     const isFest = Boolean(
       attr.isFestival ||
+      (preMatch && preMatch.isFestival) ||
       (attr.type && attr.type.toLowerCase().includes('festival')) ||
       (attr.id && String(attr.id).startsWith('festival-'))
     );
-    // Non-festival heritage destinations (churches, shrines, ancestral houses) are open year-round
+    // Non-festival heritage destinations (churches, shrines, ancestral houses, parks) are open year-round
     if (!isFest) return true;
 
-    let dateObj;
-    try {
-      dateObj = targetDateStr ? new Date(targetDateStr + 'T00:00:00') : new Date();
-      if (isNaN(dateObj.getTime())) dateObj = new Date();
-    } catch (e) {
-      dateObj = new Date();
+    // Disallow past dates: users are not allowed to make a trip from previous days
+    const todayStr = getTodayDateStr();
+    if (targetDateStr && targetDateStr < todayStr) {
+      return false;
     }
 
-    const monthName = dateObj.toLocaleString('en-US', { month: 'long' }).toLowerCase();
-    const monthShort = dateObj.toLocaleString('en-US', { month: 'short' }).toLowerCase();
+    // Parse the target trip date (targetDateStr is "YYYY-MM-DD")
+    let targetMonth = null;
+    let targetDay = null;
 
-    // 1. Check activeMonths array if specified
-    if (Array.isArray(attr.activeMonths) && attr.activeMonths.length > 0) {
-      const hasMonth = attr.activeMonths.some(m => {
-        const lower = String(m).toLowerCase();
-        return lower.includes(monthName) || lower.includes(monthShort) || monthName.includes(lower);
+    if (targetDateStr && typeof targetDateStr === 'string' && targetDateStr.includes('-')) {
+      const parts = targetDateStr.split('-');
+      if (parts.length >= 3) {
+        targetMonth = parseInt(parts[1], 10);
+        targetDay = parseInt(parts[2], 10);
+      }
+    }
+
+    if (!targetMonth || !targetDay || isNaN(targetMonth) || isNaN(targetDay)) {
+      const now = new Date();
+      targetMonth = now.getMonth() + 1;
+      targetDay = now.getDate();
+    }
+
+    // 1. Check fixed calendar rules by attraction ID
+    const attrId = attr.id || (preMatch && preMatch.id);
+    let rules = (attrId && FESTIVAL_CALENDAR_RULES[attrId]) ? FESTIVAL_CALENDAR_RULES[attrId] : null;
+
+    // Match by name if ID was dynamically generated
+    if (!rules) {
+      const nameLower = (attr.name || '').toLowerCase();
+      if (nameLower.includes('apalit') && nameLower.includes('libad')) rules = FESTIVAL_CALENDAR_RULES['festival-apalit-libad'];
+      else if (nameLower.includes('batalla')) rules = FESTIVAL_CALENDAR_RULES['festival-batalla'];
+      else if (nameLower.includes('caragan')) rules = FESTIVAL_CALENDAR_RULES['festival-caragan'];
+      else if (nameLower.includes('dukit')) rules = FESTIVAL_CALENDAR_RULES['festival-dukit'];
+      else if (nameLower.includes('duman')) rules = FESTIVAL_CALENDAR_RULES['festival-duman'];
+      else if (nameLower.includes('kuliat') || nameLower.includes('sisig festival')) rules = FESTIVAL_CALENDAR_RULES['festival-fiestang-kuliat'];
+      else if (nameLower.includes('giant lantern') || nameLower.includes('ligligan parul')) rules = FESTIVAL_CALENDAR_RULES['festival-giant-lantern'];
+      else if (nameLower.includes('ibun-ebun') || nameLower.includes('birds and eggs')) rules = FESTIVAL_CALENDAR_RULES['festival-ibun-ebun'];
+      else if (nameLower.includes('kamaru')) rules = FESTIVAL_CALENDAR_RULES['festival-kamaru'];
+      else if (nameLower.includes('balloon') || nameLower.includes('lubao')) rules = FESTIVAL_CALENDAR_RULES['festival-lubao-balloon'];
+      else if (nameLower.includes('majigangga')) rules = FESTIVAL_CALENDAR_RULES['festival-majigangga'];
+      else if (nameLower.includes('makatapak')) rules = FESTIVAL_CALENDAR_RULES['festival-makatapak'];
+      else if (nameLower.includes('tugak') || nameLower.includes('frog')) rules = FESTIVAL_CALENDAR_RULES['festival-pyestang-tugak'];
+      else if (nameLower.includes('sabuaga')) rules = FESTIVAL_CALENDAR_RULES['festival-sabuaga'];
+      else if (nameLower.includes('cutud') || nameLower.includes('maleldo')) rules = FESTIVAL_CALENDAR_RULES['festival-maleldo-cutud'];
+      else if (nameLower.includes('kuraldal') || nameLower.includes('sasmuan')) rules = FESTIVAL_CALENDAR_RULES['festival-sasmuan-kuraldal'];
+      else if (nameLower.includes('sinukwan')) rules = FESTIVAL_CALENDAR_RULES['festival-sinukwan'];
+      else if (nameLower.includes('tigtigan terakan')) rules = FESTIVAL_CALENDAR_RULES['festival-tigtigan-terakan'];
+    }
+
+    // 2. Parse rules from eventDate string if not matched by ID or name
+    if (!rules || rules.length === 0) {
+      const eventDateStr = attr.eventDate || (preMatch && preMatch.eventDate) || '';
+      rules = parseFestivalDateRules(eventDateStr);
+    }
+
+    // 3. Strictly enforce specific dates: the trip date MUST fall between startDay and endDay of that month
+    if (rules && rules.length > 0) {
+      return rules.some(rule => {
+        if (rule.month !== targetMonth) return false;
+        return targetDay >= rule.startDay && targetDay <= rule.endDay;
       });
-      if (hasMonth) return true;
     }
 
-    // 2. Check eventMonth field
-    const festMonth = String(attr.eventMonth || '').toLowerCase();
-    if (festMonth) {
-      if (festMonth.includes(monthName) || festMonth.includes(monthShort) || monthName.includes(festMonth)) {
-        return true;
-      }
-      if (festMonth === 'all-year' || festMonth === 'year-round') return true;
-    }
-
-    // 3. Check eventDate field
-    const festDate = String(attr.eventDate || '').toLowerCase();
-    if (festDate) {
-      if (festDate.includes(monthName) || festDate.includes(monthShort)) {
-        return true;
-      }
+    // 4. Fallback if only sampleActiveDate is specified
+    const sampleDate = attr.sampleActiveDate || (preMatch && preMatch.sampleActiveDate);
+    if (sampleDate && /^\d{4}-\d{2}-\d{2}$/.test(sampleDate)) {
+      const sParts = sampleDate.split('-');
+      const sMonth = parseInt(sParts[1], 10);
+      const sDay = parseInt(sParts[2], 10);
+      return targetMonth === sMonth && targetDay === sDay;
     }
 
     return false;
-  }, []);
+  }, [FESTIVAL_CALENDAR_RULES, parseFestivalDateRules]);
 
   // Festivals matching the selected itinerary date/month
   const seasonalFestivals = useMemo(() => {
@@ -2281,6 +2575,29 @@ function App() {
       return isFestivalActiveOnDate(a, plannedTripDate);
     });
   }, [attractions, plannedTripDate, isFestivalActiveOnDate]);
+
+  // Any festival stops already in the active route that do not happen on the currently selected trip date
+  const inactiveFestivalsOnTrip = useMemo(() => {
+    return (activeTrip || []).filter(item => {
+      if (!item) return false;
+      const isFest = Boolean(
+        item.isFestival ||
+        (item.type && item.type.toLowerCase().includes('festival')) ||
+        (item.id && String(item.id).startsWith('festival-'))
+      );
+      if (!isFest) return false;
+      return !isFestivalActiveOnDate(item, plannedTripDate);
+    });
+  }, [activeTrip, plannedTripDate, isFestivalActiveOnDate]);
+
+  // All festivals across Pampanga regardless of season
+  const allFestivals = useMemo(() => {
+    return (attractions || []).filter(a => {
+      if (!a) return false;
+      const preMatch = (PRESEEDED_ATTRACTIONS || []).find(p => p && (p.id === a.id || p.name === a.name));
+      return Boolean(a.isFestival || (preMatch && preMatch.isFestival) || (a.type && a.type.includes('Festival')));
+    });
+  }, [attractions]);
 
   // Per-Account Saved Itineraries (Dual Persistence: LocalStorage + Firebase Firestore)
   const [savedItineraries, setSavedItineraries] = useState(() => {
@@ -3978,6 +4295,7 @@ So, where do we start? 😊`,
 
   const [attractionMunFilter, setAttractionMunFilter] = useState('All');
   const [attractionTypeFilter, setAttractionTypeFilter] = useState('All');
+  const [attractionFestivalFilter, setAttractionFestivalFilter] = useState('All'); // 'All' | 'active-on-date' | 'all-festivals'
   const [attractionSearchQuery, setAttractionSearchQuery] = useState('');
   const [isAttractionMunOpen, setIsAttractionMunOpen] = useState(false);
   const [selectedAttraction, setSelectedAttraction] = useState(null);
@@ -13654,8 +13972,28 @@ Return ONLY a valid JSON object matching this schema:
       (res.type && res.type.toLowerCase().includes('festival')) ||
       (res.id && String(res.id).startsWith('festival-'))
     );
+
+    // FESTIVAL DATE RESTRICTION: Festivals can strictly ONLY be added if the trip date matches the event date!
     if (isFest && !isFestivalActiveOnDate(res, plannedTripDate)) {
-      alert(`⚠️ Festival Not Happening on Selected Date:\n\n"${res.name}" only takes place in ${res.eventMonth || 'its festival season'} (${res.eventDate || 'Scheduled Dates'}).\n\nYour planned trip date is currently set to ${plannedTripDate || 'today'}.\n\nTo add this festival to your itinerary, please adjust your Trip Date in the Food Trip Planner to ${res.eventMonth || 'its season'}.`);
+      if (!isAuthenticated || isGuest) {
+        setAuthPromptModal({
+          isOpen: true,
+          title: `Account Required: ${res.name}`,
+          message: `"${res.name}" is scheduled for celebration on ${res.eventDate || res.eventMonth || 'specific dates'}. Guest trip plans are set for today. To schedule your trip for a future festival date, please sign in or create a free account!`,
+          feature: 'festival_date',
+          targetItem: res
+        });
+        return false;
+      }
+      const targetDate = getFestivalRecommendedDate(res);
+      setFestivalDateChangeModal({
+        targetFestival: res,
+        festivalName: res.name,
+        festivalMonth: res.eventMonth || 'Festival Season',
+        festivalDate: res.eventDate || 'Scheduled Dates',
+        targetDate: targetDate,
+        currentDate: plannedTripDate
+      });
       return false;
     }
 
@@ -13708,6 +14046,7 @@ Return ONLY a valid JSON object matching this schema:
     const newItin = {
       id: 'trail-' + Date.now(),
       name: newItineraryName.trim(),
+      tripDate: plannedTripDate || getTodayDateStr(),
       stops: serializeItineraryStops(computedRoutePath),
       isFinished: false,
       createdAt: Date.now(),
@@ -13736,6 +14075,7 @@ Return ONLY a valid JSON object matching this schema:
         return {
           ...item,
           name: nameToUse,
+          tripDate: plannedTripDate || item.tripDate || getTodayDateStr(),
           stops: serializeItineraryStops(computedRoutePath),
           updatedAt: Date.now()
         };
@@ -13753,6 +14093,10 @@ Return ONLY a valid JSON object matching this schema:
     setLoadedItineraryId(itin.id);
     setLoadedItineraryName(itin.name);
     setNewItineraryName(itin.name);
+    if (itin.tripDate) {
+      const today = getTodayDateStr();
+      setPlannedTripDate(itin.tripDate < today ? today : itin.tripDate);
+    }
 
     const matchedStops = itin.stops.map(stop => {
       // 1. If stop is already a rich object with specific municipality and lat/lng
@@ -21034,6 +21378,217 @@ ${rawText}`;
                       </span>
                     </div>
 
+                    {/* Planned Trip Date & Season Row */}
+                    <div className="bg-[#FAF8F5] dark:bg-[#161412] p-3 rounded-xl border border-[#E9E5DE] dark:border-[#2A2621] space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-black text-charcoal-light dark:text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-terracotta" />
+                          <span>Planned Trip Date</span>
+                        </label>
+                        {isAuthenticated && !isGuest ? (
+                          <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                            Custom Date Active
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setAuthPromptModal({
+                              isOpen: true,
+                              title: 'Specific Date Trip Scheduling',
+                              message: 'Planning your trip for a specific future date and discovering date-restricted seasonal festivals is exclusive to registered accounts. Sign in or create a free account to schedule custom trip dates!',
+                              feature: 'trip_date'
+                            })}
+                            className="text-[9px] font-black text-terracotta dark:text-orange-400 bg-terracotta/10 px-2 py-0.5 rounded-full border border-terracotta/20 flex items-center gap-1 hover:underline cursor-pointer"
+                          >
+                            <Lock className="w-2.5 h-2.5" />
+                            <span>Account Required</span>
+                          </button>
+                        )}
+                      </div>
+
+                        <div className="space-y-2">
+                          {(!isAuthenticated || isGuest) ? (
+                            <div
+                              onClick={() => setAuthPromptModal({
+                                isOpen: true,
+                                title: 'Specific Date Trip Scheduling',
+                                message: 'Planning your trip for a specific future date and discovering date-restricted seasonal festivals is exclusive to registered accounts. Sign in or create a free account to schedule custom trip dates!',
+                                feature: 'trip_date'
+                              })}
+                              className="group cursor-pointer"
+                              title="Click to sign in and schedule for a future date"
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="flex-1 flex items-center justify-between px-3 py-1.5 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg bg-gray-100/90 dark:bg-[#1A1815] text-xs font-bold text-charcoal-light dark:text-gray-400 group-hover:border-terracotta transition-colors">
+                                  <span>{formatReadableDate(getTodayDateStr())}</span>
+                                  <Lock className="w-3 h-3 text-terracotta" />
+                                </div>
+                                <span className="text-[11px] font-bold text-amber-800 dark:text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2.5 py-1.5 rounded-lg shrink-0">
+                                  Today Only
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="date"
+                                value={plannedTripDate || getTodayDateStr()}
+                                min={getTodayDateStr()}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  const today = getTodayDateStr();
+                                  if (val && val < today) {
+                                    setPlannedTripDate(today);
+                                  } else {
+                                    setPlannedTripDate(val);
+                                  }
+                                }}
+                                className="flex-1 px-3 py-1.5 border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg bg-white dark:bg-[#1F1C18] text-xs font-bold text-charcoal dark:text-white focus:outline-none focus:ring-1 focus:ring-terracotta"
+                              />
+                              <span className="text-[11px] font-bold text-charcoal dark:text-white bg-white dark:bg-[#1F1C18] border border-[#E9E5DE] dark:border-[#2E2A24] px-2.5 py-1.5 rounded-lg shrink-0">
+                                {plannedMonthName || 'Select Date'}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Quick Date Presets */}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[9px] font-bold text-charcoal-light dark:text-gray-400">Quick:</span>
+                            <button
+                              type="button"
+                              onClick={() => setPlannedTripDate(getTodayDateStr())}
+                              className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${(!plannedTripDate || plannedTripDate === getTodayDateStr()) ? 'bg-terracotta text-white' : 'bg-white dark:bg-[#201D1A] text-charcoal dark:text-gray-300 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta'}`}
+                            >
+                              Today
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!isAuthenticated || isGuest) {
+                                  setAuthPromptModal({
+                                    isOpen: true,
+                                    title: 'Specific Date Trip Scheduling',
+                                    message: 'Planning your trip for tomorrow or future dates is exclusive to registered accounts. Sign in or create a free account to schedule custom trip dates!',
+                                    feature: 'trip_date'
+                                  });
+                                  return;
+                                }
+                                setPlannedTripDate(getTomorrowDateStr());
+                              }}
+                              className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1 ${plannedTripDate === getTomorrowDateStr() ? 'bg-terracotta text-white' : 'bg-white dark:bg-[#201D1A] text-charcoal dark:text-gray-300 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta'}`}
+                            >
+                              {(!isAuthenticated || isGuest) && <Lock className="w-2.5 h-2.5 text-terracotta" />}
+                              <span>Tomorrow</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!isAuthenticated || isGuest) {
+                                  setAuthPromptModal({
+                                    isOpen: true,
+                                    title: 'Specific Date Trip Scheduling',
+                                    message: 'Planning your trip for the weekend or future dates is exclusive to registered accounts. Sign in or create a free account to schedule custom trip dates!',
+                                    feature: 'trip_date'
+                                  });
+                                  return;
+                                }
+                                setPlannedTripDate(getUpcomingSaturdayDateStr());
+                              }}
+                              className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all flex items-center gap-1 ${plannedTripDate === getUpcomingSaturdayDateStr() ? 'bg-terracotta text-white' : 'bg-white dark:bg-[#201D1A] text-charcoal dark:text-gray-300 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta'}`}
+                            >
+                              {(!isAuthenticated || isGuest) && <Lock className="w-2.5 h-2.5 text-terracotta" />}
+                              <span>This Weekend</span>
+                            </button>
+                          </div>
+
+                          {/* Festival Specific Date Warning if any stop conflicts with the selected date */}
+                          {inactiveFestivalsOnTrip.length > 0 && (
+                            <div className="p-2.5 bg-amber-500/10 dark:bg-amber-950/40 border border-amber-400/40 dark:border-amber-600/40 rounded-xl space-y-1.5 animate-fade-in">
+                              <div className="flex items-center gap-1.5 font-black text-amber-900 dark:text-amber-300 text-[10px] uppercase tracking-wider">
+                                <span>⚠️</span>
+                                <span>Specific Date Conflict ({inactiveFestivalsOnTrip.length} Festival Stop{inactiveFestivalsOnTrip.length > 1 ? 's' : ''}):</span>
+                              </div>
+                              {inactiveFestivalsOnTrip.map(fest => (
+                                <div key={fest.id} className="text-[10px] text-charcoal dark:text-gray-300 flex items-center justify-between gap-2 pl-3">
+                                  <span className="truncate">
+                                    &bull; <strong>{fest.name}</strong> only on <strong>{fest.eventDate}</strong>
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setPlannedTripDate(getFestivalRecommendedDate(fest))}
+                                    className="text-terracotta dark:text-orange-400 font-bold hover:underline cursor-pointer shrink-0 text-[9px]"
+                                    title={`Reschedule trip date to ${fest.eventDate}`}
+                                  >
+                                    Sync to festival date
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                      {/* Active Festivals for Selected Specific Date */}
+                      {seasonalFestivals.length > 0 ? (
+                        <div className="p-2.5 bg-amber-500/10 dark:bg-amber-950/30 border border-amber-400/40 dark:border-amber-600/40 rounded-lg space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-black text-amber-950 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1">
+                              <span>🎉</span> {seasonalFestivals.length} Festival{seasonalFestivals.length > 1 ? 's' : ''} Happening on this Date ({formatReadableDate(plannedTripDate || getTodayDateStr())}):
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAttractionFestivalFilter('active-on-date');
+                                setDashboardTab('destinations');
+                              }}
+                              className="text-[9px] font-bold text-terracotta hover:underline cursor-pointer"
+                            >
+                              Explore all
+                            </button>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {seasonalFestivals.map(fest => {
+                              const alreadyAdded = activeTrip.some(item => item.id === fest.id);
+                              return (
+                                <button
+                                  key={fest.id}
+                                  type="button"
+                                  onClick={() => {
+                                    if (alreadyAdded) return;
+                                    if (handleAddToItinerary(fest)) {
+                                      setAddedStopModal(fest);
+                                    }
+                                  }}
+                                  className={`px-2 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
+                                    alreadyAdded
+                                      ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300'
+                                      : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-white border border-amber-300/80 dark:border-amber-700/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 cursor-pointer'
+                                  }`}
+                                  title={`${fest.name} (Official Date: ${fest.eventDate})`}
+                                >
+                                  <span>{alreadyAdded ? '✓' : '+'}</span>
+                                  <span className="truncate max-w-[150px]">{fest.name}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium flex items-center justify-between pt-0.5">
+                          <span>🏛️ Heritage sites open year-round for {formatReadableDate(plannedTripDate || getTodayDateStr())}.</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAttractionFestivalFilter('all-festivals');
+                              setDashboardTab('destinations');
+                            }}
+                            className="text-[9px] font-bold text-[#2C5E3B] dark:text-emerald-400 hover:underline cursor-pointer shrink-0 ml-1"
+                          >
+                            Browse Festivals
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
                     {/* Departure Point Row */}
                     <div className="bg-[#FAF8F5] dark:bg-[#161412] p-3 rounded-xl border border-[#E9E5DE] dark:border-[#2A2621] space-y-1.5">
                       <div className="flex items-center justify-between">
@@ -21534,12 +22089,23 @@ ${rawText}`;
                 if (!attr || typeof attr !== 'object') return false;
                 const matchesMun = attractionMunFilter === 'All' || attr.municipality === attractionMunFilter;
                 const matchesType = attractionTypeFilter === 'All' || attr.type === attractionTypeFilter;
+
+                const preMatch = (PRESEEDED_ATTRACTIONS || []).find(p => p && (p.id === attr.id || p.name === attr.name));
+                const isFest = Boolean(attr.isFestival || (preMatch && preMatch.isFestival) || (attr.type && attr.type.includes('Festival')));
+
+                let matchesFestivalFilter = true;
+                if (attractionFestivalFilter === 'active-on-date') {
+                  matchesFestivalFilter = isFest && isFestivalActiveOnDate(attr, plannedTripDate);
+                } else if (attractionFestivalFilter === 'all-festivals') {
+                  matchesFestivalFilter = isFest;
+                }
+
                 const nameStr = (attr.name || '').toLowerCase();
                 const descStr = (attr.description || '').toLowerCase();
                 const munStr = (attr.municipality || '').toLowerCase();
                 const typeStr = (attr.type || '').toLowerCase();
                 const matchesSearch = !q || nameStr.includes(q) || descStr.includes(q) || munStr.includes(q) || typeStr.includes(q);
-                return matchesMun && matchesType && matchesSearch;
+                return matchesMun && matchesType && matchesFestivalFilter && matchesSearch;
               });
 
               const uniqueTypes = ['All', ...Array.from(new Set((attractions || []).map(a => a.type).filter(Boolean)))];
@@ -21590,6 +22156,69 @@ ${rawText}`;
                           </button>
                         )}
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Trip Date & Festival Availability Sync Bar */}
+                  <div className="bg-gradient-to-r from-amber-500/10 via-terracotta/10 to-[#2C5E3B]/10 dark:from-amber-950/30 dark:via-orange-950/20 dark:to-[#2C5E3B]/20 rounded-2xl border border-amber-300/60 dark:border-amber-700/50 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center text-xl shrink-0 border border-amber-500/30">
+                        📅
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-amber-900 dark:text-amber-300">
+                            Active Itinerary Trip Date:
+                          </span>
+                          {isAuthenticated && !isGuest ? (
+                            <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-300">
+                              ✓ Custom Date
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded-full border border-amber-300 flex items-center gap-1">
+                              <Lock className="w-2.5 h-2.5" /> Guest Mode (Today)
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm font-black text-charcoal dark:text-white flex items-center gap-2 mt-0.5">
+                          <span>{formatReadableDate(plannedTripDate || getTodayDateStr())}</span>
+                          <span className="text-xs font-semibold text-charcoal-light dark:text-gray-400">• {plannedMonthName} Season</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <div className="px-3 py-1.5 bg-white dark:bg-[#1E1B18] rounded-xl border border-amber-300/50 dark:border-amber-700/40 text-xs font-bold text-charcoal dark:text-gray-200 flex items-center gap-1.5 shadow-2xs">
+                        <span>🎉</span>
+                        <span>
+                          <strong className="text-terracotta dark:text-orange-400">{seasonalFestivals.length}</strong> Festival{seasonalFestivals.length !== 1 ? 's' : ''} Active on this Date
+                        </span>
+                      </div>
+
+                      {isAuthenticated && !isGuest ? (
+                        <button
+                          type="button"
+                          onClick={() => setDashboardTab('planner')}
+                          className="px-3 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center gap-1 cursor-pointer active:scale-95"
+                        >
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>Change Trip Date</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setAuthPromptModal({
+                            isOpen: true,
+                            title: 'Schedule Your Trip for Any Date',
+                            message: 'Planning trips for specific dates and discovering date-restricted seasonal festivals is exclusive to registered accounts. Sign in or create a free account to choose any date for your food adventure!',
+                            feature: 'trip_date'
+                          })}
+                          className="px-3 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center gap-1 cursor-pointer active:scale-95"
+                        >
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>Sign In to Pick Dates</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -21698,6 +22327,46 @@ ${rawText}`;
                       </div>
                     </div>
 
+                    {/* Festival & Date Availability Quick Filter */}
+                    <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-[#E9E5DE]/70 dark:border-[#2E2A24] pb-1 scrollbar-thin">
+                      <span className="text-[9px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider shrink-0 flex items-center gap-1">
+                        <span>🎉</span> Season:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setAttractionFestivalFilter('All')}
+                        className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold transition-all shrink-0 cursor-pointer whitespace-nowrap ${
+                          attractionFestivalFilter === 'All'
+                            ? 'bg-[#2C5E3B] text-white shadow-xs'
+                            : 'bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-300 border border-[#E9E5DE] dark:border-[#2E2A24] hover:bg-white dark:hover:bg-[#221F1C]'
+                        }`}
+                      >
+                        All Sites ({attractions.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAttractionFestivalFilter('active-on-date')}
+                        className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold transition-all shrink-0 cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                          attractionFestivalFilter === 'active-on-date'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-700/60 hover:bg-emerald-100'
+                        }`}
+                      >
+                        <span>✓ Active on Trip Date ({seasonalFestivals.length})</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAttractionFestivalFilter('all-festivals')}
+                        className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold transition-all shrink-0 cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                          attractionFestivalFilter === 'all-festivals'
+                            ? 'bg-amber-500 text-white shadow-xs'
+                            : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700/60 hover:bg-amber-100'
+                        }`}
+                      >
+                        <span>🎉 All Pampanga Festivals ({allFestivals.length})</span>
+                      </button>
+                    </div>
+
                     {/* Category / Type Pills */}
                     {uniqueTypes.length > 2 && (
                       <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-[#E9E5DE]/70 dark:border-[#2E2A24] pb-1 scrollbar-thin">
@@ -21726,13 +22395,16 @@ ${rawText}`;
                     <span className="text-xs text-charcoal-light dark:text-gray-400 font-semibold">
                       Showing <strong className="text-charcoal dark:text-white font-extrabold">{filteredAttractions.length}</strong> tourist destination{filteredAttractions.length !== 1 ? 's' : ''}
                       {attractionMunFilter !== 'All' && <span> in <strong className="text-terracotta dark:text-orange-400">{attractionMunFilter}</strong></span>}
+                      {attractionFestivalFilter === 'active-on-date' && <span> • <strong className="text-emerald-600 dark:text-emerald-400">Active on {formatReadableDate(plannedTripDate || getTodayDateStr())}</strong></span>}
+                      {attractionFestivalFilter === 'all-festivals' && <span> • <strong className="text-amber-600 dark:text-amber-400">Festivals Only</strong></span>}
                     </span>
-                    {(attractionMunFilter !== 'All' || attractionTypeFilter !== 'All' || attractionSearchQuery) && (
+                    {(attractionMunFilter !== 'All' || attractionTypeFilter !== 'All' || attractionFestivalFilter !== 'All' || attractionSearchQuery) && (
                       <button
                         type="button"
                         onClick={() => {
                           setAttractionMunFilter('All');
                           setAttractionTypeFilter('All');
+                          setAttractionFestivalFilter('All');
                           setAttractionSearchQuery('');
                         }}
                         className="text-xs text-terracotta dark:text-orange-400 hover:underline font-bold"
@@ -21755,6 +22427,7 @@ ${rawText}`;
                         onClick={() => {
                           setAttractionMunFilter('All');
                           setAttractionTypeFilter('All');
+                          setAttractionFestivalFilter('All');
                           setAttractionSearchQuery('');
                         }}
                         className="px-4 py-2 bg-terracotta text-white rounded-xl text-xs font-bold hover:bg-terracotta-dark transition-all cursor-pointer shadow-xs"
@@ -21800,10 +22473,15 @@ ${rawText}`;
                                   const festDate = attr.eventDate || (preMatch && preMatch.eventDate);
                                   const festMonth = attr.eventMonth || (preMatch && preMatch.eventMonth);
                                   if (!isFest && !festDate) return null;
+                                  const isActiveOnTrip = isFestivalActiveOnDate(attr, plannedTripDate);
                                   return (
-                                    <div className="absolute top-2.5 right-2.5 bg-amber-500/95 backdrop-blur-xs text-white text-[9px] font-black px-2.5 py-1 rounded-lg border border-white/20 shadow-xs flex items-center gap-1">
-                                      <span>🎉</span>
-                                      <span>{festMonth ? `${festMonth} Festival` : 'Festival'}</span>
+                                    <div className={`absolute top-2.5 right-2.5 backdrop-blur-xs text-white text-[9px] font-black px-2.5 py-1 rounded-lg border shadow-xs flex items-center gap-1 ${
+                                      isActiveOnTrip
+                                        ? 'bg-emerald-600/95 border-emerald-300/40 ring-1 ring-emerald-400'
+                                        : 'bg-amber-500/95 border-white/20'
+                                    }`}>
+                                      <span>{isActiveOnTrip ? '✓' : '🎉'}</span>
+                                      <span>{isActiveOnTrip ? `Active on Trip Date (${festMonth || plannedMonthName})` : (festMonth ? `${festMonth} Festival` : 'Festival')}</span>
                                     </div>
                                   );
                                 })()}
@@ -21893,21 +22571,88 @@ ${rawText}`;
                                 </button>
                               </div>
 
-                              <button
-                                type="button"
-                                disabled={isAdded}
-                                onClick={() => {
-                                  if (handleAddToItinerary(attr)) {
-                                    setAddedStopModal(attr);
+                              {(() => {
+                                const preMatch = (PRESEEDED_ATTRACTIONS || []).find(p => p && (p.id === attr.id || p.name === attr.name));
+                                const isFest = Boolean(attr.isFestival || (preMatch && preMatch.isFestival) || (attr.type && attr.type.includes('Festival')));
+                                const festMonth = attr.eventMonth || (preMatch && preMatch.eventMonth);
+                                const festDate = attr.eventDate || (preMatch && preMatch.eventDate);
+                                const isActiveOnTrip = isFestivalActiveOnDate(attr, plannedTripDate);
+
+                                if (isAdded) {
+                                  return (
+                                    <button
+                                      type="button"
+                                      disabled
+                                      className="px-4 py-2 rounded-xl text-xs font-black bg-bananaleaf/10 text-bananaleaf dark:text-emerald-400 border border-bananaleaf/25 font-bold cursor-default flex items-center gap-1.5"
+                                    >
+                                      ✓ Added to Trail
+                                    </button>
+                                  );
+                                }
+
+                                if (isFest && !isActiveOnTrip) {
+                                  const specificDateLabel = festDate ? festDate.split('(')[0].trim() : (festMonth || 'Festival');
+                                  if (!isAuthenticated || isGuest) {
+                                    return (
+                                      <button
+                                        type="button"
+                                        onClick={() => setAuthPromptModal({
+                                          isOpen: true,
+                                          title: `Scheduled Festival: ${attr.name}`,
+                                          message: `"${attr.name}" is scheduled for celebration on ${festDate || festMonth || 'specific dates'}. Guest trip plans are set for today. To schedule your trip for a future festival date, please sign in or create a free account!`,
+                                          feature: 'festival_date',
+                                          targetItem: attr
+                                        })}
+                                        className="px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-500/30 cursor-pointer active:scale-95"
+                                        title={`Celebrated on ${specificDateLabel}. Sign in to schedule for this date.`}
+                                      >
+                                        <Lock className="w-3 h-3" />
+                                        <span>Only on {specificDateLabel}</span>
+                                      </button>
+                                    );
                                   }
-                                }}
-                                className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${isAdded
-                                  ? 'bg-bananaleaf/10 text-bananaleaf dark:text-emerald-400 border border-bananaleaf/25 font-bold cursor-default'
-                                  : 'bg-[#2C5E3B] hover:bg-[#20452B] text-white shadow-xs cursor-pointer active:scale-95'
-                                  }`}
-                              >
-                                <span>{isAdded ? '✓ Added to Trail' : '+ Add to Trail'}</span>
-                              </button>
+
+                                  const targetDate = getFestivalRecommendedDate(attr);
+                                  const recYear = targetDate.split('-')[0];
+                                  const currentYear = String(new Date().getFullYear());
+                                  const yearSuffix = recYear > currentYear ? ` (${recYear})` : '';
+
+                                  return (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setFestivalDateChangeModal({
+                                          targetFestival: attr,
+                                          festivalName: attr.name,
+                                          festivalMonth: festMonth || 'Festival Season',
+                                          festivalDate: festDate || 'Scheduled Dates',
+                                          targetDate: targetDate,
+                                          currentDate: plannedTripDate
+                                        });
+                                      }}
+                                      className="px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white shadow-xs cursor-pointer active:scale-95"
+                                      title={`Reschedule trip to ${specificDateLabel}${yearSuffix} to visit this festival on its next celebration date`}
+                                    >
+                                      <Calendar className="w-3 h-3" />
+                                      <span>Plan for {specificDateLabel}{yearSuffix}</span>
+                                    </button>
+                                  );
+                                }
+
+                                return (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (handleAddToItinerary(attr)) {
+                                        setAddedStopModal(attr);
+                                      }
+                                    }}
+                                    className="px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 bg-[#2C5E3B] hover:bg-[#20452B] text-white shadow-xs cursor-pointer active:scale-95"
+                                  >
+                                    <span>+ Add to Trail</span>
+                                  </button>
+                                );
+                              })()}
                             </div>
                           </div>
                         );
@@ -23026,15 +23771,27 @@ ${rawText}`;
                                 <span className={`text-sm font-black block truncate ${itin.isFinished ? 'text-charcoal-light line-through' : 'text-charcoal group-hover/itin:text-terracotta transition-colors'}`}>
                                   {itin.name}
                                 </span>
-                                {itin.isFinished ? (
-                                  <span className="inline-flex items-center gap-1 mt-0.5 text-[10px] font-extrabold text-bananaleaf animate-fade-in">
-                                    ✓ Finished Trip
-                                  </span>
-                                ) : (
-                                  <span className="text-[10px] text-charcoal-light font-bold">
-                                    Active Plan • {itin.stops?.length || 0} Stops
-                                  </span>
-                                )}
+                                <div className="flex items-center gap-2 flex-wrap text-[10px] font-bold mt-1">
+                                  {itin.isFinished ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-bananaleaf animate-fade-in">
+                                      ✓ Finished Trip • {itin.stops?.length || 0} Stops
+                                    </span>
+                                  ) : (
+                                    <span className="text-charcoal-light dark:text-gray-400">
+                                      Active Plan • {itin.stops?.length || 0} Stops
+                                    </span>
+                                  )}
+                                  {itin.tripDate && (
+                                    <span className="text-terracotta dark:text-orange-400 bg-terracotta/10 px-2 py-0.5 rounded-md flex items-center gap-1 font-extrabold">
+                                      📅 {formatReadableDate(itin.tripDate)}
+                                    </span>
+                                  )}
+                                  {Array.isArray(itin.stops) && itin.stops.some(s => s && (s.isFestival || (s.id && String(s.id).startsWith('festival-')))) && (
+                                    <span className="text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-2 py-0.5 rounded-md flex items-center gap-1 font-extrabold">
+                                      🎉 Includes Festival
+                                    </span>
+                                  )}
+                                </div>
                               </div>
 
                               <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -24659,19 +25416,81 @@ ${rawText}`;
                 >
                   Close
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const targetAttr = selectedAttraction;
-                    if (handleAddToItinerary(targetAttr)) {
-                      setSelectedAttraction(null);
-                      setAddedStopModal(targetAttr);
+                {(() => {
+                  const targetAttr = selectedAttraction;
+                  const preMatch = (PRESEEDED_ATTRACTIONS || []).find(p => p && (p.id === targetAttr.id || p.name === targetAttr.name));
+                  const isFest = Boolean(targetAttr.isFestival || (preMatch && preMatch.isFestival) || (targetAttr.type && targetAttr.type.includes('Festival')));
+                  const festMonth = targetAttr.eventMonth || (preMatch && preMatch.eventMonth);
+                  const festDate = targetAttr.eventDate || (preMatch && preMatch.eventDate);
+                  const isActiveOnTrip = isFestivalActiveOnDate(targetAttr, plannedTripDate);
+
+                  if (isFest && !isActiveOnTrip) {
+                    const specificDateLabel = festDate ? festDate.split('(')[0].trim() : (festMonth || 'Festival');
+                    if (!isAuthenticated || isGuest) {
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedAttraction(null);
+                            setAuthPromptModal({
+                              isOpen: true,
+                              title: `Scheduled Festival: ${targetAttr.name}`,
+                              message: `"${targetAttr.name}" is scheduled for celebration on ${festDate || festMonth || 'specific dates'}. Guest trip plans are set for today. To schedule your trip for a future festival date, please sign in or create a free account!`,
+                              feature: 'festival_date',
+                              targetItem: targetAttr
+                            });
+                          }}
+                          className="px-5 py-2 bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold shadow cursor-pointer active:scale-95 flex items-center gap-1.5"
+                          title={`Celebrated on ${specificDateLabel}. Sign in to schedule for this date.`}
+                        >
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>Only on {specificDateLabel} (Sign In to Plan)</span>
+                        </button>
+                      );
                     }
-                  }}
-                  className="px-5 py-2 bg-[#2C5E3B] text-white rounded-xl text-xs font-bold hover:bg-[#20452B] shadow cursor-pointer active:scale-95"
-                >
-                  + Add Side-Trip to Route
-                </button>
+
+                    const targetDate = getFestivalRecommendedDate(targetAttr);
+                    const recYear = targetDate.split('-')[0];
+                    const currentYear = String(new Date().getFullYear());
+                    const yearSuffix = recYear > currentYear ? ` (${recYear})` : '';
+
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedAttraction(null);
+                          setFestivalDateChangeModal({
+                            targetFestival: targetAttr,
+                            festivalName: targetAttr.name,
+                            festivalMonth: festMonth || 'Festival Season',
+                            festivalDate: festDate || 'Scheduled Dates',
+                            targetDate: targetDate,
+                            currentDate: plannedTripDate
+                          });
+                        }}
+                        className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow cursor-pointer active:scale-95 flex items-center gap-1.5"
+                      >
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>Reschedule Trip to {specificDateLabel}{yearSuffix} &amp; Add</span>
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (handleAddToItinerary(targetAttr)) {
+                          setSelectedAttraction(null);
+                          setAddedStopModal(targetAttr);
+                        }
+                      }}
+                      className="px-5 py-2 bg-[#2C5E3B] text-white rounded-xl text-xs font-bold hover:bg-[#20452B] shadow cursor-pointer active:scale-95"
+                    >
+                      + Add Side-Trip to Route
+                    </button>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -25480,6 +26299,164 @@ ${rawText}`;
                 className="w-full py-2.5 bg-[#FAF8F5] dark:bg-[#25221E] hover:bg-[#E9E5DE] dark:hover:bg-[#2E2A24] text-charcoal dark:text-gray-200 rounded-xl text-xs font-bold transition-all border border-[#E9E5DE] dark:border-[#35302A] cursor-pointer active:scale-95"
               >
                 Continue Browsing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Account Required Auth Prompt Modal (For Specific Date Scheduling & Seasonal Festivals) */}
+      {authPromptModal.isOpen && (
+        <div className="fixed inset-0 z-[280] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in font-sans">
+          <div className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5 text-center animate-scale-in relative">
+            <button
+              type="button"
+              onClick={() => setAuthPromptModal({ isOpen: false, title: '', message: '', feature: '', targetItem: null })}
+              className="absolute top-4 right-4 text-charcoal-light dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:border-red-400 dark:hover:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/40 w-7 h-7 rounded-full bg-[#FAF8F5] dark:bg-[#161412] flex items-center justify-center text-xs font-bold border border-[#E9E5DE] dark:border-[#2E2A24] cursor-pointer transition-colors"
+              aria-label="Close"
+              title="Close"
+            >
+              ✕
+            </button>
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-amber-500/20 to-terracotta/20 text-terracotta flex items-center justify-center text-3xl shadow-inner border border-terracotta/20">
+              🔒
+            </div>
+            <div className="space-y-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-terracotta dark:text-orange-400 bg-terracotta/10 px-3 py-1 rounded-full border border-terracotta/20 inline-block">
+                ✨ Account Required Feature
+              </span>
+              <h3 className="text-lg font-black text-charcoal dark:text-white m-0">
+                {authPromptModal.title || 'Account Required for Date Planning'}
+              </h3>
+              <p className="text-xs text-charcoal-light dark:text-gray-300 leading-relaxed m-0">
+                {authPromptModal.message || 'Selecting specific trip dates, planning visits to date-restricted seasonal festivals, and saving custom itineraries is reserved for registered accounts.'}
+              </p>
+            </div>
+
+            {/* Feature Perks Callout */}
+            <div className="p-3.5 bg-[#FAF8F5] dark:bg-[#161412] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] text-left space-y-2">
+              <div className="text-[10px] font-black text-charcoal dark:text-gray-200 uppercase tracking-wider">
+                Explorer Account Privileges:
+              </div>
+              <ul className="text-[11px] text-charcoal-light dark:text-gray-400 space-y-1.5 list-none p-0 m-0">
+                <li className="flex items-center gap-2">
+                  <span className="text-terracotta font-black">📅</span>
+                  <span><strong>Custom Trip Date:</strong> Schedule your trip for any day, weekend, or holiday</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-amber-500 font-black">🎉</span>
+                  <span><strong>Seasonal Festivals:</strong> Access date-restricted Pampanga fiestas &amp; celebrations</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-[#2C5E3B] dark:text-emerald-400 font-black">💾</span>
+                  <span><strong>Save Itineraries:</strong> Store multiple dated trips in your permanent Travel History</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthPromptModal({ isOpen: false, title: '', message: '', feature: '', targetItem: null });
+                  setIsRegistering(true);
+                  setActiveView('auth');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="w-full py-3 bg-terracotta hover:bg-terracotta-dark text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              >
+                <span>🔑 Sign In or Create Free Account</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setAuthPromptModal({ isOpen: false, title: '', message: '', feature: '', targetItem: null })}
+                className="w-full py-2.5 bg-[#FAF8F5] dark:bg-[#25221E] hover:bg-[#E9E5DE] dark:hover:bg-[#2E2A24] text-charcoal dark:text-gray-200 rounded-xl text-xs font-bold transition-all border border-[#E9E5DE] dark:border-[#35302A] cursor-pointer active:scale-95"
+              >
+                Continue as Guest (Today only)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Festival Date Reschedule Modal (When account holder adds a festival happening on a different date) */}
+      {festivalDateChangeModal && (
+        <div className="fixed inset-0 z-[280] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in font-sans">
+          <div className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-4 text-center animate-scale-in relative">
+            <button
+              type="button"
+              onClick={() => setFestivalDateChangeModal(null)}
+              className="absolute top-4 right-4 text-charcoal-light dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:border-red-400 dark:hover:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/40 w-7 h-7 rounded-full bg-[#FAF8F5] dark:bg-[#161412] flex items-center justify-center text-xs font-bold border border-[#E9E5DE] dark:border-[#2E2A24] cursor-pointer transition-colors"
+              aria-label="Close"
+              title="Close"
+            >
+              ✕
+            </button>
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center text-3xl shadow-inner border border-amber-500/30">
+              🎉
+            </div>
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-950 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/50 px-3 py-1 rounded-full border border-amber-300 dark:border-amber-700 inline-block">
+                🗓️ Specific Festival Date Restriction
+              </span>
+              <h3 className="text-base font-black text-charcoal dark:text-white m-0">
+                {festivalDateChangeModal.festivalName}
+              </h3>
+              <p className="text-xs text-charcoal-light dark:text-gray-300 leading-relaxed m-0">
+                This festival can <strong className="text-terracotta dark:text-orange-400">only be added on its specific celebration date</strong>: <strong className="text-charcoal dark:text-white">{festivalDateChangeModal.festivalDate}</strong>. Your trip is currently scheduled for <strong className="text-charcoal dark:text-white">{formatReadableDate(festivalDateChangeModal.currentDate)}</strong>.
+                {parseInt(festivalDateChangeModal.targetDate.split('-')[0], 10) > new Date().getFullYear() && (
+                  <span className="block mt-1 text-amber-800 dark:text-amber-300 font-bold bg-amber-500/10 px-2 py-1 rounded-md border border-amber-500/20">
+                    ℹ️ This festival has already concluded for {new Date().getFullYear()}. We recommend scheduling for its upcoming celebration in {festivalDateChangeModal.targetDate.split('-')[0]}!
+                  </span>
+                )}
+              </p>
+            </div>
+
+            <div className="p-3 bg-amber-500/10 dark:bg-amber-950/30 rounded-2xl border border-amber-400/40 text-left space-y-1 text-xs">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-charcoal-light dark:text-gray-400">Current Trip Date:</span>
+                <span className="font-bold text-charcoal dark:text-white">{formatReadableDate(festivalDateChangeModal.currentDate)}</span>
+              </div>
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-amber-900 dark:text-amber-300 font-bold">Next Festival Celebration:</span>
+                <span className="font-black text-amber-700 dark:text-amber-300">{formatReadableDate(festivalDateChangeModal.targetDate)}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!isAuthenticated || isGuest) {
+                    setFestivalDateChangeModal(null);
+                    setAuthPromptModal({
+                      isOpen: true,
+                      title: 'Account Required: Custom Trip Date',
+                      message: 'Planning trips for future dates and scheduling seasonal festivals is exclusive to registered accounts. Sign in or create a free account to schedule custom trip dates!',
+                      feature: 'trip_date'
+                    });
+                    return;
+                  }
+                  const targetDate = festivalDateChangeModal.targetDate;
+                  const fest = festivalDateChangeModal.targetFestival;
+                  const today = getTodayDateStr();
+                  setPlannedTripDate(targetDate < today ? today : targetDate);
+                  if (!activeTrip.some(item => item.id === fest.id)) {
+                    setActiveTrip(prev => [...prev, fest]);
+                  }
+                  setFestivalDateChangeModal(null);
+                  setAddedStopModal(fest);
+                }}
+                className="w-full py-3 bg-[#2C5E3B] hover:bg-[#20452B] text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              >
+                <span>🗓️ Adjust Trip Date to {formatReadableDate(festivalDateChangeModal.targetDate)} &amp; Add</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFestivalDateChangeModal(null)}
+                className="w-full py-2.5 bg-[#FAF8F5] dark:bg-[#25221E] hover:bg-[#E9E5DE] dark:hover:bg-[#2E2A24] text-charcoal dark:text-gray-200 rounded-xl text-xs font-bold transition-all border border-[#E9E5DE] dark:border-[#35302A] cursor-pointer active:scale-95"
+              >
+                Keep Current Date &amp; Cancel
               </button>
             </div>
           </div>

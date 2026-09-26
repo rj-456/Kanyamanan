@@ -433,7 +433,7 @@ export const catalogMenuWithAi = async ({ rawText = '', images = [], apiKey = ''
 
   if (effectiveKey) {
     try {
-      const model = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_MODEL) || 'gemini-2.0-flash';
+      const model = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_MODEL) || 'gemini-3.7-flash';
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(effectiveKey)}`;
 
       const parts = [];
@@ -949,7 +949,7 @@ export const scanPlateWithAi = async (imageBase64) => {
   ).trim();
 
   if (geminiKey) {
-    const candidateGemini = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.6-flash'];
+    const candidateGemini = ['gemini-flash-lite-latest', 'gemini-3.1-flash-lite', 'gemini-3.7-flash', 'gemini-3.8-flash'];
     for (const gModel of candidateGemini) {
       try {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${gModel}:generateContent?key=${geminiKey}`;
