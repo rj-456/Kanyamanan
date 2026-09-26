@@ -22879,8 +22879,8 @@ ${rawText}`;
                   {[
                     ['📖 Travel Kasaup Guide', 'Travel Kasaup Guide: Show me the 8 Travel Kasaup features, what each feature does, and a sample prompt I can use for each one.'],
                     ['🍽️ Recommend restaurants in Pampanga', 'Recommend restaurants in Pampanga'],
-                    ['🏛️ What tourist attractions can we visit in Pampanga?', 'What tourist attractions can we visit in Pampanga?'],
-                    ['📍 What restaurants are near me?', 'What restaurants are near me?']
+                    ['📍 What restaurants are near me?', 'What restaurants are near me?'],
+                    ['🏛️ What tourist attractions can we visit in Pampanga?', 'What tourist attractions can we visit in Pampanga?']
                   ].map(([label, fullPrompt]) => (
                     <button
                       key={label}
@@ -23136,8 +23136,8 @@ ${rawText}`;
               {[
                 ['📖 Travel Kasaup Guide', 'Travel Kasaup Guide: Show me the 8 Travel Kasaup features, what each feature does, and a sample prompt I can use for each one.'],
                 ['🍽️ Restaurants in Pampanga', 'Recommend restaurants in Pampanga'],
-                ['🏛️ Tourist attractions in Pampanga', 'What tourist attractions can we visit in Pampanga?'],
-                ['📍 Restaurants near me', 'What restaurants are near me?']
+                ['📍 Restaurants near me', 'What restaurants are near me?'],
+                ['🏛️ Tourist attractions in Pampanga', 'What tourist attractions can we visit in Pampanga?']
               ].map(([label, fullPrompt]) => (
                 <button
                   key={label}
