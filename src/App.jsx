@@ -320,8 +320,7 @@ const isDemoUserObj = (parsed) => {
   const uname = String(parsed.username || '').toLowerCase().trim();
   const uemail = String(parsed.email || '').toLowerCase().trim();
   if (!uname && !uemail) return true;
-  if (uname.includes('rancis') || uemail.includes('rancis')) return true;
-  if (uname === 'guest' || uname === 'default_explorer' || uname === 'explorer') return true;
+  if (uname === 'guest' || uname === 'default_explorer' || uname === 'explorer' || uname === 'demo' || uname === 'demouser') return true;
   return false;
 };
 
@@ -333,20 +332,22 @@ const getUserAccountKey = (profile) => {
 };
 
 // Per-account saved itinerary loader.
-// IMPORTANT: a brand-new account must start with an empty Travel History.
-// Never fall back to shared/demo/master itinerary keys for a registered user.
+// Reads itineraries strictly for the logged-in user account.
 const getSavedItinerariesForUser = (profile) => {
-  if (!profile || isDemoUserObj(profile)) return [];
+  if (!profile) return [];
+  const uname = String(profile.username || '').toLowerCase().trim();
+  if (uname === 'guest' || uname === 'default_explorer' || uname === 'explorer') return [];
 
   const userKey = getUserAccountKey(profile);
   const accountSpecificKeys = [
     `kanyamanan_itineraries_${userKey}`,
+    profile?.username
+      ? `kanyamanan_itineraries_${String(profile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`
+      : null,
     profile?.email
       ? `kanyamanan_itineraries_${String(profile.email).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`
       : null,
-    profile?.username
-      ? `kanyamanan_itineraries_${String(profile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`
-      : null
+    'kanyamanan_saved_itineraries'
   ].filter(Boolean);
 
   for (const key of accountSpecificKeys) {
@@ -354,12 +355,11 @@ const getSavedItinerariesForUser = (profile) => {
       const saved = localStorage.getItem(key);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) { }
   }
 
-  // New account = no saved travel history yet.
   return [];
 };
 
@@ -799,6 +799,7 @@ function App() {
               municipality: res.municipality || preseeded?.municipality || 'City of San Fernando',
               corridor: res.corridor || preseeded?.corridor || 'MacArthur Highway Line',
               operatingHours: res.operatingHours || preseeded?.operatingHours || '09:00 AM - 09:00 PM',
+              operatingDays: res.operatingDays || preseeded?.operatingDays || res.branches?.[0]?.operatingDays || 'Monday - Sunday (Daily)',
               priceTier: res.priceTier || preseeded?.priceTier || '$',
               facebookUrl: sanitizeVerifiedContact(rawFb),
               instagramUrl: sanitizeVerifiedContact(rawIg),
@@ -806,7 +807,7 @@ function App() {
               phoneNumber: sanitizeVerifiedContact(rawPhone),
               email: sanitizeVerifiedContact(rawEmail),
               reservationInfo: preseeded?.reservationInfo || res.reservationInfo || 'Casual walk-ins welcome.',
-              branches: mergedBranches.length > 0 ? mergedBranches : [{ branchName: `${res.name || 'Restaurant'} (Main Branch)`, municipality: res.municipality || 'City of San Fernando', address: res.address || 'Pampanga', operatingHours: res.operatingHours || '09:00 AM - 09:00 PM', lat: res.lat || 15.0300, lng: res.lng || 120.6800, facebookUrl: sanitizeVerifiedContact(rawFb), instagramUrl: sanitizeVerifiedContact(rawIg), tiktokUrl: sanitizeVerifiedContact(rawTt) }],
+              branches: mergedBranches.length > 0 ? mergedBranches : [{ branchName: `${res.name || 'Restaurant'} (Main Branch)`, municipality: res.municipality || 'City of San Fernando', address: res.address || 'Pampanga', operatingHours: res.operatingHours || '09:00 AM - 09:00 PM', operatingDays: res.operatingDays || 'Monday - Sunday (Daily)', lat: res.lat || 15.0300, lng: res.lng || 120.6800, facebookUrl: sanitizeVerifiedContact(rawFb), instagramUrl: sanitizeVerifiedContact(rawIg), tiktokUrl: sanitizeVerifiedContact(rawTt) }],
               menu: menuToUse,
               image: resolvedImage,
               images: resolvedImages,
@@ -1001,7 +1002,12 @@ function App() {
               activeMonths: (preMatch && preMatch.activeMonths) || attr.activeMonths || [],
               sampleActiveDate: (preMatch && preMatch.sampleActiveDate) || attr.sampleActiveDate || '',
               scheduleNote: (preMatch && preMatch.scheduleNote) || attr.scheduleNote || '',
-              announcementNote: (preMatch && preMatch.announcementNote) || attr.announcementNote || 'Wait for further announcements and updates here'
+              announcementNote: (preMatch && preMatch.announcementNote) || attr.announcementNote || 'Wait for further announcements and updates here',
+              operatingHours: (attr.operatingHours && attr.operatingHours !== '09:00 AM - 09:00 PM') ? attr.operatingHours : ((preMatch && preMatch.operatingHours) || attr.operatingHours || (attr.is24Hours || (preMatch && preMatch.is24Hours) ? 'Open 24 Hours (24/7)' : '08:00 AM - 05:00 PM')),
+              operatingDays: attr.operatingDays || (preMatch && preMatch.operatingDays) || 'Monday - Sunday (Daily)',
+              openingTime: attr.openingTime || (preMatch && preMatch.openingTime) || '08:00 AM',
+              closingTime: attr.closingTime || (preMatch && preMatch.closingTime) || '05:00 PM',
+              is24Hours: Boolean(attr.is24Hours || (preMatch && preMatch.is24Hours) || (attr.operatingHours && (attr.operatingHours.includes('24') || attr.operatingHours.toLowerCase().includes('24/7'))))
             };
           }).filter(Boolean);
 
@@ -1033,7 +1039,12 @@ function App() {
       activeMonths: a.activeMonths || [],
       sampleActiveDate: a.sampleActiveDate || '',
       scheduleNote: a.scheduleNote || '',
-      announcementNote: a.announcementNote || 'Wait for further announcements and updates here'
+      announcementNote: a.announcementNote || 'Wait for further announcements and updates here',
+      operatingHours: a.operatingHours || (a.is24Hours ? 'Open 24 Hours (24/7)' : '08:00 AM - 05:00 PM'),
+      operatingDays: a.operatingDays || 'Monday - Sunday (Daily)',
+      openingTime: a.openingTime || '08:00 AM',
+      closingTime: a.closingTime || '05:00 PM',
+      is24Hours: Boolean(a.is24Hours || (a.operatingHours && (a.operatingHours.includes('24') || a.operatingHours.toLowerCase().includes('24/7'))))
     }));
 
     try {
@@ -2182,43 +2193,28 @@ function App() {
   // Trip routing pipeline State
   const [activeTrip, setActiveTrip] = useState([]);
   const [draggedIndex, setDraggedIndex] = useState(null);
-  const [plannedTripDate, setPlannedTripDate] = useState(() => {
+
+  // Helper to format a local Date into YYYY-MM-DD using local device timezone (never shifted by UTC)
+  const formatLocalDateToYMD = (d = new Date()) => {
     try {
-      const today = new Date();
-      return today.toISOString().split('T')[0];
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     } catch (e) {
       return '';
-    }
-  });
-  const [showFestivalsCalendar, setShowFestivalsCalendar] = useState(false);
-  const [authPromptModal, setAuthPromptModal] = useState({ isOpen: false, title: '', message: '', feature: '', targetItem: null });
-  const [festivalDateChangeModal, setFestivalDateChangeModal] = useState(null);
-
-  // Formatted human-readable date helper
-  const formatReadableDate = (dateStr) => {
-    if (!dateStr) return '';
-    try {
-      const d = new Date(dateStr + 'T00:00:00');
-      if (isNaN(d.getTime())) return dateStr;
-      return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-    } catch (e) {
-      return dateStr;
     }
   };
 
   const getTodayDateStr = () => {
-    try {
-      return new Date().toISOString().split('T')[0];
-    } catch (e) {
-      return '';
-    }
+    return formatLocalDateToYMD(new Date());
   };
 
   const getTomorrowDateStr = () => {
     try {
       const d = new Date();
       d.setDate(d.getDate() + 1);
-      return d.toISOString().split('T')[0];
+      return formatLocalDateToYMD(d);
     } catch (e) {
       return '';
     }
@@ -2230,9 +2226,38 @@ function App() {
       const day = d.getDay();
       const diff = (6 - day + 7) % 7 || 7;
       d.setDate(d.getDate() + diff);
-      return d.toISOString().split('T')[0];
+      return formatLocalDateToYMD(d);
     } catch (e) {
       return '';
+    }
+  };
+
+  const [plannedTripDate, setPlannedTripDate] = useState(() => {
+    return formatLocalDateToYMD(new Date());
+  });
+  const [showFestivalsCalendar, setShowFestivalsCalendar] = useState(false);
+  const [authPromptModal, setAuthPromptModal] = useState({ isOpen: false, title: '', message: '', feature: '', targetItem: null });
+  const [festivalDateChangeModal, setFestivalDateChangeModal] = useState(null);
+
+  // Formatted human-readable date helper (uses local date parts consistently)
+  const formatReadableDate = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      const parts = String(dateStr).split('-');
+      if (parts.length === 3) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const d = parseInt(parts[2], 10);
+        const dateObj = new Date(y, m, d);
+        if (!isNaN(dateObj.getTime())) {
+          return dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+        }
+      }
+      const fallback = new Date(dateStr + 'T00:00:00');
+      if (isNaN(fallback.getTime())) return dateStr;
+      return fallback.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (e) {
+      return dateStr;
     }
   };
 
@@ -2240,9 +2265,19 @@ function App() {
   const plannedMonthName = useMemo(() => {
     if (!plannedTripDate) return '';
     try {
-      const d = new Date(plannedTripDate + 'T00:00:00');
-      if (isNaN(d.getTime())) return '';
-      return d.toLocaleString('en-US', { month: 'long' });
+      const parts = String(plannedTripDate).split('-');
+      if (parts.length === 3) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const d = parseInt(parts[2], 10);
+        const dateObj = new Date(y, m, d);
+        if (!isNaN(dateObj.getTime())) {
+          return dateObj.toLocaleString('en-US', { month: 'long' });
+        }
+      }
+      const fallback = new Date(plannedTripDate + 'T00:00:00');
+      if (isNaN(fallback.getTime())) return '';
+      return fallback.toLocaleString('en-US', { month: 'long' });
     } catch (e) {
       return '';
     }
@@ -2619,42 +2654,43 @@ function App() {
   // Persist Travel History strictly per authenticated account.
   // Guests and newly-created accounts must never inherit another account's history.
   const persistSavedItineraries = (updatedList) => {
-    if (!isAuthenticated || isGuest || !userProfile || isDemoUserObj(userProfile)) {
-      setSavedItineraries([]);
+    const listToSave = Array.isArray(updatedList) ? updatedList : [];
+    setSavedItineraries(listToSave);
+
+    if (!userProfile || isDemoUserObj(userProfile)) {
       return;
     }
 
-    setSavedItineraries(Array.isArray(updatedList) ? updatedList : []);
     const userKey = getUserAccountKey(userProfile);
 
     try {
-      localStorage.setItem(`kanyamanan_itineraries_${userKey}`, JSON.stringify(updatedList));
+      localStorage.setItem(`kanyamanan_itineraries_${userKey}`, JSON.stringify(listToSave));
       if (userProfile?.username) {
         localStorage.setItem(
           `kanyamanan_itineraries_${String(userProfile.username).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`,
-          JSON.stringify(updatedList)
+          JSON.stringify(listToSave)
         );
       }
       if (userProfile?.email) {
         localStorage.setItem(
           `kanyamanan_itineraries_${String(userProfile.email).toLowerCase().trim().replace(/[^a-z0-9_]/g, '_')}`,
-          JSON.stringify(updatedList)
+          JSON.stringify(listToSave)
         );
       }
+      localStorage.setItem('kanyamanan_saved_itineraries', JSON.stringify(listToSave));
     } catch (e) { }
 
-    saveUserItinerariesToCloud(userKey, updatedList);
+    saveUserItinerariesToCloud(userKey, listToSave);
 
     // Sync itineraries to Django REST API
-    if (Array.isArray(updatedList)) {
-      updatedList.forEach(itin => {
+    if (Array.isArray(listToSave)) {
+      listToSave.forEach(itin => {
         saveDjangoUserItinerary(userKey, itin);
       });
     }
   };
 
   // Reload Travel History whenever the authenticated account changes.
-  // An empty account must explicitly load [] so a previous user's state cannot remain in React state.
   useEffect(() => {
     if (!isAuthenticated || isGuest || !userProfile || isDemoUserObj(userProfile)) {
       setSavedItineraries([]);
@@ -2663,10 +2699,12 @@ function App() {
 
     const userKey = getUserAccountKey(userProfile);
     const localRecovered = getSavedItinerariesForUser(userProfile);
-    setSavedItineraries(Array.isArray(localRecovered) ? localRecovered : []);
+    if (Array.isArray(localRecovered) && localRecovered.length > 0) {
+      setSavedItineraries(localRecovered);
+    }
 
     const unsubscribe = subscribeToUserItineraries(userKey, (cloudItins) => {
-      if (Array.isArray(cloudItins)) {
+      if (Array.isArray(cloudItins) && cloudItins.length > 0) {
         setSavedItineraries(cloudItins);
         try {
           localStorage.setItem(`kanyamanan_itineraries_${userKey}`, JSON.stringify(cloudItins));
@@ -2685,6 +2723,20 @@ function App() {
         } catch (e) { }
       }
     });
+
+    // Also fetch from Django backend
+    if (typeof fetchDjangoUserItineraries === 'function') {
+      fetchDjangoUserItineraries(userKey).then(djangoItins => {
+        if (Array.isArray(djangoItins) && djangoItins.length > 0) {
+          setSavedItineraries(prev => {
+            if (!prev || prev.length === 0) return djangoItins;
+            const existingIds = new Set(prev.map(i => i.id));
+            const newFromDjango = djangoItins.filter(i => !existingIds.has(i.id));
+            return [...prev, ...newFromDjango];
+          });
+        }
+      }).catch(() => {});
+    }
 
     return () => {
       if (unsubscribe) unsubscribe();
@@ -2928,6 +2980,7 @@ function App() {
       municipality: 'City of San Fernando',
       address: '',
       operatingHours: '09:00 AM - 09:00 PM',
+      operatingDays: 'Monday - Sunday (Daily)',
       lat: 15.0300,
       lng: 120.6800
     }
@@ -3608,6 +3661,7 @@ function App() {
   const [adminEditingAttractionId, setAdminEditingAttractionId] = useState(null);
   const [adminAttractionSearch, setAdminAttractionSearch] = useState('');
   const [adminAttractionMunicipalityFilter, setAdminAttractionMunicipalityFilter] = useState('All');
+  const [adminAttractionCategoryFilter, setAdminAttractionCategoryFilter] = useState('All'); // 'All' | 'Festivals' | 'Others'
   const [adminAttractionForm, setAdminAttractionForm] = useState({
     name: '',
     municipality: 'City of San Fernando',
@@ -3623,7 +3677,12 @@ function App() {
     eventDate: '',
     eventMonth: 'All-Year',
     scheduleNote: '',
-    announcementNote: 'Wait for further announcements and updates here'
+    announcementNote: 'Wait for further announcements and updates here',
+    operatingHours: '08:00 AM - 05:00 PM',
+    operatingDays: 'Monday - Sunday (Daily)',
+    openingTime: '08:00 AM',
+    closingTime: '05:00 PM',
+    is24Hours: false
   });
 
   const [adminDishes, setAdminDishes] = useState([{ name: '', price: '', ingredients: '', allergens: '', calories: '' }]);
@@ -4219,15 +4278,6 @@ So, where do we start? 😊`,
     }
 
     return stops;
-  }, [activeTrip, isTrafficCongested]);
-
-  // Trigger loading toast when itinerary changes
-  useEffect(() => {
-    if (activeTrip.length > 0) {
-      setShowToast(true);
-      const timer = setTimeout(() => setShowToast(false), 3000);
-      return () => clearTimeout(timer);
-    }
   }, [activeTrip, isTrafficCongested]);
 
   // Traffic alert ticker effect
@@ -13997,7 +14047,9 @@ Return ONLY a valid JSON object matching this schema:
       return false;
     }
 
-    if (activeTrip.some(item => item.id === res.id)) return false;
+    if (activeTrip.some(item => item.id === res.id)) {
+      return true;
+    }
     setActiveTrip([...activeTrip, res]);
     return true;
   };
@@ -14041,13 +14093,19 @@ Return ONLY a valid JSON object matching this schema:
 
   const handleSaveActiveTrip = (e) => {
     if (e && e.preventDefault) e.preventDefault();
-    if (!newItineraryName.trim() || activeTrip.length === 0) return;
+    if (activeTrip.length === 0) {
+      alert("Your trip itinerary has no stops. Please add at least one restaurant or tourist destination before saving!");
+      return;
+    }
+
+    const nameToUse = (newItineraryName || `Pampanga Food Trip (${new Date().toLocaleDateString()})`).trim();
+    const stopsList = computedRoutePath && computedRoutePath.length > 0 ? computedRoutePath : activeTrip;
 
     const newItin = {
       id: 'trail-' + Date.now(),
-      name: newItineraryName.trim(),
+      name: nameToUse,
       tripDate: plannedTripDate || getTodayDateStr(),
-      stops: serializeItineraryStops(computedRoutePath),
+      stops: serializeItineraryStops(stopsList),
       isFinished: false,
       createdAt: Date.now(),
       updatedAt: Date.now()
@@ -14057,8 +14115,9 @@ Return ONLY a valid JSON object matching this schema:
     persistSavedItineraries(updated);
     setLoadedItineraryId(newItin.id);
     setLoadedItineraryName(newItin.name);
+    setNewItineraryName('');
     setDashboardTab('history');
-    alert(`✓ "${newItin.name}" saved permanently to your account (${userProfile.username})!\n\nYour travel history will stay intact even after refreshing or opening from another browser.`);
+    alert(`✓ "${newItin.name}" saved permanently to your account (${userProfile.username || 'Traveler'})!\n\nYour travel history will stay intact even after refreshing or opening from another browser.`);
   };
 
   const handleUpdateLoadedItinerary = (e) => {
@@ -14545,6 +14604,7 @@ Return ONLY a valid JSON object matching this schema:
       name: res.name || '',
       municipality: res.municipality || 'City of San Fernando',
       operatingHours: res.operatingHours || '09:00 AM - 09:00 PM',
+      operatingDays: res.operatingDays || res.branches?.[0]?.operatingDays || 'Monday - Sunday (Daily)',
       priceTier: res.priceTier || '$',
       address: res.address || '',
       image: res.image || (res.images && res.images[0]) || '',
@@ -14570,6 +14630,7 @@ Return ONLY a valid JSON object matching this schema:
           municipality: bMun,
           address: b.address || res.address || '',
           operatingHours: b.operatingHours || res.operatingHours || '09:00 AM - 09:00 PM',
+          operatingDays: b.operatingDays || res.operatingDays || 'Monday - Sunday (Daily)',
           phoneNumber: b.phoneNumber || '',
           email: b.email || '',
           reservationInfo: b.reservationInfo || '',
@@ -14585,6 +14646,7 @@ Return ONLY a valid JSON object matching this schema:
         municipality: bMun,
         address: res.address || '',
         operatingHours: res.operatingHours || '09:00 AM - 09:00 PM',
+        operatingDays: res.operatingDays || 'Monday - Sunday (Daily)',
         phoneNumber: res.phoneNumber || '',
         email: res.email || '',
         reservationInfo: res.reservationInfo || '',
@@ -16207,6 +16269,7 @@ ${rawText}`;
           municipality: mun,
           address: (b.address || '').trim() || `${mun}, Pampanga`,
           operatingHours: (b.operatingHours || adminForm.operatingHours || '09:00 AM - 09:00 PM').trim(),
+          operatingDays: (b.operatingDays || adminForm.operatingDays || 'Monday - Sunday (Daily)').trim(),
           phoneNumber: sanitizeVerifiedContact((b.phoneNumber || '').trim()),
           email: sanitizeVerifiedContact((b.email || '').trim()),
           reservationInfo: (b.reservationInfo || adminForm.reservationInfo || '').trim(),
@@ -16227,6 +16290,8 @@ ${rawText}`;
         name: nameToSave,
         municipality: primaryMun,
         operatingHours: primaryBranch?.operatingHours || adminForm.operatingHours || originalRes?.operatingHours || '09:00 AM - 09:00 PM',
+        operatingDays: primaryBranch?.operatingDays || adminForm.operatingDays || originalRes?.operatingDays || 'Monday - Sunday (Daily)',
+        is24Hours: Boolean(primaryBranch?.is24Hours || (primaryBranch?.operatingHours && (primaryBranch.operatingHours.includes('24') || primaryBranch.operatingHours.toLowerCase().includes('24/7')))),
         priceTier: adminForm.priceTier || originalRes?.priceTier || '$',
         address: primaryBranch?.address || adminForm.address || originalRes?.address || '',
         lat: primaryLat,
@@ -16429,7 +16494,7 @@ ${rawText}`;
       setAdminEditingId(null);
       setAdminForm({
         name: '', municipality: 'City of San Fernando',
-        operatingHours: '09:00 AM - 09:00 PM', priceTier: '$$',
+        operatingHours: '09:00 AM - 09:00 PM', operatingDays: 'Monday - Sunday (Daily)', priceTier: '$$',
         address: '', image: '', images: [], description: '', username: '', password: ''
       });
       setAdminBranches([
@@ -16438,6 +16503,7 @@ ${rawText}`;
           municipality: 'City of San Fernando',
           address: '',
           operatingHours: '09:00 AM - 09:00 PM',
+          operatingDays: 'Monday - Sunday (Daily)',
           lat: 15.0300,
           lng: 120.6800
         }
@@ -16452,6 +16518,7 @@ ${rawText}`;
         municipality: adminForm.municipality || 'City of San Fernando',
         address: adminForm.address || '',
         operatingHours: adminForm.operatingHours || '09:00 AM - 09:00 PM',
+        operatingDays: adminForm.operatingDays || 'Monday - Sunday (Daily)',
         phoneNumber: '',
         email: '',
         reservationInfo: adminForm.reservationInfo || '',
@@ -16465,6 +16532,7 @@ ${rawText}`;
           municipality: mun,
           address: (b.address || '').trim() || `${mun}, Pampanga`,
           operatingHours: (b.operatingHours || adminForm.operatingHours || '09:00 AM - 09:00 PM').trim(),
+          operatingDays: (b.operatingDays || adminForm.operatingDays || 'Monday - Sunday (Daily)').trim(),
           phoneNumber: sanitizeVerifiedContact((b.phoneNumber || '').trim()),
           email: sanitizeVerifiedContact((b.email || '').trim()),
           reservationInfo: (b.reservationInfo || adminForm.reservationInfo || '').trim(),
@@ -16504,6 +16572,8 @@ ${rawText}`;
         municipality: primaryMun,
         corridor: adminForm.corridor || 'MacArthur Highway Line',
         operatingHours: primaryBranch?.operatingHours || adminForm.operatingHours || '09:00 AM - 09:00 PM',
+        operatingDays: primaryBranch?.operatingDays || adminForm.operatingDays || 'Monday - Sunday (Daily)',
+        is24Hours: Boolean(primaryBranch?.is24Hours || (primaryBranch?.operatingHours && (primaryBranch.operatingHours.includes('24') || primaryBranch.operatingHours.toLowerCase().includes('24/7')))),
         priceTier: adminForm.priceTier || '$$',
         lat: primaryLat,
         lng: primaryLng,
@@ -16548,7 +16618,7 @@ ${rawText}`;
 
     setAdminForm({
       name: '', municipality: 'City of San Fernando',
-      operatingHours: '09:00 AM - 09:00 PM', priceTier: '$',
+      operatingHours: '09:00 AM - 09:00 PM', operatingDays: 'Monday - Sunday (Daily)', priceTier: '$',
       address: '', image: '', images: [], description: '',
       facebookUrl: '', instagramUrl: '', tiktokUrl: '', phoneNumber: '', email: '', reservationInfo: '',
       username: '', password: ''
@@ -16559,6 +16629,7 @@ ${rawText}`;
         municipality: 'City of San Fernando',
         address: '',
         operatingHours: '09:00 AM - 09:00 PM',
+        operatingDays: 'Monday - Sunday (Daily)',
         facebookUrl: '',
         instagramUrl: '',
         tiktokUrl: '',
@@ -16684,6 +16755,17 @@ ${rawText}`;
     if (!attr) return;
     setAdminEditingAttractionId(attr.id);
     const existingImgs = Array.isArray(attr.images) && attr.images.length > 0 ? attr.images : (attr.image ? [attr.image] : []);
+    const is24 = Boolean(attr.is24Hours || (attr.operatingHours && (attr.operatingHours.includes('24') || attr.operatingHours.toLowerCase().includes('24/7'))));
+    let openT = attr.openingTime || '';
+    let closeT = attr.closingTime || '';
+    if (!openT && !closeT && attr.operatingHours && attr.operatingHours.includes('-')) {
+      const parts = attr.operatingHours.split('-');
+      openT = parts[0]?.trim() || '';
+      closeT = parts[1]?.trim() || '';
+    }
+    if (!openT && !is24) openT = '08:00 AM';
+    if (!closeT && !is24) closeT = '05:00 PM';
+
     setAdminAttractionForm({
       name: attr.name || '',
       municipality: attr.municipality || 'City of San Fernando',
@@ -16699,7 +16781,12 @@ ${rawText}`;
       eventDate: attr.eventDate || '',
       eventMonth: attr.eventMonth || 'All-Year',
       scheduleNote: attr.scheduleNote || '',
-      announcementNote: attr.announcementNote || 'Wait for further announcements and updates here'
+      announcementNote: attr.announcementNote || 'Wait for further announcements and updates here',
+      operatingDays: attr.operatingDays || 'Monday - Sunday (Daily)',
+      operatingHours: attr.operatingHours || (is24 ? 'Open 24 Hours (24/7)' : `${openT} - ${closeT}`),
+      openingTime: openT,
+      closingTime: closeT,
+      is24Hours: is24
     });
     setAdminSectionTab('attractions');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -16732,7 +16819,14 @@ ${rawText}`;
       eventDate: (adminAttractionForm.eventDate || '').trim(),
       eventMonth: adminAttractionForm.eventMonth || 'All-Year',
       scheduleNote: (adminAttractionForm.scheduleNote || '').trim(),
-      announcementNote: (adminAttractionForm.announcementNote || '').trim() || 'Wait for further announcements and updates here'
+      announcementNote: (adminAttractionForm.announcementNote || '').trim() || 'Wait for further announcements and updates here',
+      operatingDays: (adminAttractionForm.operatingDays || 'Monday - Sunday (Daily)').trim(),
+      operatingHours: adminAttractionForm.is24Hours
+        ? 'Open 24 Hours (24/7)'
+        : (adminAttractionForm.operatingHours || (adminAttractionForm.openingTime && adminAttractionForm.closingTime ? `${adminAttractionForm.openingTime} - ${adminAttractionForm.closingTime}` : '08:00 AM - 05:00 PM')),
+      openingTime: adminAttractionForm.openingTime || '08:00 AM',
+      closingTime: adminAttractionForm.closingTime || '05:00 PM',
+      is24Hours: Boolean(adminAttractionForm.is24Hours || (adminAttractionForm.operatingHours && (adminAttractionForm.operatingHours.includes('24') || adminAttractionForm.operatingHours.toLowerCase().includes('24/7'))))
     };
 
     if (adminEditingAttractionId) {
@@ -16797,7 +16891,12 @@ ${rawText}`;
       eventDate: '',
       eventMonth: 'All-Year',
       scheduleNote: '',
-      announcementNote: 'Wait for further announcements and updates here'
+      announcementNote: 'Wait for further announcements and updates here',
+      operatingDays: 'Monday - Sunday (Daily)',
+      operatingHours: '08:00 AM - 05:00 PM',
+      openingTime: '08:00 AM',
+      closingTime: '05:00 PM',
+      is24Hours: false
     });
   };
 
@@ -18058,9 +18157,10 @@ ${rawText}`;
                               )}
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                            {/* Row 1: Branch Identification & Location */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
                               <div>
-                                <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Name</label>
+                                <label className="block text-[9px] font-bold text-charcoal-light dark:text-gray-400 uppercase mb-0.5">Branch Name</label>
                                 <input
                                   type="text"
                                   placeholder="e.g. Everybody's Cafe Main Branch"
@@ -18070,11 +18170,11 @@ ${rawText}`;
                                     updated[bIdx] = { ...updated[bIdx], branchName: e.target.value };
                                     setAdminBranches(updated);
                                   }}
-                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] font-bold"
+                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-100 font-bold"
                                 />
                               </div>
                               <div>
-                                <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Municipality / City</label>
+                                <label className="block text-[9px] font-bold text-charcoal-light dark:text-gray-400 uppercase mb-0.5">Branch Municipality / City</label>
                                 <select
                                   value={branch.municipality || 'City of San Fernando'}
                                   onChange={(e) => {
@@ -18095,7 +18195,7 @@ ${rawText}`;
                                       }));
                                     }
                                   }}
-                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] font-bold cursor-pointer"
+                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-100 font-bold cursor-pointer"
                                 >
                                   {MUNICIPALITIES.map(mun => (
                                     <option key={mun} value={mun}>{mun}</option>
@@ -18103,40 +18203,133 @@ ${rawText}`;
                                 </select>
                               </div>
                               <div>
-                                <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Operating Hours</label>
-                                <input
-                                  type="text"
-                                  placeholder="e.g. 08:00 AM - 09:00 PM"
-                                  value={branch.operatingHours || '09:00 AM - 09:00 PM'}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    const updated = [...adminBranches];
-                                    updated[bIdx] = { ...updated[bIdx], operatingHours: val };
-                                    setAdminBranches(updated);
-                                    if (bIdx === 0) {
-                                      setAdminForm(prev => ({ ...prev, operatingHours: val }));
-                                    }
-                                  }}
-                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5] font-semibold"
-                                />
-                              </div>
-                              <div>
-                                <label className="block text-[9px] font-bold text-charcoal-light uppercase mb-0.5">Branch Exact Street / Barangay Address</label>
+                                <label className="block text-[9px] font-bold text-charcoal-light dark:text-gray-400 uppercase mb-0.5">Branch Exact Street / Barangay Address</label>
                                 <input
                                   type="text"
                                   placeholder="e.g. MacArthur Highway, Del Pilar"
                                   value={branch.address || ''}
                                   onChange={(e) => {
-                                    const val = e.target.value;
                                     const updated = [...adminBranches];
-                                    updated[bIdx] = { ...updated[bIdx], address: val };
+                                    updated[bIdx] = { ...updated[bIdx], address: e.target.value };
                                     setAdminBranches(updated);
                                     if (bIdx === 0) {
-                                      setAdminForm(prev => ({ ...prev, address: val }));
+                                      setAdminForm(prev => ({ ...prev, address: e.target.value }));
                                     }
                                   }}
-                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] rounded-lg bg-[#FAF8F5]"
+                                  className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-100 font-medium"
                                 />
+                              </div>
+                            </div>
+
+                            {/* Row 2: Branch Schedule (Operating Days & Operating Hours) */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-1">
+                              {/* Operating Days */}
+                              <div>
+                                <div className="flex items-center justify-between mb-1">
+                                  <label className="block text-[9px] font-bold text-charcoal-light dark:text-gray-400 uppercase">📅 Branch Operating Days</label>
+                                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded text-terracotta dark:text-[#E27D60] bg-terracotta/10">
+                                    Weekly Schedule
+                                  </span>
+                                </div>
+                                <div className="space-y-1.5">
+                                  <input
+                                    type="text"
+                                    placeholder="e.g. Monday - Sunday (Daily) or Tuesday - Sunday"
+                                    value={branch.operatingDays || 'Monday - Sunday (Daily)'}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      const updated = [...adminBranches];
+                                      updated[bIdx] = { ...updated[bIdx], operatingDays: val };
+                                      setAdminBranches(updated);
+                                      if (bIdx === 0) {
+                                        setAdminForm(prev => ({ ...prev, operatingDays: val }));
+                                      }
+                                    }}
+                                    className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-100 font-semibold"
+                                  />
+                                  <div className="flex items-center gap-1 flex-wrap">
+                                    <span className="text-[8px] font-bold text-charcoal-light dark:text-gray-400">Day Presets:</span>
+                                    {[
+                                      'Monday - Sunday (Daily)',
+                                      'Tuesday - Sunday (Closed Mon)',
+                                      'Monday - Saturday',
+                                      'Wednesday - Sunday',
+                                      'Friday - Sunday'
+                                    ].map((preset) => (
+                                      <button
+                                        key={preset}
+                                        type="button"
+                                        onClick={() => {
+                                          const updated = [...adminBranches];
+                                          updated[bIdx] = { ...updated[bIdx], operatingDays: preset };
+                                          setAdminBranches(updated);
+                                          if (bIdx === 0) {
+                                            setAdminForm(prev => ({ ...prev, operatingDays: preset }));
+                                          }
+                                        }}
+                                        className="px-1.5 py-0.5 text-[8.5px] font-bold bg-[#FAF8F5] dark:bg-[#1E1B18] hover:bg-gray-200 dark:hover:bg-[#2A2621] text-charcoal dark:text-gray-300 rounded border border-[#E9E5DE] dark:border-[#2E2A24] transition-colors cursor-pointer"
+                                      >
+                                        {preset}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Operating Hours */}
+                              <div>
+                                <div className="flex items-center justify-between mb-1">
+                                  <label className="block text-[9px] font-bold text-charcoal-light dark:text-gray-400 uppercase">🕒 Branch Operating Hours</label>
+                                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                                    Boolean(branch.is24Hours || (branch.operatingHours && (branch.operatingHours.includes('24') || branch.operatingHours.toLowerCase().includes('24/7'))))
+                                      ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60'
+                                      : 'text-charcoal-light dark:text-gray-400'
+                                  }`}>
+                                    {Boolean(branch.is24Hours || (branch.operatingHours && (branch.operatingHours.includes('24') || branch.operatingHours.toLowerCase().includes('24/7')))) ? 'Open 24/7' : 'Standard'}
+                                  </span>
+                                </div>
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center gap-1.5">
+                                    <input
+                                      type="text"
+                                      placeholder="e.g. 08:00 AM - 09:00 PM or Open 24 Hours"
+                                      value={branch.operatingHours || '09:00 AM - 09:00 PM'}
+                                      disabled={Boolean(branch.is24Hours || (branch.operatingHours && (branch.operatingHours.includes('24') || branch.operatingHours.toLowerCase().includes('24/7'))))}
+                                      onChange={(e) => {
+                                        const val = e.target.value;
+                                        const updated = [...adminBranches];
+                                        updated[bIdx] = { ...updated[bIdx], operatingHours: val, is24Hours: false };
+                                        setAdminBranches(updated);
+                                        if (bIdx === 0) {
+                                          setAdminForm(prev => ({ ...prev, operatingHours: val, is24Hours: false }));
+                                        }
+                                      }}
+                                      className="block w-full px-2.5 py-1.5 text-xs border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg bg-[#FAF8F5] dark:bg-[#161412] text-charcoal dark:text-gray-100 font-semibold disabled:bg-emerald-50 dark:disabled:bg-emerald-950/40 disabled:text-emerald-800 dark:disabled:text-emerald-300 disabled:border-emerald-300 dark:disabled:border-emerald-800/60"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const is24 = !(branch.is24Hours || (branch.operatingHours && (branch.operatingHours.includes('24') || branch.operatingHours.toLowerCase().includes('24/7'))));
+                                        const val = is24 ? 'Open 24 Hours (24/7)' : '09:00 AM - 09:00 PM';
+                                        const updated = [...adminBranches];
+                                        updated[bIdx] = { ...updated[bIdx], operatingHours: val, is24Hours: is24 };
+                                        setAdminBranches(updated);
+                                        if (bIdx === 0) {
+                                          setAdminForm(prev => ({ ...prev, operatingHours: val, is24Hours: is24 }));
+                                        }
+                                      }}
+                                      className={`px-3 py-1.5 text-[11px] font-black rounded-lg border shrink-0 transition-all cursor-pointer flex items-center gap-1 select-none ${
+                                        Boolean(branch.is24Hours || (branch.operatingHours && (branch.operatingHours.includes('24') || branch.operatingHours.toLowerCase().includes('24/7'))))
+                                          ? 'bg-emerald-600 text-white border-emerald-600 dark:border-emerald-500 shadow-sm'
+                                          : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#2A2621] border-[#E9E5DE] dark:border-[#2E2A24]'
+                                      }`}
+                                      title="Toggle 24 Hours schedule"
+                                    >
+                                      <span>{Boolean(branch.is24Hours || (branch.operatingHours && (branch.operatingHours.includes('24') || branch.operatingHours.toLowerCase().includes('24/7')))) ? '✓' : '🕒'}</span>
+                                      <span>{Boolean(branch.is24Hours || (branch.operatingHours && (branch.operatingHours.includes('24') || branch.operatingHours.toLowerCase().includes('24/7')))) ? '24 Hours' : '24 Hrs'}</span>
+                                    </button>
+                                  </div>
+                                </div>
                               </div>
                             </div>
 
@@ -19268,33 +19461,80 @@ ${rawText}`;
                     </div>
                   </div>
 
-                  {/* Festival / Event Schedule Controls */}
-                  <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-xl space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px] font-black text-amber-950 flex items-center gap-1.5 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(adminAttractionForm.isFestival || (adminAttractionForm.type && adminAttractionForm.type.includes('Festival')))}
-                          onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, isFestival: e.target.checked })}
-                          className="w-4 h-4 rounded text-terracotta accent-terracotta cursor-pointer"
-                        />
-                        <span>🎉 Cultural Festival / Annual Fiesta Destination</span>
-                      </label>
-                      <span className="text-[9px] font-bold text-amber-800 bg-amber-100/90 px-2 py-0.5 rounded-full border border-amber-200">
-                        {adminAttractionForm.isFestival || (adminAttractionForm.type && adminAttractionForm.type.includes('Festival')) ? 'Festival Mode Active' : 'Regular Landmark'}
+                  {/* Festival / Event Schedule Controls - 2 Choices: Festivals and Others */}
+                  <div className="p-3.5 bg-amber-50/70 dark:bg-[#1E1B18] border border-amber-200/80 dark:border-[#2E2A24] rounded-xl space-y-3">
+                    <div className="flex items-center justify-between flex-wrap gap-2.5">
+                      <div>
+                        <span className="block text-[10px] font-black text-amber-950 dark:text-amber-300 uppercase tracking-wider">
+                          Destination Schedule Type
+                        </span>
+                        <p className="text-[11px] text-charcoal-light dark:text-gray-400 font-medium">
+                          Select whether this is an annual/seasonal Cultural Festival or a Regular Landmark.
+                        </p>
+                      </div>
+
+                      {/* 2 Choices: Festivals vs Others */}
+                      <div className="inline-flex p-1 bg-white dark:bg-[#161412] border border-amber-300/80 dark:border-[#2E2A24] rounded-xl shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAdminAttractionForm(prev => ({
+                              ...prev,
+                              isFestival: true,
+                              type: '🎉 Cultural Festival / Fiesta'
+                            }));
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer select-none ${
+                            Boolean(adminAttractionForm.isFestival || (adminAttractionForm.type && adminAttractionForm.type.includes('Festival')))
+                              ? 'bg-amber-600 text-white shadow-xs ring-1 ring-amber-500'
+                              : 'text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white'
+                          }`}
+                        >
+                          <span>🎉</span>
+                          <span>Festivals</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAdminAttractionForm(prev => ({
+                              ...prev,
+                              isFestival: false,
+                              type: prev.type && prev.type.includes('Festival') ? '🏛️ Historic Parish Church' : (prev.type || '🏛️ Historic Parish Church')
+                            }));
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer select-none ${
+                            !Boolean(adminAttractionForm.isFestival || (adminAttractionForm.type && adminAttractionForm.type.includes('Festival')))
+                              ? 'bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-500'
+                              : 'text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white'
+                          }`}
+                        >
+                          <span>🏛️</span>
+                          <span>Others</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] pt-1 border-t border-amber-200/60 dark:border-amber-900/30">
+                      <span className="text-charcoal-light dark:text-gray-400 font-semibold">Active Mode:</span>
+                      <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${
+                        Boolean(adminAttractionForm.isFestival || (adminAttractionForm.type && adminAttractionForm.type.includes('Festival')))
+                          ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-700/60'
+                          : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700/60'
+                      }`}>
+                        {Boolean(adminAttractionForm.isFestival || (adminAttractionForm.type && adminAttractionForm.type.includes('Festival'))) ? '🎉 Festival Mode Active' : '🏛️ Regular Landmark / Others Active'}
                       </span>
                     </div>
 
                     {(adminAttractionForm.isFestival || (adminAttractionForm.type && adminAttractionForm.type.includes('Festival'))) && (
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-amber-200/60">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-amber-200/60 dark:border-amber-900/40">
                         <div>
-                          <label className="block text-[9px] font-black text-amber-900 uppercase tracking-wider mb-1">
+                          <label className="block text-[9px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider mb-1">
                             Festival Month
                           </label>
                           <select
                             value={adminAttractionForm.eventMonth || 'All-Year'}
                             onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, eventMonth: e.target.value })}
-                            className="block w-full px-2.5 py-1.5 border border-amber-300 rounded-lg bg-white text-xs font-bold text-charcoal focus:outline-none"
+                            className="block w-full px-2.5 py-1.5 border border-amber-300 dark:border-amber-700/60 rounded-lg bg-white dark:bg-[#161412] text-xs font-bold text-charcoal dark:text-gray-100 focus:outline-none cursor-pointer"
                           >
                             <option value="All-Year">All-Year / Ongoing</option>
                             <option value="January">January</option>
@@ -19312,7 +19552,7 @@ ${rawText}`;
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[9px] font-black text-amber-900 uppercase tracking-wider mb-1">
+                          <label className="block text-[9px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider mb-1">
                             Festival Date / Period
                           </label>
                           <input
@@ -19320,11 +19560,11 @@ ${rawText}`;
                             placeholder="e.g. Mid-December (Dec 14–31)"
                             value={adminAttractionForm.eventDate || ''}
                             onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, eventDate: e.target.value })}
-                            className="block w-full px-2.5 py-1.5 border border-amber-300 rounded-lg bg-white text-xs font-semibold text-charcoal focus:outline-none"
+                            className="block w-full px-2.5 py-1.5 border border-amber-300 dark:border-amber-700/60 rounded-lg bg-white dark:bg-[#161412] text-xs font-semibold text-charcoal dark:text-gray-100 focus:outline-none"
                           />
                         </div>
                         <div>
-                          <label className="block text-[9px] font-black text-amber-900 uppercase tracking-wider mb-1">
+                          <label className="block text-[9px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider mb-1">
                             Key Activities / Highlights
                           </label>
                           <input
@@ -19332,11 +19572,11 @@ ${rawText}`;
                             placeholder="e.g. Giant lantern competition, food market"
                             value={adminAttractionForm.scheduleNote || ''}
                             onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, scheduleNote: e.target.value })}
-                            className="block w-full px-2.5 py-1.5 border border-amber-300 rounded-lg bg-white text-xs font-semibold text-charcoal focus:outline-none"
+                            className="block w-full px-2.5 py-1.5 border border-amber-300 dark:border-amber-700/60 rounded-lg bg-white dark:bg-[#161412] text-xs font-semibold text-charcoal dark:text-gray-100 focus:outline-none"
                           />
                         </div>
                         <div className="col-span-full">
-                          <label className="block text-[9px] font-black text-amber-900 uppercase tracking-wider mb-1">
+                          <label className="block text-[9px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-wider mb-1">
                             📢 Bulletin & Announcement Notice
                           </label>
                           <input
@@ -19344,12 +19584,137 @@ ${rawText}`;
                             placeholder="e.g. Wait for further announcements and updates here"
                             value={adminAttractionForm.announcementNote || ''}
                             onChange={(e) => setAdminAttractionForm({ ...adminAttractionForm, announcementNote: e.target.value })}
-                            className="block w-full px-2.5 py-1.5 border border-amber-300 rounded-lg bg-white text-xs font-semibold text-charcoal focus:outline-none"
+                            className="block w-full px-2.5 py-1.5 border border-amber-300 dark:border-amber-700/60 rounded-lg bg-white dark:bg-[#161412] text-xs font-semibold text-charcoal dark:text-gray-100 focus:outline-none"
                           />
                         </div>
                       </div>
                     )}
                   </div>
+
+                  {/* Standard Tourist Destination Visiting & Operating Hours (For non-festivals / Others) */}
+                  {!(adminAttractionForm.isFestival || (adminAttractionForm.type && adminAttractionForm.type.includes('Festival'))) && (
+                    <div className="p-3.5 bg-emerald-50/70 dark:bg-[#1E1B18] border border-emerald-200/80 dark:border-[#2E2A24] rounded-xl space-y-3">
+                      {/* Operating Days Selector */}
+                      <div className="space-y-1.5 pb-2.5 border-b border-emerald-200/60 dark:border-emerald-900/30">
+                        <div className="flex items-center justify-between">
+                          <label className="block text-[9px] font-black text-emerald-900 dark:text-emerald-300 uppercase tracking-wider">
+                            📅 Operating Days (Schedule for Visitors)
+                          </label>
+                          <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400">
+                            Weekly Schedule
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="e.g. Monday - Sunday (Daily) or Tuesday - Sunday (Closed Mon)"
+                          value={adminAttractionForm.operatingDays || 'Monday - Sunday (Daily)'}
+                          onChange={(e) => setAdminAttractionForm(prev => ({ ...prev, operatingDays: e.target.value }))}
+                          className="block w-full px-2.5 py-1.5 border border-emerald-300 dark:border-emerald-700/60 rounded-lg bg-white dark:bg-[#161412] text-xs font-bold text-charcoal dark:text-gray-100 focus:outline-none"
+                        />
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[8.5px] font-bold text-emerald-800 dark:text-emerald-400">Day Presets:</span>
+                          {[
+                            'Monday - Sunday (Daily)',
+                            'Tuesday - Sunday (Closed Mon)',
+                            'Monday - Saturday',
+                            'Wednesday - Sunday',
+                            'Friday - Sunday'
+                          ].map((preset) => (
+                            <button
+                              key={preset}
+                              type="button"
+                              onClick={() => setAdminAttractionForm(prev => ({ ...prev, operatingDays: preset }))}
+                              className="px-2 py-0.5 text-[9px] font-bold bg-white dark:bg-[#161412] text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-300 dark:border-emerald-700/60 rounded-md transition-colors cursor-pointer"
+                            >
+                              {preset}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                          <span className="text-[11px] font-black text-emerald-950 dark:text-emerald-300 uppercase tracking-wider">
+                            Operating Hours
+                          </span>
+                        </div>
+                        {/* 24 Hours Open Choice Toggle Button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const is24 = !Boolean(adminAttractionForm.is24Hours || (adminAttractionForm.operatingHours && (adminAttractionForm.operatingHours.includes('24') || adminAttractionForm.operatingHours.toLowerCase().includes('24/7'))));
+                            setAdminAttractionForm(prev => ({
+                              ...prev,
+                              is24Hours: is24,
+                              operatingHours: is24 ? 'Open 24 Hours (24/7)' : `${prev.openingTime || '08:00 AM'} - ${prev.closingTime || '05:00 PM'}`
+                            }));
+                          }}
+                          className={`px-3 py-1.5 rounded-lg border text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer select-none ${
+                            Boolean(adminAttractionForm.is24Hours || (adminAttractionForm.operatingHours && (adminAttractionForm.operatingHours.includes('24') || adminAttractionForm.operatingHours.toLowerCase().includes('24/7'))))
+                              ? 'bg-emerald-600 text-white border-emerald-600 dark:border-emerald-500 shadow-sm'
+                              : 'bg-white dark:bg-[#161412] text-emerald-900 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700/60 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
+                          }`}
+                          title="Toggle 24 Hours schedule"
+                        >
+                          <span>{Boolean(adminAttractionForm.is24Hours || (adminAttractionForm.operatingHours && (adminAttractionForm.operatingHours.includes('24') || adminAttractionForm.operatingHours.toLowerCase().includes('24/7')))) ? '✓' : '🕒'}</span>
+                          <span>Open 24 Hours / 24/7</span>
+                        </button>
+                      </div>
+
+                      {Boolean(adminAttractionForm.is24Hours || (adminAttractionForm.operatingHours && (adminAttractionForm.operatingHours.includes('24') || adminAttractionForm.operatingHours.toLowerCase().includes('24/7')))) ? (
+                        <div className="p-2.5 bg-emerald-100/70 dark:bg-emerald-950/40 rounded-lg text-xs font-bold text-emerald-900 dark:text-emerald-300 flex items-center gap-2 border border-emerald-200 dark:border-emerald-800/40">
+                          <span>✨</span>
+                          <span>This destination is marked as <strong>Open 24/7</strong>. Tourists and visitors can explore at any time.</span>
+                        </div>
+                      ) : (
+                        <div className="space-y-2 pt-1 border-t border-emerald-200/60 dark:border-emerald-900/30">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-[9px] font-black text-emerald-900 dark:text-emerald-300 uppercase tracking-wider mb-1">
+                                Opening Time
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="e.g. 06:00 AM or 08:00 AM"
+                                value={adminAttractionForm.openingTime || ''}
+                                onChange={(e) => {
+                                  const openT = e.target.value;
+                                  const closeT = adminAttractionForm.closingTime || '05:00 PM';
+                                  setAdminAttractionForm(prev => ({
+                                    ...prev,
+                                    openingTime: openT,
+                                    operatingHours: openT && closeT ? `${openT} - ${closeT}` : openT
+                                  }));
+                                }}
+                                className="block w-full px-2.5 py-1.5 border border-emerald-300 dark:border-emerald-700/60 rounded-lg bg-white dark:bg-[#161412] text-xs font-bold text-charcoal dark:text-gray-100 focus:outline-none"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[9px] font-black text-emerald-900 dark:text-emerald-300 uppercase tracking-wider mb-1">
+                                Closing Time
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="e.g. 05:00 PM or 06:00 PM"
+                                value={adminAttractionForm.closingTime || ''}
+                                onChange={(e) => {
+                                  const closeT = e.target.value;
+                                  const openT = adminAttractionForm.openingTime || '08:00 AM';
+                                  setAdminAttractionForm(prev => ({
+                                    ...prev,
+                                    closingTime: closeT,
+                                    operatingHours: openT && closeT ? `${openT} - ${closeT}` : closeT
+                                  }));
+                                }}
+                                className="block w-full px-2.5 py-1.5 border border-emerald-300 dark:border-emerald-700/60 rounded-lg bg-white dark:bg-[#161412] text-xs font-bold text-charcoal dark:text-gray-100 focus:outline-none"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Row 2: Exact Address & Geo-Coordinates with Live Search */}
                   <div className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl space-y-3">
@@ -19631,17 +19996,17 @@ ${rawText}`;
                     }).length} of {attractions.length} Sites)
                   </h3>
 
-                  {/* Search Bar & Municipality Filter */}
+                  {/* Search Bar, Category Filter & Municipality Filter */}
                   <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                     {/* Search Input */}
-                    <div className="relative min-w-[200px] sm:w-64">
+                    <div className="relative min-w-[180px] sm:w-56">
                       <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-light pointer-events-none" />
                       <input
                         type="text"
                         value={adminAttractionSearch}
                         onChange={(e) => setAdminAttractionSearch(e.target.value)}
                         placeholder="Search landmark, category, city..."
-                        className="w-full pl-8 pr-7 py-1.5 text-xs bg-ivory border border-[#E9E5DE] rounded-xl focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white"
+                        className="w-full pl-8 pr-7 py-1.5 text-xs bg-ivory dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal dark:text-gray-100 rounded-xl focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white dark:focus:bg-[#1E1B18]"
                       />
                       {adminAttractionSearch && (
                         <button
@@ -19656,11 +20021,48 @@ ${rawText}`;
                       )}
                     </div>
 
+                    {/* Category Filter Pills: All / Festivals / Others */}
+                    <div className="inline-flex p-0.5 bg-ivory dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl text-xs font-bold shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setAdminAttractionCategoryFilter('All')}
+                        className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer select-none ${
+                          adminAttractionCategoryFilter === 'All'
+                            ? 'bg-terracotta text-white shadow-2xs font-black'
+                            : 'text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white'
+                        }`}
+                      >
+                        All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAdminAttractionCategoryFilter('Festivals')}
+                        className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer select-none ${
+                          adminAttractionCategoryFilter === 'Festivals'
+                            ? 'bg-amber-600 text-white shadow-2xs font-black'
+                            : 'text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white'
+                        }`}
+                      >
+                        🎉 Festivals
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAdminAttractionCategoryFilter('Others')}
+                        className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer select-none ${
+                          adminAttractionCategoryFilter === 'Others'
+                            ? 'bg-emerald-600 text-white shadow-2xs font-black'
+                            : 'text-charcoal-light dark:text-gray-400 hover:text-charcoal dark:hover:text-white'
+                        }`}
+                      >
+                        🏛️ Others
+                      </button>
+                    </div>
+
                     {/* Municipality Filter Dropdown */}
                     <select
                       value={adminAttractionMunicipalityFilter}
                       onChange={(e) => setAdminAttractionMunicipalityFilter(e.target.value)}
-                      className="px-2.5 py-1.5 text-xs bg-ivory border border-[#E9E5DE] rounded-xl font-medium focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white text-charcoal cursor-pointer"
+                      className="px-2.5 py-1.5 text-xs bg-ivory dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal dark:text-gray-100 rounded-xl font-medium focus:outline-none focus:ring-1 focus:ring-terracotta focus:bg-white dark:focus:bg-[#1E1B18] cursor-pointer"
                     >
                       <option value="All">All Municipalities ({attractions.length})</option>
                       {MUNICIPALITIES.map(m => {
@@ -19675,9 +20077,9 @@ ${rawText}`;
                   </div>
                 </div>
 
-                <div className="overflow-x-auto border border-[#E9E5DE] rounded-xl">
-                  <table className="min-w-full divide-y divide-[#E9E5DE] text-left text-xs">
-                    <thead className="bg-[#FAF8F5] text-charcoal-light uppercase font-bold tracking-wider text-[11px]">
+                <div className="overflow-x-auto border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl">
+                  <table className="min-w-full divide-y divide-[#E9E5DE] dark:divide-[#2E2A24] text-left text-xs">
+                    <thead className="bg-[#FAF8F5] dark:bg-[#161412] text-charcoal-light dark:text-gray-400 uppercase font-bold tracking-wider text-[11px]">
                       <tr>
                         <th className="px-4 py-3">Landmark Name</th>
                         <th className="px-4 py-3">Municipality / City</th>
@@ -19687,9 +20089,12 @@ ${rawText}`;
                         <th className="px-4 py-3 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#E9E5DE] bg-white text-charcoal font-medium">
+                    <tbody className="divide-y divide-[#E9E5DE] dark:divide-[#2E2A24] bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 font-medium">
                       {attractions
                         .filter(attr => {
+                          const isFest = Boolean(attr.isFestival || (attr.type && attr.type.includes('Festival')));
+                          if (adminAttractionCategoryFilter === 'Festivals' && !isFest) return false;
+                          if (adminAttractionCategoryFilter === 'Others' && isFest) return false;
                           const matchesSearch = !adminAttractionSearch.trim() ||
                             (attr.name && attr.name.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
                             (attr.municipality && attr.municipality.toLowerCase().includes(adminAttractionSearch.toLowerCase())) ||
@@ -19700,24 +20105,37 @@ ${rawText}`;
                           return matchesSearch && matchesMun;
                         })
                         .map(attr => (
-                          <tr key={attr.id} className="hover:bg-ivory/40">
+                          <tr key={attr.id} className="hover:bg-ivory/40 dark:hover:bg-white/5 transition-colors">
                             <td className="px-4 py-3 font-extrabold flex items-center gap-2">
-                              {attr.image && <img src={attr.image} alt={attr.name} className="w-8 h-8 rounded object-cover border border-[#E9E5DE]" />}
+                              {attr.image && <img src={attr.image} alt={attr.name} className="w-8 h-8 rounded object-cover border border-[#E9E5DE] dark:border-[#2E2A24]" />}
                               <span>{attr.name}</span>
                             </td>
-                            <td className="px-4 py-3 text-terracotta font-bold">📍 {attr.municipality}</td>
+                            <td className="px-4 py-3 text-terracotta dark:text-[#E27D60] font-bold">📍 {attr.municipality}</td>
                             <td className="px-4 py-3">
-                              <span className="text-charcoal-light">{attr.type}</span>
-                              {(attr.isFestival || (attr.type && attr.type.includes('Festival'))) && (
+                              <span className="text-charcoal-light dark:text-gray-300">{attr.type}</span>
+                              {(attr.isFestival || (attr.type && attr.type.includes('Festival'))) ? (
                                 <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                                  <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-extrabold rounded">
+                                  <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300/40 dark:border-amber-800/60 text-[10px] font-extrabold rounded">
                                     🎉 {attr.eventMonth || 'Festival'}
                                   </span>
                                   {attr.eventDate && (
-                                    <span className="text-[10px] text-charcoal-light font-semibold">
+                                    <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-semibold">
                                       📅 {attr.eventDate}
                                     </span>
                                   )}
+                                </div>
+                              ) : (
+                                <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                                  <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-gray-100 dark:bg-stone-800 text-charcoal dark:text-gray-300 border border-stone-200 dark:border-stone-700 flex items-center gap-1">
+                                    📅 {attr.operatingDays || 'Mon - Sun (Daily)'}
+                                  </span>
+                                  <span className={`px-1.5 py-0.5 text-[10px] font-extrabold rounded flex items-center gap-1 ${
+                                    (attr.is24Hours || (attr.operatingHours && attr.operatingHours.includes('24')))
+                                      ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-800/60'
+                                      : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50'
+                                  }`}>
+                                    🕒 {attr.is24Hours || (attr.operatingHours && (attr.operatingHours.includes('24') || attr.operatingHours.toLowerCase().includes('24/7'))) ? 'Open 24/7' : (attr.operatingHours || '08:00 AM - 05:00 PM')}
+                                  </span>
                                 </div>
                               )}
                             </td>
@@ -19726,7 +20144,7 @@ ${rawText}`;
                                 const destRating = getDestinationAverageRating(attr.id);
                                 if (destRating.count === 0 || destRating.isUnrated) {
                                   return (
-                                    <span className="text-[10px] font-bold text-charcoal-light bg-gray-100 px-2 py-0.5 rounded-md border border-[#E9E5DE]">
+                                    <span className="text-[10px] font-bold text-charcoal-light dark:text-gray-400 bg-gray-100 dark:bg-[#282420] px-2 py-0.5 rounded-md border border-[#E9E5DE] dark:border-[#38332C]">
                                       New (0 reviews)
                                     </span>
                                   );
@@ -19734,26 +20152,26 @@ ${rawText}`;
                                 return (
                                   <div className="flex items-center gap-1 font-black text-amber-500">
                                     <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                                    <span className="text-xs text-charcoal">{destRating.score}</span>
-                                    <span className="text-[10px] text-charcoal-light font-medium">({destRating.count})</span>
+                                    <span className="text-xs text-charcoal dark:text-gray-100">{destRating.score}</span>
+                                    <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">({destRating.count})</span>
                                   </div>
                                 );
                               })()}
                             </td>
-                            <td className="px-4 py-3 text-charcoal-light text-[11px] max-w-xs truncate">{attr.description}</td>
+                            <td className="px-4 py-3 text-charcoal-light dark:text-gray-400 text-[11px] max-w-xs truncate">{attr.description}</td>
                             <td className="px-4 py-3 text-right space-x-1 shrink-0">
                               <button
                                 type="button"
                                 onClick={() => startAdminAttractionEdit(attr)}
-                                className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs hover:border-terracotta"
+                                className="p-1.5 text-charcoal-light dark:text-gray-400 hover:text-terracotta dark:hover:text-[#E27D60] rounded-lg hover:bg-terracotta/5 dark:hover:bg-terracotta/10 inline-flex border border-[#E9E5DE] dark:border-[#2E2A24] bg-white dark:bg-[#1E1B18] cursor-pointer shadow-2xs hover:border-terracotta"
                                 title="Edit Destination"
                               >
-                                <Edit className="h-4 w-4 text-terracotta" />
+                                <Edit className="h-4 w-4 text-terracotta dark:text-[#E27D60]" />
                               </button>
                               <button
                                 type="button"
                                 onClick={() => deleteAttraction(attr.id)}
-                                className="p-1.5 text-charcoal-light hover:text-terracotta rounded-lg hover:bg-terracotta/5 inline-flex border border-[#E9E5DE] bg-white cursor-pointer shadow-2xs"
+                                className="p-1.5 text-charcoal-light dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 inline-flex border border-[#E9E5DE] dark:border-[#2E2A24] bg-white dark:bg-[#1E1B18] cursor-pointer shadow-2xs"
                                 title="Delete Destination"
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -20473,7 +20891,7 @@ ${rawText}`;
           <div className="space-y-6">
 
             {/* Hero Section with Kapampangan Cultural & Food Imagery */}
-            <div className="bento-card relative overflow-hidden p-4 sm:p-6 md:p-8 lg:p-8 xl:p-10 bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFEB] dark:from-[#1E1B18] dark:via-[#171513] dark:to-[#12100E] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl shadow-sm">
+            <div className="bento-card relative overflow-hidden p-4 sm:p-5 md:p-6 lg:p-7 bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFEB] dark:from-[#1E1B18] dark:via-[#171513] dark:to-[#12100E] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl shadow-sm">
               {/* Background Parul Sampernandu (Giant Lantern) & Mount Arayat Outline Watermark */}
               <div className="absolute right-0 bottom-0 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 text-terracotta/10 dark:text-terracotta/5 opacity-25 pointer-events-none z-0">
                 <svg viewBox="0 0 100 100" className="w-full h-full stroke-current fill-none" strokeWidth="0.8">
@@ -20487,7 +20905,7 @@ ${rawText}`;
                 </svg>
               </div>
 
-              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-10 items-center">
+              <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
                 {/* Left Column: Rich Editorial Typography, Feature Pills & Quick Actions */}
                 <div className="lg:col-span-6 space-y-3.5 sm:space-y-4.5 text-left">
                   {/* Top Cultural Badge */}
@@ -20769,102 +21187,100 @@ ${rawText}`;
               </div>
             </div>
 
-            {/* Bento Grid: 12-Column Layout */}
-            <div id="restaurants-section" className="grid grid-cols-1 lg:grid-cols-12 gap-6 scroll-mt-24">
+            {/* Mobile & Tablet Horizontal Municipality Strip (< lg) */}
+            <div className="lg:hidden space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black uppercase tracking-wider text-charcoal dark:text-white flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5 text-terracotta" /> Municipalities ({MUNICIPALITIES.length})
+                </span>
 
-              {/* Sidebar / Horizontal Strip: Municipalities List */}
-              <div className="lg:col-span-3 space-y-4">
-
-                {/* Mobile & Tablet Horizontal Municipality Strip (< lg) */}
-                <div className="lg:hidden space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-black uppercase tracking-wider text-charcoal dark:text-white flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-terracotta" /> Municipalities ({MUNICIPALITIES.length})
-                    </span>
-
-                    {/* Controls: Swipe Notice & Interactive Scroll Buttons */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-semibold hidden sm:inline select-none">
-                        Swipe or drag to explore
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => handleMunScroll('left')}
-                          className="w-7 h-7 rounded-lg bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal dark:text-gray-200 flex items-center justify-center hover:bg-terracotta hover:text-white hover:border-terracotta transition-all shadow-2xs cursor-pointer active:scale-90"
-                          aria-label="Scroll municipalities left"
-                          title="Scroll left"
-                        >
-                          <ChevronLeft className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleMunScroll('right')}
-                          className="w-7 h-7 rounded-lg bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal dark:text-gray-200 flex items-center justify-center hover:bg-terracotta hover:text-white hover:border-terracotta transition-all shadow-2xs cursor-pointer active:scale-90"
-                          aria-label="Scroll municipalities right"
-                          title="Scroll right"
-                        >
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Horizontal Scrollable Row: Touch Pan & Mouse Drag to Scroll */}
-                  <div className="relative">
-                    <div
-                      ref={munScrollRef}
-                      onMouseDown={handleMunMouseDown}
-                      onMouseMove={handleMunMouseMove}
-                      onMouseUp={handleMunMouseUp}
-                      onMouseLeave={handleMunMouseLeave}
-                      onScroll={checkMunScroll}
-                      className="flex overflow-x-auto gap-1.5 pb-2 pt-0.5 no-scrollbar touch-pan-x overscroll-x-contain select-none cursor-grab active:cursor-grabbing scroll-smooth"
+                {/* Controls: Swipe Notice & Interactive Scroll Buttons */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-semibold hidden sm:inline select-none">
+                    Swipe or drag to explore
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleMunScroll('left')}
+                      className="w-7 h-7 rounded-lg bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal dark:text-gray-200 flex items-center justify-center hover:bg-terracotta hover:text-white hover:border-terracotta transition-all shadow-2xs cursor-pointer active:scale-90"
+                      aria-label="Scroll municipalities left"
+                      title="Scroll left"
                     >
-                      <button
-                        type="button"
-                        data-active={selectedMunicipality === 'All'}
-                        onClick={(e) => {
-                          if (hasDraggedMunRef.current) {
-                            e.preventDefault();
-                            return;
-                          }
-                          setSelectedMunicipality('All');
-                        }}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer whitespace-nowrap select-none ${selectedMunicipality === 'All'
-                          ? 'bg-terracotta text-white shadow-xs font-black ring-2 ring-terracotta/20 scale-102'
-                          : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/40'
-                          }`}
-                      >
-                        All ({restaurants.length})
-                      </button>
-
-                      {MUNICIPALITIES.map(mun => (
-                        <button
-                          key={mun}
-                          type="button"
-                          data-active={selectedMunicipality === mun}
-                          onClick={(e) => {
-                            if (hasDraggedMunRef.current) {
-                              e.preventDefault();
-                              return;
-                            }
-                            setSelectedMunicipality(mun);
-                          }}
-                          className={`px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer whitespace-nowrap select-none ${selectedMunicipality === mun
-                            ? 'bg-terracotta text-white shadow-xs font-black ring-2 ring-terracotta/20 scale-102'
-                            : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/40'
-                            }`}
-                        >
-                          {mun} ({municipalityCounts[mun] || 0})
-                        </button>
-                      ))}
-                    </div>
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMunScroll('right')}
+                      className="w-7 h-7 rounded-lg bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal dark:text-gray-200 flex items-center justify-center hover:bg-terracotta hover:text-white hover:border-terracotta transition-all shadow-2xs cursor-pointer active:scale-90"
+                      aria-label="Scroll municipalities right"
+                      title="Scroll right"
+                    >
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
+              </div>
 
-                {/* Desktop Sidebar: Vertical Municipality List (lg:) */}
-                <div className="hidden lg:block bento-card p-5 bg-white dark:bg-[#1E1B18] space-y-4 border-[#E9E5DE] dark:border-[#2E2A24] sticky top-24">
+              {/* Horizontal Scrollable Row: Touch Pan & Mouse Drag to Scroll */}
+              <div className="relative">
+                <div
+                  ref={munScrollRef}
+                  onMouseDown={handleMunMouseDown}
+                  onMouseMove={handleMunMouseMove}
+                  onMouseUp={handleMunMouseUp}
+                  onMouseLeave={handleMunMouseLeave}
+                  onScroll={checkMunScroll}
+                  className="flex overflow-x-auto gap-1.5 pb-2 pt-0.5 no-scrollbar touch-pan-x overscroll-x-contain select-none cursor-grab active:cursor-grabbing scroll-smooth"
+                >
+                  <button
+                    type="button"
+                    data-active={selectedMunicipality === 'All'}
+                    onClick={(e) => {
+                      if (hasDraggedMunRef.current) {
+                        e.preventDefault();
+                        return;
+                      }
+                      setSelectedMunicipality('All');
+                    }}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer whitespace-nowrap select-none ${selectedMunicipality === 'All'
+                      ? 'bg-terracotta text-white shadow-xs font-black ring-2 ring-terracotta/20 scale-102'
+                      : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/40'
+                      }`}
+                  >
+                    All ({restaurants.length})
+                  </button>
+
+                  {MUNICIPALITIES.map(mun => (
+                    <button
+                      key={mun}
+                      type="button"
+                      data-active={selectedMunicipality === mun}
+                      onClick={(e) => {
+                        if (hasDraggedMunRef.current) {
+                          e.preventDefault();
+                          return;
+                        }
+                        setSelectedMunicipality(mun);
+                      }}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer whitespace-nowrap select-none ${selectedMunicipality === mun
+                        ? 'bg-terracotta text-white shadow-xs font-black ring-2 ring-terracotta/20 scale-102'
+                        : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/40'
+                        }`}
+                    >
+                      {mun} ({municipalityCounts[mun] || 0})
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Bento Grid: 12-Column Layout */}
+            <div id="restaurants-section" className="grid grid-cols-1 lg:grid-cols-12 gap-6 scroll-mt-24 items-start">
+
+              {/* Desktop Sidebar: Vertical Municipality List (lg:) */}
+              <div className="hidden lg:block lg:col-span-3">
+                <div className="bento-card p-5 bg-white dark:bg-[#1E1B18] space-y-4 border-[#E9E5DE] dark:border-[#2E2A24] sticky top-24">
                   <div className="flex items-center justify-between pb-2 border-b border-[#E9E5DE] dark:border-[#2E2A24]">
                     <h3 className="text-xs font-extrabold text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-terracotta" /> Municipality/City Selection
@@ -20907,11 +21323,10 @@ ${rawText}`;
                     ))}
                   </div>
                 </div>
-
               </div>
 
               {/* Feed Grid Area */}
-              <div className="lg:col-span-9 space-y-6">
+              <div className="col-span-1 lg:col-span-9 space-y-6">
 
                 {/* Filter indicators */}
                 <div className="flex items-center justify-between bg-white dark:bg-[#1E1B18] px-4 py-3 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24]">
@@ -21063,23 +21478,32 @@ ${rawText}`;
                             <span className="flex items-center gap-1"><Activity className="h-3.5 w-3.5 text-terracotta shrink-0" /> Crowd Forecaster:</span>
                             <span className="text-terracotta">{(res.occupancy?.[4] ?? res.branches?.[0]?.occupancy?.[4] ?? 85)}% Peak</span>
                           </div>
-                          <div className="flex items-center justify-between font-semibold">
-                            <span className="flex items-center gap-1"><DollarSign className="h-3.5 w-3.5 text-calamansi shrink-0" /> Est. Cost:</span>
-                            <span className="text-calamansi font-bold">₱{res.menu[0]?.price || 200} base</span>
+                          <div className="flex items-center justify-between font-semibold gap-2">
+                            <span className="flex items-center gap-1 shrink-0"><Clock className="h-3.5 w-3.5 text-bananaleaf shrink-0" /> Schedule &amp; Hours:</span>
+                            <span className="text-charcoal dark:text-gray-200 font-bold text-right truncate min-w-0" title={`${res.operatingDays || res.branches?.[0]?.operatingDays || 'Daily'} • ${res.is24Hours ? 'Open 24 Hours (24/7)' : (res.operatingHours || '09:00 AM - 09:00 PM')}`}>
+                              <span className="text-terracotta dark:text-[#E27D60] font-black mr-1 text-[9.5px]">
+                                {res.operatingDays || res.branches?.[0]?.operatingDays || 'Mon - Sun'}
+                              </span>
+                              <span>
+                                {res.is24Hours || (res.operatingHours && (res.operatingHours.includes('24') || res.operatingHours.toLowerCase().includes('24/7') || res.operatingHours.toLowerCase().includes('24 hours')))
+                                  ? '24/7'
+                                  : (res.operatingHours || '09:00 AM - 09:00 PM')}
+                              </span>
+                            </span>
                           </div>
 
-                          <div className="flex items-center justify-between text-[10px] pt-1 border-t border-[#FAF8F5] dark:border-[#2A2621]">
-                            <div className="flex items-center gap-1.5 font-semibold text-charcoal-light dark:text-gray-300 min-w-0 max-w-[60%]" title={getRestaurantMunicipalities(res).join(', ')}>
+                          <div className="flex items-center justify-between text-[10px] pt-2 border-t border-[#FAF8F5] dark:border-[#2A2621] gap-2">
+                            <div className="flex items-center gap-1.5 font-semibold text-charcoal-light dark:text-gray-300 min-w-0 flex-1" title={getRestaurantMunicipalities(res).join(', ')}>
                               <MapPin className="h-3.5 w-3.5 text-saffron shrink-0" />
                               {getRestaurantMunicipalities(res).length > 1 ? (
-                                <span className="text-[10px] font-black text-terracotta truncate bg-terracotta/5 dark:bg-terracotta/15 px-1.5 py-0.5 rounded border border-terracotta/15 dark:border-terracotta/30">
-                                  {getRestaurantMunicipalities(res).length} Branches ({getRestaurantMunicipalities(res).join(' • ')})
+                                <span className="text-[10px] font-black text-terracotta dark:text-[#E27D60] truncate bg-terracotta/5 dark:bg-terracotta/15 px-1.5 py-0.5 rounded border border-terracotta/15 dark:border-terracotta/30">
+                                  {getRestaurantMunicipalities(res).length} Branches
                                 </span>
                               ) : (
                                 <span className="truncate text-xs font-bold text-charcoal dark:text-gray-200">{res.municipality}</span>
                               )}
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5 shrink-0">
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -21092,12 +21516,13 @@ ${rawText}`;
                                     setAddedStopModal(res);
                                   }
                                 }}
-                                className="px-2.5 py-1 bg-terracotta hover:bg-terracotta-dark text-white text-[10px] font-extrabold rounded-lg flex items-center gap-1 transition-colors shadow-2xs cursor-pointer active:scale-95"
+                                className="px-2.5 py-1 bg-terracotta hover:bg-terracotta-dark dark:bg-terracotta/90 dark:hover:bg-terracotta text-white text-[10px] font-extrabold rounded-lg flex items-center gap-1 transition-all shadow-2xs dark:shadow-none dark:border dark:border-terracotta/40 cursor-pointer active:scale-95 shrink-0 whitespace-nowrap"
                               >
-                                <Plus className="h-3 w-3" /> Add Stop
+                                <Plus className="h-3 w-3 shrink-0" />
+                                <span>Add Stop</span>
                               </button>
-                              <span className="text-xs font-bold text-terracotta flex items-center gap-0.5">
-                                Drawer <ChevronRight className="h-3 w-3" />
+                              <span className="text-xs font-bold text-terracotta dark:text-[#E27D60] flex items-center gap-0.5 shrink-0 whitespace-nowrap">
+                                Explore <ChevronRight className="h-3 w-3 shrink-0" />
                               </span>
                             </div>
                           </div>
@@ -21573,18 +21998,8 @@ ${rawText}`;
                           </div>
                         </div>
                       ) : (
-                        <div className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium flex items-center justify-between pt-0.5">
+                        <div className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium pt-0.5">
                           <span>🏛️ Heritage sites open year-round for {formatReadableDate(plannedTripDate || getTodayDateStr())}.</span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setAttractionFestivalFilter('all-festivals');
-                              setDashboardTab('destinations');
-                            }}
-                            className="text-[9px] font-bold text-[#2C5E3B] dark:text-emerald-400 hover:underline cursor-pointer shrink-0 ml-1"
-                          >
-                            Browse Festivals
-                          </button>
                         </div>
                       )}
                     </div>
@@ -22549,6 +22964,39 @@ ${rawText}`;
                                         {festMonth}
                                       </span>
                                     )}
+                                  </div>
+                                );
+                              })()}
+
+                              {/* Non-Festival Opening & Closing Time and Operating Days Highlight Bar */}
+                              {(() => {
+                                const preMatch = (PRESEEDED_ATTRACTIONS || []).find(p => p && (p.id === attr.id || p.name === attr.name));
+                                const isFest = Boolean(attr.isFestival || (preMatch && preMatch.isFestival) || (attr.type && attr.type.includes('Festival')));
+                                const festDate = attr.eventDate || (preMatch && preMatch.eventDate);
+                                if (isFest || festDate) return null;
+
+                                const days = attr.operatingDays || (preMatch && preMatch.operatingDays) || 'Monday - Sunday (Daily)';
+                                const hours = attr.operatingHours || (preMatch && preMatch.operatingHours) || (attr.is24Hours ? 'Open 24 Hours (24/7)' : '08:00 AM - 05:00 PM');
+                                const is24Hrs = Boolean(attr.is24Hours || (preMatch && preMatch.is24Hours) || hours.includes('24') || hours.toLowerCase().includes('24/7'));
+
+                                return (
+                                  <div className="mt-2.5 p-2 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30 border border-emerald-300/80 dark:border-emerald-800/60 rounded-xl flex items-center justify-between gap-2 shadow-2xs">
+                                    <div className="flex items-center gap-1.5 min-w-0">
+                                      <Clock className="w-3.5 h-3.5 text-bananaleaf dark:text-emerald-400 shrink-0" />
+                                      <span className="text-[11px] font-black text-emerald-950 dark:text-emerald-200 truncate" title={`${days} • ${hours}`}>
+                                        <span className="text-emerald-700 dark:text-emerald-300 font-extrabold mr-1">
+                                          {days}:
+                                        </span>
+                                        {hours}
+                                      </span>
+                                    </div>
+                                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shrink-0 shadow-2xs ${
+                                      is24Hrs
+                                        ? 'bg-emerald-600 text-white dark:bg-emerald-500'
+                                        : 'bg-emerald-200/90 dark:bg-emerald-900/80 text-emerald-950 dark:text-emerald-200'
+                                    }`}>
+                                      {is24Hrs ? '24/7 Open' : 'Schedule'}
+                                    </span>
                                   </div>
                                 );
                               })()}
@@ -24055,17 +24503,17 @@ ${rawText}`;
             <div className="sticky top-0 bg-white/95 dark:bg-[#1E1B18]/95 backdrop-blur-md border-b border-[#E9E5DE] dark:border-[#2E2A24] px-5 py-3.5 flex items-center justify-between gap-3 z-30 shadow-2xs rounded-t-3xl">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-lg font-black text-charcoal m-0 leading-tight truncate">{selectedRestaurant.name}</h2>
+                  <h2 className="text-lg font-black text-charcoal dark:text-white m-0 leading-tight truncate">{selectedRestaurant.name}</h2>
                   <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-terracotta/10 text-terracotta border border-terracotta/20 shrink-0">
                     {selectedRestaurant.priceTier === '$' ? '$ Budget' : selectedRestaurant.priceTier === '$$' ? '$$ Moderate' : selectedRestaurant.priceTier === '$$$' ? '$$$ Premium' : '$$$$ Fine Degustation'}
                   </span>
                   {getRestaurantMunicipalities(selectedRestaurant).length > 1 && (
-                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-800 border border-amber-500/30 shrink-0">
+                    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/15 dark:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-500/30 dark:border-amber-500/40 shrink-0">
                       🏪 {getRestaurantMunicipalities(selectedRestaurant).length} Branches
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-charcoal-light mt-0.5 m-0 truncate">
+                <p className="text-[11px] text-charcoal-light dark:text-gray-400 mt-0.5 m-0 truncate">
                   📍 {getRestaurantMunicipalities(selectedRestaurant).length > 1
                     ? `${getRestaurantMunicipalities(selectedRestaurant).join(' • ')}`
                     : (selectedRestaurant.address || `${selectedRestaurant.municipality}, Pampanga`)}
@@ -24077,15 +24525,11 @@ ${rawText}`;
                   onClick={() => {
                     const muns = getRestaurantMunicipalities(selectedRestaurant);
                     const targetRes = selectedRestaurant;
-                    setSelectedRestaurant(null);
-                    setActiveDish(null);
-                    setCvUploadedMeal(null);
                     if (muns.length > 1) {
                       setBranchSelectTarget(targetRes);
                     } else {
-                      if (handleAddToItinerary(targetRes)) {
-                        setAddedStopModal(targetRes);
-                      }
+                      handleAddToItinerary(targetRes);
+                      setAddedStopModal(targetRes);
                     }
                   }}
                   className="px-3.5 py-1.5 bg-terracotta hover:bg-terracotta-dark text-white text-xs font-bold rounded-xl shadow-xs hover:shadow transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
@@ -24108,12 +24552,12 @@ ${rawText}`;
               ref={restaurantModalBodyRef}
               onScroll={(e) => {
                 const container = e.currentTarget;
-                if (restaurantReviewsRef.current) {
-                  const reviewsOffsetTop = restaurantReviewsRef.current.offsetTop;
-                  setIsRestaurantScrolledDown(container.scrollTop >= reviewsOffsetTop - 250);
-                } else {
-                  const isNearBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 250;
-                  setIsRestaurantScrolledDown(isNearBottom);
+                if (!container) return;
+                const shouldScrollDown = restaurantReviewsRef.current
+                  ? container.scrollTop >= restaurantReviewsRef.current.offsetTop - 250
+                  : container.scrollTop + container.clientHeight >= container.scrollHeight - 250;
+                if (shouldScrollDown !== isRestaurantScrolledDown) {
+                  setIsRestaurantScrolledDown(shouldScrollDown);
                 }
               }}
               className="p-5 sm:p-6 space-y-6 flex-1 overflow-y-auto pb-16 relative"
@@ -24220,20 +24664,21 @@ ${rawText}`;
               })()}
 
               {/* Core Metadata */}
-              <div className="bg-[#FAF8F5] border border-[#E9E5DE] p-4 rounded-xl space-y-3 text-xs">
-                <p className="text-charcoal leading-relaxed">{selectedRestaurant.description}</p>
-                <div className="grid grid-cols-3 gap-2 text-[11px] text-charcoal-light pt-2 border-t border-[#E9E5DE]">
+              <div className="bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] p-4 rounded-xl space-y-3 text-xs">
+                <p className="text-charcoal dark:text-gray-200 leading-relaxed">{selectedRestaurant.description}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px] text-charcoal-light dark:text-gray-400 pt-2 border-t border-[#E9E5DE] dark:border-[#2E2A24]">
                   <div>
-                    <strong className="block text-charcoal">Schedule:</strong>
-                    {selectedRestaurant.operatingHours}
+                    <strong className="block text-charcoal dark:text-white">Schedule &amp; Hours:</strong>
+                    <span className="block font-semibold text-terracotta">{selectedRestaurant.operatingDays || 'Monday - Sunday (Daily)'}</span>
+                    <span>{selectedRestaurant.operatingHours}</span>
                   </div>
                   <div>
-                    <strong className="block text-charcoal">Price Points:</strong>
+                    <strong className="block text-charcoal dark:text-white">Price Points:</strong>
                     {selectedRestaurant.priceTier === '$' ? 'Budget ($)' : selectedRestaurant.priceTier === '$$' ? 'Moderate ($$)' : selectedRestaurant.priceTier === '$$$' ? 'Premium ($$$)' : selectedRestaurant.priceTier === '$$$$' ? 'Fine Degustation ($$$$)' : selectedRestaurant.priceTier || 'Budget ($)'}
                   </div>
                   <div>
-                    <strong className="block text-charcoal">Primary GPS:</strong>
-                    <span className="font-mono font-bold text-charcoal block">
+                    <strong className="block text-charcoal dark:text-white">Primary GPS:</strong>
+                    <span className="font-mono font-bold text-charcoal dark:text-gray-200 block">
                       {(selectedRestaurant.lat || 15.0300).toFixed(4)}°, {(selectedRestaurant.lng || 120.6800).toFixed(4)}°
                     </span>
                   </div>
@@ -24265,6 +24710,7 @@ ${rawText}`;
                       municipality: selectedRestaurant.municipality || 'City of San Fernando',
                       address: selectedRestaurant.address || '',
                       operatingHours: selectedRestaurant.operatingHours || '10:00 AM - 10:00 PM',
+                      operatingDays: selectedRestaurant.operatingDays || 'Monday - Sunday (Daily)',
                       lat: selectedRestaurant.lat || 15.0345,
                       lng: selectedRestaurant.lng || 120.687,
                       phoneNumber: selectedRestaurant.phoneNumber || preseedMatch?.phoneNumber || '',
@@ -24273,17 +24719,17 @@ ${rawText}`;
                     }];
 
                 return (
-                  <div className="bg-white border border-[#E9E5DE] p-4 rounded-2xl shadow-xs space-y-3.5 text-left">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#FAF8F5] pb-2.5">
+                  <div className="bg-white dark:bg-[#1A1815] border border-[#E9E5DE] dark:border-[#2E2A24] p-4 rounded-2xl shadow-xs space-y-3.5 text-left">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#FAF8F5] dark:border-[#2E2A24] pb-2.5">
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-xl bg-terracotta/10 text-terracotta flex items-center justify-center shrink-0">
                           <Calendar className="w-4 h-4" />
                         </div>
                         <div>
-                          <strong className="text-xs font-black text-charcoal block leading-tight">
+                          <strong className="text-xs font-black text-charcoal dark:text-white block leading-tight">
                             🏪 {rawBranches.length > 1 ? `Branch Locations & Reservations (${rawBranches.length} Locations)` : 'Location, Contact & Reservations'}
                           </strong>
-                          <span className="text-[10px] text-charcoal-light font-medium">
+                          <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium">
                             {rawBranches.length > 1 ? 'Select branch location when adding to trip' : 'Direct contact & official channels'}
                           </span>
                         </div>
@@ -24341,10 +24787,10 @@ ${rawText}`;
                         const hasContact = Boolean(bPhone || bEmail);
 
                         return (
-                          <div key={`branch-unified-${b.branchName || b.municipality || ''}-${bIdx}`} className="p-3.5 bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl space-y-2.5 text-left shadow-2xs flex flex-col justify-between">
+                          <div key={`branch-unified-${b.branchName || b.municipality || ''}-${bIdx}`} className="p-3.5 bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl space-y-2.5 text-left shadow-2xs flex flex-col justify-between">
                             <div className="space-y-1.5">
-                              <div className="flex items-center justify-between border-b border-[#E9E5DE]/60 pb-1.5">
-                                <strong className="text-xs font-black text-charcoal truncate">
+                              <div className="flex items-center justify-between border-b border-[#E9E5DE]/60 dark:border-[#2E2A24] pb-1.5">
+                                <strong className="text-xs font-black text-charcoal dark:text-white truncate">
                                   📍 {b.branchName || (b.municipality ? `${b.municipality} Branch` : selectedRestaurant.name)}
                                 </strong>
                                 {b.municipality && (
@@ -24355,36 +24801,39 @@ ${rawText}`;
                               </div>
 
                               {b.address && (
-                                <p className="text-[10px] text-charcoal-light font-medium m-0 line-clamp-2" title={b.address}>
+                                <p className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium m-0 line-clamp-2" title={b.address}>
                                   {b.address}
                                 </p>
                               )}
 
-                              <div className="flex flex-wrap items-center gap-1.5 text-[9px] text-charcoal-light pt-0.5">
+                              <div className="flex flex-wrap items-center gap-1.5 text-[9px] text-charcoal-light dark:text-gray-400 pt-0.5">
                                 {(b.lat && b.lng) && (
-                                  <span className="bg-white px-1.5 py-0.5 rounded border border-[#E9E5DE] font-mono font-bold text-terracotta">
+                                  <span className="bg-white dark:bg-[#201D1A] px-1.5 py-0.5 rounded border border-[#E9E5DE] dark:border-[#2E2A24] font-mono font-bold text-terracotta">
                                     GPS: {Number(b.lat).toFixed(4)}°, {Number(b.lng).toFixed(4)}°
                                   </span>
                                 )}
-                                <span className="bg-white px-1.5 py-0.5 rounded border border-[#E9E5DE] font-sans font-medium">
+                                <span className="bg-white dark:bg-[#201D1A] px-1.5 py-0.5 rounded border border-[#E9E5DE] dark:border-[#2E2A24] font-sans font-bold text-emerald-800 dark:text-emerald-400">
+                                  📅 {b.operatingDays || selectedRestaurant.operatingDays || 'Mon - Sun (Daily)'}
+                                </span>
+                                <span className="bg-white dark:bg-[#201D1A] px-1.5 py-0.5 rounded border border-[#E9E5DE] dark:border-[#2E2A24] font-sans font-medium">
                                   🕒 {b.operatingHours || selectedRestaurant.operatingHours || '10:00 AM - 10:00 PM'}
                                 </span>
                               </div>
                             </div>
 
-                            <div className="pt-1.5 border-t border-[#E9E5DE]/60 space-y-1.5">
+                            <div className="pt-1.5 border-t border-[#E9E5DE]/60 dark:border-[#2E2A24] space-y-1.5">
                               {hasContact ? (
                                 <div className="space-y-1.5">
                                   {bPhone && (
-                                    <div className="flex items-center gap-2 p-1.5 bg-white rounded-lg border border-[#E9E5DE]">
+                                    <div className="flex items-center gap-2 p-1.5 bg-white dark:bg-[#201D1A] rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24]">
                                       <div className="w-5 h-5 rounded bg-terracotta/10 text-terracotta flex items-center justify-center shrink-0">
                                         <Phone className="w-3 h-3" />
                                       </div>
                                       <div className="min-w-0 flex-1">
-                                        <span className="text-[7px] font-bold uppercase text-charcoal-light block">Direct Line</span>
+                                        <span className="text-[7px] font-bold uppercase text-charcoal-light dark:text-gray-400 block">Direct Line</span>
                                         <a
                                           href={`tel:${bPhone.replace(/\s+/g, '')}`}
-                                          className="text-xs font-bold text-charcoal hover:text-terracotta transition-colors truncate block"
+                                          className="text-xs font-bold text-charcoal dark:text-gray-200 hover:text-terracotta transition-colors truncate block"
                                         >
                                           {bPhone}
                                         </a>
@@ -24393,15 +24842,15 @@ ${rawText}`;
                                   )}
 
                                   {bEmail && (
-                                    <div className="flex items-center gap-2 p-1.5 bg-white rounded-lg border border-[#E9E5DE]">
+                                    <div className="flex items-center gap-2 p-1.5 bg-white dark:bg-[#201D1A] rounded-lg border border-[#E9E5DE] dark:border-[#2E2A24]">
                                       <div className="w-5 h-5 rounded bg-[#2C5E3B]/10 text-[#2C5E3B] flex items-center justify-center shrink-0">
                                         <Mail className="w-3 h-3" />
                                       </div>
                                       <div className="min-w-0 flex-1">
-                                        <span className="text-[7px] font-bold uppercase text-charcoal-light block">Email Inquiry</span>
+                                        <span className="text-[7px] font-bold uppercase text-charcoal-light dark:text-gray-400 block">Email Inquiry</span>
                                         <a
                                           href={`mailto:${bEmail}`}
-                                          className="text-xs font-bold text-charcoal hover:text-[#2C5E3B] transition-colors truncate block"
+                                          className="text-xs font-bold text-charcoal dark:text-gray-200 hover:text-[#2C5E3B] transition-colors truncate block"
                                         >
                                           {bEmail}
                                         </a>
@@ -24410,20 +24859,20 @@ ${rawText}`;
                                   )}
                                 </div>
                               ) : (
-                                <div className="p-2 bg-white/80 rounded-lg border border-dashed border-[#E9E5DE] space-y-0.5">
-                                  <div className="flex items-center gap-1 text-charcoal">
+                                <div className="p-2 bg-white/80 dark:bg-[#201D1A]/80 rounded-lg border border-dashed border-[#E9E5DE] dark:border-[#2E2A24] space-y-0.5">
+                                  <div className="flex items-center gap-1 text-charcoal dark:text-white">
                                     <span className="text-xs">🚶</span>
                                     <strong className="text-[10px] font-bold">Casual walk-ins welcome</strong>
                                   </div>
-                                  <p className="text-[9px] text-charcoal-light leading-tight m-0">
+                                  <p className="text-[9px] text-charcoal-light dark:text-gray-400 leading-tight m-0">
                                     Direct walk-in dining. Official inquiries via social channels.
                                   </p>
                                 </div>
                               )}
 
                               {bRes && (
-                                <div className="p-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-[9px] text-charcoal space-y-0.5">
-                                  <span className="text-[7px] font-bold uppercase text-amber-900 block">Table Reservation Guidelines:</span>
+                                <div className="p-1.5 bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/20 dark:border-amber-800/40 rounded-lg text-[9px] text-charcoal dark:text-gray-200 space-y-0.5">
+                                  <span className="text-[7px] font-bold uppercase text-amber-900 dark:text-amber-300 block">Table Reservation Guidelines:</span>
                                   <p className="m-0 font-medium leading-tight">{bRes}</p>
                                 </div>
                               )}
@@ -24439,7 +24888,7 @@ ${rawText}`;
               {/* Live Occupancy Forecaster chart */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-1.5">
+                  <h3 className="text-xs font-bold text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                     <Activity className="h-4.5 w-4.5 text-terracotta animate-pulse" /> Live Corridor Occupancy Forecaster
                   </h3>
                   <span className="text-[10px] font-black text-bananaleaf bg-bananaleaf/10 px-2.5 py-0.5 rounded-full border border-bananaleaf/25">
@@ -24447,7 +24896,7 @@ ${rawText}`;
                   </span>
                 </div>
 
-                <div className="h-28 w-full bg-[#FAF8F5] rounded-xl border border-[#E9E5DE] p-3 flex flex-col justify-between">
+                <div className="h-28 w-full bg-[#FAF8F5] dark:bg-[#161412] rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] p-3 flex flex-col justify-between">
                   <div className="flex-1 flex items-end justify-between gap-1 pt-2">
                     {(selectedRestaurant.occupancy || selectedRestaurant.branches?.[0]?.occupancy || [20, 40, 60, 80, 90, 85, 70, 60, 75, 85, 90, 70]).map((val, idx) => (
                       <div
@@ -24455,14 +24904,14 @@ ${rawText}`;
                         style={{ height: `${Math.min(90, Math.max(14, val * 0.85))}%` }}
                         className={`w-full rounded-t-sm transition-all duration-300 relative group/bar ${val > 80 ? 'bg-terracotta hover:bg-terracotta-dark' : 'bg-saffron hover:bg-saffron-dark'}`}
                       >
-                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-charcoal text-white text-[8px] font-bold py-0.5 px-1 rounded opacity-0 group-hover/bar:opacity-100 mb-1 z-10 shrink-0">
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-charcoal dark:bg-black text-white text-[8px] font-bold py-0.5 px-1 rounded opacity-0 group-hover/bar:opacity-100 mb-1 z-10 shrink-0">
                           {val}%
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  <div className="flex justify-between text-[8px] font-bold text-charcoal-light mt-1.5 pt-1 border-t border-[#E9E5DE] select-none">
+                  <div className="flex justify-between text-[8px] font-bold text-charcoal-light dark:text-gray-400 mt-1.5 pt-1 border-t border-[#E9E5DE] dark:border-[#2E2A24] select-none">
                     {OCCUPANCY_HOURS.filter((_, i) => i % 2 === 0).map((hour, idx) => (
                       <span key={idx}>{hour}</span>
                     ))}
@@ -24507,16 +24956,16 @@ ${rawText}`;
                 return (
                   <div className="space-y-3">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
-                      <h3 className="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-1.5">
+                      <h3 className="text-xs font-bold text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                         <span>🍽️</span> The Digital Menu Table
-                        <span className="text-[10px] text-charcoal-light font-normal lowercase">
+                        <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-normal lowercase">
                           ({filteredMenu.length} of {dedupedMenu.length} items)
                         </span>
                       </h3>
 
                       {/* Menu Dish Search Input Bar */}
                       <div className="relative w-full sm:w-64">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-charcoal-light pointer-events-none" />
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-charcoal-light dark:text-gray-400 pointer-events-none" />
                         <input
                           type="text"
                           placeholder="Search menu dishes, ingredients..."
@@ -24525,13 +24974,13 @@ ${rawText}`;
                             setDrawerDishSearch(e.target.value);
                             setDrawerVisibleDishLimit(24);
                           }}
-                          className="w-full pl-8 pr-7 py-1.5 text-xs bg-white border border-[#E9E5DE] rounded-lg text-charcoal placeholder-charcoal-light/60 focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-all shadow-2xs font-medium"
+                          className="w-full pl-8 pr-7 py-1.5 text-xs bg-white dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-lg text-charcoal dark:text-white placeholder-charcoal-light/60 dark:placeholder-gray-500 focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-all shadow-2xs font-medium"
                         />
                         {drawerDishSearch && (
                           <button
                             type="button"
                             onClick={() => setDrawerDishSearch('')}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-charcoal-light hover:text-red-500 dark:hover:text-red-400 rounded-full transition-colors cursor-pointer"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-charcoal-light dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-full transition-colors cursor-pointer"
                             title="Clear search"
                             aria-label="Clear search"
                           >
@@ -24542,9 +24991,9 @@ ${rawText}`;
                     </div>
 
                     {filteredMenu.length === 0 ? (
-                      <div className="p-6 text-center bg-[#FAF8F5] border border-[#E9E5DE] rounded-xl space-y-2">
+                      <div className="p-6 text-center bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-xl space-y-2">
                         <span className="text-2xl block">🔍</span>
-                        <p className="text-xs font-bold text-charcoal">
+                        <p className="text-xs font-bold text-charcoal dark:text-white">
                           No dishes found matching "{drawerDishSearch}"
                         </p>
                         <button
@@ -24572,16 +25021,16 @@ ${rawText}`;
                                   }`}
                               >
                                 <div className="w-full min-w-0">
-                                  <div className="flex justify-between items-start gap-1">
-                                    <div className="min-w-0">
+                                  <div className="flex justify-between items-start gap-2">
+                                    <div className="min-w-0 flex-1">
                                       {isPkg && (
                                         <span className="inline-block text-[8px] font-black uppercase tracking-wider text-amber-800 dark:text-amber-300 bg-amber-500/20 px-1.5 py-0.2 rounded mb-0.5">
                                           🏷️ Package Set
                                         </span>
                                       )}
-                                      <strong className="text-xs font-extrabold text-charcoal dark:text-white truncate block">{dish.name}</strong>
+                                      <strong className="text-xs font-extrabold text-charcoal dark:text-white line-clamp-2 block leading-snug">{dish.name}</strong>
                                     </div>
-                                    <span className="text-xs font-black text-bananaleaf dark:text-emerald-400 shrink-0">
+                                    <span className="text-xs font-black text-bananaleaf dark:text-emerald-400 shrink-0 whitespace-nowrap">
                                       ₱{dish.price}{isPkg ? ' / pax' : ''}
                                     </span>
                                   </div>
@@ -24615,7 +25064,7 @@ ${rawText}`;
                             <button
                               type="button"
                               onClick={() => setDrawerVisibleDishLimit(prev => prev + 24)}
-                              className="px-4 py-2 bg-[#FAF8F5] dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] text-xs font-bold text-charcoal dark:text-white rounded-xl hover:bg-terracotta hover:text-white hover:border-terracotta transition-all cursor-pointer shadow-2xs"
+                              className="px-4 py-2 bg-[#FAF8F5] dark:bg-[#201D1A] border border-[#E9E5DE] dark:border-[#2E2A24] text-xs font-bold text-charcoal dark:text-white rounded-xl hover:bg-terracotta hover:text-white hover:border-terracotta transition-all cursor-pointer shadow-2xs"
                             >
                               Show More Dishes ({filteredMenu.length - drawerVisibleDishLimit} remaining)
                             </button>
@@ -24886,26 +25335,25 @@ ${rawText}`;
                 </button>
               </div>
 
-              {/* Floating Quick Jump Pill */}
-              <div className="sticky bottom-2 left-0 right-0 flex justify-center pointer-events-none z-20">
+              {/* Floating Quick Jump Pill - Positioned cleanly in bottom corner without blocking menu items */}
+              <div className="sticky bottom-3 right-4 flex justify-end pointer-events-none z-20 pr-1">
                 {isRestaurantScrolledDown ? (
                   <button
                     type="button"
                     onClick={handleScrollToRestaurantTop}
-                    className="pointer-events-auto px-4 py-2 bg-charcoal/90 hover:bg-charcoal text-white text-xs font-bold rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/20"
+                    className="pointer-events-auto px-3.5 py-1.5 bg-charcoal/90 dark:bg-black/90 hover:bg-charcoal text-white text-[11px] font-bold rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/20"
                   >
                     <span>↑</span>
-                    <span>Back to Top</span>
+                    <span>Top</span>
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={handleScrollToRestaurantReviews}
-                    className="pointer-events-auto px-4 py-2 bg-amber-500/95 hover:bg-amber-600 text-white text-xs font-bold rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/20"
+                    className="pointer-events-auto px-3.5 py-1.5 bg-amber-500/95 hover:bg-amber-600 text-white text-[11px] font-bold rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/20"
                   >
                     <span>⭐</span>
-                    <span>Jump to Customer Reviews</span>
-                    <span className="font-black">↓</span>
+                    <span>Reviews ↓</span>
                   </button>
                 )}
               </div>
@@ -25176,6 +25624,53 @@ ${rawText}`;
                       </span>
                     </div>
                   )}
+                </div>
+              );
+            })()}
+
+            {/* Non-Festival Visiting Hours & Schedule Box */}
+            {(() => {
+              const preMatch = (PRESEEDED_ATTRACTIONS || []).find(p => p && (p.id === selectedAttraction.id || p.name === selectedAttraction.name));
+              const isFest = Boolean(selectedAttraction.isFestival || (preMatch && preMatch.isFestival) || (selectedAttraction.type && selectedAttraction.type.includes('Festival')));
+              const festDate = selectedAttraction.eventDate || (preMatch && preMatch.eventDate) || '';
+              if (isFest || festDate) return null;
+
+              const days = selectedAttraction.operatingDays || (preMatch && preMatch.operatingDays) || 'Monday - Sunday (Daily)';
+              const hours = selectedAttraction.operatingHours || (preMatch && preMatch.operatingHours) || (selectedAttraction.is24Hours ? 'Open 24 Hours (24/7)' : '08:00 AM - 05:00 PM');
+              const is24Hrs = Boolean(selectedAttraction.is24Hours || (preMatch && preMatch.is24Hours) || hours.includes('24') || hours.toLowerCase().includes('24/7'));
+
+              return (
+                <div className="p-4 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-emerald-500/10 dark:from-emerald-950/40 dark:via-teal-950/20 dark:to-emerald-900/30 border-2 border-emerald-400/60 dark:border-emerald-600/50 rounded-2xl space-y-2 shadow-xs">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-2xl p-1.5 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl">🕒</span>
+                      <div>
+                        <div className="text-[10px] font-black uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
+                          Visiting Days &amp; Operating Hours
+                        </div>
+                        <div className="text-sm font-black text-charcoal dark:text-white flex flex-wrap items-center gap-1.5 mt-0.5">
+                          <span className="text-emerald-800 dark:text-emerald-300 font-extrabold bg-emerald-100/70 dark:bg-emerald-900/50 px-2 py-0.5 rounded-md text-xs">
+                            📅 {days}
+                          </span>
+                          <span className="text-emerald-700 dark:text-emerald-400 font-black">
+                            {hours}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className={`px-3 py-1 rounded-xl text-[10px] font-black tracking-wider uppercase shadow-2xs ${
+                      is24Hrs
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700'
+                    }`}>
+                      {is24Hrs ? '🕒 Open 24/7' : 'Standard Visitor Hours'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-emerald-900/80 dark:text-emerald-300/80 m-0">
+                    {is24Hrs
+                      ? 'This destination is accessible 24 hours a day during operating days for visitors and tourists.'
+                      : 'Please observe designated visiting days and hours, and respect site preservation guidelines during your tour.'}
+                  </p>
                 </div>
               );
             })()}
@@ -26254,11 +26749,31 @@ ${rawText}`;
 
       {/* Stop Added Confirmation Modal - Centered Popup with navigation actions */}
       {addedStopModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in font-sans">
-          <div className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 text-center animate-scale-in relative">
+        <div
+          onClick={() => {
+            setAddedStopModal(null);
+            setSelectedRestaurant(null);
+            setSelectedAttraction(null);
+            setBranchSelectTarget(null);
+            setActiveDish(null);
+            setCvUploadedMeal(null);
+          }}
+          className="fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in font-sans cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4 text-center animate-scale-in relative cursor-default"
+          >
             <button
               type="button"
-              onClick={() => setAddedStopModal(null)}
+              onClick={() => {
+                setAddedStopModal(null);
+                setSelectedRestaurant(null);
+                setSelectedAttraction(null);
+                setBranchSelectTarget(null);
+                setActiveDish(null);
+                setCvUploadedMeal(null);
+              }}
               className="absolute top-4 right-4 text-charcoal-light dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:border-red-400 dark:hover:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/40 w-7 h-7 rounded-full bg-ivory dark:bg-[#161412] flex items-center justify-center text-xs font-bold border border-[#E9E5DE] dark:border-[#2E2A24] cursor-pointer transition-colors"
               aria-label="Close popup"
               title="Close"
@@ -26284,6 +26799,11 @@ ${rawText}`;
                 type="button"
                 onClick={() => {
                   setAddedStopModal(null);
+                  setSelectedRestaurant(null);
+                  setSelectedAttraction(null);
+                  setBranchSelectTarget(null);
+                  setActiveDish(null);
+                  setCvUploadedMeal(null);
                   if (!isAuthenticated && !isGuest) setIsGuest(true);
                   setActiveView('dashboard');
                   setDashboardTab('planner');
@@ -26295,7 +26815,14 @@ ${rawText}`;
               </button>
               <button
                 type="button"
-                onClick={() => setAddedStopModal(null)}
+                onClick={() => {
+                  setAddedStopModal(null);
+                  setSelectedRestaurant(null);
+                  setSelectedAttraction(null);
+                  setBranchSelectTarget(null);
+                  setActiveDish(null);
+                  setCvUploadedMeal(null);
+                }}
                 className="w-full py-2.5 bg-[#FAF8F5] dark:bg-[#25221E] hover:bg-[#E9E5DE] dark:hover:bg-[#2E2A24] text-charcoal dark:text-gray-200 rounded-xl text-xs font-bold transition-all border border-[#E9E5DE] dark:border-[#35302A] cursor-pointer active:scale-95"
               >
                 Continue Browsing

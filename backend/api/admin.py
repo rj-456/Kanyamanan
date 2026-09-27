@@ -31,7 +31,7 @@ class MultiBranchMunicipalityFilter(admin.SimpleListFilter):
 
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
-    list_display: Any = ('name', 'display_municipalities', 'username', 'password', 'operating_hours', 'price_tier')
+    list_display: Any = ('name', 'display_municipalities', 'username', 'operating_hours', 'price_tier')
     search_fields = ('name', 'municipality', 'username', 'description', 'address', 'branches__municipality', 'branches__address')
     list_filter = (MultiBranchMunicipalityFilter, 'price_tier')
     ordering = ('name',)

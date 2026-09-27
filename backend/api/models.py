@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 
 class Municipality(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -41,9 +42,9 @@ class Restaurant(models.Model):
     email = models.EmailField(blank=True, default='')
     reservation_info = models.TextField(blank=True, default='')
     
-    # Merchant Account Credentials
+    # Merchant Account Credentials (Hashed per Data Privacy Act)
     username = models.CharField(max_length=100, unique=True, default='owner')
-    password = models.CharField(max_length=100, default='password123')
+    password = models.CharField(max_length=255, default='password123')
     
     # Occupancy Heatmap Data (hourly occupancy levels 0-100)
     occupancy = models.JSONField(default=list, blank=True)
@@ -55,6 +56,12 @@ class Restaurant(models.Model):
 
     class Meta:
         ordering = ['name']
+
+    def save(self, *args, **kwargs):
+        # Data Privacy Act Compliance: Hash plaintext passwords before saving to database
+        if self.password and not self.password.startswith(('pbkdf2_sha256$', 'bcrypt$', 'argon2$')):
+            self.password = make_password(self.password)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} ({self.municipality})"

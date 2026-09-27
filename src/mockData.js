@@ -57297,7 +57297,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "📍 Cultural Landmark",
     "description": "Historical monument and heritage marker honoring Bacolor as the former colonial capital of the Philippines and commemorating survival from the 1991 Mt. Pinatubo lahar.",
     "details": "Includes sunken plazas, exposed rooftops of buried houses, and heritage monuments depicting the heroic resilience and rebirth of the Kapampangan people.",
-    "image": "/attractions/real_landmark_bacolor_lahar.jpg"
+    "image": "/attractions/real_landmark_bacolor_lahar.jpg",
+    "operatingHours": "Open 24 Hours (24/7)",
+    "openingTime": "12:00 AM",
+    "closingTime": "11:59 PM",
+    "is24Hours": true
   },
   {
     "id": "landmark-bale-matua",
@@ -57309,7 +57313,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "📍 Cultural Landmark",
     "description": "The oldest surviving colonial residence in Angeles City, built in 1824 by town founders Don Angel Pantaleon de Miranda and Doña Rosalia de Jesus.",
     "details": "Preserved with high-ceiling timber columns, capiz shell lattice windows, and thick stone foundations that withstood multiple wars and colonial eras.",
-    "image": "/attractions/real_landmark_bale_matua.jpg"
+    "image": "/attractions/real_landmark_bale_matua.jpg",
+    "operatingHours": "08:30 AM - 05:00 PM",
+    "openingTime": "08:30 AM",
+    "closingTime": "05:00 PM",
+    "is24Hours": false
   },
   {
     "id": "festival-batalla",
@@ -57341,7 +57349,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "National Cultural Treasure known as the 'Sistine Chapel of the Philippines' for its stunning hand-painted wooden ceiling frescoes.",
     "details": "Built in 1660, features exquisite woodcarvings, ornate retablo, and historic belfry.",
-    "image": "/attractions/betis_church_guagua.jpg"
+    "image": "/attractions/betis_church_guagua.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "artisan-betis-woodcarving",
@@ -57353,7 +57365,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏺 Artisan Workshop",
     "description": "Centuries-old artisanal carving studios of Betis, known as the Woodcarving Capital of the Philippines, where master carvers fashion museum-grade baroque sculptures.",
     "details": "Visitors can watch master sculptors (mandudukit) hand-carve solid narra and molave into intricate ecclesiastical retablos, saints (santos), and heirloom furniture.",
-    "image": "/attractions/real_artisan_betis_woodcarving.jpg"
+    "image": "/attractions/real_artisan_betis_woodcarving.jpg",
+    "operatingHours": "08:00 AM - 05:00 PM",
+    "openingTime": "08:00 AM",
+    "closingTime": "05:00 PM",
+    "is24Hours": false
   },
   {
     "id": "nature-candaba-swamp",
@@ -57365,7 +57381,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🌲 Nature / Ecotourism",
     "description": "Internationally renowned wetland reserve that serves as a vital staging and wintering sanctuary for tens of thousands of migratory birds from Siberia, China, and Japan.",
     "details": "Vast 32,000-hectare freshwater marsh hosting rare avian species including purple swamphens, wild ducks, and egrets. Prime spot for eco-photographers and birdwatchers.",
-    "image": "/attractions/real_nature_candaba_swamp.jpg"
+    "image": "/attractions/real_nature_candaba_swamp.jpg",
+    "operatingHours": "06:00 AM - 05:30 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "05:30 PM",
+    "is24Hours": false
   },
   {
     "id": "festival-caragan",
@@ -57398,7 +57418,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🎨 Heritage Museum",
     "description": "Premier academic repository and museum preserving Kapampangan language, Kulitan calligraphy, archaeological treasures, ecclesiastical art, and rare recordings.",
     "details": "Features galleries dedicated to pre-colonial Kapampangan history, indigenous artifacts, traditional literature, and an interactive Kulitan writing station.",
-    "image": "/attractions/real_museum_kapampangan_studies.jpg"
+    "image": "/attractions/real_museum_kapampangan_studies.jpg",
+    "operatingHours": "08:00 AM - 05:00 PM",
+    "openingTime": "08:00 AM",
+    "closingTime": "05:00 PM",
+    "is24Hours": false
   },
   {
     "id": "festival-dukit",
@@ -57494,7 +57518,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "National Historical Landmark built in 1877 during the Spanish era using polo y servicio forced labor. Witnessed historic Philippine-American war events.",
     "details": "Features dual bell towers and magnificent stained glass windows overlooking Santo Rosario heritage district.",
-    "image": "/attractions/holy_rosary_angeles.jpg"
+    "image": "/attractions/holy_rosary_angeles.jpg",
+    "operatingHours": "06:00 AM - 07:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "07:00 PM",
+    "is24Hours": false
   },
   {
     "id": "festival-ibun-ebun",
@@ -57611,7 +57639,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Seat of the Archdiocese of San Fernando, established in 1755.",
     "details": "Features a monumental dome and neo-classical stone facade overlooking the central municipal plaza.",
-    "image": "/attractions/san_fernando_cathedral.jpg"
+    "image": "/attractions/san_fernando_cathedral.jpg",
+    "operatingHours": "06:00 AM - 07:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "07:00 PM",
+    "is24Hours": false
   },
   {
     "id": "nature-miyamit-falls",
@@ -57623,7 +57655,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🌲 Nature / Ecotourism",
     "description": "Spectacular multi-tiered mountain waterfall cascading into a crystal basin within the ancestral domain of the indigenous Aeta community.",
     "details": "Surrounded by untouched tropical forests and dramatic rock formations in the foothills of Mt. Pinatubo; popular for 4x4 trails, trekking, and nature swimming.",
-    "image": "/attractions/real_nature_miyamit_falls.jpg"
+    "image": "/attractions/real_nature_miyamit_falls.jpg",
+    "operatingHours": "06:00 AM - 04:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "04:00 PM",
+    "is24Hours": false
   },
   {
     "id": "nature-arayat-park",
@@ -57635,7 +57671,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🌲 Nature / Ecotourism",
     "description": "Protected ecological haven and volcanic sanctuary featuring natural mountain spring swimming pools, lush rainforest trails, and the legendary home of Maria Sinukuan.",
     "details": "Spanning over 3,715 hectares across solitary Mount Arayat, offering scenic views of Central Luzon, hiking trails, birdwatching, and refreshing volcanic spring baths.",
-    "image": "/attractions/real_nature_arayat_park.jpg"
+    "image": "/attractions/real_nature_arayat_park.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "museum-ning-angeles",
@@ -57647,7 +57687,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🎨 Heritage Museum",
     "description": "Historic 1922 Angeles Municipal Hall transformed into a vibrant cultural museum housing the renowned Culinarium dedicated to Kapampangan culinary arts.",
     "details": "Showcases antique kitchen implements, heritage recipes, dioramas of traditional cooking methods, and historical exhibits commemorating the resilience of Angeles City.",
-    "image": "/attractions/real_museum_ning_angeles.jpg"
+    "image": "/attractions/real_museum_ning_angeles.jpg",
+    "operatingHours": "09:00 AM - 05:00 PM",
+    "openingTime": "09:00 AM",
+    "closingTime": "05:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-mabalacat",
@@ -57658,7 +57702,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Historic Augustinian parish established in 1712, known for its distinct bell tower and brick entrance arches.",
     "details": "Preserves century-old wooden religious statues and Spanish-era parish records.",
-    "image": "/attractions/mabalacat_church.jpg"
+    "image": "/attractions/mabalacat_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "landmark-pamintuan-mansion",
@@ -57670,7 +57718,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "📍 Cultural Landmark",
     "description": "Magnificent 1890s stone mansion that served as the seat of the First Philippine Republic under Gen. Emilio Aguinaldo and MacArthur’s headquarters.",
     "details": "Venue of the 1st Anniversary of the Philippine Declaration of Independence on June 12, 1899. Features a rooftop mirador watchtower, historic kitchen, and grand architecture.",
-    "image": "/attractions/real_landmark_pamintuan_mansion.jpg"
+    "image": "/attractions/real_landmark_pamintuan_mansion.jpg",
+    "operatingHours": "08:30 AM - 04:30 PM",
+    "openingTime": "08:30 AM",
+    "closingTime": "04:30 PM",
+    "is24Hours": false
   },
   {
     "id": "festival-pyestang-tugak",
@@ -57724,7 +57776,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "The oldest church in Pampanga and Central Luzon, constructed in 1572 using brick, stone, and egg whites.",
     "details": "Important Cultural Property built by Fr. Antonio Herrera with massive 2-meter thick earthquake-proof walls.",
-    "image": "/attractions/lubao_church.jpg"
+    "image": "/attractions/lubao_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-magalang",
@@ -57735,7 +57791,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Heritage parish church established in 1605 at the foot of Mount Arayat.",
     "details": "Features a grand symmetrical stone facade and historic baroque altarpiece.",
-    "image": "/attractions/magalang_church.jpg"
+    "image": "/attractions/magalang_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "artisan-sanfernando-parol",
@@ -57747,7 +57807,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏺 Artisan Workshop",
     "description": "Master artisan studios where skilled lantern makers (paroleros) craft world-renowned illuminated kaleidoscopic Christmas lanterns using intricate mechanical rotors.",
     "details": "Showcases the historic craft of steel framing, papering, and wiring thousands of colored light bulbs that transform the city into the Christmas Capital of the Philippines.",
-    "image": "/attractions/real_artisan_sanfernando_parol.jpg"
+    "image": "/attractions/real_artisan_sanfernando_parol.jpg",
+    "operatingHours": "08:00 AM - 06:00 PM",
+    "openingTime": "08:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "museum-sanfernando-train",
@@ -57759,7 +57823,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🎨 Heritage Museum",
     "description": "Colonial 1892 railway depot on the historic Manila-Dagupan line, famous as a stop of Dr. Jose Rizal and tragic final rail terminus of the 1942 Bataan Death March.",
     "details": "Restored brick station featuring authentic railway artifacts, bronze war memorial statues, vintage photographs, and historical exhibits.",
-    "image": "/attractions/real_museum_sanfernando_train.jpg"
+    "image": "/attractions/real_museum_sanfernando_train.jpg",
+    "operatingHours": "08:00 AM - 05:00 PM",
+    "openingTime": "08:00 AM",
+    "closingTime": "05:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-bacolor",
@@ -57770,7 +57838,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Historic 16th-century church half-buried by 6-meter lahar mudflows from the 1991 Mt. Pinatubo eruption.",
     "details": "Visitors enter through the original upper window arches. Houses a fully restored gilded baroque retablo.",
-    "image": "/attractions/san_guillermo_bacolor.jpg"
+    "image": "/attractions/san_guillermo_bacolor.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-floridablanca",
@@ -57781,7 +57853,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Heritage 19th-century parish church founded in 1823 under the patronage of Saint Joseph the Worker.",
     "details": "Built with traditional stone brick facade walls and a graceful octagonal bell tower.",
-    "image": "/attractions/floridablanca_church.jpg"
+    "image": "/attractions/floridablanca_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-sanluis",
@@ -57792,7 +57868,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Historic 18th-century riverside parish church overlooking the majestic Pampanga River bend.",
     "details": "Constructed in 1760 using volcanic tuff stone and traditional lime mortar.",
-    "image": "/attractions/san_luis_church.jpg"
+    "image": "/attractions/san_luis_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-masantol",
@@ -57803,7 +57883,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Historic coastal parish church founded in 1877 under the patronage of Archangel Michael.",
     "details": "Overlooks the Pampanga river delta and historic fishing communities.",
-    "image": "/attractions/masantol_church.jpg"
+    "image": "/attractions/masantol_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-candaba",
@@ -57814,7 +57898,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Historic Augustinian parish constructed in 1575, standing as the spiritual landmark of Candaba town center.",
     "details": "Features Neoclassical facade masonry and an octagonal multi-tiered belfry.",
-    "image": "/attractions/candaba_church.jpg"
+    "image": "/attractions/candaba_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-macabebe",
@@ -57825,7 +57913,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Colonial Augustinian parish founded in 1575, featuring classic red brick facade masonry.",
     "details": "Renowned for its historic Spanish-era belfry overlooking coastal river delta routes.",
-    "image": "/attractions/macabebe_church.jpg"
+    "image": "/attractions/macabebe_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "festival-maleldo-cutud",
@@ -57858,7 +57950,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Historic parish established in 1756 by Augustinian friars, featuring classic Spanish-colonial brick masonry.",
     "details": "Houses antique stone retablos and original century-old church bells.",
-    "image": "/attractions/santa_ana_church.jpg"
+    "image": "/attractions/santa_ana_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-arayat",
@@ -57869,7 +57965,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Colonial Augustinian parish established in 1590 at the foot of Mount Arayat under the patronage of St. Catherine of Alexandria.",
     "details": "Features a classic Renaissance-style facade and century-old brick bell tower.",
-    "image": "/attractions/real_parish_arayat.jpg"
+    "image": "/attractions/real_parish_arayat.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-porac",
@@ -57880,7 +57980,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Heritage 19th-century parish church founded in 1594 by Augustinian missionaries.",
     "details": "Restored after historic earthquake events, showcasing thick stone buttress walls.",
-    "image": "/attractions/porac_church.jpg"
+    "image": "/attractions/porac_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-sasmuan",
@@ -57891,7 +57995,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Historic coastal parish church founded in 1590, renowned for the miraculous Kuraldal healing dance festival.",
     "details": "Built over coastal wetlands, featuring massive stone walls and a single historic belfry.",
-    "image": "/attractions/sasmuan_church.jpg"
+    "image": "/attractions/sasmuan_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-mexico",
@@ -57902,7 +58010,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Colonial Augustinian parish established in 1581, known for its historic belfry ruins.",
     "details": "Houses antique stone altars and century-old parish registers.",
-    "image": "/attractions/mexico_church.jpg"
+    "image": "/attractions/mexico_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-minalin",
@@ -57913,7 +58025,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "National Cultural Treasure built in 1614, featuring rare European-Moorish architectural motifs.",
     "details": "Renowned for its unique floral carvings, retablo-style facade, and ancient bamboo organ relics.",
-    "image": "/attractions/minalin_church.jpg"
+    "image": "/attractions/minalin_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-santarita",
@@ -57924,7 +58040,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Historic parish church founded in 1726, home to the sacred relic of Saint Rita of Cascia.",
     "details": "Features a large spacious nave, historic pipe organ loft, and century-old heritage trees.",
-    "image": "/attractions/santa_rita_church.jpg"
+    "image": "/attractions/santa_rita_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "parish-santotomas",
@@ -57935,7 +58055,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Historic Augustinian parish church founded in 1792 in the pottery and palayok capital of Pampanga.",
     "details": "Stands as the spiritual heart of Santo Tomas, known for its solemn holy week traditions.",
-    "image": "/attractions/real_parish_santotomas.jpg"
+    "image": "/attractions/real_parish_santotomas.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "artisan-santotomas-pottery",
@@ -57947,7 +58071,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏺 Artisan Workshop",
     "description": "Pampanga’s premier earthenware crafting hub where generations of local artisans mold clay pots (palayok), earthen cooking stoves (kalan), and garden terracotta.",
     "details": "Lined with traditional wood-fired kilns and open workshops where guests can try traditional foot-wheel pottery and take home handcrafted earthenware vessels.",
-    "image": "/attractions/real_artisan_santotomas_pottery.jpg"
+    "image": "/attractions/real_artisan_santotomas_pottery.jpg",
+    "operatingHours": "08:00 AM - 05:30 PM",
+    "openingTime": "08:00 AM",
+    "closingTime": "05:30 PM",
+    "is24Hours": false
   },
   {
     "id": "festival-sasmuan-kuraldal",
@@ -58001,7 +58129,11 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Heritage parish founded in 1590, famous for the annual June Libad fluvial river procession honoring Apung Iru (St. Peter).",
     "details": "Built with thick brick masonry walls and features classical ceiling paintings.",
-    "image": "/attractions/apalit_church.jpg"
+    "image": "/attractions/apalit_church.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   },
   {
     "id": "festival-tigtigan-terakan",
@@ -58033,6 +58165,10 @@ export const PRESEEDED_ATTRACTIONS = [
     "type": "🏛️ Historic Parish Church",
     "description": "Historic Spanish colonial parish founded in 1771 under the patronage of Our Lady of the Pillar.",
     "details": "Features classic Renaissance facade arches and a historic bell tower overlooking MacArthur Highway.",
-    "image": "/attractions/real_parish_sansimon.jpg"
+    "image": "/attractions/real_parish_sansimon.jpg",
+    "operatingHours": "06:00 AM - 06:00 PM",
+    "openingTime": "06:00 AM",
+    "closingTime": "06:00 PM",
+    "is24Hours": false
   }
 ];

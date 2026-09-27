@@ -50,6 +50,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
     tiktokUrl = serializers.CharField(source='tiktok_url', required=False, allow_blank=True, default='')
     phoneNumber = serializers.CharField(source='phone_number', required=False, allow_blank=True, default='')
     reservationInfo = serializers.CharField(source='reservation_info', required=False, allow_blank=True, default='')
+    password = serializers.CharField(write_only=True, required=False, default='password123')
     branches = BranchSerializer(many=True, required=False)
     menu = MenuItemSerializer(many=True, required=False)
     reviews = RestaurantReviewSerializer(many=True, read_only=True)
@@ -64,6 +65,9 @@ class RestaurantSerializer(serializers.ModelSerializer):
             'email', 'reservationInfo', 'username', 'password',
             'occupancy', 'branches', 'menu', 'reviews', 'averageRating'
         ]
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 
     def get_averageRating(self, obj):
         revs = obj.reviews.all()

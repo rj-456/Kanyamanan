@@ -71,7 +71,7 @@ def seed():
             if username in used_usernames:
                 username = f"{raw_username}_{res_idx}"
             used_usernames.add(username)
-            password = r.get('password') or 'password123'
+            password = make_password(r.get('password') or 'password123')
             
             restaurant_obj, _ = Restaurant.objects.update_or_create(
                 restaurant_id=res_id,
