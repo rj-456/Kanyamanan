@@ -81,7 +81,7 @@ html.dark ::-webkit-scrollbar-thumb {
   @apply bg-white dark:bg-[#1E1B18] rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A25] shadow-sm relative overflow-hidden transition-all duration-300;
 }
 .bento-card:hover {
-  @apply shadow-md border-terracotta/20 dark:border-terracotta/30 transform -translate-y-0.5;
+  @apply shadow-md border-terracotta/20 dark:border-terracotta/30;
 }
 
 /* Custom glowing effects for key elements */

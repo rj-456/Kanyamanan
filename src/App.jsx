@@ -533,11 +533,12 @@ function App() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
+    let prevVal = false;
     const handleWindowScroll = () => {
-      if (window.scrollY > 280) {
-        setShowScrollTop(true);
-      } else {
-        setShowScrollTop(false);
+      const nextVal = window.scrollY > 280;
+      if (nextVal !== prevVal) {
+        prevVal = nextVal;
+        setShowScrollTop(nextVal);
       }
     };
     window.addEventListener('scroll', handleWindowScroll, { passive: true });
@@ -1182,7 +1183,6 @@ function App() {
   // Restaurant Modal Scrolling & Reviews Quick Navigation
   const restaurantModalBodyRef = useRef(null);
   const restaurantReviewsRef = useRef(null);
-  const [isRestaurantScrolledDown, setIsRestaurantScrolledDown] = useState(false);
 
   const handleScrollToRestaurantReviews = () => {
     if (restaurantReviewsRef.current) {
@@ -1198,14 +1198,13 @@ function App() {
     }
   };
 
-  // Reset drawer search, image index, category, pagination, active dish, and scroll state on restaurant switch
+  // Reset drawer search, image index, category, pagination, and active dish on restaurant switch
   useEffect(() => {
     setActiveImgIdx(0);
     setDrawerDishSearch('');
     setDrawerMenuCategory('All');
     setDrawerVisibleDishLimit(48);
     setActiveDish(null);
-    setIsRestaurantScrolledDown(false);
   }, [selectedRestaurant?.id]);
 
   useEffect(() => {
@@ -1959,6 +1958,26 @@ function App() {
     setIsSubmittingReview(false);
     return true;
   };
+
+  // Memoized processed menu for selected restaurant (ingredients, nutrition, allergens computed once)
+  const selectedRestaurantProcessedMenu = useMemo(() => {
+    if (!selectedRestaurant || !Array.isArray(selectedRestaurant.menu)) return [];
+    const seenDishNames = new Set();
+    return selectedRestaurant.menu.filter(dish => {
+      if (!dish || !dish.name) return false;
+      const norm = `${dish.name.trim().toLowerCase()}-${dish.price}`;
+      if (seenDishNames.has(norm)) return false;
+      seenDishNames.add(norm);
+      return true;
+    }).map(dish => {
+      return {
+        ...dish,
+        ingredients: getAuthenticDishIngredients(dish),
+        nutrition: getAuthenticDishNutrition(dish),
+        allergens: getAuthenticDishAllergens(dish)
+      };
+    });
+  }, [selectedRestaurant?.id, selectedRestaurant?.menu]);
 
   // Real-time camera stream effect
   useEffect(() => {
@@ -4652,6 +4671,13 @@ So, where do we start? 😊`,
   useEffect(() => {
     if (!window.L || activeView !== 'dashboard' || dashboardTab !== 'planner') return;
 
+    if (mapRef.current) {
+      try {
+        mapRef.current.remove();
+      } catch (e) { }
+      mapRef.current = null;
+    }
+
     const container = L.DomUtil.get('leaflet-map');
     if (container !== null) {
       container._leaflet_id = null;
@@ -4660,17 +4686,19 @@ So, where do we start? 😊`,
     const map = L.map('leaflet-map').setView([userLocation.lat, userLocation.lng], 11);
     mapRef.current = map;
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/index.html?tile={z}/{x}/{y}', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      attribution: '© OpenStreetMap contributors',
-      tileUrlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+      attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    map.eachLayer((layer) => {
-      if (layer.setUrl) {
-        layer.setUrl('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+    // Invalidate size once container settles to prevent tile distortion or layout shifts
+    const resizeTimer = setTimeout(() => {
+      if (mapRef.current) {
+        try {
+          mapRef.current.invalidateSize();
+        } catch (e) { }
       }
-    });
+    }, 150);
 
     const markers = [];
 
@@ -4725,7 +4753,13 @@ So, where do we start? 😊`,
     }
 
     return () => {
-      mapRef.current = null;
+      clearTimeout(resizeTimer);
+      if (mapRef.current) {
+        try {
+          mapRef.current.remove();
+        } catch (e) { }
+        mapRef.current = null;
+      }
       userMarkerRef.current = null;
     };
   }, [activeView, dashboardTab, userLocation, computedRoutePath, roadRouteCoords]);
@@ -21492,7 +21526,7 @@ ${rawText}`;
                             </span>
                           </div>
 
-                          <div className="flex items-center justify-between text-[10px] pt-2 border-t border-[#FAF8F5] dark:border-[#2A2621] gap-2">
+                          <div className="flex items-center justify-between text-[10px] pt-2 border-t border-[#FAF8F5] dark:border-[#2A2621] gap-2 flex-wrap sm:flex-nowrap">
                             <div className="flex items-center gap-1.5 font-semibold text-charcoal-light dark:text-gray-300 min-w-0 flex-1" title={getRestaurantMunicipalities(res).join(', ')}>
                               <MapPin className="h-3.5 w-3.5 text-saffron shrink-0" />
                               {getRestaurantMunicipalities(res).length > 1 ? (
@@ -24550,16 +24584,6 @@ ${rawText}`;
             {/* Scrollable Body */}
             <div
               ref={restaurantModalBodyRef}
-              onScroll={(e) => {
-                const container = e.currentTarget;
-                if (!container) return;
-                const shouldScrollDown = restaurantReviewsRef.current
-                  ? container.scrollTop >= restaurantReviewsRef.current.offsetTop - 250
-                  : container.scrollTop + container.clientHeight >= container.scrollHeight - 250;
-                if (shouldScrollDown !== isRestaurantScrolledDown) {
-                  setIsRestaurantScrolledDown(shouldScrollDown);
-                }
-              }}
               className="p-5 sm:p-6 space-y-6 flex-1 overflow-y-auto pb-16 relative"
             >
 
@@ -24921,25 +24945,7 @@ ${rawText}`;
 
               {/* Digital Menu Table with Real-Time Dish Search */}
               {(() => {
-                const rawMenu = selectedRestaurant.menu || [];
-                const seenDishNames = new Set();
-                const dedupedMenu = rawMenu.filter(dish => {
-                  if (!dish || !dish.name) return false;
-                  const norm = `${dish.name.trim().toLowerCase()}-${dish.price}`;
-                  if (seenDishNames.has(norm)) return false;
-                  seenDishNames.add(norm);
-                  return true;
-                }).map(dish => {
-                  const ingredients = getAuthenticDishIngredients(dish);
-                  const nutrition = getAuthenticDishNutrition(dish);
-                  const allergens = getAuthenticDishAllergens(dish);
-                  return {
-                    ...dish,
-                    ingredients,
-                    nutrition,
-                    allergens
-                  };
-                });
+                const dedupedMenu = selectedRestaurantProcessedMenu;
 
                 const filteredMenu = dedupedMenu.filter(dish => {
                   if (!drawerDishSearch.trim()) return true;
@@ -25336,26 +25342,25 @@ ${rawText}`;
               </div>
 
               {/* Floating Quick Jump Pill - Positioned cleanly in bottom corner without blocking menu items */}
-              <div className="sticky bottom-3 right-4 flex justify-end pointer-events-none z-20 pr-1">
-                {isRestaurantScrolledDown ? (
-                  <button
-                    type="button"
-                    onClick={handleScrollToRestaurantTop}
-                    className="pointer-events-auto px-3.5 py-1.5 bg-charcoal/90 dark:bg-black/90 hover:bg-charcoal text-white text-[11px] font-bold rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/20"
-                  >
-                    <span>↑</span>
-                    <span>Top</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleScrollToRestaurantReviews}
-                    className="pointer-events-auto px-3.5 py-1.5 bg-amber-500/95 hover:bg-amber-600 text-white text-[11px] font-bold rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/20"
-                  >
-                    <span>⭐</span>
-                    <span>Reviews ↓</span>
-                  </button>
-                )}
+              <div className="sticky bottom-3 right-4 flex items-center justify-end gap-2 pointer-events-none z-20 pr-1">
+                <button
+                  type="button"
+                  onClick={handleScrollToRestaurantReviews}
+                  className="pointer-events-auto px-3.5 py-1.5 bg-amber-500/95 hover:bg-amber-600 text-white text-[11px] font-bold rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1.5 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/20"
+                  title="Jump down to Customer Reviews"
+                >
+                  <span>⭐</span>
+                  <span>Reviews ↓</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleScrollToRestaurantTop}
+                  className="pointer-events-auto px-3 py-1.5 bg-charcoal/90 dark:bg-black/90 hover:bg-charcoal text-white text-[11px] font-bold rounded-full shadow-lg backdrop-blur-sm flex items-center gap-1 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/20"
+                  title="Scroll back to Top"
+                >
+                  <span>↑</span>
+                  <span>Top</span>
+                </button>
               </div>
 
             </div>
@@ -25994,8 +25999,14 @@ ${rawText}`;
 
 
       {branchSelectTarget && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-charcoal/70 backdrop-blur-xs p-4 animate-fade-in font-sans">
-          <div className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative animate-scale-up">
+        <div
+          onClick={() => setBranchSelectTarget(null)}
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-charcoal/70 backdrop-blur-xs p-4 animate-fade-in font-sans cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative animate-scale-up cursor-default"
+          >
             <button
               type="button"
               onClick={() => setBranchSelectTarget(null)}
@@ -26038,6 +26049,7 @@ ${rawText}`;
                       };
                       if (handleAddToItinerary(branchItem)) {
                         setBranchSelectTarget(null);
+                        setSelectedRestaurant(null);
                         setAddedStopModal(branchItem);
                       }
                     }}
