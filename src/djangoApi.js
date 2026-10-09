@@ -1,5 +1,8 @@
 // Django REST Framework API Client for Kanyamanan
-export const DJANGO_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DJANGO_API_URL) || 'https://kanyamanan-backend.vercel.app/api';
+export const DJANGO_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DJANGO_API_URL)
+  || (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://127.0.0.1:8000/api'
+    : 'https://kanyamanan-backend.vercel.app/api');
 import {
   cleanMenuOcrSpelling,
   cleanDishOrPackageName,
