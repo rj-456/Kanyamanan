@@ -88,6 +88,7 @@ import Tesseract from 'tesseract.js';
 import {
   fetchDjangoRestaurants,
   fetchDjangoAttractions,
+  fetchDjangoDeletedRestaurants,
   updateDjangoRestaurant,
   createDjangoRestaurant,
   deleteDjangoRestaurant,
@@ -695,11 +696,12 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v38_authoritative_django_deletions_sync') {
-        localStorage.setItem('kanyamanan_db_version', 'v38_authoritative_django_deletions_sync');
+      if (dbVersion !== 'v39_restore_74_restaurants') {
+        localStorage.setItem('kanyamanan_db_version', 'v39_restore_74_restaurants');
         localStorage.removeItem('kanyamanan_restaurants_db');
         localStorage.removeItem('kanyamanan_attractions_db');
         localStorage.removeItem('kanyamanan_deleted_restaurants_ids');
+        deletedIds = [];
       }
     } catch (_) { }
 
@@ -2092,20 +2094,42 @@ function App() {
   useEffect(() => {
     const syncDjangoData = async () => {
       try {
-        const liveData = await fetchDjangoRestaurants();
+        const [liveData, liveDeleted] = await Promise.all([
+          fetchDjangoRestaurants(),
+          fetchDjangoDeletedRestaurants()
+        ]);
         let deletedIds = [];
         try {
           const savedDel = localStorage.getItem('kanyamanan_deleted_restaurants_ids');
           if (savedDel) deletedIds = JSON.parse(savedDel) || [];
         } catch (e) { }
 
+        const djangoDeletedIds = Array.isArray(liveDeleted?.deleted_ids) ? liveDeleted.deleted_ids : [];
+        const djangoDeletedNames = Array.isArray(liveDeleted?.deleted_names) ? liveDeleted.deleted_names.map(n => n.toLowerCase().trim()) : [];
+
+        if (djangoDeletedIds.length > 0) {
+          deletedIds = Array.from(new Set([...deletedIds, ...djangoDeletedIds]));
+          try {
+            localStorage.setItem('kanyamanan_deleted_restaurants_ids', JSON.stringify(deletedIds));
+          } catch (e) { }
+        }
+
+        const isAuthoritativelyDeleted = (r) => {
+          if (!r) return true;
+          if (deletedIds.includes(r.id)) return true;
+          if (djangoDeletedIds.includes(r.id)) return true;
+          const nameLower = (r.name || '').toLowerCase().trim();
+          if (djangoDeletedNames.some(dn => dn && (dn === nameLower || nameLower.includes(dn)))) return true;
+          return isLegacyPreseeded(r);
+        };
+
         if (Array.isArray(liveData) && liveData.length > 0) {
-          const valid = liveData.filter(r => r && r.id && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
+          const valid = liveData.filter(r => r && r.id && !isAuthoritativelyDeleted(r));
           if (valid.length > 0) {
             setRestaurants(prev => {
               const liveDict = {};
               valid.forEach(r => {
-                if (r && r.id && !isLegacyPreseeded(r)) {
+                if (r && r.id && !isAuthoritativelyDeleted(r)) {
                   const pre = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === r.id || (p.name && r.name && p.name.toLowerCase() === r.name.toLowerCase())));
                   const liveBranches = Array.isArray(r.branches) ? [...r.branches] : [];
                   if (Array.isArray(pre?.branches)) {
@@ -2164,8 +2188,7 @@ function App() {
                 }
               } catch (e) { }
 
-              // Authoritative Django DB Sync:
-              // 1. Build lookup maps for all currently active Django listings
+              // Live Django lookup maps
               const liveDictById = {};
               const liveDictByName = {};
               valid.forEach(vr => {
@@ -2173,33 +2196,30 @@ function App() {
                 if (vr && vr.name) liveDictByName[vr.name.toLowerCase().trim()] = vr;
               });
 
-              // 2. Identify any pre-seeded / local restaurant that was DELETED from Django
-              const newlyDeleted = [];
-              (PRESEEDED_RESTAURANTS || []).forEach(pre => {
-                if (pre && pre.id && !deletedIds.includes(pre.id) && !isLegacyPreseeded(pre)) {
-                  const existsInDjango = liveDictById[pre.id] || (pre.name && liveDictByName[pre.name.toLowerCase().trim()]);
-                  if (!existsInDjango) {
-                    newlyDeleted.push(pre.id);
-                  }
+              // 1. Maintain full pre-seeded catalogue (74 authentic restaurants) with live updates merged
+              const merged = (PRESEEDED_RESTAURANTS || [])
+                .filter(pre => !isAuthoritativelyDeleted(pre))
+                .map(pre => {
+                  const liveMatch = liveDictById[pre.id] || (pre.name && liveDictByName[pre.name.toLowerCase().trim()]);
+                  const modMatch = savedModifiedRes[pre.id];
+                  if (modMatch) return modMatch;
+                  if (liveMatch) return { ...pre, ...(liveDict[liveMatch.id] || liveMatch) };
+                  return pre;
+                });
+
+              // 2. Include any new restaurants added in Django that are not in pre-seeded catalogue
+              valid.forEach(vr => {
+                if (!vr || isAuthoritativelyDeleted(vr)) return;
+                const alreadyIncluded = merged.some(m => m && (m.id === vr.id || (m.name && vr.name && m.name.toLowerCase().trim() === vr.name.toLowerCase().trim())));
+                if (!alreadyIncluded) {
+                  merged.push(savedModifiedRes[vr.id] || liveDict[vr.id] || vr);
                 }
               });
 
-              if (newlyDeleted.length > 0) {
-                deletedIds = Array.from(new Set([...deletedIds, ...newlyDeleted]));
-                try {
-                  localStorage.setItem('kanyamanan_deleted_restaurants_ids', JSON.stringify(deletedIds));
-                } catch (e) { }
-              }
-
-              // 3. Merged authoritative list: Start with all active Django listings
-              const merged = valid.map(vr => {
-                return savedModifiedRes[vr.id] || liveDict[vr.id] || vr;
-              }).filter(r => r && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
-
-              // 4. Retain any unsynced custom user-created restaurants
+              // 3. Retain any unsynced custom user-created restaurants
               if (Array.isArray(prev)) {
                 prev.forEach(r => {
-                  if (r && (r.isCustom || r.userCreated) && !deletedIds.includes(r.id) && !merged.some(m => m.id === r.id)) {
+                  if (r && (r.isCustom || r.userCreated) && !isAuthoritativelyDeleted(r) && !merged.some(m => m.id === r.id)) {
                     merged.push(r);
                   }
                 });

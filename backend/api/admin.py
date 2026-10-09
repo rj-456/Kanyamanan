@@ -1,7 +1,7 @@
 from typing import Any
 from django.contrib import admin
 from django.db.models import Q
-from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview, Attraction
+from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview, Attraction, DeletedRestaurant
 
 class BranchInline(admin.TabularInline):
     model = Branch
@@ -91,4 +91,11 @@ class AttractionAdmin(admin.ModelAdmin):
     search_fields = ('name', 'municipality', 'description', 'address')
     list_filter = ('municipality', 'attraction_type', 'is_festival')
     ordering = ('name',)
+
+@admin.register(DeletedRestaurant)
+class DeletedRestaurantAdmin(admin.ModelAdmin):
+    list_display: Any = ('restaurant_id', 'name', 'deleted_at')
+    search_fields = ('restaurant_id', 'name')
+    readonly_fields = ('deleted_at',)
+    ordering = ('-deleted_at',)
 

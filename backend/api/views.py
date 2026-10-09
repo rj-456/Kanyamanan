@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from .models import (
     Municipality, Restaurant, ChangeRequest,
-    TouristAccount, TouristItinerary, RestaurantReview, Attraction
+    TouristAccount, TouristItinerary, RestaurantReview, Attraction, DeletedRestaurant
 )
 from .serializers import (
     MunicipalitySerializer, RestaurantSerializer,
@@ -1323,6 +1323,20 @@ def scan_plate(request):
     return Response({
         "is_food": False,
         "rejection_reason": "PlateScan AI service could not verify food in this frame. Please center your meal in good lighting and try again."
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def deleted_restaurants_list(request):
+    """
+    Returns lists of IDs and names of restaurants explicitly deleted from Django.
+    Allows frontend to dynamically synchronize deletions made by administrators.
+    """
+    ids = list(DeletedRestaurant.objects.values_list('restaurant_id', flat=True))
+    names = list(DeletedRestaurant.objects.values_list('name', flat=True))
+    return Response({
+        'deleted_ids': ids,
+        'deleted_names': [n.strip() for n in names if n]
     }, status=status.HTTP_200_OK)
 
 

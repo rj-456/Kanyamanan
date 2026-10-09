@@ -48,6 +48,25 @@ export const fetchDjangoAttractions = async () => {
   }
 };
 
+/**
+ * Fetch all explicitly deleted restaurants from Django REST API
+ */
+export const fetchDjangoDeletedRestaurants = async () => {
+  try {
+    const res = await fetch(`${DJANGO_BASE_URL}/deleted-restaurants/`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) return { deleted_ids: [], deleted_names: [] };
+    const data = await res.json();
+    return {
+      deleted_ids: Array.isArray(data?.deleted_ids) ? data.deleted_ids : [],
+      deleted_names: Array.isArray(data?.deleted_names) ? data.deleted_names : []
+    };
+  } catch (err) {
+    return { deleted_ids: [], deleted_names: [] };
+  }
+};
 
 /**
  * Save / Update a restaurant in Django REST API

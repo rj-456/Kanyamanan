@@ -221,3 +221,31 @@ class Attraction(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.municipality})"
+
+class DeletedRestaurant(models.Model):
+    restaurant_id = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=200, blank=True)
+    deleted_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = "Deleted Restaurant Record"
+        verbose_name_plural = "Deleted Restaurant Records"
+        ordering = ['-deleted_at']
+
+    def __str__(self):
+        return f"Deleted: {self.name} ({self.restaurant_id})"
+
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
+@receiver(post_delete, sender=Restaurant)
+def track_deleted_restaurant(sender, instance, **kwargs):
+    try:
+        rid = getattr(instance, 'restaurant_id', None) or str(getattr(instance, 'id', ''))
+        rname = getattr(instance, 'name', '')
+        if rid:
+            DeletedRestaurant.objects.get_or_create(restaurant_id=rid, defaults={'name': rname})
+    except Exception:
+        pass
