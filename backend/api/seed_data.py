@@ -59,9 +59,67 @@ def seed_attractions():
             )
         print(f"  - Seeded {len(attractions_data)} Tourist Destinations / Attractions")
 
+def seed_missing_restaurants():
+    json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'extracted_restaurants.json')
+    if not os.path.exists(json_path):
+        alt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'extracted_restaurants.json')
+        if os.path.exists(alt_path):
+            json_path = alt_path
+
+    if os.path.exists(json_path):
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        existing_ids = set(Restaurant.objects.values_list('restaurant_id', flat=True))
+        existing_names = set(Restaurant.objects.values_list('name', flat=True))
+
+        created_count = 0
+        for r in data:
+            rid = r.get('id')
+            rname = r.get('name')
+            if not rid or not rname:
+                continue
+            if rid not in existing_ids and rname not in existing_names:
+                resto = Restaurant.objects.create(
+                    restaurant_id=rid,
+                    name=rname,
+                    municipality=r.get('municipality', ''),
+                    operating_hours=r.get('operatingHours', '09:00 AM - 08:00 PM'),
+                    price_tier=r.get('priceTier', '$'),
+                    lat=r.get('lat', 15.0320),
+                    lng=r.get('lng', 120.6860),
+                    categories=r.get('categories', []),
+                    description=r.get('description', ''),
+                    address=r.get('address', ''),
+                    image=r.get('image', ''),
+                    images=r.get('images', []),
+                    facebook_url=r.get('facebookUrl', '') or r.get('facebook_url', ''),
+                    instagram_url=r.get('instagramUrl', '') or r.get('instagram_url', ''),
+                    tiktok_url=r.get('tiktokUrl', '') or r.get('tiktok_url', ''),
+                    phone_number=r.get('phoneNumber', '') or r.get('phone_number', ''),
+                    email=r.get('email', ''),
+                    reservation_info=r.get('reservationInfo', '') or r.get('reservation_info', ''),
+                    username=r.get('username', rid[:18]),
+                    password=r.get('password', 'password123'),
+                    occupancy=r.get('occupancy', [])
+                )
+                Branch.objects.create(
+                    restaurant=resto,
+                    branch_name=f"{rname} (Main Branch)",
+                    municipality=resto.municipality,
+                    address=resto.address,
+                    operating_hours=resto.operating_hours,
+                    lat=resto.lat,
+                    lng=resto.lng
+                )
+                created_count += 1
+        if created_count > 0:
+            print(f"  - Seeded {created_count} missing restaurants")
+
 def seed():
     print("[+] Seeding Complete Kanyamanan Database...")
     seed_attractions()
+    seed_missing_restaurants()
 
     # 1. Superuser (Deterministic across all lambda containers)
     admin_user = User.objects.filter(username='admin').first()

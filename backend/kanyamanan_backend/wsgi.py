@@ -39,6 +39,13 @@ if os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
         except Exception as attr_seed_err:
             print(f"Attractions seeding error: {attr_seed_err}")
 
+        # Seed any missing authentic restaurants without overwriting deletions
+        try:
+            from api.seed_data import seed_missing_restaurants
+            seed_missing_restaurants()
+        except Exception as resto_seed_err:
+            print(f"Restaurants seeding error: {resto_seed_err}")
+
         # Seed initial admin account if missing
         try:
             if not User.objects.filter(username='admin').exists():

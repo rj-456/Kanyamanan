@@ -665,7 +665,10 @@ function App() {
     "Sasmuan Coastal Seafood & Cafe",
     "Guagua Kusina Matua",
     "Nobi-Tsa",
-    "Nobi Tsa"
+    "Nobi Tsa",
+    "Sa Lang Hee",
+    "Salanghee",
+    "Sa-Lang-Hee"
   ].map(s => s.toLowerCase().trim());
 
   const isLegacyPreseeded = (res) => {
@@ -673,10 +676,10 @@ function App() {
     if (res.isCustom || res.userCreated) return false;
     // Explicitly block legacy synthetic/removed entries
     if (res.id === 'res-ernestos-santa-ana' || res.id === 'santa-rita-turrones' || (res.id && res.id.includes('ocampo-lansang'))) return true;
-    if (res.id === 'res-1787834930597') return true;
+    if (res.id === 'res-1787834930597' || res.id === 'res-1787675541942') return true;
     if ((res.address || '').includes('Santo Rosario') && (res.name || '').toLowerCase().includes('ernesto')) return true;
     const nameLower = (res.name || '').toLowerCase().trim();
-    if (nameLower.includes('ocampo-lansang') || nameLower.includes('turrones & cafe') || nameLower.includes('turrones de casoy') || nameLower.includes('nobi-tsa') || nameLower.includes('nobi tsa')) return true;
+    if (nameLower.includes('ocampo-lansang') || nameLower.includes('turrones & cafe') || nameLower.includes('turrones de casoy') || nameLower.includes('nobi-tsa') || nameLower.includes('nobi tsa') || nameLower.includes('lang hee') || nameLower.includes('salanghee')) return true;
     return REMOVED_PRESEEDED_NAMES.some(dep => nameLower === dep || nameLower.includes(dep));
   };
 
@@ -692,8 +695,8 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v37_attractions_and_nobi_tsa_purged') {
-        localStorage.setItem('kanyamanan_db_version', 'v37_attractions_and_nobi_tsa_purged');
+      if (dbVersion !== 'v38_authoritative_django_deletions_sync') {
+        localStorage.setItem('kanyamanan_db_version', 'v38_authoritative_django_deletions_sync');
         localStorage.removeItem('kanyamanan_restaurants_db');
         localStorage.removeItem('kanyamanan_attractions_db');
         localStorage.removeItem('kanyamanan_deleted_restaurants_ids');
@@ -2161,16 +2164,46 @@ function App() {
                 }
               } catch (e) { }
 
-              const currentList = Array.isArray(prev) && prev.length > 0 ? prev.filter(r => r && r.id && !deletedIds.includes(r.id) && !isLegacyPreseeded(r)) : [];
-              const merged = currentList.map(r => {
-                if (r && r.id && savedModifiedRes[r.id]) return { ...r, ...savedModifiedRes[r.id] };
-                return (r && r.id && liveDict[r.id]) || r;
-              }).filter(r => r && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
+              // Authoritative Django DB Sync:
+              // 1. Build lookup maps for all currently active Django listings
+              const liveDictById = {};
+              const liveDictByName = {};
               valid.forEach(vr => {
-                if (vr && vr.id && !deletedIds.includes(vr.id) && !isLegacyPreseeded(vr) && !merged.some(m => m && (m.id === vr.id || (m.name && vr.name && m.name.toLowerCase() === vr.name.toLowerCase())))) {
-                  merged.push(savedModifiedRes[vr.id] || liveDict[vr.id] || vr);
+                if (vr && vr.id) liveDictById[vr.id] = vr;
+                if (vr && vr.name) liveDictByName[vr.name.toLowerCase().trim()] = vr;
+              });
+
+              // 2. Identify any pre-seeded / local restaurant that was DELETED from Django
+              const newlyDeleted = [];
+              (PRESEEDED_RESTAURANTS || []).forEach(pre => {
+                if (pre && pre.id && !deletedIds.includes(pre.id) && !isLegacyPreseeded(pre)) {
+                  const existsInDjango = liveDictById[pre.id] || (pre.name && liveDictByName[pre.name.toLowerCase().trim()]);
+                  if (!existsInDjango) {
+                    newlyDeleted.push(pre.id);
+                  }
                 }
               });
+
+              if (newlyDeleted.length > 0) {
+                deletedIds = Array.from(new Set([...deletedIds, ...newlyDeleted]));
+                try {
+                  localStorage.setItem('kanyamanan_deleted_restaurants_ids', JSON.stringify(deletedIds));
+                } catch (e) { }
+              }
+
+              // 3. Merged authoritative list: Start with all active Django listings
+              const merged = valid.map(vr => {
+                return savedModifiedRes[vr.id] || liveDict[vr.id] || vr;
+              }).filter(r => r && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
+
+              // 4. Retain any unsynced custom user-created restaurants
+              if (Array.isArray(prev)) {
+                prev.forEach(r => {
+                  if (r && (r.isCustom || r.userCreated) && !deletedIds.includes(r.id) && !merged.some(m => m.id === r.id)) {
+                    merged.push(r);
+                  }
+                });
+              }
               try {
                 localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(merged));
               } catch (e) { }
