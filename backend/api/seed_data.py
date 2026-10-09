@@ -19,8 +19,49 @@ from api.models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest
 
 ADMIN_PASSWORD_HASH = make_password('admin123', salt='KanyamananAdminSalt2026', hasher='pbkdf2_sha256')
 
+def seed_attractions():
+    attractions_json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'extracted_attractions.json')
+    if not os.path.exists(attractions_json_path):
+        alt_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'extracted_attractions.json')
+        if os.path.exists(alt_path):
+            attractions_json_path = alt_path
+
+    if os.path.exists(attractions_json_path):
+        with open(attractions_json_path, 'r', encoding='utf-8') as f:
+            attractions_data = json.load(f)
+        for a in attractions_data:
+            if not a.get('id'):
+                continue
+            Attraction.objects.update_or_create(
+                attraction_id=a['id'],
+                defaults={
+                    'name': a.get('name', ''),
+                    'municipality': a.get('municipality', ''),
+                    'address': a.get('address', ''),
+                    'lat': a.get('lat', 15.0320),
+                    'lng': a.get('lng', 120.6860),
+                    'attraction_type': a.get('type', '📍 Cultural Landmark'),
+                    'is_festival': bool(a.get('isFestival', False)),
+                    'event_date': a.get('eventDate', ''),
+                    'event_month': a.get('eventMonth', ''),
+                    'active_months': a.get('activeMonths', []),
+                    'sample_active_date': a.get('sampleActiveDate', ''),
+                    'schedule_note': a.get('scheduleNote', ''),
+                    'announcement_note': a.get('announcementNote', ''),
+                    'description': a.get('description', ''),
+                    'details': a.get('details', ''),
+                    'image': a.get('image', ''),
+                    'operating_hours': a.get('operatingHours', ''),
+                    'opening_time': a.get('openingTime', ''),
+                    'closing_time': a.get('closingTime', ''),
+                    'is_24_hours': bool(a.get('is24Hours', False))
+                }
+            )
+        print(f"  - Seeded {len(attractions_data)} Tourist Destinations / Attractions")
+
 def seed():
     print("[+] Seeding Complete Kanyamanan Database...")
+    seed_attractions()
 
     # 1. Superuser (Deterministic across all lambda containers)
     admin_user = User.objects.filter(username='admin').first()
@@ -247,42 +288,6 @@ def seed():
             }
         )
     print("  - Seeded Per-Account Tourist Itineraries & Travel History for rancis and other accounts")
-
-    # 5. Tourist Destinations / Cultural Attractions
-    attractions_json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'extracted_attractions.json')
-    if os.path.exists(attractions_json_path):
-        with open(attractions_json_path, 'r', encoding='utf-8') as f:
-            attractions_data = json.load(f)
-        for a in attractions_data:
-            if not a.get('id'):
-                continue
-            Attraction.objects.update_or_create(
-                attraction_id=a['id'],
-                defaults={
-                    'name': a.get('name', ''),
-                    'municipality': a.get('municipality', ''),
-                    'address': a.get('address', ''),
-                    'lat': a.get('lat', 15.0320),
-                    'lng': a.get('lng', 120.6860),
-                    'attraction_type': a.get('type', '📍 Cultural Landmark'),
-                    'is_festival': bool(a.get('isFestival', False)),
-                    'event_date': a.get('eventDate', ''),
-                    'event_month': a.get('eventMonth', ''),
-                    'active_months': a.get('activeMonths', []),
-                    'sample_active_date': a.get('sampleActiveDate', ''),
-                    'schedule_note': a.get('scheduleNote', ''),
-                    'announcement_note': a.get('announcementNote', ''),
-                    'description': a.get('description', ''),
-                    'details': a.get('details', ''),
-                    'image': a.get('image', ''),
-                    'operating_hours': a.get('operatingHours', ''),
-                    'opening_time': a.get('openingTime', ''),
-                    'closing_time': a.get('closingTime', ''),
-                    'is_24_hours': bool(a.get('is24Hours', False))
-                }
-            )
-        print(f"  - Seeded {len(attractions_data)} Tourist Destinations / Attractions")
-
     print("[+] Complete database seeding finished successfully!")
 
 if __name__ == '__main__':

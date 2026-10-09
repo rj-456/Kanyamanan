@@ -30,21 +30,22 @@ if os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
         except Exception as mig_err:
             print(f"Auto-migrate error: {mig_err}")
 
-        # Seed initial admin account and preseeded restaurants/attractions if database is unseeded
-        needs_seed = False
+        # Seed attractions if none exist (fast, runs in ~50ms without hashing timeouts)
         try:
             from api.models import Attraction
-            if not User.objects.filter(username='admin').exists() or not Attraction.objects.exists():
-                needs_seed = True
-        except Exception:
-            needs_seed = True
+            if not Attraction.objects.exists():
+                from api.seed_data import seed_attractions
+                seed_attractions()
+        except Exception as attr_seed_err:
+            print(f"Attractions seeding error: {attr_seed_err}")
 
-        if needs_seed:
-            try:
+        # Seed initial admin account if missing
+        try:
+            if not User.objects.filter(username='admin').exists():
                 from api.seed_data import seed
                 seed()
-            except Exception as seed_err:
-                print(f"Seeding error: {seed_err}")
+        except Exception as seed_err:
+            print(f"Admin seeding error: {seed_err}")
     except Exception as init_err:
         print(f"Auto-init error: {init_err}")
 
