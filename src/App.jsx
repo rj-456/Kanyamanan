@@ -2276,6 +2276,13 @@ function App() {
       }
     };
     syncDjangoData();
+    const syncInterval = setInterval(syncDjangoData, 30000);
+    const handleFocus = () => { syncDjangoData(); };
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      clearInterval(syncInterval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // Sync open drawer & active trip when backend updates restaurants state

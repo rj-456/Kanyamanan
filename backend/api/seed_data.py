@@ -70,6 +70,31 @@ def seed_missing_restaurants():
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
+        target_ids = {r.get('id') for r in data if r.get('id')}
+        target_names = {r.get('name', '').lower().strip() for r in data if r.get('name')}
+
+        # 1. Purge legacy synthetic/duplicate entries not in the 74 authentic catalogue
+        legacy_names = [
+            "apag apalit lechon & grill", "apag marangle", "apung oting's heritage restaurant",
+            "apung oting's restaurant", "atching lillian's ancestral kitchen", "bariotik kitchen and garden",
+            "floridablanca sugar trail resto", "guagua kusina matua", "kabigting's halo-halo (floridablanca)",
+            "kusina san guillermo", "lola ima buffet & catering", "mabalacat native treats & claypot",
+            "macabebe delta seafood grill", "masantol mangrove crab house", "minalin egg farm cafe",
+            "porac mountain grill & indigenous kitchen", "san simon expressway diner",
+            "santo tomas palayok kitchen", "sasmuan coastal seafood & cafe", "susie's cuisine (floridablanca)",
+            "swamp wild duck grill", "sa lang hee", "salanghee", "sa-lang-hee", "nobi-tsa", "nobi tsa"
+        ]
+        for r in list(Restaurant.objects.all()):
+            r_name_clean = (r.name or '').lower().strip()
+            if (r.restaurant_id not in target_ids and r_name_clean not in target_names) or any(leg == r_name_clean or leg in r_name_clean for leg in legacy_names):
+                try:
+                    r.branches.all().delete()
+                    r.menu.all().delete()
+                    r.delete()
+                except Exception:
+                    pass
+
+        # 2. Seed any missing authentic restaurants
         existing_ids = set(Restaurant.objects.values_list('restaurant_id', flat=True))
         existing_names = set(Restaurant.objects.values_list('name', flat=True))
 
@@ -103,15 +128,28 @@ def seed_missing_restaurants():
                     password=r.get('password', 'password123'),
                     occupancy=r.get('occupancy', [])
                 )
-                Branch.objects.create(
-                    restaurant=resto,
-                    branch_name=f"{rname} (Main Branch)",
-                    municipality=resto.municipality,
-                    address=resto.address,
-                    operating_hours=resto.operating_hours,
-                    lat=resto.lat,
-                    lng=resto.lng
-                )
+                branches = r.get('branches', [])
+                if branches:
+                    for b in branches:
+                        Branch.objects.create(
+                            restaurant=resto,
+                            branch_name=b.get('branchName', f"{rname} (Branch)"),
+                            municipality=b.get('municipality', resto.municipality),
+                            address=b.get('address', resto.address),
+                            operating_hours=b.get('operatingHours', resto.operating_hours),
+                            lat=b.get('lat', resto.lat),
+                            lng=b.get('lng', resto.lng)
+                        )
+                else:
+                    Branch.objects.create(
+                        restaurant=resto,
+                        branch_name=f"{rname} (Main Branch)",
+                        municipality=resto.municipality,
+                        address=resto.address,
+                        operating_hours=resto.operating_hours,
+                        lat=resto.lat,
+                        lng=resto.lng
+                    )
                 created_count += 1
         if created_count > 0:
             print(f"  - Seeded {created_count} missing restaurants")
