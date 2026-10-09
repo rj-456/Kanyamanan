@@ -87,6 +87,12 @@ def seed():
                     'address': r.get('address', ''),
                     'image': r.get('image', ''),
                     'images': r.get('images', []),
+                    'facebook_url': r.get('facebookUrl', '') or r.get('facebook_url', ''),
+                    'instagram_url': r.get('instagramUrl', '') or r.get('instagram_url', ''),
+                    'tiktok_url': r.get('tiktokUrl', '') or r.get('tiktok_url', ''),
+                    'phone_number': r.get('phoneNumber', '') or r.get('phone_number', ''),
+                    'email': r.get('email', ''),
+                    'reservation_info': r.get('reservationInfo', '') or r.get('reservation_info', ''),
                     'username': username,
                     'password': password,
                     'occupancy': r.get('occupancy', [])
@@ -110,7 +116,13 @@ def seed():
                         address=b.get('address', restaurant_obj.address),
                         operating_hours=b.get('operatingHours', restaurant_obj.operating_hours),
                         lat=b.get('lat', restaurant_obj.lat),
-                        lng=b.get('lng', restaurant_obj.lng)
+                        lng=b.get('lng', restaurant_obj.lng),
+                        facebook_url=b.get('facebookUrl', '') or b.get('facebook_url', '') or restaurant_obj.facebook_url,
+                        instagram_url=b.get('instagramUrl', '') or b.get('instagram_url', '') or restaurant_obj.instagram_url,
+                        tiktok_url=b.get('tiktokUrl', '') or b.get('tiktok_url', '') or restaurant_obj.tiktok_url,
+                        phone_number=b.get('phoneNumber', '') or b.get('phone_number', '') or restaurant_obj.phone_number,
+                        email=b.get('email', '') or restaurant_obj.email,
+                        reservation_info=b.get('reservationInfo', '') or b.get('reservation_info', '') or restaurant_obj.reservation_info
                     )
             else:
                 Branch.objects.create(
@@ -120,7 +132,13 @@ def seed():
                     address=restaurant_obj.address,
                     operating_hours=restaurant_obj.operating_hours,
                     lat=restaurant_obj.lat,
-                    lng=restaurant_obj.lng
+                    lng=restaurant_obj.lng,
+                    facebook_url=restaurant_obj.facebook_url,
+                    instagram_url=restaurant_obj.instagram_url,
+                    tiktok_url=restaurant_obj.tiktok_url,
+                    phone_number=restaurant_obj.phone_number,
+                    email=restaurant_obj.email,
+                    reservation_info=restaurant_obj.reservation_info
                 )
 
             # Seed menu items

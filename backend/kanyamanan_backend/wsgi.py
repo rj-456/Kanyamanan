@@ -24,16 +24,21 @@ if os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'):
                 except Exception as copy_err:
                     print(f"Copy db error: {copy_err}")
 
-        # Check if database schema and admin account exist
-        needs_init = False
+        # Run database migrations to ensure table schema is up-to-date with current models
+        try:
+            call_command('migrate', interactive=False)
+        except Exception as mig_err:
+            print(f"Auto-migrate error: {mig_err}")
+
+        # Seed initial admin account and preseeded restaurants if database is unseeded
+        needs_seed = False
         try:
             if not User.objects.filter(username='admin').exists():
-                needs_init = True
+                needs_seed = True
         except Exception:
-            needs_init = True
+            needs_seed = True
 
-        if needs_init:
-            call_command('migrate', interactive=False)
+        if needs_seed:
             try:
                 from api.seed_data import seed
                 seed()

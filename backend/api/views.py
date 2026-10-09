@@ -5,7 +5,7 @@ import base64
 import urllib.request
 import urllib.error
 
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -65,11 +65,22 @@ class ChangeRequestViewSet(viewsets.ModelViewSet):
     lookup_field = 'request_id'
 
 class TouristAccountViewSet(viewsets.ModelViewSet):
+    """
+    Data Privacy Act (RA 10173) Compliance:
+    Protected endpoint accessible exclusively by authenticated administrators
+    to prevent unauthorized external harvesting of tourist email addresses and identities.
+    """
     queryset = TouristAccount.objects.all().order_by('username')
     serializer_class = TouristAccountSerializer
     lookup_field = 'username'
+    permission_classes = [permissions.IsAdminUser]
 
 class TouristItineraryViewSet(viewsets.ModelViewSet):
+    """
+    Data Privacy Act (RA 10173) Compliance:
+    Restricts access to itineraries matching the requester's userAccountKey.
+    Anonymous querying without a user key returns an empty set instead of dumping all user data.
+    """
     queryset = TouristItinerary.objects.all().order_by('user_account_key', 'name')
     serializer_class = TouristItinerarySerializer
 
@@ -77,7 +88,9 @@ class TouristItineraryViewSet(viewsets.ModelViewSet):
         user_key = self.request.query_params.get('userAccountKey') or self.request.query_params.get('username')
         if user_key:
             return TouristItinerary.objects.filter(user_account_key__iexact=str(user_key).strip()).order_by('name')
-        return super().get_queryset()
+        if self.request.user and self.request.user.is_staff:
+            return super().get_queryset()
+        return TouristItinerary.objects.none()
 
 @api_view(['POST'])
 def register_tourist(request):

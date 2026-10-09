@@ -1,7 +1,7 @@
 from typing import Any
 from django.contrib import admin
 from django.db.models import Q
-from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary
+from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview
 
 class BranchInline(admin.TabularInline):
     model = Branch
@@ -10,6 +10,11 @@ class BranchInline(admin.TabularInline):
 class MenuItemInline(admin.TabularInline):
     model = MenuItem
     extra = 1
+
+class RestaurantReviewInline(admin.TabularInline):
+    model = RestaurantReview
+    extra = 0
+    readonly_fields = ('created_at',)
 
 class MultiBranchMunicipalityFilter(admin.SimpleListFilter):
     title = 'Municipality / City'
@@ -31,11 +36,11 @@ class MultiBranchMunicipalityFilter(admin.SimpleListFilter):
 
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
-    list_display: Any = ('name', 'display_municipalities', 'username', 'operating_hours', 'price_tier')
+    list_display: Any = ('name', 'display_municipalities', 'operating_hours', 'price_tier', 'phone_number')
     search_fields = ('name', 'municipality', 'username', 'description', 'address', 'branches__municipality', 'branches__address')
     list_filter = (MultiBranchMunicipalityFilter, 'price_tier')
     ordering = ('name',)
-    inlines: Any = (BranchInline, MenuItemInline)
+    inlines: Any = (BranchInline, MenuItemInline, RestaurantReviewInline)
 
     @admin.display(description='Municipality / Cities', ordering='municipality')
     def display_municipalities(self, obj):
@@ -48,6 +53,13 @@ class RestaurantAdmin(admin.ModelAdmin):
             if muns:
                 return " • ".join(muns)
         return obj.municipality
+
+@admin.register(RestaurantReview)
+class RestaurantReviewAdmin(admin.ModelAdmin):
+    list_display: Any = ('reviewer_name', 'restaurant', 'rating', 'is_verified_diner', 'created_at')
+    list_filter = ('rating', 'is_verified_diner', 'created_at')
+    search_fields = ('reviewer_name', 'comment', 'restaurant__name')
+    ordering = ('-created_at',)
 
 @admin.register(TouristAccount)
 class TouristAccountAdmin(admin.ModelAdmin):
