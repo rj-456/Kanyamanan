@@ -688,10 +688,11 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v33_django_live_sync_authoritative') {
-        localStorage.setItem('kanyamanan_db_version', 'v33_django_live_sync_authoritative');
+      if (dbVersion !== 'v35_restore_full_75_restaurants_complete') {
+        localStorage.setItem('kanyamanan_db_version', 'v35_restore_full_75_restaurants_complete');
         localStorage.removeItem('kanyamanan_restaurants_db');
         localStorage.removeItem('kanyamanan_attractions_db');
+        localStorage.removeItem('kanyamanan_deleted_restaurants_ids');
       }
     } catch (_) { }
 
@@ -1596,7 +1597,6 @@ function App() {
   const [adminLoginPass, setAdminLoginPass] = useState('');
   const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminLoginError, setAdminLoginError] = useState('');
-  const [isSyncingDjango, setIsSyncingDjango] = useState(false);
 
   // System Administrator Access Control & Privilege Verification
   // STRICT SECURITY: Must be explicitly authenticated as Super Admin via the Admin Portal
@@ -2082,38 +2082,22 @@ function App() {
   }, []);
 
   // Sync with Live Django REST API Backend
-  const syncDjangoData = async (manual = false) => {
-    setIsSyncingDjango(true);
-    try {
-      const liveData = await fetchDjangoRestaurants();
-      let deletedIds = [];
+  useEffect(() => {
+    const syncDjangoData = async () => {
       try {
-        const savedDel = localStorage.getItem('kanyamanan_deleted_restaurants_ids');
-        if (savedDel) deletedIds = JSON.parse(savedDel) || [];
-      } catch (e) { }
+        const liveData = await fetchDjangoRestaurants();
+        let deletedIds = [];
+        try {
+          const savedDel = localStorage.getItem('kanyamanan_deleted_restaurants_ids');
+          if (savedDel) deletedIds = JSON.parse(savedDel) || [];
+        } catch (e) { }
 
-      if (Array.isArray(liveData) && liveData.length > 0) {
-        // Detect restaurants deleted directly from Django Backend / Admin
-        const liveIds = new Set(liveData.map(r => r.id));
-        const newlyDetectedDeleted = [];
-        (PRESEEDED_RESTAURANTS || []).forEach(pre => {
-          if (pre && pre.id && !liveIds.has(pre.id) && !deletedIds.includes(pre.id)) {
-            newlyDetectedDeleted.push(pre.id);
-          }
-        });
-
-        if (newlyDetectedDeleted.length > 0) {
-          deletedIds = Array.from(new Set([...deletedIds, ...newlyDetectedDeleted]));
-          try {
-            localStorage.setItem('kanyamanan_deleted_restaurants_ids', JSON.stringify(deletedIds));
-          } catch (e) { }
-        }
-
-        const valid = liveData.filter(r => r && r.id && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
-        if (valid.length > 0) {
-          setRestaurants(prev => {
-            const liveDict = {};
-            valid.forEach(r => {
+        if (Array.isArray(liveData) && liveData.length > 0) {
+          const valid = liveData.filter(r => r && r.id && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
+          if (valid.length > 0) {
+            setRestaurants(prev => {
+              const liveDict = {};
+              valid.forEach(r => {
                 if (r && r.id && !isLegacyPreseeded(r)) {
                   const pre = (PRESEEDED_RESTAURANTS || []).find(p => p && (p.id === r.id || (p.name && r.name && p.name.toLowerCase() === r.name.toLowerCase())));
                   const liveBranches = Array.isArray(r.branches) ? [...r.branches] : [];
@@ -2142,6 +2126,7 @@ function App() {
                   const resolvedMenu = liveMenu.length > 0 ? liveMenu : (pre?.menu || []);
 
                   const isPlaceholderImg = (img) => !img ||
+                    img.includes('fbcdn.net') ||
                     img.includes('photo-1552566626-52f8b828add9') ||
                     img.includes('photo-1555396273-367ea4eb4db5') ||
                     img.includes('photo-1517248135467-4c7edcad34c4');
@@ -2172,19 +2157,16 @@ function App() {
                 }
               } catch (e) { }
 
-              // Authoritative: Master dataset comes directly from Django REST Backend
-              const merged = valid.map(vr => {
-                return savedModifiedRes[vr.id] || liveDict[vr.id] || vr;
+              const currentList = Array.isArray(prev) && prev.length > 0 ? prev.filter(r => r && r.id && !deletedIds.includes(r.id) && !isLegacyPreseeded(r)) : [];
+              const merged = currentList.map(r => {
+                if (r && r.id && savedModifiedRes[r.id]) return { ...r, ...savedModifiedRes[r.id] };
+                return (r && r.id && liveDict[r.id]) || r;
               }).filter(r => r && !deletedIds.includes(r.id) && !isLegacyPreseeded(r));
-
-              // Retain any unsynced local custom restaurants if created locally
-              if (Array.isArray(prev)) {
-                prev.forEach(r => {
-                  if (r && r.isCustom && !liveDict[r.id] && !deletedIds.includes(r.id) && !merged.some(m => m.id === r.id)) {
-                    merged.push(r);
-                  }
-                });
-              }
+              valid.forEach(vr => {
+                if (vr && vr.id && !deletedIds.includes(vr.id) && !isLegacyPreseeded(vr) && !merged.some(m => m && (m.id === vr.id || (m.name && vr.name && m.name.toLowerCase() === vr.name.toLowerCase())))) {
+                  merged.push(savedModifiedRes[vr.id] || liveDict[vr.id] || vr);
+                }
+              });
               try {
                 localStorage.setItem('kanyamanan_restaurants_db', JSON.stringify(merged));
               } catch (e) { }
@@ -2212,19 +2194,12 @@ function App() {
             localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(mapped));
           } catch (e) { }
         }
-      if (manual) {
-        alert(`✓ Successfully synced with Django database! (${liveData?.length || 0} active listings)`);
+      } catch (err) {
+        console.warn("Initial Django sync warning:", err);
       }
-    } catch (err) {
-      console.warn("Initial Django sync warning:", err);
-    } finally {
-      setIsSyncingDjango(false);
-    }
-  };
-
-  useEffect(() => {
+    };
     syncDjangoData();
-  }, [isAdminRoute]);
+  }, []);
 
   // Sync open drawer & active trip when backend updates restaurants state
   useEffect(() => {
@@ -18989,18 +18964,6 @@ ${rawText}`;
                           ))}
                         </select>
                       </div>
-
-                      {/* Live Django DB Sync Trigger */}
-                      <button
-                        type="button"
-                        onClick={() => syncDjangoData(true)}
-                        disabled={isSyncingDjango}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-bananaleaf/10 hover:bg-bananaleaf text-bananaleaf hover:text-white border border-bananaleaf/30 text-xs font-bold transition-all cursor-pointer shadow-xs disabled:opacity-50"
-                        title="Fetch latest restaurants directly from Django REST database"
-                      >
-                        <RefreshCw className={`h-3.5 w-3.5 ${isSyncingDjango ? 'animate-spin' : ''}`} />
-                        {isSyncingDjango ? 'Syncing...' : 'Sync with Django DB'}
-                      </button>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
