@@ -12,12 +12,12 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from .models import (
     Municipality, Restaurant, ChangeRequest,
-    TouristAccount, TouristItinerary, RestaurantReview
+    TouristAccount, TouristItinerary, RestaurantReview, Attraction
 )
 from .serializers import (
     MunicipalitySerializer, RestaurantSerializer,
     ChangeRequestSerializer, TouristAccountSerializer, TouristItinerarySerializer,
-    RestaurantReviewSerializer
+    RestaurantReviewSerializer, AttractionSerializer
 )
 
 class RestaurantViewSet(viewsets.ModelViewSet):
@@ -91,6 +91,26 @@ class TouristItineraryViewSet(viewsets.ModelViewSet):
         if self.request.user and self.request.user.is_staff:
             return super().get_queryset()
         return TouristItinerary.objects.none()
+
+class AttractionViewSet(viewsets.ModelViewSet):
+    """
+    Tourist Destinations / Attractions API ViewSet:
+    Exposes all 52 Pampanga cultural landmarks, ancestral houses,
+    natural attractions, and festivals with live search and filtering.
+    """
+    queryset = Attraction.objects.all().order_by('name')
+    serializer_class = AttractionSerializer
+    lookup_field = 'attraction_id'
+
+    def get_queryset(self):
+        qs = Attraction.objects.all().order_by('name')
+        mun = self.request.query_params.get('municipality')
+        if mun:
+            qs = qs.filter(municipality__iexact=mun.strip())
+        is_fest = self.request.query_params.get('isFestival')
+        if is_fest is not None:
+            qs = qs.filter(is_festival=(str(is_fest).lower() == 'true'))
+        return qs
 
 @api_view(['POST'])
 def register_tourist(request):

@@ -1,7 +1,7 @@
 from typing import Any
 from django.contrib import admin
 from django.db.models import Q
-from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview
+from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview, Attraction
 
 class BranchInline(admin.TabularInline):
     model = Branch
@@ -84,3 +84,11 @@ class ChangeRequestAdmin(admin.ModelAdmin):
     list_display: Any = ('request_id', 'restaurant_name', 'requested_by', 'status', 'date_submitted')
     list_filter = ('status', 'date_submitted')
     ordering = ('restaurant_name',)
+
+@admin.register(Attraction)
+class AttractionAdmin(admin.ModelAdmin):
+    list_display: Any = ('name', 'municipality', 'attraction_type', 'is_festival', 'event_date')
+    search_fields = ('name', 'municipality', 'description', 'address')
+    list_filter = ('municipality', 'attraction_type', 'is_festival')
+    ordering = ('name',)
+

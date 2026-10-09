@@ -185,3 +185,39 @@ class TouristItinerary(models.Model):
 
     def __str__(self):
         return f"Itinerary '{self.name}' ({self.user_account_key})"
+
+class Attraction(models.Model):
+    attraction_id = models.CharField(max_length=100, primary_key=True)
+    name = models.CharField(max_length=200)
+    municipality = models.CharField(max_length=100)
+    address = models.CharField(max_length=300, blank=True, default='')
+    lat = models.FloatField(default=15.0320)
+    lng = models.FloatField(default=120.6860)
+    attraction_type = models.CharField(max_length=100, blank=True, default='📍 Cultural Landmark')
+    is_festival = models.BooleanField(default=False)
+    event_date = models.CharField(max_length=100, blank=True, default='')
+    event_month = models.CharField(max_length=50, blank=True, default='')
+    active_months = models.JSONField(default=list, blank=True)
+    sample_active_date = models.CharField(max_length=50, blank=True, default='')
+    schedule_note = models.TextField(blank=True, default='')
+    announcement_note = models.TextField(blank=True, default='')
+    description = models.TextField(blank=True, default='')
+    details = models.TextField(blank=True, default='')
+    image = models.CharField(max_length=1000, blank=True, default='')
+    operating_hours = models.CharField(max_length=100, blank=True, default='')
+    opening_time = models.CharField(max_length=50, blank=True, default='')
+    closing_time = models.CharField(max_length=50, blank=True, default='')
+    is_24_hours = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = "Tourist Destination"
+        verbose_name_plural = "Tourist Destinations"
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.municipality})"

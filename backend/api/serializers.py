@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview
+from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview, Attraction
 
 class BranchSerializer(serializers.ModelSerializer):
     branchName = serializers.CharField(source='branch_name')
@@ -176,3 +176,29 @@ class TouristItinerarySerializer(serializers.ModelSerializer):
     class Meta:
         model = TouristItinerary
         fields = ['id', 'userAccountKey', 'name', 'stops', 'isFinished', 'updatedAt']
+
+class AttractionSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(source='attraction_id')
+    type = serializers.CharField(source='attraction_type', required=False)
+    isFestival = serializers.BooleanField(source='is_festival', required=False, default=False)
+    eventDate = serializers.CharField(source='event_date', required=False, allow_blank=True, default='')
+    eventMonth = serializers.CharField(source='event_month', required=False, allow_blank=True, default='')
+    activeMonths = serializers.JSONField(source='active_months', required=False, default=list)
+    sampleActiveDate = serializers.CharField(source='sample_active_date', required=False, allow_blank=True, default='')
+    scheduleNote = serializers.CharField(source='schedule_note', required=False, allow_blank=True, default='')
+    announcementNote = serializers.CharField(source='announcement_note', required=False, allow_blank=True, default='')
+    operatingHours = serializers.CharField(source='operating_hours', required=False, allow_blank=True, default='')
+    openingTime = serializers.CharField(source='opening_time', required=False, allow_blank=True, default='')
+    closingTime = serializers.CharField(source='closing_time', required=False, allow_blank=True, default='')
+    is24Hours = serializers.BooleanField(source='is_24_hours', required=False, default=False)
+
+    class Meta:
+        model = Attraction
+        fields = [
+            'id', 'name', 'municipality', 'address', 'lat', 'lng',
+            'type', 'isFestival', 'eventDate', 'eventMonth', 'activeMonths',
+            'sampleActiveDate', 'scheduleNote', 'announcementNote',
+            'description', 'details', 'image',
+            'operatingHours', 'openingTime', 'closingTime', 'is24Hours'
+        ]
+

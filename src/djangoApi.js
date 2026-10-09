@@ -31,6 +31,25 @@ export const fetchDjangoRestaurants = async () => {
 };
 
 /**
+ * Fetch all tourist attractions from Django REST API
+ */
+export const fetchDjangoAttractions = async () => {
+  try {
+    const res = await fetch(`${DJANGO_BASE_URL}/attractions/`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return Array.isArray(data) ? data : (data.results || null);
+  } catch (err) {
+    console.warn("Django REST Attractions API offline or unreachable, using local fallback:", err);
+    return null;
+  }
+};
+
+
+/**
  * Save / Update a restaurant in Django REST API
  */
 export const updateDjangoRestaurant = async (restaurantId, restaurantData) => {

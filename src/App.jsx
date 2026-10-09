@@ -87,6 +87,7 @@ import {
 import Tesseract from 'tesseract.js';
 import {
   fetchDjangoRestaurants,
+  fetchDjangoAttractions,
   updateDjangoRestaurant,
   createDjangoRestaurant,
   deleteDjangoRestaurant,
@@ -662,7 +663,9 @@ function App() {
     "Ocampo-Lansang Turrones & Cafe",
     "Santo Tomas Palayok Kitchen",
     "Sasmuan Coastal Seafood & Cafe",
-    "Guagua Kusina Matua"
+    "Guagua Kusina Matua",
+    "Nobi-Tsa",
+    "Nobi Tsa"
   ].map(s => s.toLowerCase().trim());
 
   const isLegacyPreseeded = (res) => {
@@ -670,9 +673,10 @@ function App() {
     if (res.isCustom || res.userCreated) return false;
     // Explicitly block legacy synthetic/removed entries
     if (res.id === 'res-ernestos-santa-ana' || res.id === 'santa-rita-turrones' || (res.id && res.id.includes('ocampo-lansang'))) return true;
+    if (res.id === 'res-1787834930597') return true;
     if ((res.address || '').includes('Santo Rosario') && (res.name || '').toLowerCase().includes('ernesto')) return true;
     const nameLower = (res.name || '').toLowerCase().trim();
-    if (nameLower.includes('ocampo-lansang') || nameLower.includes('turrones & cafe') || nameLower.includes('turrones de casoy')) return true;
+    if (nameLower.includes('ocampo-lansang') || nameLower.includes('turrones & cafe') || nameLower.includes('turrones de casoy') || nameLower.includes('nobi-tsa') || nameLower.includes('nobi tsa')) return true;
     return REMOVED_PRESEEDED_NAMES.some(dep => nameLower === dep || nameLower.includes(dep));
   };
 
@@ -688,8 +692,8 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v35_restore_full_75_restaurants_complete') {
-        localStorage.setItem('kanyamanan_db_version', 'v35_restore_full_75_restaurants_complete');
+      if (dbVersion !== 'v37_attractions_and_nobi_tsa_purged') {
+        localStorage.setItem('kanyamanan_db_version', 'v37_attractions_and_nobi_tsa_purged');
         localStorage.removeItem('kanyamanan_restaurants_db');
         localStorage.removeItem('kanyamanan_attractions_db');
         localStorage.removeItem('kanyamanan_deleted_restaurants_ids');
@@ -2193,6 +2197,26 @@ function App() {
           try {
             localStorage.setItem('kanyamanan_pending_approvals_db', JSON.stringify(mapped));
           } catch (e) { }
+        }
+
+        try {
+          const liveAttractions = await fetchDjangoAttractions();
+          if (Array.isArray(liveAttractions) && liveAttractions.length > 0) {
+            setAttractions(prev => {
+              const attrDict = {};
+              liveAttractions.forEach(a => { if (a && a.id) attrDict[a.id] = a; });
+              const merged = (prev || []).map(a => attrDict[a.id] || a);
+              liveAttractions.forEach(la => {
+                if (!merged.some(m => m.id === la.id)) merged.push(la);
+              });
+              try {
+                localStorage.setItem('kanyamanan_attractions_db', JSON.stringify(merged));
+              } catch (_) { }
+              return merged;
+            });
+          }
+        } catch (e) {
+          console.warn("Attractions Django sync error:", e);
         }
       } catch (err) {
         console.warn("Initial Django sync warning:", err);
