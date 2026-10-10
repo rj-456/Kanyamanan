@@ -696,8 +696,8 @@ function App() {
     // One-time database sync migration: Clears stale pre-seeded cache to load clean dataset
     try {
       const dbVersion = localStorage.getItem('kanyamanan_db_version');
-      if (dbVersion !== 'v39_restore_74_restaurants') {
-        localStorage.setItem('kanyamanan_db_version', 'v39_restore_74_restaurants');
+      if (dbVersion !== 'v42_purge_all_default_images_use_real') {
+        localStorage.setItem('kanyamanan_db_version', 'v42_purge_all_default_images_use_real');
         localStorage.removeItem('kanyamanan_restaurants_db');
         localStorage.removeItem('kanyamanan_attractions_db');
         localStorage.removeItem('kanyamanan_deleted_restaurants_ids');
@@ -766,7 +766,7 @@ function App() {
               ? mergedMenu
               : (preseededMenu.length > 0
                 ? preseededMenu
-                : [{ id: `menu-${idx}-0`, name: 'Signature Sisig', price: 250, ingredients: 'Grilled pork snout, calamansi, onions', allergens: 'Contains Pork', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80', healthIndicators: 'Moderate Calorie', nutrition: { calories: 450, protein: 25, carbs: 10, fat: 35 } }]))
+                : [{ id: `menu-${idx}-0`, name: 'Signature Sisig', price: 250, ingredients: 'Grilled pork snout, calamansi, onions', allergens: 'Contains Pork', image: '/restaurants/authentic_sisig.jpg', healthIndicators: 'Moderate Calorie', nutrition: { calories: 450, protein: 25, carbs: 10, fat: 35 } }]))
               .slice()
               .sort((a, b) => (a?.name || '').localeCompare(b?.name || '', undefined, { sensitivity: 'base' }));
 
@@ -784,13 +784,13 @@ function App() {
             });
 
             const isPlaceholderImg = (img) => !img ||
-              img.includes('photo-1552566626-52f8b828add9') ||
-              img.includes('photo-1555396273-367ea4eb4db5') ||
-              img.includes('photo-1517248135467-4c7edcad34c4');
+              img.includes('unsplash.com') ||
+              img.includes('fbcdn.net') ||
+              img.includes('streetviewpixels-pa.googleapis.com');
 
             const resolvedImage = (preseeded?.image && (isPlaceholderImg(res.image) || preseeded.image.startsWith('/')))
               ? preseeded.image
-              : (res.image || preseeded?.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80');
+              : (res.image || preseeded?.image || '/restaurants/authentic_sisig.jpg');
 
             const resolvedImages = (preseeded?.image && preseeded.image.startsWith('/'))
               ? [preseeded.image, ...(Array.isArray(res.images) ? res.images.filter(img => img !== preseeded.image && !isPlaceholderImg(img)) : (preseeded.images || []))]
@@ -2159,14 +2159,13 @@ function App() {
                   const resolvedMenu = liveMenu.length > 0 ? liveMenu : (pre?.menu || []);
 
                   const isPlaceholderImg = (img) => !img ||
+                    img.includes('unsplash.com') ||
                     img.includes('fbcdn.net') ||
-                    img.includes('photo-1552566626-52f8b828add9') ||
-                    img.includes('photo-1555396273-367ea4eb4db5') ||
-                    img.includes('photo-1517248135467-4c7edcad34c4');
+                    img.includes('streetviewpixels-pa.googleapis.com');
 
                   const resolvedImage = (pre?.image && (isPlaceholderImg(r.image) || pre.image.startsWith('/')))
                     ? pre.image
-                    : (r.image || pre?.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80');
+                    : (r.image || pre?.image || '/restaurants/authentic_sisig.jpg');
 
                   const resolvedImages = (pre?.image && pre.image.startsWith('/'))
                     ? [pre.image, ...(Array.isArray(r.images) ? r.images.filter(img => img !== pre.image && !isPlaceholderImg(img)) : (pre?.images || []))]
@@ -3026,7 +3025,7 @@ function App() {
 
                 const cleanedImg = (pre?.image && (isPlaceholderImg(r.image) || pre.image.startsWith('/')))
                   ? pre.image
-                  : (isValidImg ? r.image : (pre?.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80'));
+                  : (isValidImg && !isPlaceholderImg(r.image) ? r.image : (pre?.image || '/restaurants/authentic_sisig.jpg'));
 
                 const cleanedImages = (pre?.image && pre.image.startsWith('/'))
                   ? [pre.image, ...(Array.isArray(r.images) ? r.images.filter(img => img !== pre.image && !isPlaceholderImg(img)) : (pre?.images || []))]
@@ -13902,7 +13901,7 @@ ${JSON.stringify(updatedMessages.slice(-8))}
       return {
         id: fallbackPreset.id || `preset-${Date.now()}`,
         name: fallbackPreset.name || 'Kapampangan Dish',
-        image: fallbackPreset.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80',
+        image: fallbackPreset.image || '/restaurants/authentic_sisig.jpg',
         portion: fallbackPreset.portion || '1 standard serving (~250g)',
         nutrition: {
           calories: parseNumSafe(fallbackPreset.nutrition?.calories, 500),
@@ -14070,7 +14069,7 @@ Return ONLY a valid JSON object matching this schema:
     return {
       id: `cv-${Date.now()}`,
       name: picked.name,
-      image: imageDataUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=500&q=80',
+      image: imageDataUrl || '/restaurants/authentic_sisig.jpg',
       portion: picked.portion,
       baseNutrition: { ...picked.nutrition },
       nutrition: { ...picked.nutrition },
@@ -16278,13 +16277,13 @@ ${rawText}`;
 
       // 9. Photo Selection
       const fallbackImages = {
-        '🎨 Heritage Museum': 'https://images.unsplash.com/photo-1566127444979-b3d2b654e3d7?auto=format&fit=crop&w=1000&q=80',
-        '🏛️ Historic Parish Church': 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=1000&q=80',
-        '🌲 Nature / Ecotourism': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
-        '🏺 Artisan Workshop': 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1000&q=80',
-        '📍 Cultural Landmark': 'https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?auto=format&fit=crop&w=1000&q=80'
+        '🎨 Heritage Museum': '/attractions/real_museum_ning_angeles.jpg',
+        '🏛️ Historic Parish Church': '/attractions/betis_church_guagua.jpg',
+        '🌲 Nature / Ecotourism': '/attractions/real_nature_arayat_park.jpg',
+        '🏺 Artisan Workshop': '/attractions/real_artisan_betis_woodcarving.jpg',
+        '📍 Cultural Landmark': '/attractions/real_landmark_pamintuan_mansion.jpg'
       };
-      const finalImage = attachedImage || fallbackImages[detectedType] || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=1000&q=80';
+      const finalImage = attachedImage || fallbackImages[detectedType] || '/attractions/betis_church_guagua.jpg';
 
       // 10. Populate Admin Attraction Form
       setAdminAttractionForm(prev => ({
@@ -16709,9 +16708,9 @@ ${rawText}`;
         categories: Array.isArray(adminForm.categories) && adminForm.categories.length > 0 ? adminForm.categories : ['Heritage Kapampangan'],
         description: (adminForm.description || '').trim() || `${nameToSave} offers authentic Kapampangan dining and local specialties in ${primaryMun}.`,
         address: (primaryBranch?.address || adminForm.address || `${primaryMun}, Pampanga`).trim(),
-        image: adminForm.image || (adminForm.images && adminForm.images[0]) || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80',
+        image: adminForm.image || (adminForm.images && adminForm.images[0]) || '/restaurants/authentic_sisig.jpg',
         images: adminForm.images && adminForm.images.length > 0 ? adminForm.images : [
-          adminForm.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80'
+          adminForm.image || '/restaurants/authentic_sisig.jpg'
         ],
         facebookUrl: adminForm.facebookUrl || '',
         instagramUrl: adminForm.instagramUrl || '',
@@ -16830,9 +16829,9 @@ ${rawText}`;
       categories: ['Heritage Kapampangan'],
       description: `${nameToSave} offers authentic Kapampangan dining and culinary specialties in ${munToSave}, Pampanga. (Account provisioned by System Administrator. Log in as Restaurant Owner to customize full profile, photos, and menu catalog.)`,
       address: `${munToSave}, Pampanga`,
-      image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80',
+      image: '/restaurants/authentic_sisig.jpg',
       images: [
-        'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80'
+        '/restaurants/authentic_sisig.jpg'
       ],
       facebookUrl: '',
       instagramUrl: '',
@@ -16930,7 +16929,7 @@ ${rawText}`;
       return;
     }
 
-    const primaryImg = adminAttractionForm.image || (adminAttractionForm.images && adminAttractionForm.images[0]) || 'https://images.unsplash.com/photo-1548625361-186b86d94c73?auto=format&fit=crop&w=800&q=80';
+    const primaryImg = adminAttractionForm.image || (adminAttractionForm.images && adminAttractionForm.images[0]) || '/attractions/betis_church_guagua.jpg';
     const imagesToSave = adminAttractionForm.images && adminAttractionForm.images.length > 0 ? adminAttractionForm.images : [primaryImg];
 
     const updatedAttrObj = {
@@ -21735,6 +21734,11 @@ ${rawText}`;
                                 src={res.image}
                                 alt={res.name}
                                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  const fallback = (Array.isArray(res.images) && res.images.find(im => im && im !== e.target.src && !im.includes('fbcdn.net') && !im.includes('unsplash.com'))) || '/restaurants/authentic_sisig.jpg';
+                                  e.target.src = fallback;
+                                }}
                               />
                             ) : (
                               <>
@@ -24955,7 +24959,7 @@ ${rawText}`;
                       className="relative w-full h-full object-cover z-1 transition-transform duration-300 group-hover/carousel:scale-102"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80';
+                        e.target.src = '/restaurants/authentic_sisig.jpg';
                       }}
                     />
 
@@ -25810,6 +25814,10 @@ ${rawText}`;
                 e.stopPropagation();
                 setFullscreenImage(prev => prev ? { ...prev, isZoomed: !prev.isZoomed } : null);
               }}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = '/restaurants/authentic_sisig.jpg';
+              }}
               className={`rounded-xl shadow-2xl object-contain transition-all duration-300 ${fullscreenImage.isZoomed
                 ? 'max-h-[140vh] max-w-[140vw] scale-125 cursor-zoom-out'
                 : 'max-h-[80vh] max-w-[92vw] cursor-zoom-in'
@@ -25838,7 +25846,15 @@ ${rawText}`;
                       : 'border-white/20 opacity-60 hover:opacity-100'
                       }`}
                   >
-                    <img src={imgUrl} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img
+                      src={imgUrl}
+                      alt={`Thumb ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/restaurants/authentic_sisig.jpg';
+                      }}
+                    />
                   </button>
                 ))}
               </div>
@@ -26536,9 +26552,13 @@ ${rawText}`;
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-center gap-3 min-w-0">
                               <img
-                                src={matchedRest.image || stop.image || 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=400&q=80'}
+                                src={matchedRest.image || stop.image || '/restaurants/authentic_sisig.jpg'}
                                 alt={matchedRest.name || stop.name}
                                 className="w-12 h-12 rounded-xl object-cover border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = '/restaurants/authentic_sisig.jpg';
+                                }}
                               />
                               <div className="min-w-0">
                                 <span className="text-[10px] font-extrabold text-terracotta uppercase tracking-wider block">
@@ -26658,7 +26678,7 @@ ${rawText}`;
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    {(computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Kapampangan Restaurant Stop #1', municipality: 'Pampanga', image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=800&q=80' }]).map((stop, pIdx) => {
+                    {(computedRoutePath.length > 0 ? computedRoutePath : [{ name: 'Kapampangan Restaurant Stop #1', municipality: 'Pampanga', image: '/restaurants/authentic_sisig.jpg' }]).map((stop, pIdx) => {
                       const currentSlotImg = slotPhotos[pIdx] !== undefined ? slotPhotos[pIdx] : (completionPhotos[pIdx] || stop.image);
 
                       return (
@@ -26677,7 +26697,15 @@ ${rawText}`;
 
                           <div className="aspect-4/3 rounded-lg overflow-hidden border border-[#E9E5DE] dark:border-[#2E2A24] bg-[#FAF8F5] dark:bg-[#12100E] relative shadow-inner">
                             {currentSlotImg ? (
-                              <img src={currentSlotImg} className="w-full h-full object-cover" alt={stop.name} />
+                              <img
+                                src={currentSlotImg}
+                                className="w-full h-full object-cover"
+                                alt={stop.name}
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = '/restaurants/authentic_sisig.jpg';
+                                }}
+                              />
                             ) : (
                               <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center text-charcoal-light dark:text-gray-400 space-y-1">
                                 <span className="text-2xl">📷</span>
