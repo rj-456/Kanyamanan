@@ -1089,6 +1089,8 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCorridor, setSelectedCorridor] = useState('All');
   const [selectedMunicipality, setSelectedMunicipality] = useState('All');
+  const [munFilterSearch, setMunFilterSearch] = useState('');
+  const [isMobileMunExpanded, setIsMobileMunExpanded] = useState(false);
 
   // Horizontal Municipalities Bar: Touch Swipe, Mouse Drag-to-Scroll & Auto-Scroll
   const munScrollRef = useRef(null);
@@ -4860,6 +4862,13 @@ So, where do we start? 😊`,
     });
     return counts;
   }, [restaurants]);
+
+  // Filtered Municipalities list based on inline search query
+  const filteredMunicipalities = useMemo(() => {
+    if (!munFilterSearch || !munFilterSearch.trim()) return MUNICIPALITIES;
+    const q = munFilterSearch.toLowerCase().trim();
+    return MUNICIPALITIES.filter(m => m.toLowerCase().includes(q));
+  }, [munFilterSearch]);
 
   // Alphabetically Sorted Restaurants Helper (A to Z)
   const sortedRestaurants = useMemo(() => {
@@ -20695,7 +20704,7 @@ ${rawText}`;
               className="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-xl shadow-md border border-[#E9E5DE] dark:border-[#2E2A24] shrink-0 bg-white dark:bg-[#1E1B18] p-0.5"
             />
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-caramel to-saffron m-0 flex items-center gap-1.5 leading-none truncate">
+              <h1 className="text-lg sm:text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron m-0 flex items-center gap-1.5 leading-none truncate">
                 Kanyamanan
               </h1>
               <p className="text-[9px] sm:text-[10px] text-charcoal-light dark:text-gray-400 font-medium tracking-wide mt-0.5 hidden xl:block truncate">
@@ -21010,11 +21019,19 @@ ${rawText}`;
         {activeView === 'homepage' && (
           <div className="space-y-6">
 
-            {/* Hero Section with Kapampangan Cultural & Food Imagery */}
-            <div className="bento-card relative overflow-hidden p-4 sm:p-5 md:p-6 lg:p-7 bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFEB] dark:from-[#1E1B18] dark:via-[#171513] dark:to-[#12100E] border border-[#E9E5DE] dark:border-[#2E2A24] rounded-3xl shadow-sm">
-              {/* Background Parul Sampernandu (Giant Lantern) & Mount Arayat Outline Watermark */}
-              <div className="absolute right-0 bottom-0 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 text-terracotta/10 dark:text-terracotta/5 opacity-25 pointer-events-none z-0">
-                <svg viewBox="0 0 100 100" className="w-full h-full stroke-current fill-none" strokeWidth="0.8">
+            {/* Futuristic Hero Section: Atmospheric Glassmorphism with Volumetric Ambient Neon Lighting */}
+            <div className="relative overflow-hidden rounded-[2.2rem] p-5 sm:p-7 md:p-8 lg:p-9 transition-all duration-500 bg-white/85 dark:bg-[#0A0908]/95 border border-terracotta/25 dark:border-white/10 shadow-[0_20px_60px_-15px_rgba(200,90,50,0.14)] dark:shadow-[0_30px_90px_-20px_rgba(0,0,0,0.85)] backdrop-blur-2xl">
+              {/* Volumetric Radial Ambient Neon Glows (Inspired by Futuristic Dark Aesthetics) */}
+              <div className="pointer-events-none absolute -top-32 -left-32 w-96 h-96 rounded-full bg-gradient-to-br from-terracotta/25 via-caramel/15 to-transparent blur-3xl dark:from-terracotta/35 dark:via-caramel/20"></div>
+              <div className="pointer-events-none absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-gradient-to-tl from-ube/20 via-saffron/15 to-transparent blur-3xl dark:from-ube/30 dark:via-saffron/20"></div>
+              <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-caramel/10 dark:bg-caramel/15 blur-3xl"></div>
+
+              {/* Futuristic Cyber-Grid Matrix Texture Overlay */}
+              <div className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.08] bg-[radial-gradient(#C85A32_1.5px,transparent_1.5px)] [background-size:24px_24px]"></div>
+
+              {/* Radiant Geometric Parul Sampernandu (Giant Lantern) Watermark */}
+              <div className="absolute right-0 bottom-0 w-72 h-72 sm:w-88 sm:h-88 lg:w-[420px] lg:h-[420px] text-terracotta/15 dark:text-terracotta/10 opacity-30 pointer-events-none z-0">
+                <svg viewBox="0 0 100 100" className="w-full h-full stroke-current fill-none" strokeWidth="0.75">
                   <polygon points="50,15 57,38 80,38 61,52 69,75 50,60 31,75 39,52 20,38 43,38" />
                   <circle cx="50" cy="50" r="30" />
                   <circle cx="50" cy="50" r="42" />
@@ -21026,178 +21043,228 @@ ${rawText}`;
               </div>
 
               <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-                {/* Left Column: Rich Editorial Typography, Feature Pills & Quick Actions */}
-                <div className="lg:col-span-6 space-y-3.5 sm:space-y-4.5 text-left">
-                  {/* Top Cultural Badge */}
-                  <div className="inline-flex flex-wrap items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-gradient-to-r from-terracotta/15 via-[#FFF8F3]/5 to-saffron/15 dark:from-terracotta/25 dark:via-[#26211C] dark:to-saffron/25 border border-terracotta/30 dark:border-terracotta/40 shadow-xs backdrop-blur-xs max-w-full">
-                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-gradient-to-br from-terracotta to-[#D9531E] text-white text-[10px] shadow-xs shrink-0">
-                      ✨
-                    </span>
-                    <span className="text-[10.5px] sm:text-xs font-black tracking-wider uppercase text-charcoal dark:text-[#F7F5F0] whitespace-nowrap">
-                      Manyaman a Kayamanan
-                    </span>
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-terracotta/50 shrink-0"></span>
-                    <span className="text-[9.5px] sm:text-[11px] font-extrabold tracking-wide uppercase text-terracotta whitespace-nowrap">
-                      Culinary Heritage of Pampanga
+                {/* Left Column: Futuristic Editorial Typography & Interactive Feature Dock */}
+                <div className="lg:col-span-6 space-y-4 sm:space-y-5 text-left">
+                  {/* Top Brand Pill: DISCOVER • PLAN • TASTE • REMEMBER */}
+                  <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1.5 rounded-full bg-gradient-to-r from-terracotta/15 via-[#FFF6F0] to-terracotta/15 dark:from-terracotta/25 dark:via-[#1A1410] dark:to-terracotta/25 border border-terracotta/40 dark:border-terracotta/50 shadow-xs backdrop-blur-md">
+                    <span className="text-[9.5px] sm:text-[11px] font-black tracking-widest uppercase text-terracotta dark:text-caramel-light whitespace-nowrap flex items-center gap-2">
+                      <span>DISCOVER</span>
+                      <span className="text-terracotta/50 dark:text-terracotta/60 text-[8px]">•</span>
+                      <span>PLAN</span>
+                      <span className="text-terracotta/50 dark:text-terracotta/60 text-[8px]">•</span>
+                      <span>TASTE</span>
+                      <span className="text-terracotta/50 dark:text-terracotta/60 text-[8px]">•</span>
+                      <span>REMEMBER</span>
                     </span>
                   </div>
 
-                  {/* Main Headline */}
-                  <div className="space-y-1">
-                    <h2 className="text-2xl xs:text-3xl sm:text-4xl lg:text-[40px] xl:text-[46px] font-black text-[#1E1915] dark:text-white tracking-tight leading-[1.12] m-0 drop-shadow-xs">
+                  {/* Main Futuristic Headline with Luminous Gradients */}
+                  <div className="space-y-1.5">
+                    <h2 className="text-3xl xs:text-4xl sm:text-5xl lg:text-[44px] xl:text-[50px] font-black text-[#1A1410] dark:text-white tracking-tight leading-[1.08] m-0 drop-shadow-sm">
                       Mekeni, Mangan Tana!
                     </h2>
-                    <div className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-caramel to-saffron tracking-tight">
+                    <div className="text-base xs:text-lg sm:text-xl md:text-2xl lg:text-[26px] font-black text-transparent bg-clip-text bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron tracking-tight">
                       Explore Pampanga’s Culinary Map and more!
                     </div>
                   </div>
 
-                  {/* Fast, Entertaining & Easy-to-Read Intro */}
+                  {/* Fast, Entertaining Intro */}
                   <p className="text-xs xs:text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed font-medium m-0 max-w-xl">
-                    Discover <strong className="text-charcoal dark:text-white font-black bg-terracotta/10 dark:bg-terracotta/20 px-1.5 py-0.5 rounded-md text-terracotta inline-block">Pampanga's best heirloom flavors</strong>, legendary local kitchens across all <strong className="text-[#1E1915] dark:text-white font-bold">22 towns</strong>, and top tourist spots — powered by smart <strong className="text-[#1E1915] dark:text-white font-bold">AI food trails</strong> and instant <strong className="text-[#1E1915] dark:text-white font-bold">health insights</strong>! 🍲✨
+                    Discover <strong className="text-charcoal dark:text-white font-black bg-terracotta/10 dark:bg-terracotta/20 px-2 py-0.5 rounded-lg text-terracotta inline-block border border-terracotta/20">Pampanga's best heirloom flavors</strong>, legendary local kitchens across all <strong className="text-charcoal dark:text-white font-bold">22 towns</strong>, and top tourist spots — powered by smart <strong className="text-charcoal dark:text-white font-bold">AI food trails</strong> and instant <strong className="text-charcoal dark:text-white font-bold">health insights</strong>! 🍲✨
                   </p>
 
-                  {/* Fun, Fast-to-Scan Feature Cards */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 pt-1 w-full max-w-2xl lg:max-w-none">
-                    <div className="bg-gradient-to-b from-white to-[#FFF9F5] dark:from-[#1E1B18] dark:to-[#25201B] p-2 sm:py-2.5 sm:px-3 rounded-xl sm:rounded-2xl border border-terracotta/20 dark:border-terracotta/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
-                      <span className="text-base sm:text-lg">🍲</span>
-                      <span className="text-[10.5px] sm:text-xs font-black text-charcoal dark:text-white mt-0.5">22 Towns</span>
-                      <span className="text-[8px] sm:text-[8.5px] font-extrabold text-terracotta uppercase tracking-wide">Authentic Eats</span>
-                    </div>
-                    <div className="bg-gradient-to-b from-white to-calamansi-soft/50 dark:from-[#1E1B18] dark:to-calamansi-dark/20 p-2 sm:py-2.5 sm:px-3 rounded-xl sm:rounded-2xl border border-calamansi/25 dark:border-calamansi/35 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
-                      <span className="text-base sm:text-lg">🌿</span>
-                      <span className="text-[10.5px] sm:text-xs font-black text-charcoal dark:text-white mt-0.5">Health Data</span>
-                      <span className="text-[8px] sm:text-[8.5px] font-extrabold text-calamansi dark:text-calamansi-light uppercase tracking-wide">Allergens &amp; Diet</span>
-                    </div>
-                    <div className="bg-gradient-to-b from-white to-[#FFFDF5] dark:from-[#1E1B18] dark:to-[#25231B] p-2 sm:py-2.5 sm:px-3 rounded-xl sm:rounded-2xl border border-saffron/25 dark:border-saffron/30 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
-                      <span className="text-base sm:text-lg">🤖</span>
-                      <span className="text-[10.5px] sm:text-xs font-black text-charcoal dark:text-white mt-0.5">AI Trails</span>
-                      <span className="text-[8px] sm:text-[8.5px] font-extrabold text-caramel dark:text-saffron uppercase tracking-wide">Smart Trips</span>
-                    </div>
-                    <div className="bg-gradient-to-b from-white to-ube-soft/50 dark:from-[#1E1B18] dark:to-ube-dark/20 p-2 sm:py-2.5 sm:px-3 rounded-xl sm:rounded-2xl border border-ube/25 dark:border-ube/35 shadow-2xs text-center flex flex-col items-center justify-center hover:scale-102 transition-transform">
-                      <span className="text-base sm:text-lg">⛰️</span>
-                      <span className="text-[10.5px] sm:text-xs font-black text-charcoal dark:text-white mt-0.5">Top Sights</span>
-                      <span className="text-[8px] sm:text-[8.5px] font-extrabold text-ube dark:text-ube-light uppercase tracking-wide">Must-Visit Spots</span>
-                    </div>
+                  {/* 4 Clickable Interactive Holographic Feature Cards (The Navigation Dock) */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1.5 w-full max-w-2xl lg:max-w-none">
+                    {/* Feature 1: 22 Towns -> Smooth scroll down to Municipality Selection & Feed */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const target = document.getElementById('restaurants-section') || document.getElementById('culinary-directory');
+                        if (target) {
+                          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        } else {
+                          window.scrollTo({ top: 600, behavior: 'smooth' });
+                        }
+                      }}
+                      className="group relative p-2.5 sm:py-3 sm:px-3 rounded-2xl text-center flex flex-col items-center justify-between cursor-pointer transition-all duration-300 bg-white/70 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-terracotta/25 dark:border-white/10 hover:border-terracotta dark:hover:border-terracotta shadow-xs hover:shadow-[0_8px_25px_rgba(200,90,50,0.22)] active:scale-95 hover:-translate-y-1 backdrop-blur-md"
+                      title="Explore All 22 Pampanga Municipalities & Cities"
+                    >
+                      <span className="text-lg sm:text-xl group-hover:scale-115 transition-transform duration-300">🍲</span>
+                      <span className="text-[11px] sm:text-xs font-black text-charcoal dark:text-white mt-1">22 Towns</span>
+                      <span className="text-[8px] sm:text-[8.5px] font-black text-terracotta uppercase tracking-wide flex items-center gap-0.5">
+                        Authentic Eats <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                      </span>
+                    </button>
+
+                    {/* Feature 2: Health Data -> Switch to Health / Diet / PlateScan AI Hub */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveView('dashboard');
+                        setDashboardTab('health');
+                      }}
+                      className="group relative p-2.5 sm:py-3 sm:px-3 rounded-2xl text-center flex flex-col items-center justify-between cursor-pointer transition-all duration-300 bg-white/70 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-calamansi/30 dark:border-white/10 hover:border-calamansi dark:hover:border-calamansi shadow-xs hover:shadow-[0_8px_25px_rgba(107,142,35,0.22)] active:scale-95 hover:-translate-y-1 backdrop-blur-md"
+                      title="View Nutritional Intelligence, PlateScan AI & Allergen Filters"
+                    >
+                      <span className="text-lg sm:text-xl group-hover:scale-115 transition-transform duration-300">🌿</span>
+                      <span className="text-[11px] sm:text-xs font-black text-charcoal dark:text-white mt-1">Health Data</span>
+                      <span className="text-[8px] sm:text-[8.5px] font-black text-calamansi dark:text-calamansi-light uppercase tracking-wide flex items-center gap-0.5">
+                        Allergens &amp; Diet <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                      </span>
+                    </button>
+
+                    {/* Feature 3: AI Trails -> Switch to AI Route Planner & Smart Trips */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveView('dashboard');
+                        setDashboardTab('planner');
+                      }}
+                      className="group relative p-2.5 sm:py-3 sm:px-3 rounded-2xl text-center flex flex-col items-center justify-between cursor-pointer transition-all duration-300 bg-white/70 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-saffron/35 dark:border-white/10 hover:border-saffron dark:hover:border-saffron shadow-xs hover:shadow-[0_8px_25px_rgba(229,169,60,0.25)] active:scale-95 hover:-translate-y-1 backdrop-blur-md"
+                      title="Generate Personalized Smart Itineraries & AI Food Trails"
+                    >
+                      <span className="text-lg sm:text-xl group-hover:scale-115 transition-transform duration-300">🤖</span>
+                      <span className="text-[11px] sm:text-xs font-black text-charcoal dark:text-white mt-1">AI Trails</span>
+                      <span className="text-[8px] sm:text-[8.5px] font-black text-caramel dark:text-saffron uppercase tracking-wide flex items-center gap-0.5">
+                        Smart Trips <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                      </span>
+                    </button>
+
+                    {/* Feature 4: Top Sights -> Switch to Tourist Destinations Hub */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveView('dashboard');
+                        setDashboardTab('destinations');
+                      }}
+                      className="group relative p-2.5 sm:py-3 sm:px-3 rounded-2xl text-center flex flex-col items-center justify-between cursor-pointer transition-all duration-300 bg-white/70 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-ube/30 dark:border-white/10 hover:border-ube dark:hover:border-ube shadow-xs hover:shadow-[0_8px_25px_rgba(107,76,123,0.22)] active:scale-95 hover:-translate-y-1 backdrop-blur-md"
+                      title="Discover 52 Pampanga Cultural Destinations & Heritage Sites"
+                    >
+                      <span className="text-lg sm:text-xl group-hover:scale-115 transition-transform duration-300">⛰️</span>
+                      <span className="text-[11px] sm:text-xs font-black text-charcoal dark:text-white mt-1">Top Sights</span>
+                      <span className="text-[8px] sm:text-[8.5px] font-black text-ube dark:text-ube-light uppercase tracking-wide flex items-center gap-0.5">
+                        Must-Visit Spots <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                      </span>
+                    </button>
                   </div>
                 </div>
 
-                {/* Right Column: Kapampangan Food & Tourist Destination Showcase */}
+                {/* Right Column: Cinematic Holographic Food Showcase & Destination Radar */}
                 <div className="lg:col-span-6 flex flex-col items-center lg:items-end w-full">
-                  {/* Top: Iconic Kapampangan Food Showcase (Symmetric Triptych that scales cleanly across all sizes) */}
-                  <div className="grid grid-cols-3 gap-2 sm:gap-2.5 lg:gap-3 items-stretch w-full max-w-2xl lg:max-w-none">
+                  {/* Iconic Kapampangan Food Showcase: Seamless Glass Stage */}
+                  <div className="grid grid-cols-3 gap-2.5 sm:gap-3 items-stretch w-full max-w-2xl lg:max-w-none">
 
-                    {/* Left Flank: Authentic Culinary Classics */}
-                    <div className="flex flex-col gap-2 sm:gap-2.5 h-full justify-between">
+                    {/* Left Flank: Authentic Classics */}
+                    <div className="flex flex-col gap-2.5 h-full justify-between">
                       {/* Card 1: Kare-Kare */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
+                      <div className="flex-1 p-2 rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 hover:border-terracotta/50 shadow-xs hover:shadow-lg transition-all duration-300 text-center group flex flex-col justify-between backdrop-blur-md hover:-translate-y-0.5">
                         <div className="h-16 xs:h-18 sm:h-22 md:h-24 lg:h-18 xl:h-22 rounded-xl overflow-hidden relative shadow-2xs w-full">
                           <img
                             src="/dishes/kare_kare.jpg"
                             alt="Authentic Kapampangan Kare-Kare Stew"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                             onError={(e) => { e.target.src = "/restaurants/candaba/dishes/crispy_karekare.jpg"; }}
                           />
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7px] xs:text-[7.5px] sm:text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white text-[7.5px] sm:text-[8px] font-black px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                             🥜 Kare-Kare
                           </span>
                         </div>
-                        <div className="pt-1 text-center">
-                          <span className="font-extrabold text-[10px] xs:text-[11px] sm:text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Kare-Kare</span>
-                          <span className="text-[7.5px] xs:text-[8px] sm:text-[8.5px] font-black text-caramel dark:text-caramel-light block mt-0.5 uppercase tracking-wide truncate">Peanut Stew</span>
+                        <div className="pt-1.5 text-center">
+                          <span className="font-extrabold text-[10.5px] sm:text-xs text-charcoal dark:text-white block leading-tight truncate">Kare-Kare</span>
+                          <span className="text-[7.5px] sm:text-[8.5px] font-black text-caramel dark:text-caramel-light block mt-0.5 uppercase tracking-wide truncate">Peanut Stew</span>
                         </div>
                       </div>
 
                       {/* Card 2: Bringhe */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
+                      <div className="flex-1 p-2 rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 hover:border-terracotta/50 shadow-xs hover:shadow-lg transition-all duration-300 text-center group flex flex-col justify-between backdrop-blur-md hover:-translate-y-0.5">
                         <div className="h-16 xs:h-18 sm:h-22 md:h-24 lg:h-18 xl:h-22 rounded-xl overflow-hidden relative shadow-2xs w-full">
                           <img
                             src="/dishes/bringhe.jpg"
                             alt="Kapampangan Bringhe Fiesta Rice"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                             onError={(e) => { e.target.src = "/restaurants/candaba/dishes/paco_enselada.jpg"; }}
                           />
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7px] xs:text-[7.5px] sm:text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white text-[7.5px] sm:text-[8px] font-black px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                             🥥 Bringhe
                           </span>
                         </div>
-                        <div className="pt-1 text-center">
-                          <span className="font-extrabold text-[10px] xs:text-[11px] sm:text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Bringhe Rice</span>
-                          <span className="text-[7.5px] xs:text-[8px] sm:text-[8.5px] font-black text-bananaleaf block mt-0.5 uppercase tracking-wide truncate">Fiesta Dish</span>
+                        <div className="pt-1.5 text-center">
+                          <span className="font-extrabold text-[10.5px] sm:text-xs text-charcoal dark:text-white block leading-tight truncate">Bringhe Rice</span>
+                          <span className="text-[7.5px] sm:text-[8.5px] font-black text-bananaleaf dark:text-emerald-400 block mt-0.5 uppercase tracking-wide truncate">Fiesta Dish</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Center Column: Prominent Large Sisig Focal Piece */}
-                    <div className="h-full flex flex-col justify-between bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2.5 rounded-2xl border-2 border-terracotta shadow-md ring-2 ring-terracotta/20 hover:shadow-lg transition-all text-center group">
-                      <div className="w-full h-full min-h-[130px] xs:min-h-[145px] sm:min-h-[180px] md:min-h-[200px] lg:min-h-[160px] xl:min-h-[190px] flex-1 rounded-xl overflow-hidden relative shadow-2xs">
+                    {/* Center Piece: Luminous Hero Sisig Focal Stage */}
+                    <div className="h-full flex flex-col justify-between p-2 sm:p-2.5 rounded-2xl bg-gradient-to-b from-white to-[#FFF9F5] dark:from-[#1A1410] dark:to-[#120E0B] border-2 border-terracotta shadow-[0_12px_35px_rgba(200,90,50,0.22)] ring-4 ring-terracotta/15 hover:shadow-[0_16px_45px_rgba(200,90,50,0.32)] transition-all duration-300 text-center group hover:-translate-y-1">
+                      <div className="w-full h-full min-h-[130px] xs:min-h-[145px] sm:min-h-[180px] md:min-h-[200px] lg:min-h-[160px] xl:min-h-[190px] flex-1 rounded-xl overflow-hidden relative shadow-inner">
                         <img
                           src="/restaurants/authentic_sisig.jpg"
                           alt="Authentic Kapampangan Sizzling Sisig"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                           onError={(e) => { e.target.src = "/restaurants/candaba/dishes/sizzling_sisig.jpg"; }}
                         />
-                        <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 bg-terracotta text-white text-[8px] xs:text-[8.5px] sm:text-[9.5px] font-black px-2 sm:px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap border border-white/30">
-                          🔥 Sizzling Sisig
+                        <span className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-terracotta to-[#E0531D] text-white text-[8.5px] sm:text-[9.5px] font-black px-2.5 py-0.5 rounded-full shadow-lg whitespace-nowrap border border-white/40 flex items-center gap-1">
+                          <span className="animate-pulse">🔥</span> Sizzling Sisig
                         </span>
                       </div>
-                      <div className="pt-1.5 text-center shrink-0">
-                        <span className="font-black text-[11px] xs:text-xs sm:text-sm text-charcoal dark:text-[#F7F5F0] block leading-tight">Culinary Capital</span>
-                        <span className="text-[7.5px] xs:text-[8.5px] sm:text-[9px] font-black text-terracotta block mt-0.5 uppercase tracking-wide">Authentic Food</span>
+                      <div className="pt-2 text-center shrink-0">
+                        <span className="font-black text-xs sm:text-sm text-charcoal dark:text-white block leading-tight">Culinary Capital</span>
+                        <span className="text-[8px] sm:text-[9px] font-black text-terracotta uppercase tracking-wider block mt-0.5">Authentic Heritage</span>
                       </div>
                     </div>
 
-                    {/* Right Flank: Crispy Pata & Desserts */}
-                    <div className="flex flex-col gap-2 sm:gap-2.5 h-full justify-between">
+                    {/* Right Flank: Crispy Pata & Sweets */}
+                    <div className="flex flex-col gap-2.5 h-full justify-between">
                       {/* Card 3: Crispy Pata */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
+                      <div className="flex-1 p-2 rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 hover:border-terracotta/50 shadow-xs hover:shadow-lg transition-all duration-300 text-center group flex flex-col justify-between backdrop-blur-md hover:-translate-y-0.5">
                         <div className="h-16 xs:h-18 sm:h-22 md:h-24 lg:h-18 xl:h-22 rounded-xl overflow-hidden relative shadow-2xs w-full">
                           <img
                             src="/dishes/crispy_pata.jpg"
                             alt="Kapampangan Crispy Pata"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                             onError={(e) => { e.target.src = "/restaurants/candaba/dishes/lechon_kawali.jpg"; }}
                           />
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7px] xs:text-[7.5px] sm:text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white text-[7.5px] sm:text-[8px] font-black px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                             🍖 Crispy Pata
                           </span>
                         </div>
-                        <div className="pt-1 text-center">
-                          <span className="font-extrabold text-[10px] xs:text-[11px] sm:text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Crispy Pata</span>
-                          <span className="text-[7.5px] xs:text-[8px] sm:text-[8.5px] font-black text-terracotta block mt-0.5 uppercase tracking-wide truncate">Signature Meat</span>
+                        <div className="pt-1.5 text-center">
+                          <span className="font-extrabold text-[10.5px] sm:text-xs text-charcoal dark:text-white block leading-tight truncate">Crispy Pata</span>
+                          <span className="text-[7.5px] sm:text-[8.5px] font-black text-terracotta block mt-0.5 uppercase tracking-wide truncate">Signature Meat</span>
                         </div>
                       </div>
 
                       {/* Card 4: Halo-Halo */}
-                      <div className="flex-1 bg-white dark:bg-[#1E1B18] p-1.5 sm:p-2 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs hover:shadow-md transition-all text-center group flex flex-col justify-between">
+                      <div className="flex-1 p-2 rounded-2xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 hover:border-terracotta/50 shadow-xs hover:shadow-lg transition-all duration-300 text-center group flex flex-col justify-between backdrop-blur-md hover:-translate-y-0.5">
                         <div className="h-16 xs:h-18 sm:h-22 md:h-24 lg:h-18 xl:h-22 rounded-xl overflow-hidden relative shadow-2xs w-full">
                           <img
                             src="/dishes/halo_halo.jpg"
                             alt="Special Kapampangan Halo-Halo"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                             onError={(e) => { e.target.src = "/restaurants/candaba/dishes/buko_halo_halo.jpg"; }}
                           />
-                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[7px] xs:text-[7.5px] sm:text-[8px] font-black px-1.5 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
+                          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white text-[7.5px] sm:text-[8px] font-black px-2 py-0.5 rounded-full border border-white/20 whitespace-nowrap shadow-xs">
                             🍧 Halo-Halo
                           </span>
                         </div>
-                        <div className="pt-1 text-center">
-                          <span className="font-extrabold text-[10px] xs:text-[11px] sm:text-xs text-charcoal dark:text-[#F7F5F0] block leading-tight truncate">Halo-Halo</span>
-                          <span className="text-[7.5px] xs:text-[8px] sm:text-[8.5px] font-black text-ube dark:text-ube-light block mt-0.5 uppercase tracking-wide truncate">Ube &amp; Sweet Treat</span>
+                        <div className="pt-1.5 text-center">
+                          <span className="font-extrabold text-[10.5px] sm:text-xs text-charcoal dark:text-white block leading-tight truncate">Halo-Halo</span>
+                          <span className="text-[7.5px] sm:text-[8.5px] font-black text-ube dark:text-ube-light block mt-0.5 uppercase tracking-wide truncate">Ube &amp; Sweet Treat</span>
                         </div>
                       </div>
                     </div>
 
                   </div>
 
-                  {/* Bottom: Smaller Tourist Destination Image Cards Row */}
-                  <div className="mt-4 pt-3 border-t border-[#E9E5DE]/80 dark:border-[#2E2A24]/80 w-full max-w-2xl lg:max-w-none">
-                    <div className="flex items-center justify-between mb-1.5 px-0.5">
-                      <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-charcoal-light dark:text-gray-400 flex items-center gap-1">
-                        <span>🧭</span> Top Tourist Destinations to Visit
+                  {/* Destination Radar: Futuristic Translucent Horizontal Bar */}
+                  <div className="mt-4 pt-3.5 border-t border-black/5 dark:border-white/10 w-full max-w-2xl lg:max-w-none">
+                    <div className="flex items-center justify-between mb-2 px-1">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-charcoal-light dark:text-gray-300 flex items-center gap-1.5">
+                        <span className="animate-spin" style={{ animationDuration: '6s' }}>🧭</span> Destination Radar
                       </span>
-                      <span className="text-[8.5px] font-black text-terracotta bg-terracotta/10 dark:bg-terracotta/20 px-1.5 py-0.5 rounded-md">
-                        Add to Trip
+                      <span className="text-[8.5px] font-black text-terracotta dark:text-caramel-light bg-terracotta/10 dark:bg-terracotta/20 px-2 py-0.5 rounded-full border border-terracotta/20">
+                        Featured Sights
                       </span>
                     </div>
 
@@ -21209,7 +21276,7 @@ ${rawText}`;
                           const match = (attractions || []).find(a => a && (a.id === 'attr-arayat-natpark' || (a.name && a.name.includes('Arayat'))));
                           if (match) setSelectedAttraction(match);
                         }}
-                        className="bg-white dark:bg-[#1E1B18] p-1.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center cursor-pointer"
+                        className="p-1.5 rounded-xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 hover:border-terracotta/60 shadow-2xs hover:shadow-md transition-all duration-300 group text-center cursor-pointer backdrop-blur-md hover:-translate-y-0.5"
                       >
                         <div className="h-12 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
                           <img
@@ -21218,11 +21285,11 @@ ${rawText}`;
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             onError={(e) => { e.target.src = "/attractions/mt_arayat_park.jpg"; }}
                           />
-                          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[6.5px] font-black px-1 py-0.2 rounded whitespace-nowrap">
+                          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white text-[7px] font-black px-1.5 py-0.2 rounded-full whitespace-nowrap">
                             ⛰️ Nature
                           </span>
                         </div>
-                        <span className="text-[9px] font-extrabold text-charcoal dark:text-gray-200 block truncate mt-1">
+                        <span className="text-[9.5px] font-extrabold text-charcoal dark:text-gray-100 block truncate mt-1">
                           Mt. Arayat
                         </span>
                       </button>
@@ -21234,7 +21301,7 @@ ${rawText}`;
                           const match = (attractions || []).find(a => a && (a.id === 'attr-betis' || (a.name && a.name.includes('Betis'))));
                           if (match) setSelectedAttraction(match);
                         }}
-                        className="bg-white dark:bg-[#1E1B18] p-1.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center cursor-pointer"
+                        className="p-1.5 rounded-xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 hover:border-terracotta/60 shadow-2xs hover:shadow-md transition-all duration-300 group text-center cursor-pointer backdrop-blur-md hover:-translate-y-0.5"
                       >
                         <div className="h-12 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
                           <img
@@ -21243,11 +21310,11 @@ ${rawText}`;
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             onError={(e) => { e.target.src = "/attractions/betis_church_guagua.png"; }}
                           />
-                          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[6.5px] font-black px-1 py-0.2 rounded whitespace-nowrap">
+                          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white text-[7px] font-black px-1.5 py-0.2 rounded-full whitespace-nowrap">
                             🏛️ Church
                           </span>
                         </div>
-                        <span className="text-[9px] font-extrabold text-charcoal dark:text-gray-200 block truncate mt-1">
+                        <span className="text-[9.5px] font-extrabold text-charcoal dark:text-gray-100 block truncate mt-1">
                           Betis Church
                         </span>
                       </button>
@@ -21259,7 +21326,7 @@ ${rawText}`;
                           const match = (attractions || []).find(a => a && (a.id === 'festival-giant-lantern' || (a.name && a.name.includes('Giant Lantern'))));
                           if (match) setSelectedAttraction(match);
                         }}
-                        className="bg-white dark:bg-[#1E1B18] p-1.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center cursor-pointer"
+                        className="p-1.5 rounded-xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 hover:border-terracotta/60 shadow-2xs hover:shadow-md transition-all duration-300 group text-center cursor-pointer backdrop-blur-md hover:-translate-y-0.5"
                       >
                         <div className="h-12 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
                           <img
@@ -21268,11 +21335,11 @@ ${rawText}`;
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             onError={(e) => { e.target.src = "/attractions/giant_lantern_san_fernando.png"; }}
                           />
-                          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[6.5px] font-black px-1 py-0.2 rounded whitespace-nowrap">
+                          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white text-[7px] font-black px-1.5 py-0.2 rounded-full whitespace-nowrap">
                             ✨ Lanterns
                           </span>
                         </div>
-                        <span className="text-[9px] font-extrabold text-charcoal dark:text-gray-200 block truncate mt-1">
+                        <span className="text-[9.5px] font-extrabold text-charcoal dark:text-gray-100 block truncate mt-1">
                           Giant Lantern
                         </span>
                       </button>
@@ -21284,7 +21351,7 @@ ${rawText}`;
                           const match = (attractions || []).find(a => a && (a.id === 'festival-majigangga' || (a.name && a.name.includes('Majigangga'))));
                           if (match) setSelectedAttraction(match);
                         }}
-                        className="bg-white dark:bg-[#1E1B18] p-1.5 rounded-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-2xs hover:shadow-md transition-all group text-center cursor-pointer"
+                        className="p-1.5 rounded-xl bg-white/70 dark:bg-white/5 border border-white/60 dark:border-white/10 hover:border-terracotta/60 shadow-2xs hover:shadow-md transition-all duration-300 group text-center cursor-pointer backdrop-blur-md hover:-translate-y-0.5"
                       >
                         <div className="h-12 sm:h-11 rounded-lg overflow-hidden relative shadow-2xs">
                           <img
@@ -21293,11 +21360,11 @@ ${rawText}`;
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             onError={(e) => { e.target.src = "/attractions/majigangga_festival.jpg"; }}
                           />
-                          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-xs text-white text-[6.5px] font-black px-1 py-0.2 rounded whitespace-nowrap">
+                          <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md text-white text-[7px] font-black px-1.5 py-0.2 rounded-full whitespace-nowrap">
                             🎭 Festival
                           </span>
                         </div>
-                        <span className="text-[9px] font-extrabold text-charcoal dark:text-gray-200 block truncate mt-1">
+                        <span className="text-[9.5px] font-extrabold text-charcoal dark:text-gray-100 block truncate mt-1">
                           Majigangga
                         </span>
                       </button>
@@ -21307,25 +21374,59 @@ ${rawText}`;
               </div>
             </div>
 
-            {/* Mobile & Tablet Horizontal Municipality Strip (< lg) */}
-            <div className="lg:hidden space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-wider text-charcoal dark:text-white flex items-center gap-1.5">
-                  <MapPin className="h-3.5 w-3.5 text-terracotta" /> Municipalities ({MUNICIPALITIES.length})
-                </span>
+            {/* Mobile & Tablet Horizontal Municipality Strip & Expandable Grid (< lg) */}
+            <div id="culinary-directory" className="lg:hidden space-y-3">
+              {/* Responsive Toolbar: Heading, Active Status, Expand Grid Toggle & Navigation Arrows */}
+              <div className="flex items-center justify-between gap-2 bg-white/85 dark:bg-[#1A1714]/90 backdrop-blur-md p-2.5 sm:p-3 rounded-2xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-xs">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-terracotta/15 to-saffron/20 dark:from-terracotta/25 dark:to-saffron/25 text-terracotta dark:text-orange-400 flex items-center justify-center shadow-2xs border border-terracotta/20 shrink-0">
+                    <MapPin className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-black uppercase tracking-wider text-charcoal dark:text-white truncate">
+                        Municipalities &amp; Cities
+                      </span>
+                      <span className="text-[10px] font-bold text-charcoal-light dark:text-gray-400 bg-black/5 dark:bg-white/10 px-1.5 py-0.2 rounded-full">
+                        {MUNICIPALITIES.length}
+                      </span>
+                    </div>
+                    <p className="text-[9.5px] text-charcoal-light dark:text-gray-400 font-medium truncate m-0">
+                      Swipe or expand to browse
+                    </p>
+                  </div>
+                </div>
 
-                {/* Controls: Swipe Notice & Interactive Scroll Buttons */}
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-charcoal-light dark:text-gray-400 font-semibold hidden sm:inline select-none">
-                    Swipe or drag to explore
-                  </span>
-                  <div className="flex items-center gap-1">
+                {/* Controls: Reset + Expand All 22 Toggle + Tablet Arrows */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {selectedMunicipality !== 'All' && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMunicipality('All')}
+                      className="px-2 py-1 rounded-lg text-[10px] font-black uppercase bg-terracotta/10 text-terracotta dark:bg-terracotta/20 dark:text-orange-300 hover:bg-terracotta hover:text-white transition-all cursor-pointer"
+                    >
+                      Reset
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileMunExpanded(!isMobileMunExpanded)}
+                    className={`px-2.5 py-1.5 rounded-xl border text-[11px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${isMobileMunExpanded
+                      ? 'bg-gradient-to-r from-terracotta to-[#E0531A] text-white border-transparent shadow-xs'
+                      : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/50'
+                      }`}
+                    title={isMobileMunExpanded ? "Collapse to row" : "Expand all 22 areas"}
+                  >
+                    <span>{isMobileMunExpanded ? "Collapse" : "All 22"}</span>
+                    {isMobileMunExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                  </button>
+
+                  <div className="hidden sm:flex items-center gap-1 pl-1 border-l border-[#E9E5DE] dark:border-[#2E2A24]">
                     <button
                       type="button"
                       onClick={() => handleMunScroll('left')}
                       className="w-7 h-7 rounded-lg bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal dark:text-gray-200 flex items-center justify-center hover:bg-terracotta hover:text-white hover:border-terracotta transition-all shadow-2xs cursor-pointer active:scale-90"
-                      aria-label="Scroll municipalities left"
-                      title="Scroll left"
+                      aria-label="Scroll left"
                     >
                       <ChevronLeft className="h-3.5 w-3.5" />
                     </button>
@@ -21333,8 +21434,7 @@ ${rawText}`;
                       type="button"
                       onClick={() => handleMunScroll('right')}
                       className="w-7 h-7 rounded-lg bg-white dark:bg-[#1E1B18] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal dark:text-gray-200 flex items-center justify-center hover:bg-terracotta hover:text-white hover:border-terracotta transition-all shadow-2xs cursor-pointer active:scale-90"
-                      aria-label="Scroll municipalities right"
-                      title="Scroll right"
+                      aria-label="Scroll right"
                     >
                       <ChevronRight className="h-3.5 w-3.5" />
                     </button>
@@ -21342,57 +21442,127 @@ ${rawText}`;
                 </div>
               </div>
 
-              {/* Horizontal Scrollable Row: Touch Pan & Mouse Drag to Scroll */}
-              <div className="relative">
-                <div
-                  ref={munScrollRef}
-                  onMouseDown={handleMunMouseDown}
-                  onMouseMove={handleMunMouseMove}
-                  onMouseUp={handleMunMouseUp}
-                  onMouseLeave={handleMunMouseLeave}
-                  onScroll={checkMunScroll}
-                  className="flex overflow-x-auto gap-1.5 pb-2 pt-0.5 no-scrollbar touch-pan-x overscroll-x-contain select-none cursor-grab active:cursor-grabbing scroll-smooth"
-                >
-                  <button
-                    type="button"
-                    data-active={selectedMunicipality === 'All'}
-                    onClick={(e) => {
-                      if (hasDraggedMunRef.current) {
-                        e.preventDefault();
-                        return;
-                      }
-                      setSelectedMunicipality('All');
-                    }}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer whitespace-nowrap select-none ${selectedMunicipality === 'All'
-                      ? 'bg-terracotta text-white shadow-xs font-black ring-2 ring-terracotta/20 scale-102'
-                      : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/40'
-                      }`}
-                  >
-                    All ({restaurants.length})
-                  </button>
+              {/* View A: Expanded Responsive Grid Mode (2 cols mobile, 3-4 cols tablet) */}
+              {isMobileMunExpanded ? (
+                <div className="p-3 sm:p-4 rounded-2xl bg-white/95 dark:bg-[#161412]/95 backdrop-blur-xl border border-[#E9E5DE] dark:border-[#2E2A24] shadow-md space-y-2.5 animate-slide-down">
+                  {/* Inline Town Search Filter */}
+                  <div className="relative">
+                    <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-light dark:text-gray-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      placeholder="Search town or city..."
+                      value={munFilterSearch}
+                      onChange={(e) => setMunFilterSearch(e.target.value)}
+                      style={{ paddingLeft: '34px' }}
+                      className="w-full pr-7 py-1.5 rounded-xl text-xs bg-[#FAF8F5] dark:bg-[#1A1714] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal dark:text-white placeholder-charcoal-light/70 dark:placeholder-gray-500 focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta shadow-2xs"
+                    />
+                    {munFilterSearch && (
+                      <button
+                        type="button"
+                        onClick={() => setMunFilterSearch('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-charcoal-light dark:text-gray-400 hover:text-terracotta p-0.5"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
 
-                  {MUNICIPALITIES.map(mun => (
+                  {/* Responsive Grid of Municipality Chips */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 max-h-72 overflow-y-auto pr-1">
                     <button
-                      key={mun}
                       type="button"
-                      data-active={selectedMunicipality === mun}
+                      onClick={() => { setSelectedMunicipality('All'); setIsMobileMunExpanded(false); }}
+                      className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${selectedMunicipality === 'All'
+                        ? 'bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron text-white shadow-xs font-black'
+                        : 'bg-[#FAF8F5] dark:bg-[#1A1714] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/40'
+                        }`}
+                    >
+                      <span className="truncate">All Locations</span>
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full shrink-0 ${selectedMunicipality === 'All' ? 'bg-white/25 text-white font-black' : 'bg-black/5 dark:bg-white/10 text-charcoal-light dark:text-gray-400'}`}>
+                        {restaurants.length}
+                      </span>
+                    </button>
+                    {filteredMunicipalities.map((mun) => {
+                      const isSelected = selectedMunicipality === mun;
+                      const count = municipalityCounts[mun] || 0;
+                      return (
+                        <button
+                          key={mun}
+                          type="button"
+                          onClick={() => { setSelectedMunicipality(mun); setIsMobileMunExpanded(false); }}
+                          className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${isSelected
+                            ? 'bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron text-white shadow-xs font-black'
+                            : 'bg-[#FAF8F5] dark:bg-[#1A1714] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/40'
+                            }`}
+                        >
+                          <span className="truncate pr-1">{mun}</span>
+                          <span className={`text-[10px] px-1.5 py-0.2 rounded-full shrink-0 ${isSelected ? 'bg-white/25 text-white font-black' : 'bg-black/5 dark:bg-white/10 text-charcoal-light dark:text-gray-400'}`}>
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                /* View B: Horizontal Scrollable Strip with Edge Masks */
+                <div className="relative">
+                  {/* Left edge shadow indicator */}
+                  <div className={`pointer-events-none absolute left-0 inset-y-0 w-6 bg-gradient-to-r from-ivory dark:from-[#121110] to-transparent z-10 transition-opacity duration-200 ${canScrollMunLeft ? 'opacity-100' : 'opacity-0'}`} />
+
+                  {/* Right edge shadow indicator */}
+                  <div className={`pointer-events-none absolute right-0 inset-y-0 w-8 bg-gradient-to-l from-ivory dark:from-[#121110] to-transparent z-10 transition-opacity duration-200 ${canScrollMunRight ? 'opacity-100' : 'opacity-0'}`} />
+
+                  <div
+                    ref={munScrollRef}
+                    onMouseDown={handleMunMouseDown}
+                    onMouseMove={handleMunMouseMove}
+                    onMouseUp={handleMunMouseUp}
+                    onMouseLeave={handleMunMouseLeave}
+                    onScroll={checkMunScroll}
+                    className="flex overflow-x-auto gap-1.5 pb-2 pt-0.5 no-scrollbar touch-pan-x overscroll-x-contain select-none cursor-grab active:cursor-grabbing scroll-smooth"
+                  >
+                    <button
+                      type="button"
+                      data-active={selectedMunicipality === 'All'}
                       onClick={(e) => {
                         if (hasDraggedMunRef.current) {
                           e.preventDefault();
                           return;
                         }
-                        setSelectedMunicipality(mun);
+                        setSelectedMunicipality('All');
                       }}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer whitespace-nowrap select-none ${selectedMunicipality === mun
-                        ? 'bg-terracotta text-white shadow-xs font-black ring-2 ring-terracotta/20 scale-102'
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer whitespace-nowrap select-none ${selectedMunicipality === 'All'
+                        ? 'bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron text-white shadow-xs font-black ring-2 ring-terracotta/20 scale-102'
                         : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/40'
                         }`}
                     >
-                      {mun} ({municipalityCounts[mun] || 0})
+                      All ({restaurants.length})
                     </button>
-                  ))}
+
+                    {MUNICIPALITIES.map(mun => (
+                      <button
+                        key={mun}
+                        type="button"
+                        data-active={selectedMunicipality === mun}
+                        onClick={(e) => {
+                          if (hasDraggedMunRef.current) {
+                            e.preventDefault();
+                            return;
+                          }
+                          setSelectedMunicipality(mun);
+                        }}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer whitespace-nowrap select-none ${selectedMunicipality === mun
+                          ? 'bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron text-white shadow-xs font-black ring-2 ring-terracotta/20 scale-102'
+                          : 'bg-white dark:bg-[#1E1B18] text-charcoal dark:text-gray-200 border border-[#E9E5DE] dark:border-[#2E2A24] hover:border-terracotta/40'
+                          }`}
+                      >
+                        {mun} ({municipalityCounts[mun] || 0})
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Bento Grid: 12-Column Layout */}
@@ -21400,47 +21570,125 @@ ${rawText}`;
 
               {/* Desktop Sidebar: Vertical Municipality List (lg:) */}
               <div className="hidden lg:block lg:col-span-3">
-                <div className="bento-card p-5 bg-white dark:bg-[#1E1B18] space-y-4 border-[#E9E5DE] dark:border-[#2E2A24] sticky top-24">
-                  <div className="flex items-center justify-between pb-2 border-b border-[#E9E5DE] dark:border-[#2E2A24]">
-                    <h3 className="text-xs font-extrabold text-charcoal dark:text-white uppercase tracking-wider flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-terracotta" /> Municipality/City Selection
-                    </h3>
-                    <span className="text-[10px] font-bold text-charcoal-light dark:text-gray-300 bg-[#FAF8F5] dark:bg-[#161412] border border-[#E9E5DE] dark:border-[#2E2A24] px-2 py-0.5 rounded-md">
-                      {MUNICIPALITIES.length} Areas
-                    </span>
+                <div className="relative overflow-hidden rounded-3xl bg-white/90 dark:bg-[#161412]/95 backdrop-blur-xl p-4 sm:p-5 border border-[#E9E5DE] dark:border-[#2E2A24] shadow-[0_15px_40px_-15px_rgba(217,93,57,0.1)] dark:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)] sticky top-24 space-y-3.5 transition-all duration-300">
+                  {/* Subtle Volumetric Ambient Neon Accents */}
+                  <div className="pointer-events-none absolute -top-16 -right-16 w-36 h-36 rounded-full bg-gradient-to-br from-terracotta/20 via-saffron/15 to-transparent blur-2xl"></div>
+                  <div className="pointer-events-none absolute -bottom-16 -left-16 w-32 h-32 rounded-full bg-terracotta/10 blur-xl"></div>
+
+                  {/* Header Title & Subtitle - Fully Visible Without Truncation */}
+                  <div className="relative z-10 pb-3 border-b border-[#E9E5DE]/80 dark:border-[#2E2A24]">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-terracotta/15 to-saffron/20 dark:from-terracotta/25 dark:to-saffron/25 text-terracotta dark:text-orange-400 flex items-center justify-center shadow-2xs border border-terracotta/25 shrink-0">
+                        <MapPin className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-xs font-black text-charcoal dark:text-white uppercase tracking-wide leading-tight m-0 whitespace-normal">
+                          Municipalities &amp; Cities
+                        </h3>
+                        <p className="text-[10px] text-charcoal-light dark:text-gray-400 font-medium m-0 mt-0.5">
+                          22 Pampanga Culinary Hubs
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-1.5 max-h-[520px] overflow-y-auto pr-1">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMunicipality('All')}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${selectedMunicipality === 'All'
-                        ? 'bg-terracotta text-white shadow-sm font-black'
-                        : 'bg-[#FAF8F5] dark:bg-[#161412] hover:bg-white dark:hover:bg-[#25221E] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white border border-[#E9E5DE]/60 dark:border-[#2A2621]'
-                        }`}
-                    >
-                      <span>All Locations</span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full ${selectedMunicipality === 'All' ? 'bg-white/20 text-white font-black' : 'bg-black/5 dark:bg-white/10 text-charcoal-light dark:text-gray-300 font-bold'}`}>
-                        {restaurants.length}
-                      </span>
-                    </button>
+                  {/* Inline Quick Search Field with Clear Button & Explicit Icon Offset */}
+                  <div className="relative z-10">
+                    <div className="relative">
+                      <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-light dark:text-gray-400 pointer-events-none" />
+                      <input
+                        type="text"
+                        placeholder="Search 22 towns..."
+                        value={munFilterSearch}
+                        onChange={(e) => setMunFilterSearch(e.target.value)}
+                        style={{ paddingLeft: '34px' }}
+                        className="w-full pr-8 py-2 rounded-xl text-xs bg-[#FAF8F5] dark:bg-[#1A1714] border border-[#E9E5DE] dark:border-[#2E2A24] text-charcoal dark:text-white placeholder-charcoal-light/70 dark:placeholder-gray-500 focus:outline-none focus:border-terracotta focus:ring-1 focus:ring-terracotta transition-all shadow-2xs"
+                      />
+                      {munFilterSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setMunFilterSearch('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-charcoal-light dark:text-gray-400 hover:text-terracotta transition-colors p-0.5 cursor-pointer"
+                          title="Clear search"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
 
-                    {MUNICIPALITIES.map(mun => (
+                  {/* Vertical Scroll List of Locations */}
+                  <div className="relative z-10 space-y-1.5 max-h-[calc(100vh-270px)] min-h-[300px] overflow-y-auto pr-1 scroll-smooth">
+                    {/* All Locations Master Button */}
+                    {(!munFilterSearch || 'all locations'.includes(munFilterSearch.toLowerCase().trim())) && (
                       <button
-                        key={mun}
                         type="button"
-                        onClick={() => setSelectedMunicipality(mun)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${selectedMunicipality === mun
-                          ? 'bg-terracotta text-white shadow-sm font-black'
-                          : 'bg-[#FAF8F5] dark:bg-[#161412] hover:bg-white dark:hover:bg-[#25221E] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white border border-[#E9E5DE]/60 dark:border-[#2A2621]'
+                        onClick={() => setSelectedMunicipality('All')}
+                        className={`group relative w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-left cursor-pointer ${selectedMunicipality === 'All'
+                          ? 'bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron text-white shadow-md shadow-terracotta/25 border border-white/30 translate-x-1 ring-2 ring-terracotta/30 font-black'
+                          : 'bg-[#FAF8F5]/80 dark:bg-[#1A1714]/80 hover:bg-white dark:hover:bg-[#231F1B] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white border border-[#E9E5DE]/80 dark:border-[#2E2A24]/70 hover:border-terracotta/40 dark:hover:border-terracotta/50 shadow-2xs hover:shadow-xs hover:translate-x-1'
                           }`}
                       >
-                        <span className="truncate pr-1">{mun}</span>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${selectedMunicipality === mun ? 'bg-white/20 text-white font-black' : 'bg-black/5 dark:bg-white/10 text-charcoal-light dark:text-gray-300 font-bold'}`}>
-                          {municipalityCounts[mun] || 0}
+                        {selectedMunicipality !== 'All' && (
+                          <span className="absolute left-1 top-2.5 bottom-2.5 w-1 rounded-full bg-gradient-to-b from-terracotta to-saffron opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                        )}
+                        <span className="truncate font-black">All Locations</span>
+                        <span
+                          className={`text-[10px] px-2.5 py-0.5 rounded-full shrink-0 transition-all ${selectedMunicipality === 'All'
+                            ? 'bg-white/25 text-white backdrop-blur-xs border border-white/40 shadow-xs font-black'
+                            : 'bg-black/5 dark:bg-white/10 text-charcoal-light dark:text-gray-300 group-hover:bg-terracotta/15 group-hover:text-terracotta font-extrabold'
+                            }`}
+                        >
+                          {restaurants.length}
                         </span>
                       </button>
-                    ))}
+                    )}
+
+                    {/* Filtered Municipality Items */}
+                    {filteredMunicipalities.map((mun) => {
+                      const isSelected = selectedMunicipality === mun;
+                      const count = municipalityCounts[mun] || 0;
+                      return (
+                        <button
+                          key={mun}
+                          type="button"
+                          onClick={() => setSelectedMunicipality(mun)}
+                          className={`group relative w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 text-left cursor-pointer ${isSelected
+                            ? 'bg-gradient-to-r from-terracotta via-[#E0531A] to-saffron text-white shadow-md shadow-terracotta/25 border border-white/30 translate-x-1 ring-2 ring-terracotta/30 font-black'
+                            : 'bg-[#FAF8F5]/80 dark:bg-[#1A1714]/80 hover:bg-white dark:hover:bg-[#231F1B] text-charcoal dark:text-gray-200 hover:text-terracotta dark:hover:text-white border border-[#E9E5DE]/80 dark:border-[#2E2A24]/70 hover:border-terracotta/40 dark:hover:border-terracotta/50 shadow-2xs hover:shadow-xs hover:translate-x-1'
+                            }`}
+                        >
+                          {!isSelected && (
+                            <span className="absolute left-1 top-2.5 bottom-2.5 w-1 rounded-full bg-gradient-to-b from-terracotta to-saffron opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                          )}
+                          <span className="truncate pr-2 flex items-center gap-1.5">
+                            {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse shrink-0"></span>}
+                            <span className="truncate">{mun}</span>
+                          </span>
+                          <span
+                            className={`text-[10px] px-2.5 py-0.5 rounded-full shrink-0 transition-all ${isSelected
+                              ? 'bg-white/25 text-white backdrop-blur-xs border border-white/40 shadow-xs font-black'
+                              : 'bg-black/5 dark:bg-white/10 text-charcoal-light dark:text-gray-300 group-hover:bg-terracotta/15 group-hover:text-terracotta font-extrabold'
+                              }`}
+                          >
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+
+                    {filteredMunicipalities.length === 0 && (
+                      <div className="py-6 px-3 text-center text-xs text-charcoal-light dark:text-gray-400 space-y-2 bg-[#FAF8F5] dark:bg-[#1A1714] rounded-xl border border-dashed border-[#E9E5DE] dark:border-[#2E2A24]">
+                        <p className="m-0 font-medium">No towns matching "{munFilterSearch}"</p>
+                        <button
+                          type="button"
+                          onClick={() => setMunFilterSearch('')}
+                          className="px-2.5 py-1 text-[11px] font-bold text-terracotta bg-terracotta/10 rounded-lg hover:bg-terracotta hover:text-white transition-all cursor-pointer"
+                        >
+                          Clear Search
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
