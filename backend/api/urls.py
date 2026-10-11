@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     RestaurantViewSet, MunicipalityViewSet,
     ChangeRequestViewSet, TouristAccountViewSet, TouristItineraryViewSet,
-    RestaurantReviewViewSet, AttractionViewSet,
+    RestaurantReviewViewSet, AttractionViewSet, AttractionReviewViewSet,
     authenticate_user, register_tourist, catalog_menu, scan_plate,
     deleted_restaurants_list
 )
@@ -12,6 +12,8 @@ router = DefaultRouter()
 router.register(r'restaurants', RestaurantViewSet, basename='restaurant')
 router.register(r'reviews', RestaurantReviewViewSet, basename='review')
 router.register(r'attractions', AttractionViewSet, basename='attraction')
+router.register(r'attraction-reviews', AttractionReviewViewSet, basename='attraction-review')
+router.register(r'destination-reviews', AttractionReviewViewSet, basename='destination-review')
 router.register(r'municipalities', MunicipalityViewSet, basename='municipality')
 router.register(r'change-requests', ChangeRequestViewSet, basename='change-request')
 router.register(r'tourist-accounts', TouristAccountViewSet, basename='tourist-account')

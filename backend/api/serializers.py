@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview, Attraction
+from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview, Attraction, AttractionReview
 
 class BranchSerializer(serializers.ModelSerializer):
     branchName = serializers.CharField(source='branch_name')
@@ -177,6 +177,17 @@ class TouristItinerarySerializer(serializers.ModelSerializer):
         model = TouristItinerary
         fields = ['id', 'userAccountKey', 'name', 'stops', 'isFinished', 'updatedAt']
 
+class AttractionReviewSerializer(serializers.ModelSerializer):
+    reviewerName = serializers.CharField(source='reviewer_name', required=False, default='Heritage Explorer')
+    isVerifiedVisitor = serializers.BooleanField(source='is_verified_visitor', required=False, default=True)
+    tripId = serializers.CharField(source='trip_id', required=False, allow_blank=True, default='')
+    createdAt = serializers.DateTimeField(source='created_at', format="%Y-%m-%d %H:%M", read_only=True)
+    attractionId = serializers.CharField(source='attraction.attraction_id', read_only=True)
+
+    class Meta:
+        model = AttractionReview
+        fields = ['id', 'attractionId', 'reviewerName', 'rating', 'comment', 'isVerifiedVisitor', 'tripId', 'createdAt']
+
 class AttractionSerializer(serializers.ModelSerializer):
     id = serializers.CharField(source='attraction_id')
     type = serializers.CharField(source='attraction_type', required=False)
@@ -191,6 +202,8 @@ class AttractionSerializer(serializers.ModelSerializer):
     openingTime = serializers.CharField(source='opening_time', required=False, allow_blank=True, default='')
     closingTime = serializers.CharField(source='closing_time', required=False, allow_blank=True, default='')
     is24Hours = serializers.BooleanField(source='is_24_hours', required=False, default=False)
+    reviews = AttractionReviewSerializer(many=True, read_only=True)
+    averageRating = serializers.SerializerMethodField()
 
     class Meta:
         model = Attraction
@@ -199,6 +212,14 @@ class AttractionSerializer(serializers.ModelSerializer):
             'type', 'isFestival', 'eventDate', 'eventMonth', 'activeMonths',
             'sampleActiveDate', 'scheduleNote', 'announcementNote',
             'description', 'details', 'image',
-            'operatingHours', 'openingTime', 'closingTime', 'is24Hours'
+            'operatingHours', 'openingTime', 'closingTime', 'is24Hours',
+            'reviews', 'averageRating'
         ]
+
+    def get_averageRating(self, obj):
+        revs = obj.reviews.all()
+        if not revs.exists():
+            return None
+        return round(sum(r.rating for r in revs) / revs.count(), 1)
+
 

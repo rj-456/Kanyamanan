@@ -1,7 +1,7 @@
 from typing import Any
 from django.contrib import admin
 from django.db.models import Q
-from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview, Attraction, DeletedRestaurant
+from .models import Municipality, Restaurant, Branch, MenuItem, ChangeRequest, TouristAccount, TouristItinerary, RestaurantReview, Attraction, AttractionReview, DeletedRestaurant
 
 class BranchInline(admin.TabularInline):
     model = Branch
@@ -13,6 +13,11 @@ class MenuItemInline(admin.TabularInline):
 
 class RestaurantReviewInline(admin.TabularInline):
     model = RestaurantReview
+    extra = 0
+    readonly_fields = ('created_at',)
+
+class AttractionReviewInline(admin.TabularInline):
+    model = AttractionReview
     extra = 0
     readonly_fields = ('created_at',)
 
@@ -91,6 +96,14 @@ class AttractionAdmin(admin.ModelAdmin):
     search_fields = ('name', 'municipality', 'description', 'address')
     list_filter = ('municipality', 'attraction_type', 'is_festival')
     ordering = ('name',)
+    inlines: Any = (AttractionReviewInline,)
+
+@admin.register(AttractionReview)
+class AttractionReviewAdmin(admin.ModelAdmin):
+    list_display: Any = ('reviewer_name', 'attraction', 'rating', 'is_verified_visitor', 'created_at')
+    list_filter = ('rating', 'is_verified_visitor', 'created_at')
+    search_fields = ('reviewer_name', 'comment', 'attraction__name')
+    ordering = ('-created_at',)
 
 @admin.register(DeletedRestaurant)
 class DeletedRestaurantAdmin(admin.ModelAdmin):

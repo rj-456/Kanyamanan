@@ -222,6 +222,25 @@ class Attraction(models.Model):
     def __str__(self):
         return f"{self.name} ({self.municipality})"
 
+class AttractionReview(models.Model):
+    attraction = models.ForeignKey(Attraction, related_name='reviews', on_delete=models.CASCADE)
+    reviewer_name = models.CharField(max_length=150, default='Heritage Explorer')
+    rating = models.IntegerField(default=5)  # 1 to 5 stars
+    comment = models.TextField(blank=True, default='')
+    is_verified_visitor = models.BooleanField(default=True)
+    trip_id = models.CharField(max_length=100, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = "Tourist Destination Review"
+        verbose_name_plural = "Tourist Destination Reviews"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.reviewer_name} - {self.rating}★ for {self.attraction.name}"
+
 class DeletedRestaurant(models.Model):
     restaurant_id = models.CharField(max_length=100, unique=True)
     name = models.CharField(max_length=200, blank=True)

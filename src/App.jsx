@@ -101,7 +101,10 @@ import {
   updateDjangoChangeRequest,
   fetchDjangoReviews,
   createDjangoReview,
-  deleteDjangoReview
+  deleteDjangoReview,
+  fetchDjangoDestinationReviews,
+  createDjangoDestinationReview,
+  deleteDjangoDestinationReview
 } from './djangoApi';
 import {
   startCloudReviewsSync,
@@ -1591,6 +1594,20 @@ function App() {
       setDestReviewSuccess(true);
       setTimeout(() => setDestReviewSuccess(false), 4000);
     }
+
+    // Sync to Django REST API backend
+    try {
+      await createDjangoDestinationReview({
+        attractionId: attractionId,
+        reviewerName: reviewer,
+        rating: ratingVal,
+        comment: commentTrimmed,
+        isVerifiedVisitor: true,
+        tripId: newRev.tripId
+      });
+    } catch (err) {
+      console.warn("Django destination review submission warning:", err);
+    }
     setIsSubmittingDestReview(false);
     return true;
   };
@@ -1733,6 +1750,13 @@ function App() {
       }
       return modified ? updated : prev;
     });
+
+    // 5. Delete from Django REST API backend
+    try {
+      deleteDjangoDestinationReview(reviewId);
+    } catch (e) {
+      console.warn("Backend destination review deletion note:", e);
+    }
 
     return true;
   };
@@ -3121,10 +3145,13 @@ function App() {
   const [completionFeedback, setCompletionFeedback] = useState({});
 
   const handleFeedbackSubmitForStop = async (stopId) => {
-    const current = completionFeedback[stopId] || { rating: 5, comment: '' };
-    const commentText = (current.comment || '').trim() || `${current.rating || 5}-star verified culinary visit on our Kapampangan food trip crawl!`;
-    const reviewerName = completionGroupName.trim() || (userProfile?.username && userProfile.username !== 'Guest' ? userProfile.username : 'Kapampangan Guest Explorer');
     const isAttraction = (attractions || []).some(a => a.id === stopId);
+    const current = completionFeedback[stopId] || { rating: 5, comment: '' };
+    const commentText = (current.comment || '').trim() || (isAttraction
+      ? `${current.rating || 5}-star verified heritage visit on our Kapampangan tourism tour!`
+      : `${current.rating || 5}-star verified culinary visit on our Kapampangan food trip crawl!`
+    );
+    const reviewerName = completionGroupName.trim() || (userProfile?.username && userProfile.username !== 'Guest' ? userProfile.username : 'Kapampangan Guest Explorer');
     let ok = false;
 
     if (isAttraction) {
@@ -26541,6 +26568,13 @@ ${rawText}`;
                         (attractions || []).find(a => a.id === stop.id || a.name === stop.name) ||
                         stop;
                       const stopId = matchedRest.id || stop.id || `stop-${sIdx}`;
+                      const isAttractionStop = Boolean(
+                        (attractions || []).some(a => a.id === stopId || a.id === matchedRest.id || a.name === matchedRest.name) ||
+                        matchedRest.attraction_id ||
+                        matchedRest.isFestival ||
+                        matchedRest.type?.includes('🏛️') ||
+                        matchedRest.type?.includes('Landmark')
+                      );
                       const fbState = completionFeedback[stopId] || { rating: 5, comment: '', submitted: false };
                       const isSubmitted = fbState.submitted;
 
@@ -26568,7 +26602,7 @@ ${rawText}`;
                                   {matchedRest.name || stop.name}
                                 </h4>
                                 <span className="text-[10px] text-charcoal-light dark:text-gray-400 block truncate">
-                                  {matchedRest.corridor || 'Kapampangan Heritage Spot'}
+                                  {matchedRest.corridor || (isAttractionStop ? 'Kapampangan Heritage Spot' : 'Kapampangan Culinary Spot')}
                                 </span>
                               </div>
                             </div>
@@ -26581,7 +26615,7 @@ ${rawText}`;
                             <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 rounded-xl flex items-center justify-between text-xs">
                               <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold">
                                 <span>🎉</span>
-                                <span>Review published! Salamat for supporting authentic Kapampangan dining.</span>
+                                <span>Review published! Salamat for supporting authentic Kapampangan {isAttractionStop ? 'tourism' : 'dining'}.</span>
                               </div>
                               <span className="text-xs font-mono font-black text-amber-500">
                                 {'★'.repeat(fbState.rating || 5)}
@@ -26618,7 +26652,10 @@ ${rawText}`;
                               <div>
                                 <textarea
                                   rows={2}
-                                  placeholder={`How was your experience at ${matchedRest.name || stop.name}? Highlight must-try dishes, flavors, or ambiance...`}
+                                  placeholder={isAttractionStop
+                                    ? `How was your experience visiting ${matchedRest.name || stop.name}? Highlight historical features, atmosphere, architecture, or heritage notes...`
+                                    : `How was your experience at ${matchedRest.name || stop.name}? Highlight must-try dishes, flavors, or ambiance...`
+                                  }
                                   value={fbState.comment || ''}
                                   onChange={(e) => {
                                     const text = e.target.value;

@@ -303,6 +303,60 @@ export const deleteDjangoReview = async (reviewId) => {
 };
 
 /**
+ * Fetch Reviews for Tourist Destinations from Django REST API
+ */
+export const fetchDjangoDestinationReviews = async (attractionId) => {
+  try {
+    const url = attractionId
+      ? `${DJANGO_BASE_URL}/destination-reviews/?attractionId=${encodeURIComponent(attractionId)}`
+      : `${DJANGO_BASE_URL}/destination-reviews/`;
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return Array.isArray(data) ? data : (data.results || null);
+  } catch (err) {
+    console.warn("Django destination reviews fetch warning:", err);
+    return null;
+  }
+};
+
+/**
+ * Submit a Tourist Destination Review to Django REST API
+ */
+export const createDjangoDestinationReview = async (reviewData) => {
+  try {
+    const res = await fetch(`${DJANGO_BASE_URL}/destination-reviews/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reviewData)
+    });
+    if (!res.ok) return false;
+    return await res.json();
+  } catch (err) {
+    console.warn("Django destination review creation warning:", err);
+    return false;
+  }
+};
+
+/**
+ * Delete a Tourist Destination Review from Django REST API (Super Admin only)
+ */
+export const deleteDjangoDestinationReview = async (reviewId) => {
+  try {
+    const res = await fetch(`${DJANGO_BASE_URL}/destination-reviews/${reviewId}/`, {
+      method: 'DELETE'
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn("Django destination review deletion warning:", err);
+    return false;
+  }
+};
+
+/**
  * System Prompt & JSON Schema for Menu Vision OCR & Automatic Dish Cataloger
  */
 export const MENU_CATALOGER_SYSTEM_PROMPT = `You are an expert menu parser and culinary database annotator with deep understanding of Philippine restaurant menus, caterers, buffet packages, and regional dishes.

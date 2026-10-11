@@ -12,12 +12,12 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from .models import (
     Municipality, Restaurant, ChangeRequest,
-    TouristAccount, TouristItinerary, RestaurantReview, Attraction, DeletedRestaurant
+    TouristAccount, TouristItinerary, RestaurantReview, Attraction, AttractionReview, DeletedRestaurant
 )
 from .serializers import (
     MunicipalitySerializer, RestaurantSerializer,
     ChangeRequestSerializer, TouristAccountSerializer, TouristItinerarySerializer,
-    RestaurantReviewSerializer, AttractionSerializer
+    RestaurantReviewSerializer, AttractionSerializer, AttractionReviewSerializer
 )
 
 class RestaurantViewSet(viewsets.ModelViewSet):
@@ -52,6 +52,26 @@ class RestaurantReviewViewSet(viewsets.ModelViewSet):
             restaurant = Restaurant.objects.filter(restaurant_id=restaurant_id).first()
             if restaurant:
                 serializer.save(restaurant=restaurant)
+                return
+        serializer.save()
+
+class AttractionReviewViewSet(viewsets.ModelViewSet):
+    queryset = AttractionReview.objects.all().order_by('-created_at')
+    serializer_class = AttractionReviewSerializer
+
+    def get_queryset(self):
+        attraction_id = self.request.query_params.get('attractionId') or self.request.query_params.get('attraction')
+        if attraction_id:
+            return AttractionReview.objects.filter(attraction__attraction_id=attraction_id).order_by('-created_at')
+        return super().get_queryset()
+
+    def perform_create(self, serializer):
+        data = getattr(self.request, 'data', {}) or {}
+        attraction_id = data.get('attractionId') or data.get('attraction') if isinstance(data, dict) else None
+        if attraction_id:
+            attraction = Attraction.objects.filter(attraction_id=attraction_id).first()
+            if attraction:
+                serializer.save(attraction=attraction)
                 return
         serializer.save()
 
